@@ -36,30 +36,22 @@ inline std::string mesh_path(const std::string& name) {return data_path() + "/me
 const int WINDOW_WIDTH_PX = 840;
 const int WINDOW_HEIGHT_PX = 600;
 
-const int GRID_CELL_WIDTH_PX = 60;
-const int GRID_CELL_HEIGHT_PX = 60;
-const int GRID_LINE_WIDTH_PX = 2;
+const int TILE_WIDTH_PX = 60;
+const int TILE_HEIGHT_PX = 60;
 
-// towers
-const int MAX_TOWERS_START = 5;
-const float TOWER_TIMER_MS = 1000.0f;	// number of milliseconds between tower shots
+// player constants
 
-// invaders
-const int INVADER_HEALTH = 50;
-const float INVADER_SPAWN_RATE_MS = 2 * 1000.0f;
+// passive constants
 
-// projectiles
-const int PROJECTILE_DAMAGE = 10;
+// enemy constants
+
+// object constants
 
 // These are hard coded to the dimensions of the entity's texture
 
-// invaders are 64x64 px, but cells are 60x60
-const float INVADER_BB_WIDTH = (float)GRID_CELL_WIDTH_PX;
-const float INVADER_BB_HEIGHT = (float)GRID_CELL_HEIGHT_PX;
-
-// towers are 64x64 px, but cells are 60x60
-const float TOWER_BB_WIDTH = (float)GRID_CELL_WIDTH_PX;
-const float TOWER_BB_HEIGHT = (float)GRID_CELL_HEIGHT_PX;
+// bounding boxes
+const float _BB_WIDTH = (float)GRID_CELL_WIDTH_PX;
+const float _BB_HEIGHT = (float)GRID_CELL_HEIGHT_PX;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
