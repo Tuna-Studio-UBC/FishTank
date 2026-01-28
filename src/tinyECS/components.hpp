@@ -114,7 +114,7 @@ struct Mesh
 
 enum class TEXTURE_ASSET_ID {
 	// TODO
-	TEXTURE_COUNT = 1
+	TEXTURE_COUNT = 0
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

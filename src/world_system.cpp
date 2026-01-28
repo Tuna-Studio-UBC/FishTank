@@ -109,7 +109,7 @@ bool WorldSystem::start_and_load_sounds() {
 		return false;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+	/*background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
 	invader_hit_sound = Mix_LoadWAV(audio_path("invader_hit.wav").c_str());
 	tower_hit_sound = Mix_LoadWAV(audio_path("tower_hit.wav").c_str());
 
@@ -119,7 +119,7 @@ bool WorldSystem::start_and_load_sounds() {
 			audio_path("invader_hit.wav").c_str(),
 			audio_path("tower_hit.wav").c_str());
 		return false;
-	}
+	}*/
 
 	return true;
 }
