@@ -7,7 +7,7 @@
 #include "render_system.hpp"
 #include "tinyECS/registry.hpp"
 
-void RenderSystem::drawGridLine(Entity entity,
+/*void RenderSystem::drawGridLine(Entity entity,
 								const mat3& projection) {
 
 	GridLine& gridLine = registry.gridLines.get(entity);
@@ -92,7 +92,7 @@ void RenderSystem::drawGridLine(Entity entity,
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 	gl_has_errors();
-}
+}*/
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
@@ -316,9 +316,9 @@ void RenderSystem::draw()
 			drawTexturedMesh(entity, projection_2D);
 		}
 		// draw grid lines separately, as they do not have motion but need to be rendered
-		else if (registry.gridLines.has(entity)) {
+		/*else if (registry.gridLines.has(entity)) {
 			drawGridLine(entity, projection_2D);
-		}
+		}*/
 	}
 
 	// draw framebuffer to screen

@@ -10,21 +10,7 @@ struct Player
 
 };
 
-// Tower
-struct Tower {
-	float range;	// for vision / detection
-	float timer_ms;	// when to shoot - this could also be a separate timer component...
-};
-
-// Invader
-struct Invader {
-	int health;
-};
-
-// Projectile
-struct Projectile {
-	int damage;
-};
+// TODO: all components
 
 // used for Entities that cause damage
 struct Deadly
@@ -79,12 +65,6 @@ struct GridLine {
 	vec2 end_pos   = { 10, 10 };	// default to diagonal line
 };
 
-// A timer that will be associated to dying chicken
-struct DeathTimer
-{
-	float counter_ms = 3000;
-};
-
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
 struct ColoredVertex
 {
@@ -133,10 +113,8 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	INVADER = 0,
-	TOWER = INVADER + 1,
-	PROJECTILE = TOWER + 1,
-	TEXTURE_COUNT = PROJECTILE + 1
+	// TODO
+	TEXTURE_COUNT = 0
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

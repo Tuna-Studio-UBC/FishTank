@@ -54,19 +54,8 @@ private:
 	void on_mouse_move(vec2 pos);
 	void on_mouse_button_pressed(int button, int action, int mods);
 
-	// restart level
-	void restart_game();
-
 	// OpenGL window handle
 	GLFWwindow* window;
-
-	float next_invader_spawn;
-	float invader_spawn_rate_ms;	// see default value in common.hpp
-
-	int max_towers;	// see default value in common.hpp
-
-	// Number of invaders stopped by the towers, displayed in the window title
-	unsigned int points;
 
 	// Game state
 	RenderSystem* renderer;
