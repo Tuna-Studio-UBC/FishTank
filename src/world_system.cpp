@@ -10,11 +10,7 @@
 #include "physics_system.hpp"
 
 // create the world
-WorldSystem::WorldSystem() :
-	points(0),
-	max_towers(MAX_TOWERS_START),
-	next_invader_spawn(0),
-	invader_spawn_rate_ms(INVADER_SPAWN_RATE_MS)
+WorldSystem::WorldSystem()
 {
 	// seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -135,9 +131,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	// start playing background music indefinitely
 	std::cout << "Starting music..." << std::endl;
 	Mix_PlayMusic(background_music, -1);
-
-	// Set all states to default
-    restart_game();
 }
 
 // Update our game world
@@ -145,7 +138,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Points: " << points;
+	title_ss << "Game: ";
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// Remove debug info from the last step
