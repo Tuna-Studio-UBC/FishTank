@@ -18,13 +18,13 @@ WorldSystem::WorldSystem()
 
 WorldSystem::~WorldSystem() {
 	// Destroy music components
-	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
-	if (invader_hit_sound != nullptr)
-		Mix_FreeChunk(invader_hit_sound);
-	if (tower_hit_sound != nullptr)
-		Mix_FreeChunk(tower_hit_sound);
-	Mix_CloseAudio();
+	// if (background_music != nullptr)
+	//	Mix_FreeMusic(background_music);
+	// if (invader_hit_sound != nullptr)
+	//	Mix_FreeChunk(invader_hit_sound);
+	//if (tower_hit_sound != nullptr)
+	//	Mix_FreeChunk(tower_hit_sound);
+	//Mix_CloseAudio();
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -129,8 +129,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 
 	// start playing background music indefinitely
-	std::cout << "Starting music..." << std::endl;
-	Mix_PlayMusic(background_music, -1);
+	// std::cout << "Starting music..." << std::endl;
+	// Mix_PlayMusic(background_music, -1);
 }
 
 // Update our game world
