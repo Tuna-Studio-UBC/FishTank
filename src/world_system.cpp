@@ -128,9 +128,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	this->renderer = renderer_arg;
 
-	// start playing background music indefinitely
-	// std::cout << "Starting music..." << std::endl;
-	// Mix_PlayMusic(background_music, -1);
+	init_tiles();
 }
 
 // Update our game world

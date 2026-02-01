@@ -27,6 +27,10 @@ using namespace glm;
 inline std::string data_path() { return std::string(PROJECT_SOURCE_DIR) + "data"; };
 inline std::string shader_path(const std::string& name) {return std::string(PROJECT_SOURCE_DIR) + "/shaders/" + name;};
 inline std::string textures_path(const std::string& name) {return data_path() + "/textures/" + std::string(name);};
+inline std::string tileset_texture_path(const std::string& name) 
+{
+	return std::string(PROJECT_SOURCE_DIR) + "res/tileset_images/" + std::string(name);
+};
 inline std::string audio_path(const std::string& name) {return data_path() + "/audio/" + std::string(name);};
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
 
@@ -38,6 +42,10 @@ const int WINDOW_HEIGHT_PX = 600;
 
 const int TILE_WIDTH_PX = 60;
 const int TILE_HEIGHT_PX = 60;
+
+
+constexpr size_t MAX_TILEMAP_SIZE = 4096;
+constexpr size_t MAX_TILESET_SIZE = 2048;
 
 // player constants
 

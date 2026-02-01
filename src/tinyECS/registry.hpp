@@ -22,6 +22,8 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
 	// TODO: add new containers
+	ComponentContainer<TileSet> tilesets;
+	ComponentContainer<TileMap> tilemaps;
 
 	// constructor that adds all containers for looping over them
 	ECSRegistry()

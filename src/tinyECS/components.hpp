@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include <vector>
 #include <unordered_map>
+#include <array>
 #include "../ext/stb_image/stb_image.h"
 
 // Player component
@@ -86,6 +87,47 @@ struct Mesh
 	vec2 original_size = {1,1};
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
+};
+
+struct TileMap
+{
+	int tileset_id = 1; // TODO: Add ID functionality
+	std::array<unsigned short, 4096> tile_ids;
+	unsigned int width;
+	unsigned int height;
+
+	TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height)
+		: tile_ids(tile_ids)
+		, width(width)
+		, height(height)
+	{
+	}
+
+	TileMap(const TileMap& other)
+	{
+		this->tile_ids = other.tile_ids;
+		this->width = other.width;
+		this->height = other.height;
+	}
+};
+
+struct TileSet
+{
+	int tileset_id = 1; // TODO: Add ID functionality
+	int width;
+	int height;
+	int tile_width_px;
+	int tile_height_px;
+	std::array<bool, 2048> collisions;
+
+	TileSet(int width, int height, int tile_width_px, int tile_height_px, std::array<bool, 2048> collisions)
+		: width(width)
+		, height(height)
+		, tile_width_px(tile_width_px)
+		, tile_height_px(tile_height_px)
+		, collisions(collisions)
+	{
+	}
 };
 
 /**
