@@ -5,7 +5,7 @@
 #define DEBUG_INIT_TILES
 
 #ifdef DEBUG_INIT_TILES
-void print_tilemap(TileMap& tilemap)
+void print_tilemap(TileMap &tilemap)
 {
 	std::cout << "TILEMAP: \n[\n";
 	for (int y = 0; y < tilemap.height; y++)
@@ -20,7 +20,7 @@ void print_tilemap(TileMap& tilemap)
 	std::cout << "]\n";
 }
 
-void print_tileset(TileSet& tileset)
+void print_tileset(TileSet &tileset)
 {
 	std::cout << "TILESET: \n[\n";
 	for (int y = 0; y < tileset.dimensions.y; y++)
@@ -48,15 +48,35 @@ void init_tiles()
 
 	registry.renderRequests.insert(
 		entity,
-		{
-			(TEXTURE_ASSET_ID)tilemap.tileset_id,
-			EFFECT_ASSET_ID::TILEMAP,
-			GEOMETRY_BUFFER_ID::SPRITE
-		}
-	);
+		{(TEXTURE_ASSET_ID)tilemap.tileset_id,
+		 EFFECT_ASSET_ID::TILEMAP,
+		 GEOMETRY_BUFFER_ID::SPRITE});
 
 #ifdef DEBUG_INIT_TILES
 	print_tilemap(tilemap);
 	print_tileset(tileset);
 #endif
+}
+
+// Player creation function
+Entity createPlayer(RenderSystem *renderer, vec2 position)
+{
+	auto entity = Entity();
+
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto &motion = registry.motions.emplace(entity);
+	motion.velocity = vec2(0.0f, 0.0f);
+	motion.position = position;
+	motion.angle = 0.f;
+	motion.scale = vec2(50.0f, 50.0f);
+	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
+	registry.renderRequests.insert(
+		entity,
+		{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		 EFFECT_ASSET_ID::EGG,
+		 GEOMETRY_BUFFER_ID::DEBUG_LINE});
+	registry.players.emplace(entity);
+	return entity;
 }

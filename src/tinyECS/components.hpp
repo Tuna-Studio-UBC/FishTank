@@ -27,10 +27,28 @@ struct Eatable
 
 // All data relevant to the shape and motion of entities
 struct Motion {
-	vec2  position = { 0, 0 };
-	float angle    = 0;
-	vec2  velocity = { 0, 0 };
-	vec2  scale    = { 10, 10 };
+	vec2 position  = {0, 0};
+	float angle    = 0; 			// Angle in degrees
+	vec2  velocity = { 0, 0 };		// px / s
+	vec2  scale    = { 10, 10 };	// px
+};
+
+enum PlayerActions {
+	MoveForward,
+	TurnLeft,
+	TurnRight,
+	QuickTurn,
+	PlayerActionCount
+};
+
+struct PlayerInputState {
+	bool current_actions[PlayerActionCount];
+	bool previous_actions[PlayerActionCount];
+};
+
+struct PlayerQuickTurn {
+	float duration_ms;
+	float direction; // -1.f for left, 1.f for right
 };
 
 // Stucture to store collision information

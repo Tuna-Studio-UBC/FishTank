@@ -7,3 +7,4 @@
 
 // TODO: create entity functions
 void init_tiles();
+Entity createPlayer(RenderSystem *renderer, vec2 position);

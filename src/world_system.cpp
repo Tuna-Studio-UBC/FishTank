@@ -19,12 +19,12 @@ WorldSystem::WorldSystem()
 WorldSystem::~WorldSystem() {
 	// Destroy music components
 	// if (background_music != nullptr)
-	//	Mix_FreeMusic(background_music);
+	// 	Mix_FreeMusic(background_music);
 	// if (invader_hit_sound != nullptr)
-	//	Mix_FreeChunk(invader_hit_sound);
-	//if (tower_hit_sound != nullptr)
-	//	Mix_FreeChunk(tower_hit_sound);
-	//Mix_CloseAudio();
+	// 	Mix_FreeChunk(invader_hit_sound);
+	// if (tower_hit_sound != nullptr)
+	// 	Mix_FreeChunk(tower_hit_sound);
+	Mix_CloseAudio();
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -129,6 +129,14 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 
 	init_tiles();
+
+	// Create player entity
+	Entity player = createPlayer(renderer, { WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
+	// start playing background music indefinitely
+
+	//Commented out duo to compiler errors
+	/*std::cout << "Starting music..." << std::endl;
+	Mix_PlayMusic(background_music, -1);*/
 }
 
 // Update our game world
@@ -166,16 +174,30 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		close_window();
 	}
 
-	// Debugging
+	// We should have 1 and only ever 1 player input component
+	assert(registry.playerInput.components.size() == 1);
+	PlayerInputState &ps = registry.playerInput.components[0];
+
+	bool key_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
+
+	// We handle the inputs separately since we need to deal with game logic
+	// E.g. how to handle multiple conflicting inputs
+	if (key == GLFW_KEY_W) {
+		ps.current_actions[PlayerActions::MoveForward] = key_pressed;
+	}
+	if (key == GLFW_KEY_A) {
+		ps.current_actions[PlayerActions::TurnLeft] = key_pressed;
+	}
 	if (key == GLFW_KEY_D) {
-		if (action == GLFW_RELEASE) {
-			if (debugging.in_debug_mode) {
-				debugging.in_debug_mode = false;
-			}
-			else {
-				debugging.in_debug_mode = true;
-			}
-		}
+		ps.current_actions[PlayerActions::TurnRight] = key_pressed;
+	}
+	if (key == GLFW_KEY_S) {
+		ps.current_actions[PlayerActions::QuickTurn] = key_pressed;
+	}
+
+	// Debug
+	if (key == GLFW_KEY_P) {
+		registry.list_all_components();
 	}
 }
 
