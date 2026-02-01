@@ -128,9 +128,14 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	this->renderer = renderer_arg;
 
+
+	// Create player entity
+	Entity player = createPlayer(renderer, { WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
 	// start playing background music indefinitely
-	std::cout << "Starting music..." << std::endl;
-	Mix_PlayMusic(background_music, -1);
+
+	//Commented out duo to compiler errors
+	/*std::cout << "Starting music..." << std::endl;
+	Mix_PlayMusic(background_music, -1);*/
 }
 
 // Update our game world
