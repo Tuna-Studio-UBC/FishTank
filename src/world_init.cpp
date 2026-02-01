@@ -47,6 +47,15 @@ void init_tiles()
 	registry.tilemaps.insert(e_tilemap, tilemap);
 	registry.tilesets.insert(e_tileset, tileset);
 
+	registry.renderRequests.insert(
+		e_tilemap,
+		{
+			(TEXTURE_ASSET_ID)tilemap.tileset_id,
+			EFFECT_ASSET_ID::TILEMAP,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+
 #ifdef DEBUG_INIT_TILES
 	print_tilemap(tilemap);
 	print_tileset(tileset);

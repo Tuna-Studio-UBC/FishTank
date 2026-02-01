@@ -91,7 +91,7 @@ struct Mesh
 
 struct TileMap
 {
-	int tileset_id = 1; // TODO: Add ID functionality
+	int tileset_id = 0; // TODO: Add ID functionality
 	std::array<unsigned short, 4096> tile_ids;
 	unsigned int width;
 	unsigned int height;
@@ -155,8 +155,8 @@ struct TileSet
  */
 
 enum class TEXTURE_ASSET_ID {
-	// TODO
-	TEXTURE_COUNT = 0
+	TEXTURE_TILESET = 0,
+	TEXTURE_COUNT = TEXTURE_TILESET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -166,7 +166,8 @@ enum class EFFECT_ASSET_ID {
 	CHICKEN = EGG + 1,
 	TEXTURED = CHICKEN + 1,
 	VIGNETTE = TEXTURED + 1,
-	EFFECT_COUNT = VIGNETTE + 1
+	TILEMAP = VIGNETTE + 1,
+	EFFECT_COUNT = TILEMAP + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

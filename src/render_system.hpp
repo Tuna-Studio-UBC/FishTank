@@ -29,7 +29,9 @@ class RenderSystem {
 
 	// Make sure these paths remain in sync with the associated enumerators (see TEXTURE_ASSET_ID).
 	// TODO
-	const std::array<std::string, texture_count> texture_paths = {};
+	const std::array<std::string, texture_count> texture_paths = {
+		tileset_texture_path("greybox_tiles.png")
+	};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -38,7 +40,8 @@ class RenderSystem {
 		shader_path("egg"),
 		shader_path("chicken"),
 		shader_path("textured"),
-		shader_path("vignette")
+		shader_path("vignette"),
+		shader_path("tilemap")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -78,7 +81,7 @@ public:
 
 private:
 	// Internal drawing functions for each entity type
-	void drawGridLine(Entity entity, const mat3& projection);
+	void drawTilemapMesh(Entity entity, const mat3& projection);
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
 
