@@ -22,7 +22,9 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
 	// TODO: add new containers
-
+	ComponentContainer<PlayerInputState> playerInput;
+	ComponentContainer<PlayerQuickTurn> playerQuickTurn;
+	
 	// constructor that adds all containers for looping over them
 	ECSRegistry()
 	{
@@ -37,6 +39,8 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
 		// TODO: add new containers
+		registry_list.push_back(&playerInput);
+		registry_list.push_back(&playerQuickTurn);
 	}
 
 	void clear_all_components() {
