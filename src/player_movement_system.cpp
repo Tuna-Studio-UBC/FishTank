@@ -8,7 +8,7 @@ float PLAYER_MOVE_SPEED = 60;           // px per sec
 // float PLAYER_DECELERATION = 300;        // px per sec
 // float PLAYER_MAX_MOVE_SPEED = 300;      // px per sec
 float PLAYER_TURN_SPEED = 270;          // deg per sec
-float PLAYER_QUICK_TURN_DURATION = 5000; // ms
+float PLAYER_QUICK_TURN_DURATION = 200; // ms
 
 void debug_print_input_state(PlayerInputState &ps) {
     std::cout << "Current:  ";
@@ -112,8 +112,8 @@ void PlayerMovementSystem::step(float elapsed_ms)
         m.position += direction_to_vector(m.angle) * ((PLAYER_MOVE_SPEED * elapsed_ms) / 1000.f);
     }
 
-    // debug_print_player_motion(m);
-    // debug_print_input_state(ps);
+    debug_print_player_motion(m);
+    debug_print_input_state(ps);
 
     // Shift action over
     std::copy(std::begin(ps.current_actions), std::end(ps.current_actions), std::begin(ps.previous_actions));
