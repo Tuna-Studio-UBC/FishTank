@@ -2,7 +2,7 @@
 #include "tinyECS/registry.hpp"
 #include <iostream>
 
-// #define DEBUG_INIT_TILES
+#define DEBUG_INIT_TILES
 
 #ifdef DEBUG_INIT_TILES
 void print_tilemap(TileMap& tilemap)
@@ -23,12 +23,12 @@ void print_tilemap(TileMap& tilemap)
 void print_tileset(TileSet& tileset)
 {
 	std::cout << "TILESET: \n[\n";
-	for (int y = 0; y < tileset.height; y++)
+	for (int y = 0; y < tileset.dimensions.y; y++)
 	{
 		std::cout << "[";
-		for (int x = 0; x < tileset.width; x++)
+		for (int x = 0; x < tileset.dimensions.x; x++)
 		{
-			std::cout << (int)tileset.collisions[x + tileset.width * y] << ", ";
+			std::cout << (int)tileset.collisions[x + tileset.dimensions.x * y] << ", ";
 		}
 		std::cout << "]\n";
 	}
@@ -38,17 +38,16 @@ void print_tileset(TileSet& tileset)
 
 void init_tiles()
 {
-	Entity e_tilemap = Entity();
-	Entity e_tileset = Entity();
+	Entity entity = Entity();
 
 	TileMap tilemap = parse_tilemap(TILEMAP_JSON);
 	TileSet tileset = parse_tileset(TILESET_JSON);
 
-	registry.tilemaps.insert(e_tilemap, tilemap);
-	registry.tilesets.insert(e_tileset, tileset);
+	registry.tilemaps.insert(entity, tilemap);
+	registry.tilesets.insert(entity, tileset);
 
 	registry.renderRequests.insert(
-		e_tilemap,
+		entity,
 		{
 			(TEXTURE_ASSET_ID)tilemap.tileset_id,
 			EFFECT_ASSET_ID::TILEMAP,

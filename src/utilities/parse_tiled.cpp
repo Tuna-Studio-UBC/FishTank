@@ -51,8 +51,8 @@ TileSet parse_tileset(const std::string& path)
 
 	int width   = tileset_dom["columns"  ].GetInt();
 	int n_tiles = tileset_dom["tilecount"].GetInt();
-	int height  = width / n_tiles;
-	if (width % n_tiles != 0)
+	int height  = n_tiles / width;
+	if (n_tiles % width != 0)
 		height++;
 
 	int height_px = tileset_dom["tileheight"].GetInt();

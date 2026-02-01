@@ -116,15 +116,13 @@ struct TileMap
 struct TileSet
 {
 	int tileset_id = 1; // TODO: Add ID functionality
-	int width;
-	int height;
+	vec2 dimensions;
 	int tile_width_px;
 	int tile_height_px;
 	std::array<bool, 2048> collisions;
 
 	TileSet(int width, int height, int tile_width_px, int tile_height_px, std::array<bool, 2048> collisions)
-		: width(width)
-		, height(height)
+		: dimensions(vec2(width, height))
 		, tile_width_px(tile_width_px)
 		, tile_height_px(tile_height_px)
 		, collisions(collisions)

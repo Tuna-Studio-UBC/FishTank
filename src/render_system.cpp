@@ -7,13 +7,12 @@
 #include "render_system.hpp"
 #include "tinyECS/registry.hpp"
 
-void RenderSystem::drawTile(RenderRequest& render_request, TileMap& tilemap, const mat3& projection)
+void RenderSystem::drawTile(const RenderRequest& render_request, const TileMap& tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3& projection)
 {
-	int tile_size = 64;
-	ivec2 tile_pos = ivec2(3, 3);
-	ivec2 tilemap_size = ivec2(6, 2);
+	int tile_size = TILE_SIZE_PX;
 	Transform transform;
-	transform.translate(tile_size * tile_pos);
+	transform.translate((tile_size * tile_pos) + (TILE_SIZE_PX / 2));
+	// TODO: REMOVE / 2
 	transform.scale(vec2(tile_size));
 
 	unsigned short tile_id = tilemap.tile_ids[GET_2D_POS(tile_pos.x, tile_pos.y, tilemap.width)];
@@ -65,12 +64,11 @@ void RenderSystem::drawTile(RenderRequest& render_request, TileMap& tilemap, con
 	gl_has_errors();
 
 	GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
-	glUniform2iv(tileset_size_uloc, 1, (GLint*)&tilemap_size);
+	glUniform2iv(tileset_size_uloc, 1, (GLint*)&tileset_size);
 	gl_has_errors();
 
-	// TODO: Remove magic numbers
 	// Atlas offset is normalized atlas coordinates
-	vec2 atlas_offset = vec2((tile_id % tilemap_size.x)/ (float)tilemap_size.x, (tile_id / tilemap_size.x)/ (float) tilemap_size.y);
+	vec2 atlas_offset = vec2((tile_id % tileset_size.x)/ (float)tileset_size.x, (tile_id / tileset_size.x)/ (float)tileset_size.y);
 	GLint atlas_offset_uloc = glGetUniformLocation(program, "atlas_offset");
 	glUniform2fv(atlas_offset_uloc, 1, (GLfloat*)&atlas_offset);
 	gl_has_errors();
@@ -93,9 +91,25 @@ void RenderSystem::drawTile(RenderRequest& render_request, TileMap& tilemap, con
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 	gl_has_errors();
 
+	// https://learnopengl.com/Getting-started/Textures
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 	gl_has_errors();
+}
+
+void RenderSystem::drawTilemap(const Entity& entity, const mat3& projection)
+{
+	RenderRequest& render_request = registry.renderRequests.get(entity);
+	TileMap& tilemap = registry.tilemaps.get(entity);
+	TileSet& tileset = registry.tilesets.get(entity);
+	for (int x = 0; x < tilemap.width; x++)
+		for (int y = 0; y < tilemap.height; y++)
+			RenderSystem::drawTile(render_request, tilemap, ivec2(x, y), tileset.dimensions, projection);
 }
 
 void RenderSystem::drawTexturedMesh(Entity entity,
@@ -321,7 +335,7 @@ void RenderSystem::draw()
 		}
 		else if (registry.tilemaps.has(entity))
 		{
-			drawTile(registry.renderRequests.get(entity), registry.tilemaps.get(entity), projection_2D);
+			drawTilemap(entity, projection_2D);
 		}
 	}
 
