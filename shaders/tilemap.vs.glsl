@@ -11,9 +11,13 @@ out vec2 texcoord;
 uniform mat3 transform;
 uniform mat3 projection;
 
+// Tilemap Specific Data
+uniform ivec2 tileset_size;
+uniform vec2 atlas_offset;
+
 void main()
 {
-	texcoord = in_texcoord;
+	texcoord = atlas_offset + (in_texcoord / tileset_size);
 	vec3 pos = projection * transform * vec3(in_position.xy, 1.0);
 	gl_Position = vec4(pos.xy, in_position.z, 1.0);
 }

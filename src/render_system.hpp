@@ -81,7 +81,7 @@ public:
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTilemapMesh(Entity entity, const mat3& projection);
+	void drawTile(RenderRequest &render_request, TileMap &tilemap, const mat3& projection);
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
 

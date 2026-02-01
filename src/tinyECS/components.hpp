@@ -89,6 +89,8 @@ struct Mesh
 	std::vector<uint16_t> vertex_indices;
 };
 
+#define GET_2D_POS(x, y, width) x + width * y
+
 struct TileMap
 {
 	int tileset_id = 0; // TODO: Add ID functionality

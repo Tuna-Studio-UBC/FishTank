@@ -7,13 +7,13 @@
 #ifdef DEBUG_INIT_TILES
 void print_tilemap(TileMap& tilemap)
 {
-	std::cout << "TILESET: \n[\n";
+	std::cout << "TILEMAP: \n[\n";
 	for (int y = 0; y < tilemap.height; y++)
 	{
 		std::cout << "[";
 		for (int x = 0; x < tilemap.width; x++)
 		{
-			std::cout << tilemap.tile_ids[x + tilemap.width * y];
+			std::cout << tilemap.tile_ids[x + tilemap.width * y] << ", ";
 		}
 		std::cout << "]\n";
 	}
@@ -22,13 +22,13 @@ void print_tilemap(TileMap& tilemap)
 
 void print_tileset(TileSet& tileset)
 {
-	std::cout << "TILEMAP: \n[\n";
+	std::cout << "TILESET: \n[\n";
 	for (int y = 0; y < tileset.height; y++)
 	{
 		std::cout << "[";
 		for (int x = 0; x < tileset.width; x++)
 		{
-			std::cout << (int)tileset.collisions[x + tileset.width * y];
+			std::cout << (int)tileset.collisions[x + tileset.width * y] << ", ";
 		}
 		std::cout << "]\n";
 	}
