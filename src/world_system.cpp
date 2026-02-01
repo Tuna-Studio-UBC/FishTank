@@ -18,12 +18,12 @@ WorldSystem::WorldSystem()
 
 WorldSystem::~WorldSystem() {
 	// Destroy music components
-	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
-	if (invader_hit_sound != nullptr)
-		Mix_FreeChunk(invader_hit_sound);
-	if (tower_hit_sound != nullptr)
-		Mix_FreeChunk(tower_hit_sound);
+	// if (background_music != nullptr)
+	// 	Mix_FreeMusic(background_music);
+	// if (invader_hit_sound != nullptr)
+	// 	Mix_FreeChunk(invader_hit_sound);
+	// if (tower_hit_sound != nullptr)
+	// 	Mix_FreeChunk(tower_hit_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
