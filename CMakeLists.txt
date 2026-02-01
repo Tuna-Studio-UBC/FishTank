@@ -1,7 +1,7 @@
-# CMakeLists.txt for Towers vs. Invaders
+# CMakeLists.txt
 cmake_minimum_required(VERSION 3.1)
 
-project(tower_defense)
+project(fish_tank)
 
 # use C++17
 set (CMAKE_CXX_STANDARD 17)
