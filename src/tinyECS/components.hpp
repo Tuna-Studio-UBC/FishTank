@@ -45,6 +45,11 @@ struct PlayerInputState {
 	bool previous_actions[PlayerActionCount];
 };
 
+struct PlayerQuickTurn {
+	float duration_ms;
+	float direction; // -1.f for left, 1.f for right
+};
+
 // Stucture to store collision information
 struct Collision
 {

@@ -188,6 +188,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (key == GLFW_KEY_S) {
 		ps.current_actions[PlayerActions::QuickTurn] = key_pressed;
 	}
+
+	// Debug
+	if (key == GLFW_KEY_P) {
+		registry.list_all_components();
+	}
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
