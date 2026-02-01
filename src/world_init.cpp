@@ -21,6 +21,6 @@ Entity createPlayer(RenderSystem* renderer, vec2 position) {
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::EGG,
 		GEOMETRY_BUFFER_ID::DEBUG_LINE });
-
+	registry.players.emplace(entity);
 	return entity;
 }

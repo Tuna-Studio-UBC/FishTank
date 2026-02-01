@@ -131,7 +131,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	// Create player entity
 	Entity player = createPlayer(renderer, { WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
-	registry.players.emplace(player);
 	// start playing background music indefinitely
 
 	//Commented out duo to compiler errors
