@@ -11,13 +11,18 @@
 
 // create the world
 WorldSystem::WorldSystem()
+	: background_music(nullptr)
+	, invader_hit_sound(nullptr)
+	, tower_hit_sound(nullptr) //this is to avoid uninitialized warning
 {
+
 	// seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
 
 WorldSystem::~WorldSystem() {
 	// Destroy music components
+#ifdef ENABLE_AUDIO
 	if (background_music != nullptr)
 		Mix_FreeMusic(background_music);
 	if (invader_hit_sound != nullptr)
@@ -25,7 +30,7 @@ WorldSystem::~WorldSystem() {
 	if (tower_hit_sound != nullptr)
 		Mix_FreeChunk(tower_hit_sound);
 	Mix_CloseAudio();
-
+#endif
 	// Destroy all created components
 	registry.clear_all_components();
 
@@ -128,9 +133,15 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	this->renderer = renderer_arg;
 
+
+	// Create player entity
+	createPlayer(renderer, { WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
+
 	// start playing background music indefinitely
-	std::cout << "Starting music..." << std::endl;
-	Mix_PlayMusic(background_music, -1);
+
+	//Commented out duo to compiler errors
+	/*std::cout << "Starting music..." << std::endl;
+	Mix_PlayMusic(background_music, -1);*/
 }
 
 // Update our game world

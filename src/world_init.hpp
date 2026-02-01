@@ -5,3 +5,4 @@
 #include "render_system.hpp"
 
 // TODO: create entity functions
+Entity createPlayer(RenderSystem* renderer, vec2 position);
