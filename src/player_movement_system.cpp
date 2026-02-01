@@ -112,8 +112,8 @@ void PlayerMovementSystem::step(float elapsed_ms)
         m.position += direction_to_vector(m.angle) * ((PLAYER_MOVE_SPEED * elapsed_ms) / 1000.f);
     }
 
-    debug_print_player_motion(m);
-    debug_print_input_state(ps);
+    // debug_print_player_motion(m);
+    // debug_print_input_state(ps);
 
     // Shift action over
     std::copy(std::begin(ps.current_actions), std::end(ps.current_actions), std::begin(ps.previous_actions));
