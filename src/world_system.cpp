@@ -168,16 +168,25 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		close_window();
 	}
 
-	// Debugging
+	// We should have 1 and only ever 1 player input component
+	assert(registry.playerInput.components.size() == 1);
+	PlayerInputState &ps = registry.playerInput.components[0];
+
+	bool key_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
+
+	// We handle the inputs separately since we need to deal with game logic
+	// E.g. how to handle multiple conflicting inputs
+	if (key == GLFW_KEY_W) {
+		ps.current_actions[PlayerActions::MoveForward] = key_pressed;
+	}
+	if (key == GLFW_KEY_A) {
+		ps.current_actions[PlayerActions::TurnLeft] = key_pressed;
+	}
 	if (key == GLFW_KEY_D) {
-		if (action == GLFW_RELEASE) {
-			if (debugging.in_debug_mode) {
-				debugging.in_debug_mode = false;
-			}
-			else {
-				debugging.in_debug_mode = true;
-			}
-		}
+		ps.current_actions[PlayerActions::TurnRight] = key_pressed;
+	}
+	if (key == GLFW_KEY_S) {
+		ps.current_actions[PlayerActions::QuickTurn] = key_pressed;
 	}
 }
 
