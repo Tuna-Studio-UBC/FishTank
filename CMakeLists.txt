@@ -1,7 +1,7 @@
 # CMakeLists.txt
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
-project(fish_tank)
+project(fishtank)
 
 # use C++17
 set (CMAKE_CXX_STANDARD 17)

@@ -49,7 +49,7 @@ inline std::unordered_map<std::string, std::pair<int, int>> SCREEN_SIZES = {
 //
 // game constants
 //
-inline const char *GAME_NAME = "Fish Tank!";
+inline const char *GAME_NAME = "FishTank!";
 
 inline const std::string WINDOW_SIZE = "hd";
 const int WINDOW_WIDTH_PX = SCREEN_SIZES[WINDOW_SIZE].first;
