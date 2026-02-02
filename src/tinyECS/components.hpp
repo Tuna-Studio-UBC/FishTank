@@ -31,6 +31,8 @@ struct Wall
 	vec2 position;
 };
 
+
+// used for Entities that cause damage
 struct Mine
 {
 	int damage;
@@ -59,16 +61,9 @@ struct SpeedControl
 	float turn_speed = 0;
 };
 
-
-struct PlayerQuickTurn
-{
+struct PlayerQuickTurn {
 	float duration_ms;
 	float direction; // -1.f for left, 1.f for right
-};
-
-struct Wallet
-{
-	int crackers = 0;
 };
 
 struct DropsCrackers
@@ -76,12 +71,20 @@ struct DropsCrackers
 	int cracker;
 };
 
+struct Wallet
+{
+	int crackers = 0;
+};
+// Uses: Motion
+
 struct Patrolling
 {
+	
 };
 
 struct Pursuit
 {
+	
 };
 
 struct Bouncy
@@ -93,12 +96,13 @@ struct Bouncy
 // Physics (Motion, collision, etc)
 // =================================================================================
 struct Motion {
-	vec2 position  = {0, 0};		// WORLD COORDINATE px
-	float angle    = 0; 			// Angle in degrees
+	vec2 position = { 0, 0 };		// WORLD COORDINATE px
+	float angle = 0; 			// Angle in degrees
 	vec2  velocity = { 0, 0 };		// px / s
-	vec2  scale    = { 10, 10 };	// px
+	vec2  scale = { 10, 10 };	// px
 };
 
+// Stucture to store collision information
 struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
@@ -106,9 +110,12 @@ struct Collision
 	Collision(Entity &other) { this->other = other; };
 };
 
-// =================================================================================
-// Game State
-// =================================================================================
+// Data structure for toggling debug mode
+struct Debug {
+	bool in_debug_mode = 0;
+	bool in_freeze_mode = 0;
+};
+extern Debug debugging;
 
 struct ScreenState
 {

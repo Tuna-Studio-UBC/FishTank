@@ -37,15 +37,34 @@ public:
 	ComponentContainer<PlayerInputState> playerInput;
 
 	// Rendering
-	ComponentContainer<Mesh *> meshPtrs;
+	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<vec3> colors;
 	ComponentContainer<TileSet> tilesets;
 	ComponentContainer<TileMap> tilemaps;
-	
+
 	// constructor that adds all containers for looping over them
 	ECSRegistry()
 	{
+		// Entity
+		registry_list.push_back(&players);
+		registry_list.push_back(&enemies);
+		registry_list.push_back(&bullet);
+		registry_list.push_back(&wall);
+		registry_list.push_back(&mine);
+
+		// Behaviour
+		registry_list.push_back(&health);
+		registry_list.push_back(&fireControl);
+		registry_list.push_back(&speedControl);
+		registry_list.push_back(&playerQuickTurn);
+		registry_list.push_back(&wallet);
+		registry_list.push_back(&dropsCrackers);
+		registry_list.push_back(&patrolling);
+		registry_list.push_back(&pursuit);
+		registry_list.push_back(&bouncy);
+
+		// Physics
 		registry_list.push_back(&motions);
 		// Entity
 		registry_list.push_back(&players);
