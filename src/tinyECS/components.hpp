@@ -10,26 +10,29 @@
 // =================================================================================
 
 struct Player {};
-// Uses: Motion, Health, FireControl, Speed Control, Wallet
+// Uses: Motion, Health, FireControl, SpeedControl, Wallet
 
-struct Enemy {
+struct Enemy
+{
 	float detection_radius = 300;
 };
-// Uses: Motion, Health, FireControl, Speed Control, DropsCrackers
+// Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
-struct Bullet {
+struct Bullet
+{
 	int damage;
 };
 // Uses: Motion
 // Optional: Bouncy
 
-struct Wall {
+struct Wall
+{
 	vec2 position;
 };
-// Uses: Motion
 
-struct Mine {
+struct Mine
+{
 	int damage;
 };
 // Uses: Motion
@@ -38,10 +41,10 @@ struct Mine {
 // Behaviour (Attached to entities, e.g. Bouncy, Health, ...)
 // =================================================================================
 
-struct Health 
+struct Health
 {
-	int max_hp;
-	int hp;
+	int max_hp = 100;
+	int hp = 100;
 };
 
 struct FireControl
@@ -50,15 +53,17 @@ struct FireControl
 	float cooldown_ms = 2000;		// ms
 };
 
+struct SpeedControl
+{
+	float move_speed = 0;
+	float turn_speed = 0;
+};
+
+
 struct PlayerQuickTurn
 {
 	float duration_ms;
 	float direction; // -1.f for left, 1.f for right
-};
-
-struct Bouncy
-{
-	int bounces_remaining = 3;
 };
 
 struct Wallet
@@ -79,6 +84,11 @@ struct Pursuit
 {
 };
 
+struct Bouncy
+{
+	int bounces_remaining = 3;
+};
+
 // =================================================================================
 // Physics (Motion, collision, etc)
 // =================================================================================
@@ -94,11 +104,6 @@ struct Collision
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity &other) { this->other = other; };
-};
-
-struct SpeedControl {
-	float move_speed;
-	float turn_speed;
 };
 
 // =================================================================================
