@@ -221,9 +221,9 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 			createProjectile(renderer, player_pos, angle);
 
 
-			std::cout << "Mouse Pos: (" << lround(mouse_pos.x) << ", " << lround(mouse_pos.y) << ")\n";
-			std::cout << "Player Pos: (" << lround(player_pos.x) << ", " << lround(player_pos.y) << ")\n";
-			std::cout << "Angle: " << angle << "\n";
+			// std::cout << "Mouse Pos: (" << lround(mouse_pos.x) << ", " << lround(mouse_pos.y) << ")\n";
+			// std::cout << "Player Pos: (" << lround(player_pos.x) << ", " << lround(player_pos.y) << ")\n";
+			// std::cout << "Angle: " << angle << "\n";
 		}
 	}
 }
