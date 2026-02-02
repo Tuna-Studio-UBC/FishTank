@@ -2,12 +2,6 @@
 #include "player_movement_system.hpp"
 #include <iostream>
 
-// Player Movement Parameters
-float PLAYER_MOVE_SPEED = 60;           // px per sec
-// float PLAYER_ACCELERATION = 60;         // px per sec
-// float PLAYER_DECELERATION = 300;        // px per sec
-// float PLAYER_MAX_MOVE_SPEED = 300;      // px per sec
-float PLAYER_TURN_SPEED = 270;          // deg per sec
 float PLAYER_QUICK_TURN_DURATION = 200; // ms
 
 void debug_print_input_state(PlayerInputState &ps) {
@@ -52,18 +46,15 @@ vec2 direction_to_vector(float degree) {
     return unit_vec;
 }
 
+// TODO: !!! TEMP PROCESS MOVEMENT HERE, PHYSICS SYSTEM SHOULD HANDLE UPDATES
 void PlayerMovementSystem::step(float elapsed_ms)
 {
     // We should have 1 and only ever 1 player input component
     assert(registry.playerInput.components.size() == 1);
     PlayerInputState &ps = registry.playerInput.components[0];
-    
-    // !!! TEMPORARY FOR TESTING UNTIL WE KNOW WHAT MOTION TO USE FOR THE PLAYER
-    if (registry.motions.size() == 0) {
-        Entity e = Entity();
-        registry.motions.emplace(e);
-    }
-    Motion &m = registry.motions.components[0];
+    Entity playerEntity = registry.players.entities[0];
+    Motion &m = registry.motions.get(playerEntity);
+    SpeedControl &sc = registry.speedControl.get(playerEntity);
 
     float dt = elapsed_ms / 1000.0f;
     bool quick_turn_active = (registry.playerQuickTurn.size() != 0);
@@ -82,7 +73,7 @@ void PlayerMovementSystem::step(float elapsed_ms)
         if (key_held(PlayerActions::TurnRight, ps)) {
             turn_dir += 1.f;
         }
-        m.angle = std::fmod(m.angle + turn_dir * PLAYER_TURN_SPEED * dt, 360.f);
+        m.angle = std::fmod(m.angle + turn_dir * sc.turn_speed * dt, 360.f);
     }
 
     // Process Quick Turn
@@ -109,7 +100,7 @@ void PlayerMovementSystem::step(float elapsed_ms)
 
     if (key_held(PlayerActions::MoveForward, ps))
     {
-        m.position += direction_to_vector(m.angle) * ((PLAYER_MOVE_SPEED * elapsed_ms) / 1000.f);
+        m.position += direction_to_vector(m.angle) * ((sc.move_speed * elapsed_ms) / 1000.f);
     }
 
     // debug_print_player_motion(m);
