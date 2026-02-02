@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include <vector>
 #include <unordered_map>
+#include <array>
 #include "../ext/stb_image/stb_image.h"
 
 // =================================================================================
@@ -151,6 +152,47 @@ struct Mesh
 	std::vector<uint16_t> vertex_indices;
 };
 
+#define GET_2D_POS(x, y, width) x + width * y
+
+struct TileMap
+{
+	int tileset_id = 0; // TODO: Add ID functionality
+	std::array<unsigned short, 4096> tile_ids;
+	unsigned int width;
+	unsigned int height;
+
+	TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height)
+		: tile_ids(tile_ids)
+		, width(width)
+		, height(height)
+	{
+	}
+
+	TileMap(const TileMap& other)
+	{
+		this->tile_ids = other.tile_ids;
+		this->width = other.width;
+		this->height = other.height;
+	}
+};
+
+struct TileSet
+{
+	int tileset_id = 1; // TODO: Add ID functionality
+	vec2 dimensions;
+	int tile_width_px;
+	int tile_height_px;
+	std::array<bool, 2048> collisions;
+
+	TileSet(int width, int height, int tile_width_px, int tile_height_px, std::array<bool, 2048> collisions)
+		: dimensions(vec2(width, height))
+		, tile_width_px(tile_width_px)
+		, tile_height_px(tile_height_px)
+		, collisions(collisions)
+	{
+	}
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -176,8 +218,8 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	// TODO
-	TEXTURE_COUNT = 0
+	TEXTURE_TILESET = 0,
+	TEXTURE_COUNT = TEXTURE_TILESET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -187,7 +229,8 @@ enum class EFFECT_ASSET_ID {
 	CHICKEN = EGG + 1,
 	TEXTURED = CHICKEN + 1,
 	VIGNETTE = TEXTURED + 1,
-	EFFECT_COUNT = VIGNETTE + 1
+	TILEMAP = VIGNETTE + 1,
+	EFFECT_COUNT = TILEMAP + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

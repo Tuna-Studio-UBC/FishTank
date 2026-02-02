@@ -7,6 +7,111 @@
 #include "render_system.hpp"
 #include "tinyECS/registry.hpp"
 
+void RenderSystem::drawTile(const RenderRequest& render_request, const TileMap& tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3& projection)
+{
+	int tile_size = TILE_SIZE_PX;
+	Transform transform;
+	transform.translate((tile_size * tile_pos) + (TILE_SIZE_PX / 2));
+	// TODO: REMOVE / 2
+	transform.scale(vec2(tile_size));
+
+	unsigned short tile_id = tilemap.tile_ids[GET_2D_POS(tile_pos.x, tile_pos.y, tilemap.width)];
+	if (tile_id == 0)
+		return;
+
+	tile_id--;
+
+	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
+
+	glUseProgram(program);
+	gl_has_errors();
+
+	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
+	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+
+	// Setting vertex and index buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	GLint in_position_loc = glGetAttribLocation(program, "in_position");
+	GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+	gl_has_errors();
+	assert(in_texcoord_loc >= 0);
+
+	glEnableVertexAttribArray(in_position_loc);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(TexturedVertex), (void*)0);
+	gl_has_errors();
+
+	glEnableVertexAttribArray(in_texcoord_loc);
+	glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),(void*)sizeof(vec3));
+
+	// Enabling and binding texture to slot 0
+	glActiveTexture(GL_TEXTURE0);
+	gl_has_errors();
+
+	GLuint texture_id =	texture_gl_handles[(GLuint)render_request.used_texture];
+
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	gl_has_errors();
+
+	// Getting uniform locations for glUniform* calls
+	GLint color_uloc = glGetUniformLocation(program, "fcolor");
+	const vec3 color = vec3(1);
+	glUniform3fv(color_uloc, 1, (float*)&color);
+	gl_has_errors();
+
+	GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
+	glUniform2iv(tileset_size_uloc, 1, (GLint*)&tileset_size);
+	gl_has_errors();
+
+	// Atlas offset is normalized atlas coordinates
+	vec2 atlas_offset = vec2((tile_id % tileset_size.x)/ (float)tileset_size.x, (tile_id / tileset_size.x)/ (float)tileset_size.y);
+	GLint atlas_offset_uloc = glGetUniformLocation(program, "atlas_offset");
+	glUniform2fv(atlas_offset_uloc, 1, (GLfloat*)&atlas_offset);
+	gl_has_errors();
+
+	// Get number of indices from index buffer, which has elements uint16_t
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
+	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	gl_has_errors();
+
+	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	// https://learnopengl.com/Getting-started/Textures
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Drawing of num_indices/3 triangles specified in the index buffer
+	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+	gl_has_errors();
+}
+
+void RenderSystem::drawTilemap(const Entity& entity, const mat3& projection)
+{
+	RenderRequest& render_request = registry.renderRequests.get(entity);
+	TileMap& tilemap = registry.tilemaps.get(entity);
+	TileSet& tileset = registry.tilesets.get(entity);
+	for (int x = 0; x < tilemap.width; x++)
+		for (int y = 0; y < tilemap.height; y++)
+			RenderSystem::drawTile(render_request, tilemap, ivec2(x, y), tileset.dimensions, projection);
+}
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
 {
@@ -227,6 +332,10 @@ void RenderSystem::draw()
 			// Note, its not very efficient to access elements indirectly via the entity
 			// albeit iterating through all Sprites in sequence. A good point to optimize
 			drawTexturedMesh(entity, projection_2D);
+		}
+		else if (registry.tilemaps.has(entity))
+		{
+			drawTilemap(entity, projection_2D);
 		}
 	}
 
