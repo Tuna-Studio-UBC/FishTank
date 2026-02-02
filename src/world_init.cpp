@@ -2,7 +2,7 @@
 #include "tinyECS/registry.hpp"
 #include <iostream>
 
-#define DEBUG_INIT_TILES
+// #define DEBUG_INIT_TILES
 
 #ifdef DEBUG_INIT_TILES
 void print_tilemap(TileMap &tilemap)
@@ -78,5 +78,24 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 		 EFFECT_ASSET_ID::EGG,
 		 GEOMETRY_BUFFER_ID::DEBUG_LINE});
 	registry.players.emplace(entity);
+	return entity;
+}
+
+Entity createProjectile(RenderSystem* renderer, vec2 position, float angle)
+{
+	auto entity = Entity();
+
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = vec2(PROJECTILE_SPEED, 0.f);
+	motion.position = position;
+	motion.angle = angle;
+	motion.scale = vec2(PROJECTILE_SIZE_PX);
+
+	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_PROJECTILE,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE });
 	return entity;
 }

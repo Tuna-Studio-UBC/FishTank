@@ -30,7 +30,8 @@ class RenderSystem {
 	// Make sure these paths remain in sync with the associated enumerators (see TEXTURE_ASSET_ID).
 	// TODO
 	const std::array<std::string, texture_count> texture_paths = {
-		tileset_texture_path("greybox_tiles.png")
+		tileset_texture_path("greybox_tiles.png"),
+		textures_path("white_bubble.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
