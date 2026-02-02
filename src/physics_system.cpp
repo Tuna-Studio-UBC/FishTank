@@ -31,11 +31,13 @@ void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move each entity that has motion
 	auto& motion_registry = registry.motions;
-	for(uint i = 0; i< motion_registry.size(); i++)
+	for(Motion& motion : motion_registry.components)
 	{
-		// TODO
-
-		(void)elapsed_ms; // placeholder to silence unused warning until implemented
+		auto velocity = motion.velocity * elapsed_ms / 1000.f;
+		auto angle = motion.angle;
+		float vx_prime = cos(angle) * velocity.x - sin(angle) * velocity.y;
+		float vy_prime = sin(angle) * velocity.x + cos(angle) * velocity.y;
+		motion.position += vec2(vx_prime, vy_prime);
 	}
 
 	// check for collisions between all moving entities

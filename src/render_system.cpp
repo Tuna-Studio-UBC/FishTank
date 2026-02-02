@@ -112,8 +112,7 @@ void RenderSystem::drawTilemap(const Entity& entity, const mat3& projection)
 			RenderSystem::drawTile(render_request, tilemap, ivec2(x, y), tileset.dimensions, projection);
 }
 
-void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection)
+void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection)
 {
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
