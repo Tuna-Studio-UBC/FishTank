@@ -27,6 +27,19 @@ struct Patrol
     float padding_px = 5.f;
 };
 
+struct DistractionTrigger
+{
+    float interact_radius_px = 80.f; // distance to e
+    float cooldown_ms = 800.f;
+    float cooldown_remaining_ms = 0.f;
+};
+
+struct DistractionEvent
+{
+    vec2 position = {0.f, 0.f};   
+    float remaining_ms = 2000.f;
+};
+
 // used for Entities that cause damage
 struct Deadly
 {

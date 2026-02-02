@@ -115,3 +115,31 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 pa
 
     return entity;
 }
+
+Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px)
+{
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    auto& motion = registry.motions.emplace(entity);
+    motion.position = position;
+    motion.velocity = {0.f, 0.f};
+    motion.angle = 0.f;
+    motion.scale = {30.f, 30.f};
+
+    registry.colors.emplace(entity, vec3(0.1f, 0.9f, 0.1f));
+    registry.renderRequests.insert(
+        entity,
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT,
+          EFFECT_ASSET_ID::EGG,
+          GEOMETRY_BUFFER_ID::EGG });
+
+    DistractionTrigger trig;
+    trig.interact_radius_px = interact_radius_px;
+    trig.cooldown_ms = 800.f;
+    trig.cooldown_remaining_ms = 0.f;
+    registry.distractionTriggers.insert(entity, trig);
+
+    return entity;
+}

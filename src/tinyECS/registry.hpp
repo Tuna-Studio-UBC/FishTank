@@ -17,6 +17,8 @@ public:
 
 	ComponentContainer<Enemy> enemies;
 	ComponentContainer<Patrol> patrols;
+	ComponentContainer<DistractionTrigger> distractionTriggers;
+	ComponentContainer<DistractionEvent> distractionEvents;
 
 	ComponentContainer<Mesh *> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
@@ -41,6 +43,8 @@ public:
 
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&patrols);
+		registry_list.push_back(&distractionTriggers);
+		registry_list.push_back(&distractionEvents);
 
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
