@@ -7,7 +7,7 @@
 #include "render_system.hpp"
 #include "tinyECS/registry.hpp"
 
-void RenderSystem::drawTile(const RenderRequest& render_request, const TileMap& tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3& projection)
+void RenderSystem::drawTile(const RenderRequest& render_request, const TileMap& tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3& projection, const mat3& view)
 {
 	int tile_size = TILE_SIZE_PX;
 	Transform transform;
@@ -90,6 +90,10 @@ void RenderSystem::drawTile(const RenderRequest& render_request, const TileMap& 
 	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 	gl_has_errors();
+	
+	GLuint view_loc = glGetUniformLocation(currProgram, "view");
+	glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+	gl_has_errors();
 
 	// https://learnopengl.com/Getting-started/Textures
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -102,17 +106,17 @@ void RenderSystem::drawTile(const RenderRequest& render_request, const TileMap& 
 	gl_has_errors();
 }
 
-void RenderSystem::drawTilemap(const Entity& entity, const mat3& projection)
+void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, const mat3 &view)
 {
 	RenderRequest& render_request = registry.renderRequests.get(entity);
 	TileMap& tilemap = registry.tilemaps.get(entity);
 	TileSet& tileset = registry.tilesets.get(entity);
 	for (int x = 0; x < tilemap.width; x++)
 		for (int y = 0; y < tilemap.height; y++)
-			RenderSystem::drawTile(render_request, tilemap, ivec2(x, y), tileset.dimensions, projection);
+			RenderSystem::drawTile(render_request, tilemap, ivec2(x, y), tileset.dimensions, projection, view);
 }
 
-void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection)
+void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view)
 {
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
@@ -220,6 +224,10 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection)
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
 	gl_has_errors();
 
+	GLuint view_loc = glGetUniformLocation(currProgram, "view");
+	glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+	gl_has_errors();
+
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 	gl_has_errors();
@@ -321,7 +329,9 @@ void RenderSystem::draw()
 							  // sprites back to front
 	gl_has_errors();
 
+	// pos = projection * view * transform * vec;
 	mat3 projection_2D = createProjectionMatrix();
+	mat3 view_2D = createViewMatrix();
 
 	// draw all entities with a render request to the frame buffer
 	for (Entity entity : registry.renderRequests.entities)
@@ -330,11 +340,11 @@ void RenderSystem::draw()
 		if (registry.motions.has(entity)) {
 			// Note, its not very efficient to access elements indirectly via the entity
 			// albeit iterating through all Sprites in sequence. A good point to optimize
-			drawTexturedMesh(entity, projection_2D);
+			drawTexturedMesh(entity, projection_2D, view_2D);
 		}
 		else if (registry.tilemaps.has(entity))
 		{
-			drawTilemap(entity, projection_2D);
+			drawTilemap(entity, projection_2D, view_2D);
 		}
 	}
 
@@ -364,5 +374,17 @@ mat3 RenderSystem::createProjectionMatrix()
 		{ sx, 0.f, 0.f},
 		{0.f,  sy, 0.f},
 		{ tx,  ty, 1.f}
+	};
+}
+
+mat3 RenderSystem::createViewMatrix()
+{
+	Entity player = registry.players.entities[0];
+	Motion &m = registry.motions.get(player);
+	
+	return {
+		{1.f, 0.f, 0.f},
+		{0.f, 1.f, 0.f},
+		{-(m.position.x - WINDOW_WIDTH_PX / 2.f), -(m.position.y - WINDOW_HEIGHT_PX / 2.f), 1.f}
 	};
 }

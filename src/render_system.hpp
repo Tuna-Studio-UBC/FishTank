@@ -77,14 +77,15 @@ public:
 	void draw();
 
 	mat3 createProjectionMatrix();
+	mat3 createViewMatrix();
 
 	Entity get_screen_state_entity() { return screen_state_entity; }
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTile(const RenderRequest &render_request, const TileMap &tilemap, const ivec2& tile_pos, const ivec2& tileset_size, const mat3& projection);
-	void drawTilemap(const Entity& e, const mat3& projection);
-	void drawTexturedMesh(Entity entity, const mat3& projection);
+	void drawTile(const RenderRequest &render_request, const TileMap &tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3 &projection, const mat3 &view);
+	void drawTilemap(const Entity &e, const mat3 &projection, const mat3 &view);
+	void drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view);
 	void drawToScreen();
 
 	// Window handle
