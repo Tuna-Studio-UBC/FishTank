@@ -132,6 +132,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	// Create player entity
 	Entity player = createPlayer(renderer, { WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
+	
+	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, TILE_SIZE_PX);
 	// start playing background music indefinitely
 
 	//Commented out duo to compiler errors

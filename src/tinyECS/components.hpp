@@ -16,6 +16,12 @@ struct Player
 // used for Entities that cause damage
 struct Deadly
 {
+	float radius;
+};
+
+// when the entity detects the player
+struct Detected
+{
 
 };
 

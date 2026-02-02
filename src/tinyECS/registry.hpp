@@ -28,6 +28,8 @@ public:
 	ComponentContainer<PlayerInputState> playerInput;
 	ComponentContainer<PlayerQuickTurn> playerQuickTurn;
 
+	ComponentContainer<Detected> detecteds;
+
 	// constructor that adds all containers for looping over them
 	ECSRegistry()
 	{
@@ -44,6 +46,7 @@ public:
 		// TODO: add new containers
 		registry_list.push_back(&playerInput);
 		registry_list.push_back(&playerQuickTurn);
+		registry_list.push_back(&detecteds);
 	}
 
 	void clear_all_components()
