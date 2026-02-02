@@ -10,43 +10,75 @@ class ECSRegistry
 	std::vector<ContainerInterface *> registry_list;
 
 public:
-	// Manually created list of all components this game has
+	// Entity
+	ComponentContainer<Player> players;
+	ComponentContainer<Enemy> enemies;
+	ComponentContainer<Bullet> bullet;
+	ComponentContainer<Wall> wall;
+	ComponentContainer<Mine> mine;
+
+	// Behaviour
+	ComponentContainer<Health> health;
+	ComponentContainer<FireControl> fireControl;
+	ComponentContainer<SpeedControl> speedControl;
+	ComponentContainer<PlayerQuickTurn> playerQuickTurn;
+	ComponentContainer<Wallet> wallet;
+	ComponentContainer<DropsCrackers> dropsCrackers;
+	ComponentContainer<Patrolling> patrolling;
+	ComponentContainer<Pursuit> pursuit;
+	ComponentContainer<Bouncy> bouncy;
+
+	// Physics
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
-	ComponentContainer<Player> players;
+
+	// Game State
+	ComponentContainer<ScreenState> screenStates;
+	ComponentContainer<PlayerInputState> playerInput;
+
+	// Rendering
 	ComponentContainer<Mesh *> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
-	ComponentContainer<ScreenState> screenStates;
-	ComponentContainer<Eatable> eatables;
-	ComponentContainer<Deadly> deadlys;
-	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
-	// TODO: add new containers
 	ComponentContainer<TileSet> tilesets;
 	ComponentContainer<TileMap> tilemaps;
-
-	ComponentContainer<PlayerInputState> playerInput;
-	ComponentContainer<PlayerQuickTurn> playerQuickTurn;
-
-	ComponentContainer<Detected> detecteds;
-
+	
 	// constructor that adds all containers for looping over them
 	ECSRegistry()
 	{
 		registry_list.push_back(&motions);
-		registry_list.push_back(&collisions);
+		// Entity
 		registry_list.push_back(&players);
+		registry_list.push_back(&enemies);
+		registry_list.push_back(&bullet);
+		registry_list.push_back(&wall);
+		registry_list.push_back(&mine);
+
+		// Behaviour
+		registry_list.push_back(&health);
+		registry_list.push_back(&fireControl);
+		registry_list.push_back(&speedControl);
+		registry_list.push_back(&playerQuickTurn);
+		registry_list.push_back(&wallet);
+		registry_list.push_back(&dropsCrackers);
+		registry_list.push_back(&patrolling);
+		registry_list.push_back(&pursuit);
+		registry_list.push_back(&bouncy);
+
+		// Physics
+		registry_list.push_back(&motions);
+		registry_list.push_back(&collisions);
+
+		// Game State
+		registry_list.push_back(&screenStates);
+		registry_list.push_back(&playerInput);
+
+		// Rendering
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
-		registry_list.push_back(&screenStates);
-		registry_list.push_back(&eatables);
-		registry_list.push_back(&deadlys);
-		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
-		// TODO: add new containers
-		registry_list.push_back(&playerInput);
-		registry_list.push_back(&playerQuickTurn);
-		registry_list.push_back(&detecteds);
+		registry_list.push_back(&tilesets);
+		registry_list.push_back(&tilemaps);
 	}
 
 	void clear_all_components()

@@ -59,7 +59,6 @@ private:
 
 	// Game state
 	RenderSystem* renderer;
-	float current_speed;
 
 	// grid
 	std::vector<Entity> grid_lines;
