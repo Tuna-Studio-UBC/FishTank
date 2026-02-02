@@ -1,3 +1,4 @@
 build
 
+.vs/*
 ext/project_path.hpp

@@ -1,0 +1,41 @@
+{ "compressionlevel":-1,
+ "height":10,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[7, 7, 7, 7, 7, 11, 11, 11, 11, 11, 9, 9, 9, 9, 9,
+            7, 1, 1, 1, 1, 5, 5, 5, 5, 5, 3, 3, 3, 3, 9,
+            7, 1, 1, 1, 1, 5, 5, 5, 5, 5, 3, 3, 3, 3, 9,
+            7, 1, 1, 1, 1, 5, 5, 5, 5, 5, 3, 3, 3, 3, 9,
+            7, 1, 1, 1, 1, 5, 11, 11, 11, 5, 3, 3, 3, 3, 9,
+            8, 2, 2, 2, 2, 4, 10, 10, 10, 4, 6, 6, 6, 6, 12,
+            8, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 12,
+            8, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 12,
+            8, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 12,
+            8, 8, 8, 8, 8, 10, 10, 10, 10, 10, 12, 12, 12, 12, 12],
+         "height":10,
+         "id":1,
+         "name":"main",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":15,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":2,
+ "nextobjectid":1,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.9.2",
+ "tileheight":32,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"navigation_tiles.tsx"
+        }],
+ "tilewidth":32,
+ "type":"map",
+ "version":"1.9",
+ "width":15
+}

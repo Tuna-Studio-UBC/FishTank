@@ -7,26 +7,22 @@
 #include "render_system.hpp"
 #include "tinyECS/registry.hpp"
 
-/*void RenderSystem::drawGridLine(Entity entity,
-								const mat3& projection) {
-
-	GridLine& gridLine = registry.gridLines.get(entity);
-
-	// Transformation code, see Rendering and Transformation in the template
-	// specification for more info Incrementally updates transformation matrix,
-	// thus ORDER IS IMPORTANT
+void RenderSystem::drawTile(const RenderRequest& render_request, const TileMap& tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3& projection)
+{
+	int tile_size = TILE_SIZE_PX;
 	Transform transform;
-	transform.translate(gridLine.start_pos);
-	transform.scale(gridLine.end_pos);
+	transform.translate((tile_size * tile_pos) + (TILE_SIZE_PX / 2));
+	// TODO: REMOVE / 2
+	transform.scale(vec2(tile_size));
 
-	assert(registry.renderRequests.has(entity));
-	const RenderRequest& render_request = registry.renderRequests.get(entity);
+	unsigned short tile_id = tilemap.tile_ids[GET_2D_POS(tile_pos.x, tile_pos.y, tilemap.width)];
+	if (tile_id == 0)
+		return;
 
-	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
-	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
-	const GLuint program = (GLuint)effects[used_effect_enum];
+	tile_id--;
 
-	// setting shaders
+	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
+
 	glUseProgram(program);
 	gl_has_errors();
 
@@ -36,39 +32,45 @@
 
 	// Setting vertex and index buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	gl_has_errors();
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	gl_has_errors();
 
-	if (render_request.used_effect == EFFECT_ASSET_ID::EGG)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		gl_has_errors();
+	GLint in_position_loc = glGetAttribLocation(program, "in_position");
+	GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+	gl_has_errors();
+	assert(in_texcoord_loc >= 0);
 
-		GLint in_color_loc    = glGetAttribLocation(program, "in_color");
-		gl_has_errors();
+	glEnableVertexAttribArray(in_position_loc);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(TexturedVertex), (void*)0);
+	gl_has_errors();
 
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)0);
-		gl_has_errors();
+	glEnableVertexAttribArray(in_texcoord_loc);
+	glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),(void*)sizeof(vec3));
 
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)sizeof(vec3));
-		gl_has_errors();
-	}
-	else
-	{
-		assert(false && "Type of render request not supported");
-	}
+	// Enabling and binding texture to slot 0
+	glActiveTexture(GL_TEXTURE0);
+	gl_has_errors();
+
+	GLuint texture_id =	texture_gl_handles[(GLuint)render_request.used_texture];
+
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	gl_has_errors();
 
 	// Getting uniform locations for glUniform* calls
 	GLint color_uloc = glGetUniformLocation(program, "fcolor");
-	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-	// CK: std::cout << "line color: " << color.r << ", " << color.g << ", " << color.b << std::endl;
+	const vec3 color = vec3(1);
 	glUniform3fv(color_uloc, 1, (float*)&color);
+	gl_has_errors();
+
+	GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
+	glUniform2iv(tileset_size_uloc, 1, (GLint*)&tileset_size);
+	gl_has_errors();
+
+	// Atlas offset is normalized atlas coordinates
+	vec2 atlas_offset = vec2((tile_id % tileset_size.x)/ (float)tileset_size.x, (tile_id / tileset_size.x)/ (float)tileset_size.y);
+	GLint atlas_offset_uloc = glGetUniformLocation(program, "atlas_offset");
+	glUniform2fv(atlas_offset_uloc, 1, (GLfloat*)&atlas_offset);
 	gl_has_errors();
 
 	// Get number of indices from index buffer, which has elements uint16_t
@@ -89,10 +91,26 @@
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 	gl_has_errors();
 
+	// https://learnopengl.com/Getting-started/Textures
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 	gl_has_errors();
-}*/
+}
+
+void RenderSystem::drawTilemap(const Entity& entity, const mat3& projection)
+{
+	RenderRequest& render_request = registry.renderRequests.get(entity);
+	TileMap& tilemap = registry.tilemaps.get(entity);
+	TileSet& tileset = registry.tilesets.get(entity);
+	for (int x = 0; x < tilemap.width; x++)
+		for (int y = 0; y < tilemap.height; y++)
+			RenderSystem::drawTile(render_request, tilemap, ivec2(x, y), tileset.dimensions, projection);
+}
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
@@ -315,10 +333,10 @@ void RenderSystem::draw()
 			// albeit iterating through all Sprites in sequence. A good point to optimize
 			drawTexturedMesh(entity, projection_2D);
 		}
-		// draw grid lines separately, as they do not have motion but need to be rendered
-		/*else if (registry.gridLines.has(entity)) {
-			drawGridLine(entity, projection_2D);
-		}*/
+		else if (registry.tilemaps.has(entity))
+		{
+			drawTilemap(entity, projection_2D);
+		}
 	}
 
 	// draw framebuffer to screen
