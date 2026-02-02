@@ -4,35 +4,113 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
-// Player component
-struct Player
-{
+// =================================================================================
+// Entity (Represents entity, loop through list to get all)
+// =================================================================================
 
+struct Player {};
+// Uses: Motion, Health, FireControl, Speed Control, Wallet
+
+struct Enemy {
+	float detection_radius = 300;
+};
+// Uses: Motion, Health, FireControl, Speed Control, DropsCrackers
+// Optional: Patrolling, Pursuit
+
+struct Bullet {
+	int damage;
+};
+// Uses: Motion
+// Optional: Bouncy
+
+struct Wall {
+	vec2 position;
+};
+// Uses: Motion
+
+struct Mine {
+	int damage;
+};
+// Uses: Motion
+
+// =================================================================================
+// Behaviour (Attached to entities, e.g. Bouncy, Health, ...)
+// =================================================================================
+
+struct Health 
+{
+	int max_hp;
+	int hp;
 };
 
-// TODO: all components
-
-// used for Entities that cause damage
-struct Deadly
+struct FireControl
 {
-
+	float cooldown_timer = 0;		// ms
+	float cooldown_ms = 2000;		// ms
 };
 
-// used for edible entities
-struct Eatable
+struct PlayerQuickTurn
 {
-
+	float duration_ms;
+	float direction; // -1.f for left, 1.f for right
 };
 
-// All data relevant to the shape and motion of entities
+struct Bouncy
+{
+	int bounces_remaining = 3;
+};
+
+struct Wallet
+{
+	int crackers = 0;
+};
+
+struct DropsCrackers
+{
+	int cracker;
+};
+
+struct Patrolling
+{
+};
+
+struct Pursuit
+{
+};
+
+// =================================================================================
+// Physics (Motion, collision, etc)
+// =================================================================================
 struct Motion {
-	vec2 position  = {0, 0};
+	vec2 position  = {0, 0};		// WORLD COORDINATE px
 	float angle    = 0; 			// Angle in degrees
 	vec2  velocity = { 0, 0 };		// px / s
 	vec2  scale    = { 10, 10 };	// px
 };
 
-enum PlayerActions {
+struct Collision
+{
+	// Note, the first object is stored in the ECS container.entities
+	Entity other; // the second object involved in the collision
+	Collision(Entity &other) { this->other = other; };
+};
+
+struct SpeedControl {
+	float move_speed;
+	float turn_speed;
+};
+
+// =================================================================================
+// Game State
+// =================================================================================
+
+struct ScreenState
+{
+	float darken_screen_factor = -1;
+};
+
+enum PlayerActions
+{
 	MoveForward,
 	TurnLeft,
 	TurnRight,
@@ -40,48 +118,15 @@ enum PlayerActions {
 	PlayerActionCount
 };
 
-struct PlayerInputState {
+struct PlayerInputState
+{
 	bool current_actions[PlayerActionCount];
 	bool previous_actions[PlayerActionCount];
 };
 
-struct PlayerQuickTurn {
-	float duration_ms;
-	float direction; // -1.f for left, 1.f for right
-};
-
-// Stucture to store collision information
-struct Collision
-{
-	// Note, the first object is stored in the ECS container.entities
-	Entity other; // the second object involved in the collision
-	Collision(Entity& other) { this->other = other; };
-};
-
-// Data structure for toggling debug mode
-struct Debug {
-	bool in_debug_mode = 0;
-	bool in_freeze_mode = 0;
-};
-extern Debug debugging;
-
-// Sets the brightness of the screen
-struct ScreenState
-{
-	float darken_screen_factor = -1;
-};
-
-// A struct to refer to debugging graphics in the ECS
-struct DebugComponent
-{
-	// Note, an empty struct has size 1
-};
-
-// used to hold grid line start and end positions
-struct GridLine {
-	vec2 start_pos = {  0,  0 };
-	vec2 end_pos   = { 10, 10 };	// default to diagonal line
-};
+// =================================================================================
+// Rendering
+// =================================================================================
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
 struct ColoredVertex

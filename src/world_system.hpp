@@ -59,15 +59,14 @@ private:
 
 	// Game state
 	RenderSystem* renderer;
-	float current_speed;
 
 	// grid
 	std::vector<Entity> grid_lines;
 
 	// music references
-	Mix_Music* background_music;
-	Mix_Chunk* invader_hit_sound;
-	Mix_Chunk* tower_hit_sound;
+	// Mix_Music* background_music;
+	// Mix_Chunk* invader_hit_sound;
+	// Mix_Chunk* tower_hit_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
