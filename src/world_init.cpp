@@ -80,3 +80,38 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 	registry.players.emplace(entity);
 	return entity;
 }
+
+Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 patrol_b, float speed_px_s)
+{
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    auto& motion = registry.motions.emplace(entity);
+    motion.velocity = vec2(0.0f, 0.0f);
+    motion.position = position;
+    motion.angle = 0.f;
+    motion.scale = vec2(45.0f, 45.0f);
+
+    registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f)); 
+
+    registry.renderRequests.insert(
+        entity,
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT,
+          EFFECT_ASSET_ID::EGG,
+          GEOMETRY_BUFFER_ID::DEBUG_LINE });
+
+    registry.enemies.emplace(entity);
+
+	Patrol patrol;
+	patrol.speed_px_s = speed_px_s;
+	patrol.change_dir_min_ms = 3000.f;
+	patrol.change_dir_max_ms = 7000.f;
+	patrol.time_to_change_ms = 0.f;
+	patrol.dir = { 1.f, 0.f };              
+	patrol.padding_px = 5.f;
+
+	registry.patrols.insert(entity, patrol);
+
+    return entity;
+}

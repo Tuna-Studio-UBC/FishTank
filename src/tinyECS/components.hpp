@@ -12,6 +12,20 @@ struct Player
 };
 
 // TODO: all components
+struct Enemy
+{
+
+};
+
+struct Patrol
+{
+    float speed_px_s = 90.f;
+    float change_dir_min_ms = 400.f;
+    float change_dir_max_ms = 1200.f;
+    float time_to_change_ms = 0.f;
+    vec2 dir = { 1.f, 0.f };
+    float padding_px = 5.f;
+};
 
 // used for Entities that cause damage
 struct Deadly
