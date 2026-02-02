@@ -317,5 +317,21 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 }
 
 void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
+	if (action == GLFW_PRESS)
+	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			vec2 mouse_pos = vec2(mouse_pos_x, mouse_pos_y);
+			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
+			vec2& player_pos = player_motion.position;
+			// https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
+			float angle = atan2(mouse_pos.y - player_pos.y, mouse_pos.x - player_pos.x);
+			createProjectile(renderer, player_pos, angle);
 
+
+			// std::cout << "Mouse Pos: (" << lround(mouse_pos.x) << ", " << lround(mouse_pos.y) << ")\n";
+			// std::cout << "Player Pos: (" << lround(player_pos.x) << ", " << lround(player_pos.y) << ")\n";
+			// std::cout << "Angle: " << angle << "\n";
+		}
+	}
 }
