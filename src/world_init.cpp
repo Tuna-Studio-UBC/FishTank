@@ -65,23 +65,26 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 
 	registry.players.emplace(entity);
 
+	registry.keyboardInput.emplace(entity);
+	registry.mouseInput.emplace(entity);
+
 	Wallet &w = registry.wallet.emplace(entity);
 	w.crackers = 0; // !!! Hardcode for now
 
 	Health &h = registry.health.emplace(entity);
 	h.hp = 200; // !!! Hardcode for now
 	h.max_hp = 200; // !!! Hardcode for now
-
+	
 	FireControl &fc = registry.fireControl.emplace(entity);
-	fc.cooldown_ms = 2000; // !!! Hardcode for now
+	fc.cooldown_ms = 500; // !!! Hardcode for now
 	
 	SpeedControl &sc = registry.speedControl.emplace(entity);
 	sc.move_speed = 60; // !!! Hardcode for now
 	sc.turn_speed = 250; // !!! Hardcode for now
-
+	
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
 	registry.meshPtrs.emplace(entity, &mesh);
-
+	
 	Motion &motion = registry.motions.emplace(entity);
 	motion.velocity = vec2(0.0f, 0.0f);
 	motion.position = position;
@@ -95,11 +98,11 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 		 GEOMETRY_BUFFER_ID::DEBUG_LINE});
 
 	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
-	
+
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, vec2 position, float angle)
+Entity createProjectile(vec2 position, float angle)
 {
 	auto entity = Entity();
 

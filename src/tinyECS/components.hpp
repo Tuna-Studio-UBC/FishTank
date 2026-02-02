@@ -115,19 +115,31 @@ struct ScreenState
 	float darken_screen_factor = -1;
 };
 
-enum PlayerActions
+enum KeyboardActions
 {
 	MoveForward,
 	TurnLeft,
 	TurnRight,
 	QuickTurn,
-	PlayerActionCount
+	KeyboardActionsCount
 };
 
-struct PlayerInputState
+struct KeyboardInputState
 {
-	bool current_actions[PlayerActionCount];
-	bool previous_actions[PlayerActionCount];
+	bool current_actions[KeyboardActions::KeyboardActionsCount];
+	bool previous_actions[KeyboardActions::KeyboardActionsCount];
+};
+
+enum MouseActions
+{
+	LeftClick,
+	MouseActionsCount
+};
+
+struct MouseInputState
+{
+	vec2 mouse_pos;
+	MouseActions current_action = MouseActionsCount;
 };
 
 // =================================================================================

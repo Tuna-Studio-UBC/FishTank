@@ -171,24 +171,25 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// We should have 1 and only ever 1 player input component
-	assert(registry.playerInput.components.size() == 1);
-	PlayerInputState &ps = registry.playerInput.components[0];
+	assert(registry.keyboardInput.components.size() == 1);
+	Entity playerEntity = registry.players.entities[0];
+	KeyboardInputState &ps = registry.keyboardInput.get(playerEntity);
 
 	bool key_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
 
 	// We handle the inputs separately since we need to deal with game logic
 	// E.g. how to handle multiple conflicting inputs
 	if (key == GLFW_KEY_W) {
-		ps.current_actions[PlayerActions::MoveForward] = key_pressed;
+		ps.current_actions[KeyboardActions::MoveForward] = key_pressed;
 	}
 	if (key == GLFW_KEY_A) {
-		ps.current_actions[PlayerActions::TurnLeft] = key_pressed;
+		ps.current_actions[KeyboardActions::TurnLeft] = key_pressed;
 	}
 	if (key == GLFW_KEY_D) {
-		ps.current_actions[PlayerActions::TurnRight] = key_pressed;
+		ps.current_actions[KeyboardActions::TurnRight] = key_pressed;
 	}
 	if (key == GLFW_KEY_S) {
-		ps.current_actions[PlayerActions::QuickTurn] = key_pressed;
+		ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
 	}
 
 	// Debug
@@ -197,29 +198,24 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 }
 
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-
-	// record the current mouse position
-	mouse_pos_x = mouse_position.x;
-	mouse_pos_y = mouse_position.y;
+void WorldSystem::on_mouse_move(vec2 mouse_position)
+{
+	Entity e = registry.players.entities[0];
+	MouseInputState &mi = registry.mouseInput.get(e);
+	mi.mouse_pos = mouse_position;
 }
 
-void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
+void WorldSystem::on_mouse_button_pressed(int button, int action, int mods)
+{
+	Entity e = registry.players.entities[0];
+	MouseInputState &mi = registry.mouseInput.get(e);
 	if (action == GLFW_PRESS)
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
-			vec2 mouse_pos = vec2(mouse_pos_x, mouse_pos_y);
-			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
-			vec2& player_pos = player_motion.position;
-			// https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
-			float angle = atan2(mouse_pos.y - player_pos.y, mouse_pos.x - player_pos.x);
-			createProjectile(renderer, player_pos, angle);
-
-
-			// std::cout << "Mouse Pos: (" << lround(mouse_pos.x) << ", " << lround(mouse_pos.y) << ")\n";
-			// std::cout << "Player Pos: (" << lround(player_pos.x) << ", " << lround(player_pos.y) << ")\n";
-			// std::cout << "Angle: " << angle << "\n";
+			mi.current_action = MouseActions::LeftClick;
 		}
+	} else {
+		mi.current_action = MouseActions::MouseActionsCount;
 	}
 }

@@ -8,4 +8,4 @@
 // TODO: create entity functions
 void init_tiles();
 Entity createPlayer(RenderSystem *renderer, vec2 position);
-Entity createProjectile(RenderSystem* renderer, vec2 position, float angle);
+Entity createProjectile(vec2 position, float angle);

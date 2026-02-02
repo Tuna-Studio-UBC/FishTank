@@ -6,14 +6,12 @@
 #include "tinyECS/registry.hpp"
 
 // Updates the player's state based on movement
-class PlayerMovementSystem
+class PlayerInputSystem
 {
 public:
     void step(float elapsed_ms);
 
-    void init();
-
-    PlayerMovementSystem()
+    PlayerInputSystem()
     {
     }
 };
