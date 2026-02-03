@@ -79,3 +79,5 @@ struct Transform {
 };
 
 bool gl_has_errors();
+
+vec2 direction_to_unit_vector(float degree);
