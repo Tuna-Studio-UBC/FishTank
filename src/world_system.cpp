@@ -132,6 +132,18 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	// Create player entity
 	Entity player = createPlayer(renderer, { WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
+	createBell(renderer, { 300.f, 400.f }, 80.f);
+	createBell(renderer, { 700.f, 200.f }, 80.f);
+
+	// Create a single enemy for testing
+	(void)player;
+	createEnemy(
+		renderer,
+		{ 120.f, 120.f },
+		{ 120.f, 120.f },
+		{ 520.f, 120.f },
+		70.f);
+
 	
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, 100.f);
 	// start playing background music indefinitely
@@ -148,6 +160,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	std::stringstream title_ss;
 	title_ss << "Game: ";
 	glfwSetWindowTitle(window, title_ss.str().c_str());
+
+	for (Entity b : registry.distractionTriggers.entities)
+	{
+		DistractionTrigger& trig = registry.distractionTriggers.get(b);
+		if (trig.cooldown_remaining_ms > 0.f) {
+			trig.cooldown_remaining_ms -= elapsed_ms_since_last_update;
+			if (trig.cooldown_remaining_ms < 0.f)
+				trig.cooldown_remaining_ms = 0.f;
+		}
+	}
+
+	if (registry.distractionEvents.entities.size() > 0)
+	{
+		Entity evt_e = registry.distractionEvents.entities[0];
+		DistractionEvent& evt = registry.distractionEvents.get(evt_e);
+		evt.remaining_ms -= elapsed_ms_since_last_update;
+
+		if (evt.remaining_ms <= 0.f)
+		{
+			registry.remove_all_components_of(evt_e);
+			std::cout << "[Bell] DistractionEvent expired\n";
+		}
+	}
+
+	// Remove debug info from the last step
+	while (registry.debugComponents.entities.size() > 0)
+	    registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	return true;
 }
@@ -193,6 +232,79 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		ps.current_actions[PlayerActions::QuickTurn] = key_pressed;
 	}
 
+	if (action == GLFW_PRESS && key == GLFW_KEY_E)
+	{
+		if (registry.players.entities.size() == 0) {
+			std::cout << "[Bell] No player entity found\n";
+			return;
+		}
+
+		Entity player = registry.players.entities[0];
+		if (!registry.motions.has(player)) {
+			std::cout << "[Bell] Player has no Motion\n";
+			return;
+		}
+
+		vec2 player_pos = registry.motions.get(player).position;
+		float best_dist2 = 1e30f;
+		Entity best_bell;
+
+		for (Entity b : registry.distractionTriggers.entities)
+		{
+			if (!registry.motions.has(b)) continue;
+			vec2 bell_pos = registry.motions.get(b).position;
+			vec2 d = bell_pos - player_pos;
+			float dist2 = dot(d, d);
+			if (dist2 < best_dist2) {
+				best_dist2 = dist2;
+				best_bell = b;
+			}
+		}
+
+		if (best_dist2 > 9e29f) {
+			std::cout << "[Bell] No bell in the world\n";
+			return;
+		}
+
+		DistractionTrigger& trig = registry.distractionTriggers.get(best_bell);
+		float radius = trig.interact_radius_px;
+		float radius2 = radius * radius;
+
+		if (best_dist2 > radius2) {
+			float dist = sqrtf(best_dist2);
+			std::cout << "[Bell] Too far to interact. dist=" << dist
+					<< " (need <= " << radius << ")\n";
+			return;
+		}
+
+		if (trig.cooldown_remaining_ms > 0.f) {
+			std::cout << "[Bell] Bell on cooldown: " << trig.cooldown_remaining_ms << "ms\n";
+			return;
+		}
+
+		vec2 bell_pos = registry.motions.get(best_bell).position;
+
+		if (registry.distractionEvents.entities.size() > 0)
+		{
+			Entity evt_e = registry.distractionEvents.entities[0];
+			DistractionEvent& evt = registry.distractionEvents.get(evt_e);
+			evt.position = bell_pos;
+			evt.remaining_ms = 2000.f;
+		}
+		else
+		{
+			Entity evt_e = Entity();
+			DistractionEvent evt;
+			evt.position = bell_pos;
+			evt.remaining_ms = 2000.f;
+			registry.distractionEvents.insert(evt_e, evt);
+		}
+
+		trig.cooldown_remaining_ms = trig.cooldown_ms;
+
+		std::cout << "[Bell] Triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
+	}
+
 	// Debug
 	if (key == GLFW_KEY_P) {
 		registry.list_all_components();
@@ -207,5 +319,21 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 }
 
 void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
+	if (action == GLFW_PRESS)
+	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			vec2 mouse_pos = vec2(mouse_pos_x, mouse_pos_y);
+			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
+			vec2& player_pos = player_motion.position;
+			// https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
+			float angle = atan2(mouse_pos.y - player_pos.y, mouse_pos.x - player_pos.x);
+			createProjectile(renderer, player_pos, angle);
 
+
+			// std::cout << "Mouse Pos: (" << lround(mouse_pos.x) << ", " << lround(mouse_pos.y) << ")\n";
+			// std::cout << "Player Pos: (" << lround(player_pos.x) << ", " << lround(player_pos.y) << ")\n";
+			// std::cout << "Angle: " << angle << "\n";
+		}
+	}
 }

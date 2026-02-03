@@ -26,6 +26,35 @@ struct Bullet
 // Uses: Motion
 // Optional: Bouncy
 
+// TODO: all components
+struct Enemy
+{
+
+};
+
+struct Patrol
+{
+    float speed_px_s = 90.f;
+    float change_dir_min_ms = 400.f;
+    float change_dir_max_ms = 1200.f;
+    float time_to_change_ms = 0.f;
+    vec2 dir = { 1.f, 0.f };
+    float padding_px = 5.f;
+};
+
+struct DistractionTrigger
+{
+    float interact_radius_px = 80.f; // distance to e
+    float cooldown_ms = 800.f;
+    float cooldown_remaining_ms = 0.f;
+};
+
+struct DistractionEvent
+{
+    vec2 position = {0.f, 0.f};   
+    float remaining_ms = 2000.f;
+};
+
 struct Wall
 {
 	vec2 position;
@@ -231,7 +260,8 @@ struct TileSet
 
 enum class TEXTURE_ASSET_ID {
 	TEXTURE_TILESET = 0,
-	TEXTURE_COUNT = TEXTURE_TILESET + 1
+	TEXTURE_PROJECTILE = 1,
+	TEXTURE_COUNT = TEXTURE_PROJECTILE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
