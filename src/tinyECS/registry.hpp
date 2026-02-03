@@ -32,6 +32,11 @@ public:
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 
+  // E TODO: REVIEW
+	ComponentContainer<Patrol> patrols;
+	ComponentContainer<DistractionTrigger> distractionTriggers;
+	ComponentContainer<DistractionEvent> distractionEvents;
+
 	// Game State
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<PlayerInputState> playerInput;
@@ -49,6 +54,13 @@ public:
 		registry_list.push_back(&motions);
 		// Entity
 		registry_list.push_back(&players);
+
+    // E TODO: REVIEW
+		registry_list.push_back(&patrols);
+		registry_list.push_back(&distractionTriggers);
+		registry_list.push_back(&distractionEvents);
+
+
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&bullet);
 		registry_list.push_back(&wall);
@@ -74,6 +86,7 @@ public:
 		registry_list.push_back(&playerInput);
 
 		// Rendering
+
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&colors);
