@@ -26,12 +26,6 @@ struct Bullet
 // Uses: Motion
 // Optional: Bouncy
 
-// TODO: all components
-struct Enemy
-{
-
-};
-
 struct Patrol
 {
     float speed_px_s = 90.f;
