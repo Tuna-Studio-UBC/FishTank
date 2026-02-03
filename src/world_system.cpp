@@ -74,7 +74,7 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_FALSE);		// GLFW 3.3+
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX, "Towers vs Invaders Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX, GAME_NAME, nullptr, nullptr);
 	if (window == nullptr) {
 		std::cerr << "ERROR: Failed to glfwCreateWindow in world_system.cpp" << std::endl;
 		return nullptr;
@@ -91,6 +91,12 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(window, mouse_button_pressed_redirect);
+
+	// Center window
+	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	const int x = (mode->width - WINDOW_WIDTH_PX) / 2;
+	const int y = (mode->height - WINDOW_HEIGHT_PX) / 2;
+	glfwSetWindowPos(window, x, y);
 
 	return window;
 }
@@ -156,7 +162,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Game: ";
+	title_ss << GAME_NAME;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	for (Entity b : registry.distractionTriggers.entities)
