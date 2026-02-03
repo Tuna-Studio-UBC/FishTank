@@ -31,15 +31,6 @@ bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) {
     return keyboard_input.current_actions[a];
 }
 
-vec2 direction_to_unit_vector(float degree) {
-    float radians = degree * (M_PI / 180.f);
-    vec2 unit_vec = vec2(
-        std::cos(radians),
-        std::sin(radians)
-    );
-    return unit_vec;
-}
-
 // TODO: !!! TEMP PROCESS MOVEMENT HERE, PHYSICS SYSTEM SHOULD HANDLE UPDATES
 void PlayerInputSystem::step(float elapsed_ms)
 {
