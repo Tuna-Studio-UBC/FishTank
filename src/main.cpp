@@ -11,6 +11,7 @@
 #include "render_system.hpp"
 #include "world_system.hpp"
 #include "player_input_system.hpp"
+#include "bullet_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -23,6 +24,7 @@ int main()
 	RenderSystem  renderer_system;
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
+	BulletSystem bullet_system;
 
 	// initialize window
 	GLFWwindow* window = world_system.create_window();
@@ -59,9 +61,10 @@ int main()
 		world_system.step(elapsed_ms);
 		ai_system.handle_detection();
 		ai_system.step(elapsed_ms);
+		bullet_system.step(elapsed_ms);
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
-		world_system.handle_collisions();
+		world_system.handle_collisions(); // CONSIDER: handling collisions involving bullets in bullet_system
 
 		renderer_system.draw();
 	}

@@ -23,6 +23,7 @@ struct Enemy
 struct Bullet
 {
 	int damage;
+	float lifespan_ms;
 };
 // Uses: Motion
 // Optional: Bouncy
