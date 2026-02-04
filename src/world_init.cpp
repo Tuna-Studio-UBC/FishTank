@@ -105,7 +105,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 }
 
 
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern)
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner)
 {
 	auto entity = Entity();
 
@@ -113,6 +113,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
 	auto& bullet = registry.bullet.emplace(entity);
 	bullet.damage = attack_config.damage;
+	bullet.owner = owner;
 
 	auto& motion = registry.motions.emplace(entity);
 	motion.velocity = vec2(attack_config.move_speed, 0.f);

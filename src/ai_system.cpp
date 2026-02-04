@@ -140,6 +140,7 @@ void AISystem::step(float elapsed_ms)
 					req.attack_pattern = fire.attack_pattern;
 					req.position = position;
 					req.angle = angle;
+					req.owner = enemy_i; //this is new, to prevent self hit
 					angle += 45.f;
 				}
 			}
@@ -149,7 +150,8 @@ void AISystem::step(float elapsed_ms)
 					{
 						fire.attack_pattern,
 						position,
-						motion_i.angle
+						motion_i.angle,
+						enemy_i // to prevent self hit
 					});
 			}
 			fire.cooldown_timer = 0;
