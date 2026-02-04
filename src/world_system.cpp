@@ -74,7 +74,7 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_FALSE);		// GLFW 3.3+
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX, "Towers vs Invaders Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX, GAME_NAME, nullptr, nullptr);
 	if (window == nullptr) {
 		std::cerr << "ERROR: Failed to glfwCreateWindow in world_system.cpp" << std::endl;
 		return nullptr;
@@ -91,6 +91,12 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(window, mouse_button_pressed_redirect);
+
+	// Center window
+	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	const int x = (mode->width - WINDOW_WIDTH_PX) / 2;
+	const int y = (mode->height - WINDOW_HEIGHT_PX) / 2;
+	glfwSetWindowPos(window, x, y);
 
 	return window;
 }
@@ -149,7 +155,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Game: ";
+	title_ss << GAME_NAME;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	for (Entity b : registry.distractionTriggers.entities)
@@ -209,24 +215,25 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// We should have 1 and only ever 1 player input component
-	assert(registry.playerInput.components.size() == 1);
-	PlayerInputState &ps = registry.playerInput.components[0];
+	assert(registry.keyboardInput.components.size() == 1);
+	Entity playerEntity = registry.players.entities[0];
+	KeyboardInputState &ps = registry.keyboardInput.get(playerEntity);
 
 	bool key_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
 
 	// We handle the inputs separately since we need to deal with game logic
 	// E.g. how to handle multiple conflicting inputs
 	if (key == GLFW_KEY_W) {
-		ps.current_actions[PlayerActions::MoveForward] = key_pressed;
+		ps.current_actions[KeyboardActions::MoveForward] = key_pressed;
 	}
 	if (key == GLFW_KEY_A) {
-		ps.current_actions[PlayerActions::TurnLeft] = key_pressed;
+		ps.current_actions[KeyboardActions::TurnLeft] = key_pressed;
 	}
 	if (key == GLFW_KEY_D) {
-		ps.current_actions[PlayerActions::TurnRight] = key_pressed;
+		ps.current_actions[KeyboardActions::TurnRight] = key_pressed;
 	}
 	if (key == GLFW_KEY_S) {
-		ps.current_actions[PlayerActions::QuickTurn] = key_pressed;
+		ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_E)
@@ -308,14 +315,17 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 }
 
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-
-	// record the current mouse position
-	mouse_pos_x = mouse_position.x;
-	mouse_pos_y = mouse_position.y;
+void WorldSystem::on_mouse_move(vec2 mouse_position)
+{
+	Entity e = registry.players.entities[0];
+	MouseInputState &mi = registry.mouseInput.get(e);
+	mi.mouse_pos = mouse_position;
 }
 
-void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
+void WorldSystem::on_mouse_button_pressed(int button, int action, int mods)
+{
+	Entity e = registry.players.entities[0];
+	MouseInputState &mi = registry.mouseInput.get(e);
 	if (action == GLFW_PRESS)
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
@@ -331,6 +341,9 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 			// std::cout << "Mouse Pos: (" << lround(mouse_pos.x) << ", " << lround(mouse_pos.y) << ")\n";
 			// std::cout << "Player Pos: (" << lround(player_pos.x) << ", " << lround(player_pos.y) << ")\n";
 			// std::cout << "Angle: " << angle << "\n";
+			mi.current_action = MouseActions::LeftClick;
 		}
+	} else {
+		mi.current_action = MouseActions::MouseActionsCount;
 	}
 }

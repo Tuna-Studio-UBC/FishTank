@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <unordered_map>
 
 // glfw (OpenGL)
 #define NOMINMAX
@@ -35,10 +36,24 @@ inline std::string audio_path(const std::string& name) {return data_path() + "/a
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
 
 //
+// Define screen sizes
+//
+inline std::unordered_map<std::string, std::pair<int, int>> SCREEN_SIZES = {
+	{"default", std::make_pair(800, 600)},
+	{"hd", std::make_pair(1280, 720)},
+	{"widescreen", std::make_pair(1440, 900)},
+	{"fhd", std::make_pair(1920, 1080)},
+	{"qhd", std::make_pair(2560, 1440)}
+};
+
+//
 // game constants
 //
-const int WINDOW_WIDTH_PX = 840;
-const int WINDOW_HEIGHT_PX = 600;
+inline const char *GAME_NAME = "FishTank!";
+
+inline const std::string WINDOW_SIZE = "hd";
+const int WINDOW_WIDTH_PX = SCREEN_SIZES[WINDOW_SIZE].first;
+const int WINDOW_HEIGHT_PX = SCREEN_SIZES[WINDOW_SIZE].second;
 
 const int TILE_SIZE_PX = 32;
 const int TILE_WIDTH_PX = TILE_SIZE_PX;
@@ -79,3 +94,5 @@ struct Transform {
 };
 
 bool gl_has_errors();
+
+vec2 direction_to_unit_vector(float degree);

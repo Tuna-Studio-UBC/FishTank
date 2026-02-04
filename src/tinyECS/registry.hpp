@@ -39,7 +39,8 @@ public:
 
 	// Game State
 	ComponentContainer<ScreenState> screenStates;
-	ComponentContainer<PlayerInputState> playerInput;
+	ComponentContainer<KeyboardInputState> keyboardInput;
+	ComponentContainer<MouseInputState> mouseInput;
 
 	// Rendering
 	ComponentContainer<Mesh*> meshPtrs;
@@ -82,7 +83,8 @@ public:
 
 		// Game State
 		registry_list.push_back(&screenStates);
-		registry_list.push_back(&playerInput);
+		registry_list.push_back(&keyboardInput);
+		registry_list.push_back(&mouseInput);
 
 		// Rendering
 		registry_list.push_back(&meshPtrs);

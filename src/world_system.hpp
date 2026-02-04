@@ -45,10 +45,6 @@ public:
 	bool is_over() const;
 
 private:
-
-	float mouse_pos_x = 0.0f;
-	float mouse_pos_y = 0.0f;
-
 	// input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
