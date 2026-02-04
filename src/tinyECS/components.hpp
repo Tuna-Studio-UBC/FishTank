@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <array>
 #include "../ext/stb_image/stb_image.h"
+#include "configs/attack_pattern.hpp"
 
 // =================================================================================
 // Entity (Represents entity, loop through list to get all)
@@ -14,7 +15,7 @@ struct Player {};
 
 struct Enemy
 {
-	float detection_radius = 300;
+	float detection_radius;
 };
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
@@ -25,16 +26,6 @@ struct Bullet
 };
 // Uses: Motion
 // Optional: Bouncy
-
-struct Patrol
-{
-    float speed_px_s = 90.f;
-    float change_dir_min_ms = 400.f;
-    float change_dir_max_ms = 1200.f;
-    float time_to_change_ms = 0.f;
-    vec2 dir = { 1.f, 0.f };
-    float padding_px = 5.f;
-};
 
 struct DistractionTrigger
 {
@@ -54,6 +45,7 @@ struct Wall
 	vec2 position;
 };
 
+// used for Entities that cause damage
 struct Mine
 {
 	int damage;
@@ -74,6 +66,7 @@ struct FireControl
 {
 	float cooldown_timer = 0;		// ms
 	float cooldown_ms = 2000;		// ms
+	ATTACK_PATTERN attack_pattern;
 };
 
 struct SpeedControl
@@ -82,16 +75,9 @@ struct SpeedControl
 	float turn_speed = 0;
 };
 
-
-struct PlayerQuickTurn
-{
+struct PlayerQuickTurn {
 	float duration_ms;
 	float direction; // -1.f for left, 1.f for right
-};
-
-struct Wallet
-{
-	int crackers = 0;
 };
 
 struct DropsCrackers
@@ -99,12 +85,20 @@ struct DropsCrackers
 	int cracker;
 };
 
+struct Wallet
+{
+	int crackers = 0;
+};
+// Uses: Motion
+
 struct Patrolling
 {
+	
 };
 
 struct Pursuit
 {
+	
 };
 
 struct Bouncy
@@ -112,16 +106,25 @@ struct Bouncy
 	int bounces_remaining = 3;
 };
 
+// used in AISystem to request projectile creation in WorldSystem
+struct BulletRequest
+{
+	ATTACK_PATTERN attack_pattern;
+	vec2 position;
+	float angle;
+};
+
 // =================================================================================
 // Physics (Motion, collision, etc)
 // =================================================================================
 struct Motion {
-	vec2 position  = {0, 0};		// WORLD COORDINATE px
-	float angle    = 0; 			// Angle in degrees
+	vec2 position = { 0, 0 };		// WORLD COORDINATE px
+	float angle = 0; 			// Angle in RADIANS
 	vec2  velocity = { 0, 0 };		// px / s
-	vec2  scale    = { 10, 10 };	// px
+	vec2  scale = { 10, 10 };	// px
 };
 
+// Stucture to store collision information
 struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
@@ -129,9 +132,12 @@ struct Collision
 	Collision(Entity &other) { this->other = other; };
 };
 
-// =================================================================================
-// Game State
-// =================================================================================
+// Data structure for toggling debug mode
+struct Debug {
+	bool in_debug_mode = 0;
+	bool in_freeze_mode = 0;
+};
+extern Debug debugging;
 
 struct ScreenState
 {

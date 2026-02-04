@@ -141,17 +141,10 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	createBell(renderer, { 300.f, 400.f }, 80.f);
 	createBell(renderer, { 700.f, 200.f }, 80.f);
 
-	// Create a single enemy for testing
-	(void)player;
-	createEnemy(
-		renderer,
-		{ 120.f, 120.f },
-		{ 120.f, 120.f },
-		{ 520.f, 120.f },
-		70.f);
+	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
+	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
 
 	// start playing background music indefinitely
-
 	//Commented out duo to compiler errors
 	/*std::cout << "Starting music..." << std::endl;
 	Mix_PlayMusic(background_music, -1);*/
@@ -187,6 +180,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			std::cout << "[Bell] DistractionEvent expired\n";
 		}
 	}
+
+	// Create bullet entities requested by enemies in AISystem
+	for (BulletRequest req : registry.bullet_requests.components) {
+		createProjectile(renderer, req.position, req.angle, req.attack_pattern);
+	}
+	registry.bullet_requests.clear();
+
+	// Remove debug info from the last step
+	while (registry.debugComponents.entities.size() > 0)
+	    registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	return true;
 }
@@ -327,6 +330,17 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods)
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
+			vec2 mouse_pos = vec2(mouse_pos_x, mouse_pos_y);
+			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
+			vec2& player_pos = player_motion.position;
+			// https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
+			float angle = atan2(mouse_pos.y - player_pos.y, mouse_pos.x - player_pos.x);
+			createProjectile(renderer, player_pos, angle, ATTACK_PATTERN::PLAYER);
+
+
+			// std::cout << "Mouse Pos: (" << lround(mouse_pos.x) << ", " << lround(mouse_pos.y) << ")\n";
+			// std::cout << "Player Pos: (" << lround(player_pos.x) << ", " << lround(player_pos.y) << ")\n";
+			// std::cout << "Angle: " << angle << "\n";
 			mi.current_action = MouseActions::LeftClick;
 		}
 	} else {

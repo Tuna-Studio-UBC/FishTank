@@ -27,13 +27,13 @@ public:
 	ComponentContainer<Patrolling> patrolling;
 	ComponentContainer<Pursuit> pursuit;
 	ComponentContainer<Bouncy> bouncy;
+	ComponentContainer<BulletRequest> bullet_requests;
 
 	// Physics
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 
   // E TODO: REVIEW
-	ComponentContainer<Patrol> patrols;
 	ComponentContainer<DistractionTrigger> distractionTriggers;
 	ComponentContainer<DistractionEvent> distractionEvents;
 
@@ -43,25 +43,19 @@ public:
 	ComponentContainer<MouseInputState> mouseInput;
 
 	// Rendering
-	ComponentContainer<Mesh *> meshPtrs;
+	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<vec3> colors;
 	ComponentContainer<TileSet> tilesets;
 	ComponentContainer<TileMap> tilemaps;
-	
+
+	ComponentContainer<Debug> debugComponents;
+
 	// constructor that adds all containers for looping over them
 	ECSRegistry()
 	{
-		registry_list.push_back(&motions);
 		// Entity
 		registry_list.push_back(&players);
-
-    // E TODO: REVIEW
-		registry_list.push_back(&patrols);
-		registry_list.push_back(&distractionTriggers);
-		registry_list.push_back(&distractionEvents);
-
-
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&bullet);
 		registry_list.push_back(&wall);
@@ -77,6 +71,11 @@ public:
 		registry_list.push_back(&patrolling);
 		registry_list.push_back(&pursuit);
 		registry_list.push_back(&bouncy);
+		registry_list.push_back(&bullet_requests);
+
+    // E TODO: REVIEW
+		registry_list.push_back(&distractionTriggers);
+		registry_list.push_back(&distractionEvents);
 
 		// Physics
 		registry_list.push_back(&motions);
@@ -88,12 +87,13 @@ public:
 		registry_list.push_back(&mouseInput);
 
 		// Rendering
-
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&tilesets);
 		registry_list.push_back(&tilemaps);
+
+		registry_list.push_back(&debugComponents);
 	}
 
 	void clear_all_components()

@@ -1,6 +1,8 @@
 #include "world_init.hpp"
 #include "tinyECS/registry.hpp"
 #include <iostream>
+#include <configs/enemy_config.cpp>
+#include <configs/attack_pattern.cpp>
 
 // #define DEBUG_INIT_TILES
 
@@ -102,12 +104,18 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 	return entity;
 }
 
-Entity createProjectile(vec2 position, float angle)
+
+Entity createProjectile(RenderSystem* renderer, vec2 position, float angle, ATTACK_PATTERN attack_pattern)
 {
 	auto entity = Entity();
 
+	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
+
+	auto& bullet = registry.bullet.emplace(entity);
+	bullet.damage = attack_config.damage;
+
 	auto& motion = registry.motions.emplace(entity);
-	motion.velocity = vec2(PROJECTILE_SPEED, 0.f);
+	motion.velocity = vec2(attack_config.move_speed, 0.f);
 	motion.position = position;
 	motion.angle = angle;
 	motion.scale = vec2(PROJECTILE_SIZE_PX);
@@ -121,7 +129,7 @@ Entity createProjectile(vec2 position, float angle)
 	return entity;
 }
 
-Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 patrol_b, float speed_px_s)
+/*Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 patrol_b, float speed_px_s)
 {
     auto entity = Entity();
     Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
@@ -154,7 +162,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 pa
 	registry.patrols.insert(entity, patrol);
 
     return entity;
-}
+}*/
 
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px)
 {
@@ -182,4 +190,47 @@ Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_p
     registry.distractionTriggers.insert(entity, trig);
 
     return entity;
+}
+
+// Enemy creation function
+Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& config = ENEMY_CONFIGS[(int)type];
+
+	auto& enemy = registry.enemies.emplace(entity);
+	enemy.detection_radius = config.detection_radius;
+
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = vec2(0.0f, 0.0f);
+	motion.position = position;
+	motion.angle = 0.f;
+	motion.scale = vec2(50.0f, 50.0f);
+
+	registry.health.emplace(entity);
+
+	auto &fire = registry.fireControl.emplace(entity);
+	fire.attack_pattern = config.attack_pattern;
+
+	auto &speed = registry.speedControl.emplace(entity);
+	speed.move_speed = config.move_speed;
+	speed.turn_speed = config.turn_speed;
+
+	registry.dropsCrackers.emplace(entity);
+
+	if (type == ENEMY_TYPE::PATROLLER) {
+		registry.patrolling.emplace(entity);
+	}
+
+	registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		  EFFECT_ASSET_ID::EGG,
+		  GEOMETRY_BUFFER_ID::DEBUG_LINE });
+
+	return entity;
 }
