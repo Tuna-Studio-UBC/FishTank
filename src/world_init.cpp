@@ -156,7 +156,7 @@ Entity createProjectile(RenderSystem* renderer, vec2 position, float angle, ATTA
 	patrol.change_dir_min_ms = 3000.f;
 	patrol.change_dir_max_ms = 7000.f;
 	patrol.time_to_change_ms = 0.f;
-	patrol.dir = { 1.f, 0.f };              
+	patrol.dir = { 1.f, 0.f };
 	patrol.padding_px = 5.f;
 
 	registry.patrols.insert(entity, patrol);
