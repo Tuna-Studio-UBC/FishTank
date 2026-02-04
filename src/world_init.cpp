@@ -105,7 +105,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 }
 
 
-Entity createProjectile(RenderSystem* renderer, vec2 position, float angle, ATTACK_PATTERN attack_pattern)
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern)
 {
 	auto entity = Entity();
 

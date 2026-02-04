@@ -1,6 +1,6 @@
 #include "enemy_config.hpp"
-#include <common.hpp>
 #include "attack_pattern.hpp"
+#include "../common.hpp"
 
 struct EnemyConfig
 {
@@ -22,7 +22,7 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] =
     { 50.f, 90.f, 200.f, ATTACK_PATTERN::SINGLE },
 
     // Swarm
-    { 50.f, 90.f, max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE },
+    { 50.f, 90.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE },
 
     // Patroller
     { 50.f, 90.f, 0.f, ATTACK_PATTERN::SINGLE }
