@@ -3,7 +3,11 @@
 #include "world_init.hpp"
 #include <iostream>
 
-float PLAYER_QUICK_TURN_DURATION = 200; // ms
+// Player movement configurations are here for now unless we need to refactor for generalization
+float PLAYER_QUICK_TURN_DURATION = 300; // ms
+float PLAYER_MAX_SPEED = 120;
+float PLAYER_ACCELERATION = 45;
+float PLAYER_DECELERATION = 60;
 
 void debug_print_input_state(KeyboardInputState &keyboard_input) {
     std::cout << "Current:  ";
@@ -31,7 +35,6 @@ bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) {
     return keyboard_input.current_actions[a];
 }
 
-// TODO: !!! TEMP PROCESS MOVEMENT HERE, PHYSICS SYSTEM SHOULD HANDLE UPDATES
 void PlayerInputSystem::step(float elapsed_ms)
 {
     // We should have 1 and only ever 1 player input component
@@ -60,7 +63,7 @@ void PlayerInputSystem::step(float elapsed_ms)
         if (key_held(KeyboardActions::TurnRight, keyboard_input)) {
             turn_dir += 1.f;
         }
-        motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 360.f);
+        motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
     }
 
     // Process Quick Turn
@@ -75,8 +78,8 @@ void PlayerInputSystem::step(float elapsed_ms)
             relevant_ms += qt.duration_ms;
         }
 
-        float quick_turn_amount = (180.f * relevant_ms * qt.direction) / PLAYER_QUICK_TURN_DURATION;
-        motion.angle = std::fmod(motion.angle + quick_turn_amount, 360.f);
+        float quick_turn_amount = (M_PI * relevant_ms * qt.direction) / PLAYER_QUICK_TURN_DURATION;
+        motion.angle = std::fmod(motion.angle + quick_turn_amount, 2 * M_PI);
 
         if (qt.duration_ms <= 0) {
             for (Entity &e : registry.playerQuickTurn.entities) {
@@ -87,7 +90,9 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     if (key_held(KeyboardActions::MoveForward, keyboard_input))
     {
-        motion.position += direction_to_unit_vector(motion.angle) * ((sc.move_speed * elapsed_ms) / 1000.f);
+        motion.velocity.x = std::min(PLAYER_MAX_SPEED, motion.velocity.x + PLAYER_ACCELERATION * dt);
+    } else {
+        motion.velocity.x = std::max(0.f, motion.velocity.x - PLAYER_DECELERATION * dt);
     }
 
     FireControl &fc = registry.fireControl.get(playerEntity);

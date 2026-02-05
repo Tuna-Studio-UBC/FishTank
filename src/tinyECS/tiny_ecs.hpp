@@ -61,6 +61,15 @@ public:
 	Component& emplace_with_duplicates(Entity e, Args &&... args) {
 		return insert(e, Component(std::forward<Args>(args)...), false);
 	};
+	
+	// Replaces a component. If it doesn't exist, it will be emplaced
+	template <typename... Args>
+	Component &replace(Entity e, Args &&...args)
+	{
+		if (has(e))
+			remove(e);
+		return emplace(e, std::forward<Args>(args)...);
+	}
 
 	// A wrapper to return the component of an entity
 	Component& get(Entity e) {

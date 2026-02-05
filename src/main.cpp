@@ -7,10 +7,14 @@
 
 // internal
 #include "ai_system.hpp"
+#include "systems/ote_system.hpp"
+#include "systems/heal_damage_system.hpp"
+#include "systems/death_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
 #include "player_input_system.hpp"
+#include "bullet_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -19,10 +23,14 @@ int main()
 {
 	// global systems
 	AISystem	  ai_system;
+	OverTimeEffectSystem ote_system;
+	HealDamageSystem heal_damage_system;
+	DeathSystem death_system;
 	WorldSystem   world_system;
 	RenderSystem  renderer_system;
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
+	BulletSystem bullet_system;
 
 	// initialize window
 	GLFWwindow* window = world_system.create_window();
@@ -57,11 +65,15 @@ int main()
 
 		// CK: be mindful of the order of your systems and rearrange this list only if necessary
 		world_system.step(elapsed_ms);
+		ote_system.step(elapsed_ms);
+		heal_damage_system.step(elapsed_ms);
+		death_system.step(elapsed_ms);
 		ai_system.handle_detection();
 		ai_system.step(elapsed_ms);
+		bullet_system.step(elapsed_ms);
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
-		world_system.handle_collisions();
+		world_system.handle_collisions(); // CONSIDER: handling collisions involving bullets in bullet_system
 
 		renderer_system.draw();
 	}

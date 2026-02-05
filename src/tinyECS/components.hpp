@@ -6,6 +6,7 @@
 #include "../ext/stb_image/stb_image.h"
 #include "configs/attack_pattern.hpp"
 
+#pragma region Entity
 // =================================================================================
 // Entity (Represents entity, loop through list to get all)
 // =================================================================================
@@ -24,6 +25,7 @@ struct Bullet
 {
 	int damage;
 	Entity owner; // track who fired to prevent self hit
+	float lifespan_ms;
 };
 // Uses: Motion
 // Optional: Bouncy
@@ -49,6 +51,9 @@ struct Mine
 };
 // Uses: Motion
 
+#pragma endregion Entity
+
+#pragma region Behaviour
 // =================================================================================
 // Behaviour (Attached to entities, e.g. Bouncy, Health, ...)
 // =================================================================================
@@ -57,6 +62,29 @@ struct Health
 {
 	int max_hp = 100;
 	int hp = 100;
+};
+
+struct Dead
+{
+};
+
+struct Damage
+{
+	int amount;
+	Damage(int amount) { this->amount = amount; };
+};
+// Optional: OverTimeEffect
+
+struct OverTimeEffect
+{
+	float interval_ms = 1000;			 // ms
+	float duration_time_ms = 3000; // ms
+	float elapsed_time_ms = 0;		 // ms
+	OverTimeEffect(float interval_ms, float duration_time_ms)
+	{
+		this->interval_ms = interval_ms;
+		this->duration_time_ms = duration_time_ms;
+	};
 };
 
 struct FireControl
@@ -75,6 +103,12 @@ struct SpeedControl
 struct PlayerQuickTurn {
 	float duration_ms;
 	float direction; // -1.f for left, 1.f for right
+};
+
+struct Target
+{
+	Entity target;
+	Target(Entity &target) { this->target = target; };
 };
 
 struct DropsCrackers
@@ -118,14 +152,35 @@ struct BulletRequest
 	Entity owner;
 };
 
+#pragma endregion Behaviour
+
+#pragma region Pickups
+// =================================================================================
+// Pickups
+// =================================================================================
+
+struct PickUp
+{
+};
+
+struct Heal
+{
+	int amount;
+	Heal(int amount) { this->amount = amount; };
+};
+// Optional: OverTimeEffect
+
+#pragma endregion Pickups
+
+#pragma region Physics
 // =================================================================================
 // Physics (Motion, collision, etc)
 // =================================================================================
 struct Motion {
 	vec2 position = { 0, 0 };		// WORLD COORDINATE px
-	float angle = 0; 			// Angle in RADIANS
+	float angle = 0; 				// Angle in RADIANS
 	vec2  velocity = { 0, 0 };		// px / s
-	vec2  scale = { 10, 10 };	// px
+	vec2  scale = { 10, 10 };		// px
 };
 
 // Stucture to store collision information
@@ -135,6 +190,13 @@ struct Collision
 	Entity other; // the second object involved in the collision
 	Collision(Entity &other) { this->other = other; };
 };
+
+#pragma endregion Physics
+
+#pragma region Game State
+// =================================================================================
+// Game State
+// =================================================================================
 
 // Data structure for toggling debug mode
 struct Debug {
@@ -175,6 +237,9 @@ struct MouseInputState
 	MouseActions current_action = MouseActionsCount;
 };
 
+#pragma endregion Game State
+
+#pragma region Rendering
 // =================================================================================
 // Rendering
 // =================================================================================
@@ -301,3 +366,4 @@ struct RenderRequest {
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
 
+#pragma endregion Rendering

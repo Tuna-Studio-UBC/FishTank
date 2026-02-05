@@ -20,9 +20,13 @@ public:
 
 	// Behaviour
 	ComponentContainer<Health> health;
+	ComponentContainer<Dead> dead;
+	ComponentContainer<Damage> damage;
+	ComponentContainer<OverTimeEffect> overTimeEffect;
 	ComponentContainer<FireControl> fireControl;
 	ComponentContainer<SpeedControl> speedControl;
 	ComponentContainer<PlayerQuickTurn> playerQuickTurn;
+	ComponentContainer<Target> target;
 	ComponentContainer<Wallet> wallet;
 	ComponentContainer<DropsCrackers> dropsCrackers;
 	ComponentContainer<Patrolling> patrolling;
@@ -30,6 +34,11 @@ public:
 	ComponentContainer<Bouncy> bouncy;
 	ComponentContainer<BulletRequest> bullet_requests;
 	ComponentContainer<Distracted> distracted;
+
+	// Pickups
+	ComponentContainer<PickUp> pickUp;
+
+	ComponentContainer<Heal> heal;
 
 	// Physics
 	ComponentContainer<Motion> motions;
@@ -63,9 +72,13 @@ public:
 
 		// Behaviour
 		registry_list.push_back(&health);
+		registry_list.push_back(&dead);
+		registry_list.push_back(&damage);
+		registry_list.push_back(&overTimeEffect);
 		registry_list.push_back(&fireControl);
 		registry_list.push_back(&speedControl);
 		registry_list.push_back(&playerQuickTurn);
+		registry_list.push_back(&target);
 		registry_list.push_back(&wallet);
 		registry_list.push_back(&dropsCrackers);
 		registry_list.push_back(&patrolling);
@@ -73,6 +86,11 @@ public:
 		registry_list.push_back(&bouncy);
 		registry_list.push_back(&bullet_requests);
 		registry_list.push_back(&distracted);
+
+		// Pickups
+		registry_list.push_back(&pickUp);
+
+		registry_list.push_back(&heal);
 
 		// Physics
 		registry_list.push_back(&motions);
@@ -120,6 +138,10 @@ public:
 		for (ContainerInterface *reg : registry_list)
 			reg->remove(e);
 	}
+
+	template <typename Component> ComponentContainer<Component> &get();
+	template <> ComponentContainer<Damage> &get<Damage>() { return damage; }
+	template <> ComponentContainer<Heal> &get<Heal>() { return heal; }
 };
 
 extern ECSRegistry registry;

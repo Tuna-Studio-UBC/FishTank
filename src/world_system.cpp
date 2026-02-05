@@ -137,9 +137,13 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	init_tiles();
 
 	// Create player entity
-	Entity player = createPlayer(renderer, { WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
+	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f}, 80, 100);
 	createBell(renderer, { 300.f, 400.f }, 80.f);
 	createBell(renderer, { 700.f, 200.f }, 80.f);
+
+	// ! FOR TESTING ! NEED TO FIX COLOUR INDICATORS (maybe set an init colour)
+	// createOverTimeEffect<Damage>(player, 1000.f, 5000.f, 10);
+	// createOverTimeEffect<Heal>(player, 1000.f, 5000.f, 10);
 
 	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
@@ -201,46 +205,22 @@ void WorldSystem::handle_collisions() {
 	for (uint i = 0; i < collision_registry.components.size(); i++) {
 		Entity entity_a = collision_registry.entities[i];
 		Entity entity_b = collision_registry.components[i].other;
+
 		//Bullet hit player
 		if (registry.bullet.has(entity_a) && registry.players.has(entity_b)) {
 			Bullet& bullet = registry.bullet.get(entity_a);
 			if (bullet.owner != entity_b) {
-				Health& health = registry.health.get(entity_b);
-
-				health.hp -= bullet.damage;
-				std::cout << "Player hit! HP remaining: " << health.hp << std::endl;
+				registry.damage.emplace(entity_b, bullet.damage);
 				registry.remove_all_components_of(entity_a); // remove bullet
-
-				//check if player dead
-				if (health.hp <= 0) {
-					std::cout << "Game over!" << std::endl;
-					registry.remove_all_components_of(entity_b); // remove player
-					//close_window();
-				}
 			}
 		}
 		//Bullet hit enemy
 		else if (registry.bullet.has(entity_a) && registry.enemies.has(entity_b)) {
 			Bullet& bullet = registry.bullet.get(entity_a);
-			if (bullet.owner != entity_b && registry.health.has(entity_b)) {
-				Health& health = registry.health.get(entity_b);
-				health.hp -= bullet.damage;
-				std::cout << "Enemy hit! HP remaining: " << health.hp << std::endl;
+			if (bullet.owner != entity_b && registry.health.has(entity_b))
+			{
+				registry.damage.emplace(entity_b, bullet.damage);
 				registry.remove_all_components_of(entity_a); // remove bullet
-				//check if enemy dead
-					if (health.hp <= 0) {
-						std::cout << "Enemy destroyed!" << std::endl;
-						// Drop crackers
-							if (registry.dropsCrackers.has(entity_b)) {
-								DropsCrackers& drops = registry.dropsCrackers.get(entity_b);
-								Entity player = registry.players.entities[0];
-								Wallet& wallet = registry.wallet.get(player);
-								wallet.crackers += drops.cracker;
-								std::cout << "Player collected " << drops.cracker << " crackers! Total: " << wallet.crackers << std::endl;
-							}
-						registry.remove_all_components_of(entity_b); // remove enemy
-					}
-				
 			}
 		}
 	}
