@@ -77,14 +77,14 @@ struct Damage
 	int amount;
 	Damage(int amount) { this->amount = amount; };
 };
-// Optional: OverTime
+// Optional: OverTimeEffect
 
-struct OverTime
+struct OverTimeEffect
 {
 	float interval_ms = 1000;			 // ms
 	float duration_time_ms = 3000; // ms
 	float elapsed_time_ms = 0;		 // ms
-	OverTime(float interval_ms, float duration_time_ms)
+	OverTimeEffect(float interval_ms, float duration_time_ms)
 	{
 		this->interval_ms = interval_ms;
 		this->duration_time_ms = duration_time_ms;
@@ -166,7 +166,7 @@ struct Heal
 	int amount;
 	Heal(int amount) { this->amount = amount; };
 };
-// Optional: OverTime
+// Optional: OverTimeEffect
 
 #pragma endregion Pickups
 

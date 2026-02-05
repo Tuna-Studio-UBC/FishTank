@@ -7,6 +7,7 @@
 
 // internal
 #include "ai_system.hpp"
+#include "systems/ote_system.hpp"
 #include "systems/heal_damage_system.hpp"
 #include "systems/death_system.hpp"
 #include "physics_system.hpp"
@@ -22,6 +23,7 @@ int main()
 {
 	// global systems
 	AISystem	  ai_system;
+	OverTimeEffectSystem ote_system;
 	HealDamageSystem heal_damage_system;
 	DeathSystem death_system;
 	WorldSystem   world_system;
@@ -63,6 +65,7 @@ int main()
 
 		// CK: be mindful of the order of your systems and rearrange this list only if necessary
 		world_system.step(elapsed_ms);
+		ote_system.step(elapsed_ms);
 		heal_damage_system.step(elapsed_ms);
 		death_system.step(elapsed_ms);
 		ai_system.handle_detection();
