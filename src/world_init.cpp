@@ -1,8 +1,9 @@
+#include <iostream>
+
 #include "world_init.hpp"
 #include "tinyECS/registry.hpp"
-#include <iostream>
-#include <configs/enemy_config.cpp>
-#include <configs/attack_pattern.cpp>
+#include "configs/enemy_config.cpp"
+#include "configs/attack_pattern.cpp"
 
 // #define DEBUG_INIT_TILES
 
@@ -60,8 +61,13 @@ void init_tiles()
 #endif
 }
 
+#pragma region Actors
+// =================================================================================
+// Actors
+// =================================================================================
+
 // Player creation function
-Entity createPlayer(RenderSystem *renderer, vec2 position)
+Entity createPlayer(RenderSystem *renderer, vec2 position, int health, int max_health)
 {
 	auto entity = Entity();
 
@@ -74,9 +80,9 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 	w.crackers = 0; // !!! Hardcode for now
 
 	Health &h = registry.health.emplace(entity);
-	h.hp = 200; // !!! Hardcode for now
-	h.max_hp = 200; // !!! Hardcode for now
-	
+	h.hp = health;
+	h.max_hp = max_health;
+
 	FireControl &fc = registry.fireControl.emplace(entity);
 	fc.cooldown_ms = 500; // !!! Hardcode for now
 	
@@ -104,29 +110,47 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 	return entity;
 }
 
-
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner)
+Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 {
 	auto entity = Entity();
 
-	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+	registry.meshPtrs.emplace(entity, &mesh);
 
-	auto& bullet = registry.bullet.emplace(entity);
-	bullet.damage = attack_config.damage;
-	bullet.owner = owner;
+	auto &config = ENEMY_CONFIGS[(int)type];
 
-	auto& motion = registry.motions.emplace(entity);
-	motion.velocity = vec2(attack_config.move_speed, 0.f);
+	auto &enemy = registry.enemies.emplace(entity);
+	enemy.detection_radius = config.detection_radius;
+
+	auto &motion = registry.motions.emplace(entity);
+	motion.velocity = vec2(0.0f, 0.0f);
 	motion.position = position;
-	motion.angle = angle;
-	motion.scale = vec2(PROJECTILE_SIZE_PX);
+	motion.angle = 0.f;
+	motion.scale = vec2(50.0f, 50.0f);
 
-	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
+	registry.health.emplace(entity);
+
+	auto &fire = registry.fireControl.emplace(entity);
+	fire.attack_pattern = config.attack_pattern;
+
+	auto &speed = registry.speedControl.emplace(entity);
+	speed.move_speed = config.move_speed;
+	speed.turn_speed = config.turn_speed;
+
+	registry.dropsCrackers.emplace(entity);
+
+	if (type == ENEMY_TYPE::PATROLLER)
+	{
+		registry.patrolling.emplace(entity);
+	}
+
+	registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
 	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_PROJECTILE,
-		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::EGG,
+			 GEOMETRY_BUFFER_ID::DEBUG_LINE});
+
 	return entity;
 }
 
@@ -165,6 +189,22 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
     return entity;
 }*/
 
+#pragma endregion Actors
+
+#pragma region Pickups
+// =================================================================================
+// Pickups
+// =================================================================================
+
+
+
+#pragma endregion Pickups
+
+#pragma region Distractions
+// =================================================================================
+// Distractions
+// =================================================================================
+
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px)
 {
     auto entity = Entity();
@@ -193,45 +233,36 @@ Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_p
     return entity;
 }
 
-// Enemy creation function
-Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
+#pragma endregion Distractions
+
+#pragma region Hazards
+// =================================================================================
+// Hazards
+// =================================================================================
+
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner)
+{
 	auto entity = Entity();
 
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
-	registry.meshPtrs.emplace(entity, &mesh);
+	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
 
-	auto& config = ENEMY_CONFIGS[(int)type];
+	auto &bullet = registry.bullet.emplace(entity);
+	bullet.damage = attack_config.damage;
+	bullet.owner = owner;
 
-	auto& enemy = registry.enemies.emplace(entity);
-	enemy.detection_radius = config.detection_radius;
-
-	auto& motion = registry.motions.emplace(entity);
-	motion.velocity = vec2(0.0f, 0.0f);
+	auto &motion = registry.motions.emplace(entity);
+	motion.velocity = vec2(attack_config.move_speed, 0.f);
 	motion.position = position;
-	motion.angle = 0.f;
-	motion.scale = vec2(50.0f, 50.0f);
+	motion.angle = angle;
+	motion.scale = vec2(PROJECTILE_SIZE_PX);
 
-	registry.health.emplace(entity);
-
-	auto &fire = registry.fireControl.emplace(entity);
-	fire.attack_pattern = config.attack_pattern;
-
-	auto &speed = registry.speedControl.emplace(entity);
-	speed.move_speed = config.move_speed;
-	speed.turn_speed = config.turn_speed;
-
-	registry.dropsCrackers.emplace(entity);
-
-	if (type == ENEMY_TYPE::PATROLLER) {
-		registry.patrolling.emplace(entity);
-	}
-
-	registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
 	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-		  EFFECT_ASSET_ID::EGG,
-		  GEOMETRY_BUFFER_ID::DEBUG_LINE });
-
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_PROJECTILE,
+			 EFFECT_ASSET_ID::TEXTURED,
+			 GEOMETRY_BUFFER_ID::SPRITE});
 	return entity;
 }
+
+#pragma endregion Hazards
