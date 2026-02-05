@@ -186,7 +186,6 @@ struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
-	Collision(Entity &other) { this->other = other; };
 };
 
 #pragma endregion Physics
