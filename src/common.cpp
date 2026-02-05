@@ -57,11 +57,22 @@ bool gl_has_errors()
 	return true;
 }
 
-vec2 direction_to_unit_vector(float degree)
+vec2 direction_to_unit_vector(float radians)
 {
-	float radians = degree * (M_PI / 180.f);
 	vec2 unit_vec = vec2(
 		std::cos(radians),
 		std::sin(radians));
 	return unit_vec;
+}
+
+void change_vector_direction(vec2 &in_vec, float radians)
+{
+	float c = std::cos(radians);
+	float s = std::sin(radians);
+
+	float x = in_vec.x * c - in_vec.y * s;
+	float y = in_vec.x * s + in_vec.y * c;
+
+	in_vec.x = x;
+	in_vec.y = y;
 }

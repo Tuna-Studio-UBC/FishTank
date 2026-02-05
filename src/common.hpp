@@ -95,4 +95,5 @@ struct Transform {
 
 bool gl_has_errors();
 
-vec2 direction_to_unit_vector(float degree);
+vec2 direction_to_unit_vector(float radians);
+void change_vector_direction(vec2 &in_vec, float radians);

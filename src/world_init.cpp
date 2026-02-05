@@ -88,7 +88,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position, int health, int max_h
 	
 	SpeedControl &sc = registry.speedControl.emplace(entity);
 	sc.move_speed = 60; // !!! Hardcode for now
-	sc.turn_speed = 250; // !!! Hardcode for now
+	sc.turn_speed = 1.2 * M_PI; // !!! Hardcode for now
 	
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
 	registry.meshPtrs.emplace(entity, &mesh);
