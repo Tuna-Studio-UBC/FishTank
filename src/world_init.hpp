@@ -16,7 +16,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position);
 
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
 
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern);
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner);
 
 // Create enemy entity
 Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
