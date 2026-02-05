@@ -141,6 +141,10 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	createBell(renderer, { 300.f, 400.f }, 80.f);
 	createBell(renderer, { 700.f, 200.f }, 80.f);
 
+	// ! FOR TESTING ! NEED TO FIX COLOUR INDICATORS (maybe set an init colour)
+	// createOverTimeEffect<Damage>(player, 1000.f, 5000.f, 10);
+	// createOverTimeEffect<Heal>(player, 1000.f, 5000.f, 10);
+
 	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
 
