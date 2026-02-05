@@ -11,6 +11,7 @@ void BulletSystem::step(float elapsed_ms)
 		bullet.lifespan_ms -= elapsed_ms;
 
 		if (bullet.lifespan_ms <= 0) {
+			// Print to console for now
 			std::cout << "Bullet " << entity << " has been removed." << std::endl;
 			registry.remove_all_components_of(entity);
 		}
@@ -18,5 +19,5 @@ void BulletSystem::step(float elapsed_ms)
 }
 
 void BulletSystem::handle_collisions() {
-
+	// handle collisions involving bullets
 }
