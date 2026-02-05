@@ -23,6 +23,7 @@ struct Enemy
 struct Bullet
 {
 	int damage;
+	Entity owner; // track who fired to prevent self hit
 	float lifespan_ms;
 };
 // Uses: Motion
@@ -113,6 +114,7 @@ struct BulletRequest
 	ATTACK_PATTERN attack_pattern;
 	vec2 position;
 	float angle;
+	Entity owner;
 };
 
 // =================================================================================

@@ -104,7 +104,8 @@ void PlayerInputSystem::step(float elapsed_ms)
         vec2 mouse_relative_pos = mouse_input.mouse_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
         // https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
         float angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);
-        createProjectile(player_pos, angle, ATTACK_PATTERN::PLAYER);
+        Entity player = registry.players.entities[0];
+		createProjectile(player_pos, angle, ATTACK_PATTERN::PLAYER, player); // player is the owner of the bullet (hopefully)
         fc.cooldown_timer = fc.cooldown_ms;
 
         // debug_print_player_motion(motion);

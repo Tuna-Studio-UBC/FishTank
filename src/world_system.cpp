@@ -183,7 +183,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Create bullet entities requested by enemies in AISystem
 	for (BulletRequest req : registry.bullet_requests.components) {
-		createProjectile(req.position, req.angle, req.attack_pattern);
+		createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
 	}
 	registry.bullet_requests.clear();
 
@@ -197,8 +197,54 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 
-	// TODO
-	registry.collisions.clear();
+	ComponentContainer<Collision>& collision_registry = registry.collisions;
+	for (uint i = 0; i < collision_registry.components.size(); i++) {
+		Entity entity_a = collision_registry.entities[i];
+		Entity entity_b = collision_registry.components[i].other;
+		//Bullet hit player
+		if (registry.bullet.has(entity_a) && registry.players.has(entity_b)) {
+			Bullet& bullet = registry.bullet.get(entity_a);
+			if (bullet.owner != entity_b) {
+				Health& health = registry.health.get(entity_b);
+
+				health.hp -= bullet.damage;
+				std::cout << "Player hit! HP remaining: " << health.hp << std::endl;
+				registry.remove_all_components_of(entity_a); // remove bullet
+
+				//check if player dead
+				if (health.hp <= 0) {
+					std::cout << "Game over!" << std::endl;
+					registry.remove_all_components_of(entity_b); // remove player
+					//close_window();
+				}
+			}
+		}
+		//Bullet hit enemy
+		else if (registry.bullet.has(entity_a) && registry.enemies.has(entity_b)) {
+			Bullet& bullet = registry.bullet.get(entity_a);
+			if (bullet.owner != entity_b && registry.health.has(entity_b)) {
+				Health& health = registry.health.get(entity_b);
+				health.hp -= bullet.damage;
+				std::cout << "Enemy hit! HP remaining: " << health.hp << std::endl;
+				registry.remove_all_components_of(entity_a); // remove bullet
+				//check if enemy dead
+					if (health.hp <= 0) {
+						std::cout << "Enemy destroyed!" << std::endl;
+						// Drop crackers
+							if (registry.dropsCrackers.has(entity_b)) {
+								DropsCrackers& drops = registry.dropsCrackers.get(entity_b);
+								Entity player = registry.players.entities[0];
+								Wallet& wallet = registry.wallet.get(player);
+								wallet.crackers += drops.cracker;
+								std::cout << "Player collected " << drops.cracker << " crackers! Total: " << wallet.crackers << std::endl;
+							}
+						registry.remove_all_components_of(entity_b); // remove enemy
+					}
+				
+			}
+		}
+	}
+		registry.collisions.clear();
 }
 
 // Should the game be over ?
