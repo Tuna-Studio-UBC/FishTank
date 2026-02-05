@@ -16,6 +16,7 @@ public:
 	ComponentContainer<Bullet> bullet;
 	ComponentContainer<Wall> wall;
 	ComponentContainer<Mine> mine;
+	ComponentContainer<Bell> bells;
 
 	// Behaviour
 	ComponentContainer<Health> health;
@@ -28,14 +29,12 @@ public:
 	ComponentContainer<Pursuit> pursuit;
 	ComponentContainer<Bouncy> bouncy;
 	ComponentContainer<BulletRequest> bullet_requests;
+	ComponentContainer<Distracted> distracted;
 
 	// Physics
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 
-  // E TODO: REVIEW
-	ComponentContainer<DistractionTrigger> distractionTriggers;
-	ComponentContainer<DistractionEvent> distractionEvents;
 
 	// Game State
 	ComponentContainer<ScreenState> screenStates;
@@ -60,6 +59,7 @@ public:
 		registry_list.push_back(&bullet);
 		registry_list.push_back(&wall);
 		registry_list.push_back(&mine);
+		registry_list.push_back(&bells);
 
 		// Behaviour
 		registry_list.push_back(&health);
@@ -72,10 +72,7 @@ public:
 		registry_list.push_back(&pursuit);
 		registry_list.push_back(&bouncy);
 		registry_list.push_back(&bullet_requests);
-
-    // E TODO: REVIEW
-		registry_list.push_back(&distractionTriggers);
-		registry_list.push_back(&distractionEvents);
+		registry_list.push_back(&distracted);
 
 		// Physics
 		registry_list.push_back(&motions);

@@ -65,3 +65,13 @@ vec2 direction_to_unit_vector(float degree)
 		std::sin(radians));
 	return unit_vec;
 }
+
+bool entity_in_radius(vec2 dist, vec2 target_scale, float radius) {
+	float true_radius =
+		radius + std::max(target_scale.x,
+			target_scale.y);
+
+	float dist2 = dist.x * dist.x + dist.y * dist.y;
+
+	return dist2 <= true_radius * true_radius;
+}

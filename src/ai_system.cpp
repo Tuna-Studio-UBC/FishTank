@@ -11,18 +11,6 @@ static vec2 direction_vector(vec2 v, vec2 fallback)
     return v / len;
 }
 
-static bool player_in_radius(vec2 player_pos, Motion enemy_motion, float radius) {
-	vec2 d = player_pos - enemy_motion.position;
-
-	float true_radius =
-		radius + std::max(enemy_motion.scale.x,
-			enemy_motion.scale.y);
-
-	float dist2 = d.x * d.x + d.y * d.y;
-
-	return dist2 <= true_radius * true_radius;
-}
-
 void adjust_angle(float target_angle, Motion &motion, float max_turn) {
 	float current_angle = motion.angle;
 	float diff = target_angle - current_angle;
@@ -105,18 +93,31 @@ void AISystem::step(float elapsed_ms)
 
 	ComponentContainer<Pursuit>& pursuit_container = registry.pursuit;
 	Entity player = registry.players.entities[0];
-	vec2 player_pos = registry.motions.get(player).position;
+	vec2 target_pos = registry.motions.get(player).position;
 
 	for (uint i = 0; i < pursuit_container.components.size(); i++)
 	{
 		Entity enemy_i = pursuit_container.entities[i];
+
+		if (registry.distracted.has(enemy_i)) {
+			Distracted& distracted = registry.distracted.get(enemy_i);
+			distracted.remaining_ms -= elapsed_ms;
+
+			if (distracted.remaining_ms > 0) {
+				target_pos = registry.motions.get(distracted.bell).position;
+			}
+			else {
+				registry.distracted.remove(enemy_i);
+			}
+		}
+
 		Motion  &motion_i = registry.motions.get(enemy_i);
 		vec2 position = motion_i.position;
 		float angle = motion_i.angle;
 		SpeedControl &speed = registry.speedControl.get(enemy_i);
 		
 		// TODO: not hardcode stopping distance
-		if (player_in_radius(player_pos, motion_i, 100.f)) {
+		if (entity_in_radius(target_pos - motion_i.position, motion_i.scale, 100.f)) {
 			motion_i.velocity = vec2(0.f,0.f);
 		}
 		else {
@@ -124,7 +125,7 @@ void AISystem::step(float elapsed_ms)
 		}
 
 		// Adjust angle to track player
-		float target_angle = atan2(player_pos.y - position.y, player_pos.x - position.x);
+		float target_angle = atan2(target_pos.y - position.y, target_pos.x - position.x);
 		float max_turn = speed.turn_speed * (elapsed_ms / 1000.f);
 		adjust_angle(target_angle, motion_i, max_turn);
 		
@@ -169,8 +170,10 @@ void AISystem::handle_detection() {
 		float radius_i = enemy_container.components[i].detection_radius;
 		Entity enemy_i = enemy_container.entities[i];
 		Motion &motion_i = registry.motions.get(enemy_i);
+
+		bool in_radius = entity_in_radius(player_pos - motion_i.position, motion_i.scale, radius_i);
     
-		if (!registry.pursuit.has(enemy_i) && player_in_radius(player_pos, motion_i, radius_i)) {
+		if (!registry.pursuit.has(enemy_i) && in_radius) {
 			registry.pursuit.emplace(enemy_i);
 			float speed = registry.speedControl.get(enemy_i).move_speed;
 			motion_i.velocity = vec2(speed, 0.f);
@@ -178,7 +181,7 @@ void AISystem::handle_detection() {
 			// log to console for now
 			std::cout << "player detected by enemy " << enemy_i.id() << std::endl;
 		}
-		if (registry.pursuit.has(enemy_i) && !player_in_radius(player_pos, motion_i, radius_i)) {
+		if (registry.pursuit.has(enemy_i) && !in_radius) {
 			registry.pursuit.remove(enemy_i);
 			motion_i.velocity = vec2(0.f, 0.f);
 
