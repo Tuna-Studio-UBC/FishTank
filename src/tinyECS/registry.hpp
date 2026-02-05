@@ -19,15 +19,24 @@ public:
 
 	// Behaviour
 	ComponentContainer<Health> health;
+	ComponentContainer<Dead> dead;
+	ComponentContainer<Damage> damage;
+	ComponentContainer<OverTime> overTime;
 	ComponentContainer<FireControl> fireControl;
 	ComponentContainer<SpeedControl> speedControl;
 	ComponentContainer<PlayerQuickTurn> playerQuickTurn;
+	ComponentContainer<Target> target;
 	ComponentContainer<Wallet> wallet;
 	ComponentContainer<DropsCrackers> dropsCrackers;
 	ComponentContainer<Patrolling> patrolling;
 	ComponentContainer<Pursuit> pursuit;
 	ComponentContainer<Bouncy> bouncy;
 	ComponentContainer<BulletRequest> bullet_requests;
+
+	// Pickups
+	ComponentContainer<PickUp> pickUp;
+
+	ComponentContainer<Heal> heal;
 
 	// Physics
 	ComponentContainer<Motion> motions;
@@ -63,9 +72,13 @@ public:
 
 		// Behaviour
 		registry_list.push_back(&health);
+		registry_list.push_back(&dead);
+		registry_list.push_back(&damage);
+		registry_list.push_back(&overTime);
 		registry_list.push_back(&fireControl);
 		registry_list.push_back(&speedControl);
 		registry_list.push_back(&playerQuickTurn);
+		registry_list.push_back(&target);
 		registry_list.push_back(&wallet);
 		registry_list.push_back(&dropsCrackers);
 		registry_list.push_back(&patrolling);
@@ -73,9 +86,14 @@ public:
 		registry_list.push_back(&bouncy);
 		registry_list.push_back(&bullet_requests);
 
-    // E TODO: REVIEW
+		// E TODO: REVIEW
 		registry_list.push_back(&distractionTriggers);
 		registry_list.push_back(&distractionEvents);
+
+		// Pickups
+		registry_list.push_back(&pickUp);
+
+		registry_list.push_back(&heal);
 
 		// Physics
 		registry_list.push_back(&motions);

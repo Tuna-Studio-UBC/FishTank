@@ -12,11 +12,9 @@
 void init_tiles();
 
 // Create player entity
-Entity createPlayer(RenderSystem *renderer, vec2 position);
+Entity createPlayer(RenderSystem *renderer, vec2 position, int health, int max_health);
+Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
 
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
 
 Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner);
-
-// Create enemy entity
-Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
