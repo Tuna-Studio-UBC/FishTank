@@ -23,9 +23,9 @@ static bool player_in_radius(vec2 player_pos, Motion enemy_motion, float radius)
 	return dist2 <= true_radius * true_radius;
 }
 
-void adjust_angle(float target_angle, Motion &motion, float max_turn) {
+void adjust_angle(float target_angle_radians, Motion &motion, float max_turn) {
 	float current_angle = motion.angle;
-	float diff = target_angle - current_angle;
+	float diff = target_angle_radians - current_angle;
 	while (diff > M_PI) {
 		diff -= 2 * M_PI;
 	}
@@ -124,9 +124,9 @@ void AISystem::step(float elapsed_ms)
 		}
 
 		// Adjust angle to track player
-		float target_angle = atan2(player_pos.y - position.y, player_pos.x - position.x);
+		float target_angle_radians = atan2(player_pos.y - position.y, player_pos.x - position.x);
 		float max_turn = speed.turn_speed * (elapsed_ms / 1000.f);
-		adjust_angle(target_angle, motion_i, max_turn);
+		adjust_angle(target_angle_radians, motion_i, max_turn);
 		
 		// Firing logic
 		FireControl& fire = registry.fireControl.get(enemy_i);
@@ -141,7 +141,7 @@ void AISystem::step(float elapsed_ms)
 					req.position = position;
 					req.angle = angle;
 					req.owner = enemy_i; //this is new, to prevent self hit
-					angle += 45.f;
+					angle += M_PI / 4.f;
 				}
 			}
 			else {
