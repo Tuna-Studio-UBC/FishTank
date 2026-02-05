@@ -249,6 +249,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	auto &bullet = registry.bullet.emplace(entity);
 	bullet.damage = attack_config.damage;
 	bullet.owner = owner;
+  bullet.lifespan_ms = attack_config.lifespan_ms;
 
 	auto &motion = registry.motions.emplace(entity);
 	motion.velocity = vec2(attack_config.move_speed, 0.f);

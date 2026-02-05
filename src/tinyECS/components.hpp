@@ -25,6 +25,7 @@ struct Bullet
 {
 	int damage;
 	Entity owner; // track who fired to prevent self hit
+	float lifespan_ms;
 };
 // Uses: Motion
 // Optional: Bouncy
