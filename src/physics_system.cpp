@@ -92,8 +92,8 @@ void PhysicsSystem::step(float elapsed_ms)
 			{
 				Entity entity_j = motion_container.entities[j];
 				// Create a collisions event
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i); // uncommented, to have both entities know about the collision
+				registry.collisions.insert(entity_i, {entity_j}, false);
+				registry.collisions.insert(entity_j, {entity_i}, false); 
 			}
 		}
 	}
