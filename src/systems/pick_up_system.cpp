@@ -10,7 +10,7 @@ void PickUpSystem::step(float elapsed_ms)
     if (registry.motions.has(e))
     {
       Motion &motion = registry.motions.get(e);
-      if (entity_in_radius(player_pos, motion, 0.f))
+      if (entity_in_radius(player_pos - motion.position, motion.scale, 0.f))
       {
         on_pickup(e, player);
       }
