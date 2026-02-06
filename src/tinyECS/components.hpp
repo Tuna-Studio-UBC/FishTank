@@ -49,10 +49,8 @@ struct Wall
 	vec2 position;
 };
 
-// used for Entities that cause damage
 struct Mine
 {
-	int damage;
 };
 // Uses: Motion
 
@@ -71,6 +69,12 @@ struct Health
 
 struct Dead
 {
+};
+
+struct Hazard
+{
+	int damage;
+	Hazard(int damage) { this->damage = damage; };
 };
 
 struct Damage

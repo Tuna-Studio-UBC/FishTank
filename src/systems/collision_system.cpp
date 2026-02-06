@@ -11,6 +11,7 @@ void CollisionSystem::step(float elapsed_ms)
     Entity entity_b = collision_registry.components[i].other;
 
     handle_bullets(entity_a, entity_b);
+    handle_hazards(entity_a, entity_b);
   }
 
   // Clear all collisions for the current step
@@ -44,5 +45,23 @@ void CollisionSystem::handle_bullets(Entity entity_a, Entity entity_b)
   {
     registry.remove_all_components_of(entity_a); // remove bullet
     registry.remove_all_components_of(entity_b); // remove bullet
+  }
+}
+
+void CollisionSystem::handle_hazards(Entity entity_a, Entity entity_b)
+{
+  // Hazard hit player
+  if (registry.hazard.has(entity_a) && registry.players.has(entity_b))
+  {
+    Hazard &hazard = registry.hazard.get(entity_a);
+    registry.damage.emplace(entity_b, hazard.damage);
+    registry.remove_all_components_of(entity_a);
+  }
+  // Hazard hit enemy
+  else if (registry.hazard.has(entity_a) && registry.enemies.has(entity_b))
+  {
+    Hazard &hazard = registry.hazard.get(entity_a);
+    registry.damage.emplace(entity_b, hazard.damage);
+    registry.remove_all_components_of(entity_a);
   }
 }

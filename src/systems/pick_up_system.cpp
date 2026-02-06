@@ -44,11 +44,6 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player)
       break;
     }
   }
-  else if (registry.mine.has(pickUp))
-  {
-    std::cout << "Player stepped on mine" << std::endl;
-    registry.damage.emplace(player, 50);
-  }
 
   registry.remove_all_components_of(pickUp);
 }

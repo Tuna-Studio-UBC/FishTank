@@ -16,4 +16,5 @@ public:
 
 private:
   void handle_bullets(Entity entity_a, Entity entity_b);
+  void handle_hazards(Entity entity_a, Entity entity_b);
 };

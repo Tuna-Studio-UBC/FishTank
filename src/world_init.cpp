@@ -293,4 +293,30 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	return entity;
 }
 
+Entity createMine(RenderSystem *renderer, vec2 position, int base_dmg)
+{
+	auto entity = Entity();
+
+	registry.mine.emplace(entity);
+	registry.hazard.emplace(entity, base_dmg);
+
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto &motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.velocity = {0.f, 0.f};
+	motion.angle = 0.f;
+	motion.scale = {40.f, 40.f};
+
+	registry.colors.emplace(entity, vec3(0.9f, 0.4f, 0.4f));
+	registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::EGG,
+			 GEOMETRY_BUFFER_ID::EGG});
+
+	return entity;
+}
+
 #pragma endregion Hazards

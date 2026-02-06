@@ -20,6 +20,7 @@ public:
 	// Behaviour
 	ComponentContainer<Health> health;
 	ComponentContainer<Dead> dead;
+	ComponentContainer<Hazard> hazard;
 	ComponentContainer<Damage> damage;
 	ComponentContainer<OverTimeEffect> overTimeEffect;
 	ComponentContainer<FireControl> fireControl;
@@ -76,6 +77,7 @@ public:
 		// Behaviour
 		registry_list.push_back(&health);
 		registry_list.push_back(&dead);
+		registry_list.push_back(&hazard);
 		registry_list.push_back(&damage);
 		registry_list.push_back(&overTimeEffect);
 		registry_list.push_back(&fireControl);
