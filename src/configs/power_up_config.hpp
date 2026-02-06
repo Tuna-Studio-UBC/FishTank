@@ -1,0 +1,10 @@
+#pragma once
+
+enum class POWER_UP_TYPE
+{
+  HEAL = 0,
+  SPEED_MULTIPLIER = HEAL + 1,
+  DAMAGE_MULTIPLIER = SPEED_MULTIPLIER + 1,
+  POWER_UP_TYPE_COUNT = DAMAGE_MULTIPLIER + 1
+};
+const int power_up_count = (int)POWER_UP_TYPE::POWER_UP_TYPE_COUNT;

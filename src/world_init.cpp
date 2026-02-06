@@ -196,7 +196,33 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 // Pickups
 // =================================================================================
 
+Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type)
+{
+	auto entity = Entity();
 
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto &motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.velocity = {0.f, 0.f};
+	motion.angle = 0.f;
+	motion.scale = {40.f, 40.f};
+
+	auto &config = POWER_UP_CONFIGS[(int)type];
+
+	registry.colors.emplace(entity, config.colour);
+	registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::EGG,
+			 GEOMETRY_BUFFER_ID::EGG});
+
+	registry.pickUp.emplace(entity);
+	registry.powerUp.emplace(entity, type);
+
+	return entity;
+}
 
 #pragma endregion Pickups
 
@@ -242,7 +268,7 @@ Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_p
 Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner)
 {
 	auto entity = Entity();
-
+	
 	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
 
 	auto &bullet = registry.bullet.emplace(entity);
@@ -251,7 +277,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
 	registry.overTimeEffect.emplace(entity, attack_config.lifespan_ms, attack_config.lifespan_ms);
 
-	auto &motion = registry.motions.emplace(entity);
+	Motion &motion = registry.motions.emplace(entity);
 	motion.velocity = vec2(attack_config.move_speed, 0.f);
 	motion.position = position;
 	motion.angle = angle;
@@ -261,9 +287,23 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	registry.renderRequests.insert(
 			entity,
 			{TEXTURE_ASSET_ID::TEXTURE_PROJECTILE,
-			 EFFECT_ASSET_ID::TEXTURED,
-			 GEOMETRY_BUFFER_ID::SPRITE});
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	
 	return entity;
 }
 
 #pragma endregion Hazards
+
+// =================================================================================
+// Effects
+// =================================================================================
+template <typename Component, typename... Args>
+Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, Args &&...args)
+{
+	auto ot_entity = Entity();
+	registry.get<Component>().emplace(ot_entity, std::forward<Args>(args)...);
+	registry.overTimeEffect.emplace(ot_entity, interval_ms, duration_ms);
+	registry.target.emplace(ot_entity, target_entity);
+	return ot_entity;
+}
