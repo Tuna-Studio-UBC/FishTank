@@ -11,14 +11,14 @@ static vec2 direction_vector(vec2 v, vec2 fallback)
     return v / len;
 }
 
-float adjust_angle(Entity enemy, vec2 target_pos, float elapsed_ms) {
+float adjust_angle(Entity enemy, vec2 target_pos, float elapsed_ms, float stopping_dist) {
 	Motion& motion = registry.motions.get(enemy);
 	vec2 position = motion.position;
 	float angle = motion.angle;
 	SpeedControl& speed = registry.speedControl.get(enemy);
 
 	// TODO: not hardcode stopping distance
-	if (entity_in_radius(target_pos - motion.position, motion.scale, 100.f)) {
+	if (entity_in_radius(target_pos - motion.position, motion.scale, stopping_dist)) {
 		motion.velocity = vec2(0.f, 0.f);
 	}
 	else {
@@ -121,7 +121,7 @@ void AISystem::step(float elapsed_ms)
 
 		if (distracted.remaining_ms > 0) {
 			target_pos = registry.motions.get(distracted.bell).position;
-			adjust_angle(enemy_i, target_pos, elapsed_ms);
+			adjust_angle(enemy_i, target_pos, elapsed_ms, 50.f);
 		}
 		else {
 			distracted_container.remove(enemy_i);
@@ -135,7 +135,7 @@ void AISystem::step(float elapsed_ms)
 		Entity enemy_i = pursuit_container.entities[i];
 		target_pos = registry.motions.get(player).position;
 		
-		float angle = adjust_angle(enemy_i, target_pos, elapsed_ms);
+		float angle = adjust_angle(enemy_i, target_pos, elapsed_ms, 100.f);
 		
 		// Firing logic
 		FireControl& fire = registry.fireControl.get(enemy_i);
