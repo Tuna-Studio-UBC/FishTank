@@ -203,35 +203,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	return true;
 }
 
-// Compute collisions between entities
-void WorldSystem::handle_collisions() {
-
-	ComponentContainer<Collision>& collision_registry = registry.collisions;
-	for (uint i = 0; i < collision_registry.components.size(); i++) {
-		Entity entity_a = collision_registry.entities[i];
-		Entity entity_b = collision_registry.components[i].other;
-
-		//Bullet hit player
-		if (registry.bullet.has(entity_a) && registry.players.has(entity_b)) {
-			Bullet& bullet = registry.bullet.get(entity_a);
-			if (bullet.owner != entity_b) {
-				registry.damage.emplace(entity_b, bullet.damage);
-				registry.remove_all_components_of(entity_a); // remove bullet
-			}
-		}
-		//Bullet hit enemy
-		else if (registry.bullet.has(entity_a) && registry.enemies.has(entity_b)) {
-			Bullet& bullet = registry.bullet.get(entity_a);
-			if (bullet.owner != entity_b && registry.health.has(entity_b))
-			{
-				registry.damage.emplace(entity_b, bullet.damage);
-				registry.remove_all_components_of(entity_a); // remove bullet
-			}
-		}
-	}
-		registry.collisions.clear();
-}
-
 // Should the game be over ?
 bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));

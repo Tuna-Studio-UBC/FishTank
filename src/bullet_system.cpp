@@ -17,7 +17,3 @@ void BulletSystem::step(float elapsed_ms)
 		}
 	}
 }
-
-void BulletSystem::handle_collisions() {
-	// handle collisions involving bullets
-}
