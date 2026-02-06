@@ -22,6 +22,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
 
+Entity createWall(const vec2& position, const vec2& scale = vec2(TILE_SIZE_PX));
+
 // Component can be: DamageMultiplier, SpeedMultiplier
 template <typename Component, typename... Args>
 Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&...args)

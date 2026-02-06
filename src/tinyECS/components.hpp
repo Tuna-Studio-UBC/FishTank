@@ -45,8 +45,8 @@ struct DistractionEvent
 
 struct Wall
 {
-	vec2 position;
 };
+// Uses: Motion
 
 // used for Entities that cause damage
 struct Mine

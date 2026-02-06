@@ -40,6 +40,21 @@ void print_tileset(TileSet &tileset)
 }
 #endif
 
+void generate_collision(TileMap& tilemap, TileSet& tileset)
+{
+	auto& tileset_collision_info = tileset.collisions;
+	for (int y = 1; y < tilemap.height - 1; y++)
+	{
+		for (int x = 1; x < tilemap.width - 1; x++)
+		{
+			if (tileset_collision_info[tilemap.tile_ids[GET_2D_POS(x, y, tilemap.width)] - 1])
+			{
+				createWall(vec2(x * TILE_SIZE_PX, y * TILE_SIZE_PX));
+			}
+		}
+	}
+}
+
 void init_tiles()
 {
 	Entity entity = Entity();
@@ -294,3 +309,19 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 }
 
 #pragma endregion Hazards
+
+#pragma region StaticObjects
+
+Entity createWall(const vec2& position, const vec2& scale)
+{
+	auto entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.wall.emplace(entity);
+
+	return entity;
+}
+#pragma endregion StaticObjects
