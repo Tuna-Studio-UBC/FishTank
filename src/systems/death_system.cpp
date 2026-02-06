@@ -40,6 +40,7 @@ void DeathSystem::step(float elapsed_ms)
           }
 
           registry.remove_all_components_of(e);
+          registry.progress.components[0].remaining_enemies -= 1;
         }
       }
     }

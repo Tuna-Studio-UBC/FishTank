@@ -29,6 +29,8 @@ public:
 	// call to close the window
 	void close_window();
 
+	void start_wave(Progress &progress);
+
 	// starts the game
 	void init(RenderSystem* renderer);
 

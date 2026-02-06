@@ -50,6 +50,7 @@ public:
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<KeyboardInputState> keyboardInput;
 	ComponentContainer<MouseInputState> mouseInput;
+	ComponentContainer<Progress> progress;
 
 	// Rendering
 	ComponentContainer<Mesh*> meshPtrs;
@@ -103,6 +104,7 @@ public:
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&keyboardInput);
 		registry_list.push_back(&mouseInput);
+		registry_list.push_back(&progress);
 
 		// Rendering
 		registry_list.push_back(&meshPtrs);

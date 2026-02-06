@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "physics_system.hpp"
+#include "configs/wave_config.cpp"
 
 // create the world
 WorldSystem::WorldSystem()
@@ -130,6 +131,20 @@ bool WorldSystem::start_and_load_sounds() {
 	return true;
 }
 
+void WorldSystem::start_wave(Progress &progress)
+{
+	if (WAVE_CONFIGS.size() <= progress.wave) {
+		return;
+	}
+	auto config = WAVE_CONFIGS[progress.wave];
+	progress.remaining_enemies = config.enemies.size();
+	std::cout << progress.remaining_enemies << std::endl;
+
+	for (auto enemy : config.enemies) {
+		createEnemy(renderer, enemy.position, enemy.type);
+	}
+}
+
 void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	this->renderer = renderer_arg;
@@ -138,6 +153,12 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	// Create player entity
 	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f}, 80, 100);
+	
+	auto e = Entity();
+	auto &progress = registry.progress.emplace(e);
+	start_wave(progress);
+
+	/* Uncomment to use old testing entities
 	createBell(renderer, { 300.f, 400.f }, 80.f);
 	createBell(renderer, { 700.f, 200.f }, 80.f);
 
@@ -147,7 +168,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
-
+	*/
 	// start playing background music indefinitely
 	//Commented out duo to compiler errors
 	/*std::cout << "Starting music..." << std::endl;
@@ -161,6 +182,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	std::stringstream title_ss;
 	title_ss << GAME_NAME;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
+
+	Progress& progress = registry.progress.components[0];
+	if (progress.remaining_enemies == 0) {
+		progress.wave += 1;
+		start_wave(progress);
+	}
 
 	for (Entity b : registry.distractionTriggers.entities)
 	{

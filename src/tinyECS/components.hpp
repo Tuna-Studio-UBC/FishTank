@@ -235,6 +235,13 @@ struct MouseInputState
 	MouseActions current_action = MouseActionsCount;
 };
 
+struct Progress
+{
+	int wave = 0;
+	int level = 1;
+	int remaining_enemies = -1;
+};
+
 #pragma endregion Game State
 
 #pragma region Rendering
