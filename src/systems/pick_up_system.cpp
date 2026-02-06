@@ -10,7 +10,7 @@ void PickUpSystem::step(float elapsed_ms)
     if (registry.motions.has(e))
     {
       Motion &motion = registry.motions.get(e);
-      if (player_in_radius(player_pos, motion, 0.f))
+      if (entity_in_radius(player_pos, motion, 0.f))
       {
         on_pickup(e, player);
       }
@@ -51,14 +51,4 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player)
   }
 
   registry.remove_all_components_of(pickUp);
-}
-
-// Taken from ai_system
-// Probably good enough instead of using AABB collision in the physics system
-bool PickUpSystem::player_in_radius(vec2 player_pos, Motion &other_motion, float radius)
-{
-  vec2 d = player_pos - other_motion.position;
-  float true_radius = radius + std::max(other_motion.scale.x, other_motion.scale.y);
-  float dist2 = d.x * d.x + d.y * d.y;
-  return dist2 <= true_radius * true_radius;
 }
