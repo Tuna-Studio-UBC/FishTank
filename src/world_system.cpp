@@ -203,6 +203,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	return true;
 }
 
+void WorldSystem::handle_expiration(float elapsed_ms)
+{
+	for (Entity e : registry.expiration.entities)
+	{
+		Expiration &exp = registry.expiration.get(e);
+		exp.lifetime_ms -= elapsed_ms;
+
+		if (exp.lifetime_ms <= 0)
+		{
+			std::cout << "Entity " << e.id() << " has expired" << std::endl;
+			registry.remove_all_components_of(e);
+		}
+	}
+}
+
 // Should the game be over ?
 bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));
