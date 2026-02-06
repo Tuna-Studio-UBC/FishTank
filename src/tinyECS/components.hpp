@@ -5,6 +5,7 @@
 #include <array>
 #include "../ext/stb_image/stb_image.h"
 #include "configs/attack_pattern.hpp"
+#include "configs/power_up_config.cpp"
 
 #pragma region Entity
 // =================================================================================
@@ -161,6 +162,12 @@ struct PickUp
 {
 };
 
+struct PowerUp
+{
+	POWER_UP_TYPE type;
+	PowerUp(POWER_UP_TYPE type) { this->type = type; };
+};
+
 struct Heal
 {
 	int amount;
@@ -168,12 +175,25 @@ struct Heal
 };
 // Optional: OverTimeEffect
 
+struct SpeedMultiplier
+{
+	float multiplier;
+	SpeedMultiplier(float multiplier) { this->multiplier = multiplier; };
+};
+
+struct DamageMultiplier
+{
+	float multiplier;
+	DamageMultiplier(float multiplier) { this->multiplier = multiplier; };
+};
+
 #pragma endregion Pickups
 
 #pragma region Physics
 // =================================================================================
 // Physics (Motion, collision, etc)
 // =================================================================================
+
 struct Motion {
 	vec2 position = { 0, 0 };		// WORLD COORDINATE px
 	float angle = 0; 				// Angle in RADIANS
