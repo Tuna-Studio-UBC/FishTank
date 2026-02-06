@@ -25,9 +25,8 @@ struct Bullet
 {
 	int damage;
 	Entity owner; // track who fired to prevent self hit
-	float lifespan_ms;
 };
-// Uses: Motion
+// Uses: Motion, OverTimeEffect
 // Optional: Bouncy
 
 struct Bell
@@ -35,8 +34,8 @@ struct Bell
     float interact_radius_px = 80.f; // distance to e
 	float distraction_radius = 200.f;
     float cooldown_ms = 800.f;
-    float cooldown_remaining_ms = 0.f;
-	float distraction_ms = 2000.f;
+    float cooldown_timer = 0.f;
+	float distraction_ms = 5000.f;
 };
 
 struct Wall

@@ -11,8 +11,24 @@ static vec2 direction_vector(vec2 v, vec2 fallback)
     return v / len;
 }
 
+float adjust_angle(Entity enemy, vec2 target_pos, float elapsed_ms) {
+	Motion& motion = registry.motions.get(enemy);
+	vec2 position = motion.position;
+	float angle = motion.angle;
+	SpeedControl& speed = registry.speedControl.get(enemy);
 
-void adjust_angle(float target_angle_radians, Motion &motion, float max_turn) {
+	// TODO: not hardcode stopping distance
+	if (entity_in_radius(target_pos - motion.position, motion.scale, 100.f)) {
+		motion.velocity = vec2(0.f, 0.f);
+	}
+	else {
+		motion.velocity = vec2(speed.move_speed, 0.f);
+	}
+
+	// Adjust angle to track target
+	float target_angle_radians = atan2(target_pos.y - position.y, target_pos.x - position.x);
+	float max_turn = speed.turn_speed * (elapsed_ms / 1000.f);
+
 	float current_angle = motion.angle;
 	float diff = target_angle_radians - current_angle;
 	while (diff > M_PI) {
@@ -33,6 +49,7 @@ void adjust_angle(float target_angle_radians, Motion &motion, float max_turn) {
 		current_angle += 2 * M_PI;
 	}
 	motion.angle = current_angle;
+	return motion.angle;
 }
 
 // COMMENTED OUT FOR NOW, unsure if we will keep patrolling yet
@@ -91,57 +108,48 @@ void AISystem::step(float elapsed_ms)
 {
 	// COMMENTED OUT FOR NOW, unsure if we will keep patrolling yet
 	// patrol(elapsed_ms);
+	ComponentContainer<Distracted>& distracted_container = registry.distracted;
+	Entity player = registry.players.entities[0];
+	vec2 target_pos;
+
+	for (uint i = 0; i < distracted_container.components.size(); i++)
+	{
+		Entity enemy_i = distracted_container.entities[i];
+		Distracted& distracted = distracted_container.get(enemy_i);
+		distracted.remaining_ms -= elapsed_ms;
+		float distracted_remaining = distracted.remaining_ms;
+
+		if (distracted.remaining_ms > 0) {
+			target_pos = registry.motions.get(distracted.bell).position;
+			adjust_angle(enemy_i, target_pos, elapsed_ms);
+		}
+		else {
+			distracted_container.remove(enemy_i);
+		}
+	}
 
 	ComponentContainer<Pursuit>& pursuit_container = registry.pursuit;
-	Entity player = registry.players.entities[0];
-	vec2 target_pos = registry.motions.get(player).position;
 
 	for (uint i = 0; i < pursuit_container.components.size(); i++)
 	{
 		Entity enemy_i = pursuit_container.entities[i];
-
-		if (registry.distracted.has(enemy_i)) {
-			Distracted& distracted = registry.distracted.get(enemy_i);
-			distracted.remaining_ms -= elapsed_ms;
-
-			if (distracted.remaining_ms > 0) {
-				target_pos = registry.motions.get(distracted.bell).position;
-			}
-			else {
-				registry.distracted.remove(enemy_i);
-			}
-		}
-
-		Motion  &motion_i = registry.motions.get(enemy_i);
-		vec2 position = motion_i.position;
-		float angle = motion_i.angle;
-		SpeedControl &speed = registry.speedControl.get(enemy_i);
+		target_pos = registry.motions.get(player).position;
 		
-		// TODO: not hardcode stopping distance
-		if (entity_in_radius(target_pos - motion_i.position, motion_i.scale, 100.f)) {
-			motion_i.velocity = vec2(0.f,0.f);
-		}
-		else {
-			motion_i.velocity = vec2(speed.move_speed, 0.f);
-		}
-
-		// Adjust angle to track player
-		float target_angle_radians = atan2(target_pos.y - position.y, target_pos.x - position.x);
-		float max_turn = speed.turn_speed * (elapsed_ms / 1000.f);
-		adjust_angle(target_angle_radians, motion_i, max_turn);
+		float angle = adjust_angle(enemy_i, target_pos, elapsed_ms);
 		
 		// Firing logic
 		FireControl& fire = registry.fireControl.get(enemy_i);
 		fire.cooldown_timer += elapsed_ms;
+		vec2 position = registry.motions.get(enemy_i).position;
 
 		if (fire.cooldown_timer >= fire.cooldown_ms) {
 			if (fire.attack_pattern == ATTACK_PATTERN::URCHIN) {
-				float angle = 0.f;
+				float incAngle = 0.f;
 				for (int i = 0; i < 6; i++) {
 					auto& req = registry.bullet_requests.emplace_with_duplicates(enemy_i);
 					req.attack_pattern = fire.attack_pattern;
 					req.position = position;
-					req.angle = angle;
+					req.angle = incAngle;
 					req.owner = enemy_i; //this is new, to prevent self hit
 					angle += M_PI / 4.f;
 				}
@@ -152,7 +160,7 @@ void AISystem::step(float elapsed_ms)
 					{
 						fire.attack_pattern,
 						position,
-						motion_i.angle,
+						angle,
 						enemy_i // to prevent self hit
 					});
 			}
@@ -174,7 +182,7 @@ void AISystem::handle_detection() {
 
 		bool in_radius = entity_in_radius(player_pos - motion_i.position, motion_i.scale, radius_i);
     
-		if (!registry.pursuit.has(enemy_i) && in_radius) {
+		if (!registry.pursuit.has(enemy_i) && in_radius && !registry.distracted.has(enemy_i)) {
 			registry.pursuit.emplace(enemy_i);
 			float speed = registry.speedControl.get(enemy_i).move_speed;
 			motion_i.velocity = vec2(speed, 0.f);

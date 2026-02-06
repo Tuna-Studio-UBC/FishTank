@@ -165,14 +165,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	for (Entity b : registry.bells.entities)
 	{
 		Bell& bell = registry.bells.get(b);
-		if (bell.cooldown_remaining_ms > 0.f) {
-			bell.cooldown_remaining_ms -= elapsed_ms_since_last_update;
-			if (bell.cooldown_remaining_ms < 0.f)
-				bell.cooldown_remaining_ms = 0.f;
+		if (bell.cooldown_timer > 0.f) {
+			bell.cooldown_timer -= elapsed_ms_since_last_update;
+			if (bell.cooldown_timer < 0.f)
+				bell.cooldown_timer = 0.f;
 		}
 	}
 
-	if (registry.distracted.entities.size() > 0)
+	/*if (registry.distracted.entities.size() > 0)
 	{
 		Entity evt_e = registry.distracted.entities[0];
 		Distracted& evt = registry.distracted.get(evt_e);
@@ -183,7 +183,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			registry.remove_all_components_of(evt_e);
 			std::cout << "[Bell] Distracted expired\n";
 		}
-	}
+	}*/
 
 	// Create bullet entities requested by enemies in AISystem
 	for (BulletRequest req : registry.bullet_requests.components) {
@@ -307,8 +307,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			return;
 		}
 
-		if (bell.cooldown_remaining_ms > 0.f) {
-			std::cout << "[Bell] Bell on cooldown: " << bell.cooldown_remaining_ms << "ms\n";
+		if (bell.cooldown_timer > 0.f) {
+			std::cout << "[Bell] Bell on cooldown: " << bell.cooldown_timer << "ms\n";
 			return;
 		}
 
@@ -316,12 +316,15 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		for (Entity enemy : registry.enemies.entities) {
 			Motion &enemy_motion = registry.motions.get(enemy);
-			if (entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
-				registry.distracted.emplace(enemy);
+			if (!registry.distracted.has(enemy) && entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
+				if (registry.pursuit.has(enemy)) {
+					registry.pursuit.remove(enemy);
+				}
+				registry.distracted.insert(enemy, {best_bell, bell.distraction_ms});
 			}
 		}
 
-		bell.cooldown_remaining_ms = bell.cooldown_ms;
+		bell.cooldown_timer = bell.cooldown_ms;
 
 		std::cout << "[Bell] Triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
 	}
