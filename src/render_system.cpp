@@ -13,9 +13,6 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
 	transform.translate((TILE_SIZE_PX * tile_pos) + (TILE_SIZE_PX / 2));
 	transform.scale(vec2(TILE_SIZE_PX));
 
-	if (tile_pos.x == 13 && tile_pos.y == 10)
-		std::cout << "Used for debugging\n";
-
 	unsigned short tile_id = tilemap.tile_ids[GET_2D_POS(tile_pos.x, tile_pos.y, tilemap.width)];
 	if (tile_id == 0)
 		return;
