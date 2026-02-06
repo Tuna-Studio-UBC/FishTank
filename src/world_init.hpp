@@ -23,6 +23,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
 
+Entity createWall(vec2 position, vec2 scale);
+
 // Component can be: Damage, Heal
 template <typename Component, typename... Args>
 Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, Args &&...args)

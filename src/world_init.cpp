@@ -283,6 +283,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	motion.angle = angle;
 	motion.scale = vec2(PROJECTILE_SIZE_PX);
 
+	Bouncy& bouncy = registry.bouncy.emplace(entity);
+
 	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
 	registry.renderRequests.insert(
 			entity,
@@ -294,3 +296,21 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 }
 
 #pragma endregion Hazards
+#pragma region Walls
+Entity createWall(vec2 position, vec2 scale)
+{
+	auto entity = Entity();
+	Wall& wall = registry.wall.emplace(entity);
+	auto &motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.velocity = {0.f, 0.f};
+	motion.angle = 0.f;
+	motion.scale = scale;
+	registry.colors.emplace(entity, vec3(0.2f, 0.2f, 0.2f));
+	registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::EGG,
+			 GEOMETRY_BUFFER_ID::DEBUG_LINE});
+	return entity;
+}

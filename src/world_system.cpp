@@ -157,6 +157,29 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	//Commented out duo to compiler errors
 	/*std::cout << "Starting music..." << std::endl;
 	Mix_PlayMusic(background_music, -1);*/
+
+	// walls
+	float wall_thickness = TILE_SIZE_PX;
+	// top
+	createWall(
+		vec2(WINDOW_WIDTH_PX / 2.f, wall_thickness / 2.f),
+		vec2(WINDOW_WIDTH_PX, wall_thickness)
+	);
+	// bottom
+	createWall(
+		vec2(WINDOW_WIDTH_PX / 2.f, WINDOW_HEIGHT_PX - wall_thickness / 2.f),
+		vec2(WINDOW_WIDTH_PX, wall_thickness)
+	);
+	// left
+	createWall(
+		vec2(wall_thickness / 2.f, WINDOW_HEIGHT_PX / 2.f),
+		vec2(wall_thickness, WINDOW_HEIGHT_PX)
+	);
+	// right
+	createWall(
+		vec2(WINDOW_WIDTH_PX - wall_thickness / 2.f, WINDOW_HEIGHT_PX / 2.f),
+		vec2(wall_thickness, WINDOW_HEIGHT_PX)
+	);
 }
 
 // Update our game world
