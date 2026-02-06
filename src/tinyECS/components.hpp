@@ -75,6 +75,15 @@ struct Damage
 };
 // Optional: OverTimeEffect
 
+struct Expiration
+{
+	float lifespan_ms = 5000; // ms
+	Expiration(float lifespan_ms)
+	{
+		this->lifespan_ms = lifespan_ms;
+	};
+};
+
 struct OverTimeEffect
 {
 	float interval_ms = 1000;			 // ms

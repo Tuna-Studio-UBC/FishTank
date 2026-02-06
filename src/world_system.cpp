@@ -137,7 +137,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	init_tiles();
 
 	// Create player entity
-	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f}, 80, 100);
+	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 	createBell(renderer, { 300.f, 400.f }, 80.f);
 	createBell(renderer, { 700.f, 200.f }, 80.f);
 
@@ -203,33 +203,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	return true;
 }
 
-// Compute collisions between entities
-void WorldSystem::handle_collisions() {
+void WorldSystem::handle_expiration(float elapsed_ms)
+{
+	for (Entity e : registry.expiration.entities)
+	{
+		Expiration &exp = registry.expiration.get(e);
+		exp.lifespan_ms -= elapsed_ms;
 
-	ComponentContainer<Collision>& collision_registry = registry.collisions;
-	for (uint i = 0; i < collision_registry.components.size(); i++) {
-		Entity entity_a = collision_registry.entities[i];
-		Entity entity_b = collision_registry.components[i].other;
-
-		//Bullet hit player
-		if (registry.bullet.has(entity_a) && registry.players.has(entity_b)) {
-			Bullet& bullet = registry.bullet.get(entity_a);
-			if (bullet.owner != entity_b) {
-				registry.damage.emplace(entity_b, bullet.damage);
-				registry.remove_all_components_of(entity_a); // remove bullet
-			}
-		}
-		//Bullet hit enemy
-		else if (registry.bullet.has(entity_a) && registry.enemies.has(entity_b)) {
-			Bullet& bullet = registry.bullet.get(entity_a);
-			if (bullet.owner != entity_b && registry.health.has(entity_b))
-			{
-				registry.damage.emplace(entity_b, bullet.damage);
-				registry.remove_all_components_of(entity_a); // remove bullet
-			}
+		if (exp.lifespan_ms <= 0)
+		{
+			std::cout << "Entity " << e.id() << " has expired" << std::endl;
+			registry.remove_all_components_of(e);
 		}
 	}
-		registry.collisions.clear();
 }
 
 // Should the game be over ?

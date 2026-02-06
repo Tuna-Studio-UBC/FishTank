@@ -27,17 +27,17 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player)
 
     std::cout << "Picked up power up type: " << (int)powerUp.type << std::endl;
 
-    // TODO: add powerups
+    // TODO: Add more power ups!!!
     switch (powerUp.type)
     {
     case POWER_UP_TYPE::HEAL:
       createOverTimeEffect<Heal>(player, config.duration_ms, config.duration_ms, config.amount);
       break;
     case POWER_UP_TYPE::SPEED_MULTIPLIER:
-      // createExpires<SpeedMultiplier>(player, config.duration_ms, config.amount);
+      createExpirationEffect<SpeedMultiplier>(player, config.duration_ms, config.amount);
       break;
     case POWER_UP_TYPE::DAMAGE_MULTIPLIER:
-      // createExpires<DamageMultiplier>(player, config.duration_ms, config.amount);
+      createExpirationEffect<DamageMultiplier>(player, config.duration_ms, config.amount);
       break;
     default:
       std::cout << "Unknown power up type" << std::endl;

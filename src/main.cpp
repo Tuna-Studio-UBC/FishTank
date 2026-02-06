@@ -7,6 +7,7 @@
 
 // internal
 #include "ai_system.hpp"
+#include "systems/collision_system.hpp"
 #include "systems/ote_system.hpp"
 #include "systems/heal_damage_system.hpp"
 #include "systems/death_system.hpp"
@@ -22,7 +23,8 @@ using Clock = std::chrono::high_resolution_clock;
 int main()
 {
 	// global systems
-	AISystem	  ai_system;
+	AISystem ai_system;
+	CollisionSystem collision_system;
 	OverTimeEffectSystem ote_system;
 	HealDamageSystem heal_damage_system;
 	DeathSystem death_system;
@@ -73,7 +75,9 @@ int main()
 		ai_system.step(elapsed_ms);
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
-		world_system.handle_collisions(); // CONSIDER: handling collisions involving bullets in bullet_system
+		world_system.handle_expiration(elapsed_ms);
+
+		collision_system.step(elapsed_ms);
 
 		renderer_system.draw();
 	}
