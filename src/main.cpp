@@ -79,7 +79,7 @@ int main()
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
 		
-		collision_system.step(elapsed_ms); // CONSIDER: handling collisions involving bullets in bullet_system
+		collision_system.step(elapsed_ms);
 
 		renderer_system.draw();
 	}

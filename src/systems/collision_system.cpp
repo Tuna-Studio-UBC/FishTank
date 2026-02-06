@@ -39,4 +39,10 @@ void CollisionSystem::handle_bullets(Entity entity_a, Entity entity_b)
       registry.remove_all_components_of(entity_a); // remove bullet
     }
   }
+  // Bullet hit bullet
+  else if (registry.bullet.has(entity_a) && registry.bullet.has(entity_b))
+  {
+    registry.remove_all_components_of(entity_a); // remove bullet
+    registry.remove_all_components_of(entity_b); // remove bullet
+  }
 }
