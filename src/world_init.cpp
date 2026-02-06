@@ -294,16 +294,3 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 }
 
 #pragma endregion Hazards
-
-// =================================================================================
-// Effects
-// =================================================================================
-template <typename Component, typename... Args>
-Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, Args &&...args)
-{
-	auto ot_entity = Entity();
-	registry.get<Component>().emplace(ot_entity, std::forward<Args>(args)...);
-	registry.overTimeEffect.emplace(ot_entity, interval_ms, duration_ms);
-	registry.target.emplace(ot_entity, target_entity);
-	return ot_entity;
-}
