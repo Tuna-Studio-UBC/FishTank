@@ -13,14 +13,17 @@ public:
 	// Entity
 	ComponentContainer<Player> players;
 	ComponentContainer<Enemy> enemies;
-	ComponentContainer<Bullet> bullet;
 	ComponentContainer<Wall> wall;
+
+	// Hazards
+	ComponentContainer<Hazard> hazard;
+	ComponentContainer<Bullet> bullet;
 	ComponentContainer<Mine> mine;
+	ComponentContainer<Anemone> anemone;
 
 	// Behaviour
 	ComponentContainer<Health> health;
 	ComponentContainer<Dead> dead;
-	ComponentContainer<Hazard> hazard;
 	ComponentContainer<Damage> damage;
 	ComponentContainer<OverTimeEffect> overTimeEffect;
 	ComponentContainer<FireControl> fireControl;
@@ -70,14 +73,17 @@ public:
 		// Entity
 		registry_list.push_back(&players);
 		registry_list.push_back(&enemies);
-		registry_list.push_back(&bullet);
 		registry_list.push_back(&wall);
+
+		// Hazards
+		registry_list.push_back(&hazard);
+		registry_list.push_back(&bullet);
 		registry_list.push_back(&mine);
+		registry_list.push_back(&anemone);
 
 		// Behaviour
 		registry_list.push_back(&health);
 		registry_list.push_back(&dead);
-		registry_list.push_back(&hazard);
 		registry_list.push_back(&damage);
 		registry_list.push_back(&overTimeEffect);
 		registry_list.push_back(&fireControl);

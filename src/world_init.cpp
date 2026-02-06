@@ -293,12 +293,13 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	return entity;
 }
 
-Entity createMine(RenderSystem *renderer, vec2 position, int base_dmg)
+Entity createMine(RenderSystem *renderer, vec2 position)
 {
 	auto entity = Entity();
 
+	auto &config = HAZARD_CONFIGS[(int)HAZARD_TYPE::MINE];
 	registry.mine.emplace(entity);
-	registry.hazard.emplace(entity, base_dmg);
+	registry.hazard.emplace(entity, HAZARD_TYPE::MINE);
 
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -309,7 +310,34 @@ Entity createMine(RenderSystem *renderer, vec2 position, int base_dmg)
 	motion.angle = 0.f;
 	motion.scale = {40.f, 40.f};
 
-	registry.colors.emplace(entity, vec3(0.9f, 0.4f, 0.4f));
+	registry.colors.emplace(entity, config.colour);
+	registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::EGG,
+			 GEOMETRY_BUFFER_ID::EGG});
+
+	return entity;
+}
+
+Entity createAnemone(RenderSystem *renderer, vec2 position)
+{
+	auto entity = Entity();
+
+	auto &config = HAZARD_CONFIGS[(int)HAZARD_TYPE::ANEMONE];
+	registry.anemone.emplace(entity);
+	registry.hazard.emplace(entity, HAZARD_TYPE::ANEMONE);
+
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto &motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.velocity = {0.f, 0.f};
+	motion.angle = 0.f;
+	motion.scale = {40.f, 40.f};
+
+	registry.colors.emplace(entity, config.colour);
 	registry.renderRequests.insert(
 			entity,
 			{TEXTURE_ASSET_ID::TEXTURE_COUNT,

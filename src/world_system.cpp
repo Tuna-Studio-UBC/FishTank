@@ -154,8 +154,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	createPowerUp(renderer, {600.f, 500.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
 
 	// ! FOR TESTING !
-	createMine(renderer, {500.f, 400.f}, 10);
-	createMine(renderer, {500.f, 600.f}, 10);
+	createMine(renderer, {500.f, 400.f});
+	createAnemone(renderer, {500.f, 600.f});
 
 	// start playing background music indefinitely
 	//Commented out duo to compiler errors

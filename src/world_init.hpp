@@ -7,6 +7,7 @@
 #include "utilities/parse_tiled.hpp"
 #include "configs/enemy_config.hpp"
 #include "configs/attack_pattern.hpp"
+#include "configs/hazard_config.hpp"
 #include "configs/power_up_config.hpp"
 
 // TODO: create entity functions
@@ -20,12 +21,10 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
 
 Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner);
-Entity createMine(RenderSystem *renderer, vec2 position, int damage);
+Entity createMine(RenderSystem *renderer, vec2 position);
+Entity createAnemone(RenderSystem *renderer, vec2 position);
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
-
-// template <typename Component, typename... Args>
-// Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, Args &&...args);
 
 // Component can be: Damage, Heal
 template <typename Component, typename... Args>
