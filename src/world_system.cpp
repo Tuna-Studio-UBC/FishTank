@@ -137,7 +137,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	init_tiles();
 
 	// Create player entity
-	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f}, 80, 100);
+	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 	createBell(renderer, { 300.f, 400.f }, 80.f);
 	createBell(renderer, { 700.f, 200.f }, 80.f);
 
@@ -205,6 +205,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	    registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	return true;
+}
+
+void WorldSystem::handle_expiration(float elapsed_ms)
+{
+	for (Entity e : registry.expiration.entities)
+	{
+		Expiration &exp = registry.expiration.get(e);
+		exp.lifespan_ms -= elapsed_ms;
+
+		if (exp.lifespan_ms <= 0)
+		{
+			std::cout << "Entity " << e.id() << " has expired" << std::endl;
+			registry.remove_all_components_of(e);
+		}
+	}
 }
 
 // Should the game be over ?

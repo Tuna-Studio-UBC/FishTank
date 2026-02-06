@@ -78,7 +78,8 @@ int main()
 		bullet_system.step(elapsed_ms);
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
-		
+		world_system.handle_expiration(elapsed_ms);
+
 		collision_system.step(elapsed_ms);
 
 		renderer_system.draw();

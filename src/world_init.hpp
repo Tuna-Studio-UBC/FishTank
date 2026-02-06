@@ -10,12 +10,11 @@
 #include "configs/hazard_config.hpp"
 #include "configs/power_up_config.hpp"
 
-// TODO: create entity functions
 // Initiate tile map
 void init_tiles();
 
 // Create player entity
-Entity createPlayer(RenderSystem *renderer, vec2 position, int health, int max_health);
+Entity createPlayer(RenderSystem *renderer, vec2 position);
 Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
 
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
@@ -25,6 +24,17 @@ Entity createMine(RenderSystem *renderer, vec2 position);
 Entity createAnemone(RenderSystem *renderer, vec2 position);
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
+
+// Component can be: DamageMultiplier, SpeedMultiplier
+template <typename Component, typename... Args>
+Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&...args)
+{
+  auto exp_entity = Entity();
+  registry.get<Component>().emplace(exp_entity, std::forward<Args>(args)...);
+  registry.expiration.emplace(exp_entity, lifespan_ms);
+  registry.target.emplace(exp_entity, target_entity);
+  return exp_entity;
+}
 
 // Component can be: Damage, Heal
 template <typename Component, typename... Args>

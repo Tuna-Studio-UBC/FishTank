@@ -25,6 +25,7 @@ public:
 	ComponentContainer<Health> health;
 	ComponentContainer<Dead> dead;
 	ComponentContainer<Damage> damage;
+	ComponentContainer<Expiration> expiration;
 	ComponentContainer<OverTimeEffect> overTimeEffect;
 	ComponentContainer<FireControl> fireControl;
 	ComponentContainer<SpeedControl> speedControl;
@@ -85,6 +86,7 @@ public:
 		registry_list.push_back(&health);
 		registry_list.push_back(&dead);
 		registry_list.push_back(&damage);
+		registry_list.push_back(&expiration);
 		registry_list.push_back(&overTimeEffect);
 		registry_list.push_back(&fireControl);
 		registry_list.push_back(&speedControl);
