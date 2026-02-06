@@ -13,7 +13,7 @@ uniform mat3 projection;
 uniform mat3 view;
 
 // Tilemap Specific Data
-uniform ivec2 tileset_size;
+uniform vec2 tileset_size;
 uniform vec2 atlas_offset;
 
 void main()

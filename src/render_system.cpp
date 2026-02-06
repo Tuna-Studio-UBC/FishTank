@@ -13,7 +13,7 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
 	transform.translate((TILE_SIZE_PX * tile_pos) + (TILE_SIZE_PX / 2));
 	transform.scale(vec2(TILE_SIZE_PX));
 
-	if (tile_pos.x == 6 && tile_pos.y == 10)
+	if (tile_pos.x == 13 && tile_pos.y == 10)
 		std::cout << "Used for debugging\n";
 
 	unsigned short tile_id = tilemap.tile_ids[GET_2D_POS(tile_pos.x, tile_pos.y, tilemap.width)];
@@ -56,9 +56,7 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
 	int min_x = max(((int)(player_pos.x - (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) - 1, 0);
 	int max_x = min(((int)(player_pos.x + (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) + 1, (int) tilemap.width);
 	int min_y = max(((int)(player_pos.y - (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) - 1, 0);
-	int max_y = min(((int)(player_pos.y + (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) + 1, (int)tilemap.height);
-	std::cout << (player_pos.x - (WINDOW_WIDTH_PX / 2));
-	std::cout << "Min X: " << min_x << "| Max X: " << max_x << "\n";
+	int max_y = min(((int)(player_pos.y + (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) + 1, (int) tilemap.height);
 
 	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
 
@@ -103,7 +101,7 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
 	gl_has_errors();
 
 	GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
-	glUniform2iv(tileset_size_uloc, 1, (GLint*)&tileset.dimensions);
+	glUniform2fv(tileset_size_uloc, 1, (GLfloat*)&tileset.dimensions);
 	gl_has_errors();
 
 	GLuint projection_loc = glGetUniformLocation(program, "projection");
