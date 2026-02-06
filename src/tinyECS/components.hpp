@@ -26,7 +26,6 @@ struct Bullet
 {
 	int damage;
 	Entity owner; // track who fired to prevent self hit
-	float lifespan_ms;
 };
 // Uses: Motion
 // Optional: Bouncy
@@ -79,6 +78,15 @@ struct Damage
 	Damage(int amount) { this->amount = amount; };
 };
 // Optional: OverTimeEffect
+
+struct Expiration
+{
+	float lifespan_ms = 5000; // ms
+	Expiration(float lifespan_ms)
+	{
+		this->lifespan_ms = lifespan_ms;
+	};
+};
 
 struct OverTimeEffect
 {
