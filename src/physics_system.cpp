@@ -60,13 +60,16 @@ void PhysicsSystem::step(float elapsed_ms)
 
 		// TODO: Optimize this nested loop
 		// Apply SpeedMultiplier power up
-		for (Entity& target_entity : registry.target.entities)
+		for (Entity& sm_entity : registry.speedMultiplier.entities)
 		{
-			Target &t = registry.target.get(target_entity);
-			if (registry.speedMultiplier.has(target_entity) && t.target == e)
+			if (registry.target.has(sm_entity))
 			{
-				SpeedMultiplier &sm = registry.speedMultiplier.get(target_entity);
-				velocity *= sm.multiplier;
+				Target &t = registry.target.get(sm_entity);
+				if (t.target == e)
+				{
+					SpeedMultiplier &sm = registry.speedMultiplier.get(sm_entity);
+					velocity *= sm.multiplier;
+				}
 			}
 		}
 
