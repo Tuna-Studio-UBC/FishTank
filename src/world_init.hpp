@@ -24,11 +24,11 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
 
 // Component can be: DamageMultiplier, SpeedMultiplier
 template <typename Component, typename... Args>
-Entity createExpirationEffect(Entity target_entity, float lifetime_ms, Args &&...args)
+Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&...args)
 {
   auto exp_entity = Entity();
   registry.get<Component>().emplace(exp_entity, std::forward<Args>(args)...);
-  registry.expiration.emplace(exp_entity, lifetime_ms);
+  registry.expiration.emplace(exp_entity, lifespan_ms);
   registry.target.emplace(exp_entity, target_entity);
   return exp_entity;
 }

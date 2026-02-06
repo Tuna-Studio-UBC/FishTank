@@ -208,9 +208,9 @@ void WorldSystem::handle_expiration(float elapsed_ms)
 	for (Entity e : registry.expiration.entities)
 	{
 		Expiration &exp = registry.expiration.get(e);
-		exp.lifetime_ms -= elapsed_ms;
+		exp.lifespan_ms -= elapsed_ms;
 
-		if (exp.lifetime_ms <= 0)
+		if (exp.lifespan_ms <= 0)
 		{
 			std::cout << "Entity " << e.id() << " has expired" << std::endl;
 			registry.remove_all_components_of(e);
