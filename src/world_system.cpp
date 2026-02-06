@@ -137,7 +137,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	init_tiles();
 
 	// Create player entity
-	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f}, 80, 100);
+	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 	createBell(renderer, { 300.f, 400.f }, 80.f);
 	createBell(renderer, { 700.f, 200.f }, 80.f);
 
