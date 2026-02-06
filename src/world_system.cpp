@@ -148,6 +148,11 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
 
+	// ! FOR TESTING !
+	createPowerUp(renderer, {500.f, 500.f}, POWER_UP_TYPE::HEAL);
+	createPowerUp(renderer, {700.f, 500.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
+	createPowerUp(renderer, {600.f, 500.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
+
 	// start playing background music indefinitely
 	//Commented out duo to compiler errors
 	/*std::cout << "Starting music..." << std::endl;

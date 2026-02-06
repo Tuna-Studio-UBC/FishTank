@@ -196,7 +196,33 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 // Pickups
 // =================================================================================
 
+Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type)
+{
+	auto entity = Entity();
 
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto &motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.velocity = {0.f, 0.f};
+	motion.angle = 0.f;
+	motion.scale = {40.f, 40.f};
+
+	auto &config = POWER_UP_CONFIGS[(int)type];
+
+	registry.colors.emplace(entity, config.colour);
+	registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::EGG,
+			 GEOMETRY_BUFFER_ID::EGG});
+
+	registry.pickUp.emplace(entity);
+	registry.powerUp.emplace(entity, type);
+
+	return entity;
+}
 
 #pragma endregion Pickups
 

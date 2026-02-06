@@ -6,6 +6,7 @@
 #include "utilities/parse_tiled.hpp"
 #include "configs/enemy_config.hpp"
 #include "configs/attack_pattern.hpp"
+#include "configs/power_up_config.hpp"
 
 // TODO: create entity functions
 // Initiate tile map
@@ -18,6 +19,8 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
 
 Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner);
+
+Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
 
 // Component can be: Damage, Heal
 template <typename Component, typename... Args>
