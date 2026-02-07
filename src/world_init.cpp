@@ -2,6 +2,7 @@
 
 #include "world_init.hpp"
 #include "tinyECS/registry.hpp"
+#include "configs/player_config.cpp"
 #include "configs/enemy_config.cpp"
 #include "configs/attack_pattern.cpp"
 
@@ -39,6 +40,21 @@ void print_tileset(TileSet &tileset)
 }
 #endif
 
+void generate_collision(TileMap& tilemap, TileSet& tileset)
+{
+	auto& tileset_collision_info = tileset.collisions;
+	for (int y = 1; y < tilemap.height - 1; y++)
+	{
+		for (int x = 1; x < tilemap.width - 1; x++)
+		{
+			if (tileset_collision_info[tilemap.tile_ids[GET_2D_POS(x, y, tilemap.width)] - 1])
+			{
+				createWall(vec2(x * TILE_SIZE_PX, y * TILE_SIZE_PX));
+			}
+		}
+	}
+}
+
 void init_tiles()
 {
 	Entity entity = Entity();
@@ -67,28 +83,29 @@ void init_tiles()
 // =================================================================================
 
 // Player creation function
-Entity createPlayer(RenderSystem *renderer, vec2 position, int health, int max_health)
+Entity createPlayer(RenderSystem *renderer, vec2 position)
 {
 	auto entity = Entity();
 
+	PlayerConfig config;
 	registry.players.emplace(entity);
 
 	registry.keyboardInput.emplace(entity);
 	registry.mouseInput.emplace(entity);
 
 	Wallet &w = registry.wallet.emplace(entity);
-	w.crackers = 0; // !!! Hardcode for now
+	w.crackers = config.crackers;
 
 	Health &h = registry.health.emplace(entity);
-	h.hp = health;
-	h.max_hp = max_health;
+	h.hp = config.hp;
+	h.max_hp = config.max_hp;
 
 	FireControl &fc = registry.fireControl.emplace(entity);
-	fc.cooldown_ms = 500; // !!! Hardcode for now
+	fc.cooldown_ms = config.fire_rate_cd_ms;
 	
 	SpeedControl &sc = registry.speedControl.emplace(entity);
-	sc.move_speed = 60; // !!! Hardcode for now
-	sc.turn_speed = 1.2 * M_PI; // !!! Hardcode for now
+	sc.move_speed = config.move_speed;
+	sc.turn_speed = config.turn_speed;
 	
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -105,7 +122,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position, int health, int max_h
 		 EFFECT_ASSET_ID::EGG,
 		 GEOMETRY_BUFFER_ID::DEBUG_LINE});
 
-	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
+	registry.colors.emplace(entity, config.colour);
 
 	return entity;
 }
@@ -272,10 +289,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	
 	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
 
-	Bullet &bullet = registry.bullet.insert(
-		entity, {attack_config.damage,
-				 owner,
-				 attack_config.lifespan_ms});
+	Bullet &bullet = registry.bullet.insert(entity, {attack_config.damage, owner});
+	registry.expiration.emplace(entity, attack_config.lifespan_ms);
 
 	Motion &motion = registry.motions.emplace(entity);
 	motion.velocity = vec2(attack_config.move_speed, 0.f);
@@ -296,21 +311,19 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 }
 
 #pragma endregion Hazards
-#pragma region Walls
-Entity createWall(vec2 position, vec2 scale)
+
+#pragma region StaticObjects
+
+Entity createWall(const vec2& position, const vec2& scale)
 {
 	auto entity = Entity();
-	Wall& wall = registry.wall.emplace(entity);
-	auto &motion = registry.motions.emplace(entity);
+
+	Motion& motion = registry.motions.emplace(entity);
 	motion.position = position;
-	motion.velocity = {0.f, 0.f};
-	motion.angle = 0.f;
 	motion.scale = scale;
-	registry.colors.emplace(entity, vec3(0.2f, 0.2f, 0.2f));
-	registry.renderRequests.insert(
-			entity,
-			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			 EFFECT_ASSET_ID::EGG,
-			 GEOMETRY_BUFFER_ID::DEBUG_LINE});
+
+	registry.wall.emplace(entity);
+
 	return entity;
 }
+#pragma endregion StaticObjects

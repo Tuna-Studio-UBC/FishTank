@@ -70,3 +70,4 @@ TileSet parse_tileset(const std::string& path)
 
 	return TileSet(width, height, width_px, height_px, collisions);
 }
+

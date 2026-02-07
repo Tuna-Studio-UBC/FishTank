@@ -9,12 +9,11 @@
 #include "configs/attack_pattern.hpp"
 #include "configs/power_up_config.hpp"
 
-// TODO: create entity functions
 // Initiate tile map
 void init_tiles();
 
 // Create player entity
-Entity createPlayer(RenderSystem *renderer, vec2 position, int health, int max_health);
+Entity createPlayer(RenderSystem *renderer, vec2 position);
 Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
 
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
@@ -23,7 +22,18 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
 
-Entity createWall(vec2 position, vec2 scale);
+Entity createWall(const vec2& position, const vec2& scale = vec2(TILE_SIZE_PX));
+
+// Component can be: DamageMultiplier, SpeedMultiplier
+template <typename Component, typename... Args>
+Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&...args)
+{
+  auto exp_entity = Entity();
+  registry.get<Component>().emplace(exp_entity, std::forward<Args>(args)...);
+  registry.expiration.emplace(exp_entity, lifespan_ms);
+  registry.target.emplace(exp_entity, target_entity);
+  return exp_entity;
+}
 
 // Component can be: Damage, Heal
 template <typename Component, typename... Args>
