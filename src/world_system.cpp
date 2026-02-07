@@ -131,14 +131,9 @@ bool WorldSystem::start_and_load_sounds() {
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
-	std::cout << "=== WorldSystem::init() START ===" << std::endl;  // ADD THIS
-
 	this->renderer = renderer_arg;
 
-	std::cout << "About to call init_tiles()..." << std::endl;  // ADD THIS
 	init_tiles();
-
-	std::cout << "About to call init_tile_walls()..." << std::endl;  // ADD THIS
 	init_tile_walls();
 	// Create player entity
 	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});

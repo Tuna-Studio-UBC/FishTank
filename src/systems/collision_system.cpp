@@ -96,7 +96,6 @@ void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
             while (bullet_motion.angle < 0) bullet_motion.angle += 2 * M_PI;
             while (bullet_motion.angle >= 2 * M_PI) bullet_motion.angle -= 2 * M_PI;
 
-            std::cout << "Bullet bounced off wall!" << std::endl;
         }
         else {
             // Non-bouncy bullets get destroyed
