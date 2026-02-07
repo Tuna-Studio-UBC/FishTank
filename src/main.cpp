@@ -77,7 +77,6 @@ int main()
 			pick_up_system.step(elapsed_ms);
 			physics_system.step(elapsed_ms);
 			player_input_system.step(elapsed_ms);
-			world_system.handle_collisions();
 		}
 
 		renderer_system.draw();
