@@ -47,13 +47,12 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
 	RenderRequest& render_request = registry.renderRequests.get(entity);
 	TileMap& tilemap = registry.tilemaps.get(entity);
 	TileSet& tileset = registry.tilesets.get(entity);
-	Entity &player = registry.players.entities[0];
-	vec2& player_pos = registry.motions.get(player).position;
-	// Only render the tiles that are on screen
-	int min_x = max(((int)(player_pos.x - (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) - 2, 0);
-	int max_x = min(((int)(player_pos.x + (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) + 2, (int) tilemap.width);
-	int min_y = max(((int)(player_pos.y - (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) - 2, 0);
-	int max_y = min(((int)(player_pos.y + (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) + 2, (int) tilemap.height);
+	vec2& camera_pos = registry.motions.get(registry.camera.entities[0]).position;
+	// Only render the tiles that are on screen. Use camera pos and not player pos
+	int min_x = max(((int)(camera_pos.x - (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) - 1, 0);
+	int max_x = min(((int)(camera_pos.x + (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) + 1, (int) tilemap.width);
+	int min_y = max(((int)(camera_pos.y - (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) - 1, 0);
+	int max_y = min(((int)(camera_pos.y + (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) + 1, (int) tilemap.height);
 
 	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
 
