@@ -47,32 +47,24 @@ bool collision_AABB(const Motion& motion1, const Motion& motion2)
 	bool collisionY = bottom1 >= top2 && top1 <= bottom2;
 	return collisionX && collisionY;
 }
-bool collides_with_tile(vec2 position, vec2 half_size, const TileMap& tilemap, const TileSet& tileset) {
-	int min_tile_x = (int)floor((position.x - half_size.x) / TILE_SIZE_PX);
-	int max_tile_x = (int)floor((position.x + half_size.x) / TILE_SIZE_PX);
-	int min_tile_y = (int)floor((position.y - half_size.y) / TILE_SIZE_PX);
-	int max_tile_y = (int)floor((position.y + half_size.y) / TILE_SIZE_PX);
+bool collides_with_wall(const Motion& entity_motion, Entity& out_wall_entity) {
+	vec2 entity_box = get_bounding_box(entity_motion);
 
-	for (int ty = min_tile_y; ty <= max_tile_y; ty++) {
-		for (int tx = min_tile_x; tx <= max_tile_x; tx++) {
-			if (tx < 0 || tx >= (int)tilemap.width || ty < 0 || ty >= (int)tilemap.height)
-				continue;
-			unsigned short tile_id = tilemap.tile_ids[tx + ty * tilemap.width];
-			//DEBUG: print tile info
-			std::cout << "Tile (" << tx << "," << ty << ") - ID: " << tile_id
-				<< " - Has Collision: " << (tile_id < 2048 && tileset.collisions[tile_id] ? "YES" : "NO")
-				<< std::endl;
-			if (tile_id < 2048 && tileset.collisions[tile_id])
-				return true;
-
+	//Loop through all wall entites
+	for (Entity wall_entity : registry.wall.entities) {
+		if (!registry.motions.has(wall_entity))
+			continue;
+		Motion& wall_motion = registry.motions.get(wall_entity);
+		if (collision_AABB(entity_motion, wall_motion)) {
+			out_wall_entity = wall_entity;
+			return true;
 		}
 	}
+	
 	return false;
 }
 void PhysicsSystem::step(float elapsed_ms)
 {
-	TileMap& tilemap = registry.tilemaps.components[0];
-	TileSet& tileset = registry.tilesets.components[0];
 	// Move each entity that has motion
 	auto& motion_registry = registry.motions;
 	for (uint i = 0; i < motion_registry.components.size(); i++) // changed so i can use index to get entity, sorry
@@ -92,19 +84,19 @@ void PhysicsSystem::step(float elapsed_ms)
 
 		if (registry.players.has(entity) || registry.enemies.has(entity))
 		{
-			vec2 half_size = get_bounding_box(motion) / 2.f;
-			if (collides_with_tile(motion.position, half_size, tilemap, tileset)) {
+			Entity wall_entity;
+			if (collides_with_wall(motion, wall_entity)) {
 				motion.position = old_position; // try only moving horiontally
 				motion.position.x += movement.x;
 
-				if (collides_with_tile(motion.position, half_size, tilemap, tileset))
+				if (collides_with_wall(motion, wall_entity))
 				{
 					// x movement blocked, revert x
 					motion.position.x = old_position.x;
 				}
 				// try moving only vertically
 				motion.position.y = old_position.y + movement.y;
-				if (collides_with_tile(motion.position, half_size, tilemap, tileset)) {
+				if (collides_with_wall(motion, wall_entity)) {
 					// y movement blocked, revert y
 					motion.position.y = old_position.y;
 				}

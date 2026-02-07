@@ -11,7 +11,8 @@
 
 // Initiate tile map
 void init_tiles();
-
+// create tile walls
+void init_tile_walls();
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);

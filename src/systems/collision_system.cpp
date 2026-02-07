@@ -1,5 +1,5 @@
 #include "collision_system.hpp"
-
+vec2 get_bounding_box(const Motion& motion);
 // Compute collisions between entities
 void CollisionSystem::step(float elapsed_ms)
 {
@@ -51,21 +51,56 @@ void CollisionSystem::handle_bullets(Entity entity_a, Entity entity_b)
 void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
     if (registry.bullet.has(entity_a) && registry.wall.has(entity_b)) {
         if (registry.bouncy.has(entity_a)) {
-            Motion &bullet_motion = registry.motions.get(entity_a);
+            Motion& bullet_motion = registry.motions.get(entity_a);
             Motion& wall_motion = registry.motions.get(entity_b);
-            vec2 wall_scale = wall_motion.scale;
-            bool is_vertical_wall = wall_scale.x < wall_scale.y;
-            if (is_vertical_wall) {
+
+            // Calculate relative position to determine bounce direction
+            vec2 bullet_to_wall = bullet_motion.position - wall_motion.position;
+            vec2 wall_half_size = wall_motion.scale / 2.f;
+            vec2 bullet_half_size = get_bounding_box(bullet_motion) / 2.f;
+
+            // Determine which side of the wall was hit
+            float overlap_x = wall_half_size.x - abs(bullet_to_wall.x);
+            float overlap_y = wall_half_size.y - abs(bullet_to_wall.y);
+
+			const float MIN_OVERLAP = 0.1f; // Minimum overlap to consider a collision (to avoid jitter)
+            if (overlap_x < MIN_OVERLAP || overlap_y < MIN_OVERLAP) {
+                // Not enough overlap, likely a corner case, skip bounce
+                return;
+			}
+			vec2 velocity_dir = vec2(cos(bullet_motion.angle), sin(bullet_motion.angle));
+            float overlap_diff = abs(overlap_x - overlap_y);
+            if (overlap_diff < 2.f) {
+                bullet_motion.angle = bullet_motion.angle + M_PI;
+            }
+            else if (overlap_x < overlap_y) {
+                // Hit left or right side (vertical bounce)
                 bullet_motion.angle = M_PI - bullet_motion.angle;
+                // Push bullet out horizontally
+                if (bullet_to_wall.x > 0)
+                    bullet_motion.position.x = wall_motion.position.x + wall_half_size.x + bullet_half_size.x + 2.f;
+                else
+                    bullet_motion.position.x = wall_motion.position.x - wall_half_size.x - bullet_half_size.x - 2.f;
             }
             else {
+                // Hit top or bottom (horizontal bounce)
                 bullet_motion.angle = -bullet_motion.angle;
+                // Push bullet out vertically
+                if (bullet_to_wall.y > 0)
+                    bullet_motion.position.y = wall_motion.position.y + wall_half_size.y + bullet_half_size.y + 2.f;
+                else
+                    bullet_motion.position.y = wall_motion.position.y - wall_half_size.y - bullet_half_size.y - 2.f;
             }
 
+            // Normalize angle
             while (bullet_motion.angle < 0) bullet_motion.angle += 2 * M_PI;
             while (bullet_motion.angle >= 2 * M_PI) bullet_motion.angle -= 2 * M_PI;
-            std::cout << "Bullet bounced" << std::endl;
-            
+
+            std::cout << "Bullet bounced off wall!" << std::endl;
+        }
+        else {
+            // Non-bouncy bullets get destroyed
+            registry.remove_all_components_of(entity_a);
         }
     }
 }

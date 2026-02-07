@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <set>
+#include <map>
 #include "world_init.hpp"
 #include "tinyECS/registry.hpp"
 #include "configs/player_config.cpp"
@@ -54,7 +55,48 @@ void generate_collision(TileMap& tilemap, TileSet& tileset)
 		}
 	}
 }
+// tiles -> wall entites
+void init_tile_walls() {
+	std::cout << "DEBUG: init_tile_walls() called!" << std::endl;
 
+	TileMap& tilemap = registry.tilemaps.components[0];
+	TileSet& tileset = registry.tilesets.components[0];
+	// Count occurrences of each tile ID
+	std::map<int, int> tile_counts;
+	for (unsigned int y = 0; y < tilemap.height; y++) {
+		for (unsigned int x = 0; x < tilemap.width; x++) {
+			int tile_id = tilemap.tile_ids[x + y * tilemap.width];
+			tile_counts[tile_id]++;
+		}
+	}
+	std::cout << "=== UNIQUE TILE IDs IN MAP ===" << std::endl;
+	for (auto& pair : tile_counts) {
+		std::cout << "Tile ID: " << pair.first << ": " << pair.second << " tiles" << std::endl;
+	}
+	std::cout << "===============================" << std::endl;
+
+	int walls_created = 0;
+	int floor_tile_id = 1; //guessing -> confirmed from output
+	for (unsigned int y = 0; y < tilemap.height; y++) {
+		for (unsigned int x = 0; x < tilemap.width; x++) {
+			int tile_id = tilemap.tile_ids[x+ y * tilemap.width ];
+
+			// skip empty/floor tiles, skip outer border tiles
+			bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
+			bool is_non_empty = (tile_id != floor_tile_id);
+
+			if (is_non_empty && !is_border) {
+				vec2 position = vec2(
+					x * TILE_SIZE_PX + TILE_SIZE_PX / 2.f,
+					y * TILE_SIZE_PX + TILE_SIZE_PX / 2.f);
+				vec2 scale = vec2(TILE_SIZE_PX, TILE_SIZE_PX);
+				createWall(position, scale);
+				walls_created++;
+			}
+		}
+	}
+	std::cout << "DEBUG: Created " << registry.wall.entities.size() << " wall entties from tiles" << std::endl;
+}
 void init_tiles()
 {
 	Entity entity = Entity();
