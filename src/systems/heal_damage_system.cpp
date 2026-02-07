@@ -21,7 +21,7 @@ void HealDamageSystem::handle_damaging()
 
       // TODO: Handle visual indicators
 
-      printf("Entity %d took %d damage and now has %d/%d HP\n", e.id(), d.amount, h.hp, h.max_hp);
+      std::cout << e.name_id() << " took " << d.amount << " damage and now has " << h.hp << "/" << h.max_hp << " HP" << std::endl;
     }
   }
 }
@@ -39,7 +39,7 @@ void HealDamageSystem::handle_healing()
 
       // TODO: Handle visual indicators
 
-      printf("Entity %d took %d healing and now has %d/%d HP\n", e.id(), h.amount, he.hp, he.max_hp);
+      std::cout << e.name_id() << " took " << h.amount << " healing and now has " << he.hp << "/" << he.max_hp << " HP" << std::endl;
     }
   }
 }

@@ -25,7 +25,7 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player)
     PowerUp powerUp = registry.powerUp.get(pickUp);
     auto &config = POWER_UP_CONFIGS[(int)powerUp.type];
 
-    std::cout << "Picked up power up type: " << (int)powerUp.type << std::endl;
+    std::cout << "Picked up " << pickUp.name_id() << " of type: " << (int)powerUp.type << std::endl;
 
     // TODO: Add more power ups!!!
     switch (powerUp.type)
