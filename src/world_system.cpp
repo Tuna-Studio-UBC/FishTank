@@ -138,7 +138,6 @@ void WorldSystem::start_wave(Progress &progress)
 	}
 	auto config = WAVE_CONFIGS[progress.wave];
 	progress.remaining_enemies = config.enemies.size();
-	std::cout << progress.remaining_enemies << std::endl;
 
 	for (auto enemy : config.enemies) {
 		createEnemy(renderer, enemy.position, enemy.type);
@@ -185,7 +184,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	Progress& progress = registry.progress.components[0];
 	if (progress.remaining_enemies == 0) {
-		progress.wave += 1;
+		std::cout << "Wave " << progress.wave << " complete, starting next wave." << std::endl;
+		progress.wave += 1; 
 		start_wave(progress);
 	}
 
