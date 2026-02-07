@@ -7,6 +7,7 @@
 #include "utilities/parse_tiled.hpp"
 #include "configs/enemy_config.hpp"
 #include "configs/attack_pattern.hpp"
+#include "configs/hazard_config.hpp"
 #include "configs/power_up_config.hpp"
 
 // Initiate tile map
@@ -19,6 +20,8 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
 
 Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner);
+Entity createMine(RenderSystem *renderer, vec2 position);
+Entity createAnemone(RenderSystem *renderer, vec2 position);
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
 

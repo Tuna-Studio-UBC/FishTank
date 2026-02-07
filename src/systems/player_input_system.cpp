@@ -3,11 +3,8 @@
 #include "world_init.hpp"
 #include <iostream>
 
-// Player movement configurations are here for now unless we need to refactor for generalization
-float PLAYER_QUICK_TURN_DURATION = 300; // ms
-float PLAYER_MAX_SPEED = 120;
-float PLAYER_ACCELERATION = 45;
-float PLAYER_DECELERATION = 60;
+float MAX_SPEED_MULTIPLIER = 2;     // Max speed = move speed * x
+float DECELERATION_MULTIPLIER = 2;  // Deceleration = move speed * x
 
 void debug_print_input_state(KeyboardInputState &keyboard_input) {
     std::cout << "Current:  ";
@@ -48,13 +45,14 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     float dt = elapsed_ms / 1000.0f;
     bool quick_turn_active = (registry.playerQuickTurn.size() != 0);
+    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f;
 
     // Process Turn Input
     if (key_pressed(KeyboardActions::QuickTurn, keyboard_input) && !quick_turn_active) {
         Entity e = Entity();
         PlayerQuickTurn &qt = registry.playerQuickTurn.emplace(e);
         qt.direction = -1;
-        qt.duration_ms = PLAYER_QUICK_TURN_DURATION;
+        qt.duration_ms = quick_turn_duration;
     } else if (!quick_turn_active) {
         float turn_dir = 0.f;
         if (key_held(KeyboardActions::TurnLeft, keyboard_input)) {
@@ -78,7 +76,7 @@ void PlayerInputSystem::step(float elapsed_ms)
             relevant_ms += qt.duration_ms;
         }
 
-        float quick_turn_amount = (M_PI * relevant_ms * qt.direction) / PLAYER_QUICK_TURN_DURATION;
+        float quick_turn_amount = (M_PI * relevant_ms * qt.direction) / quick_turn_duration;
         motion.angle = std::fmod(motion.angle + quick_turn_amount, 2 * M_PI);
 
         if (qt.duration_ms <= 0) {
@@ -90,9 +88,10 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     if (key_held(KeyboardActions::MoveForward, keyboard_input))
     {
-        motion.velocity.x = std::min(PLAYER_MAX_SPEED, motion.velocity.x + PLAYER_ACCELERATION * dt);
+        float max_speed = 3.f * sc.move_speed;
+        motion.velocity.x = std::min(max_speed, motion.velocity.x + sc.move_speed * dt);
     } else {
-        motion.velocity.x = std::max(0.f, motion.velocity.x - PLAYER_DECELERATION * dt);
+        motion.velocity.x = std::max(0.f, motion.velocity.x - (DECELERATION_MULTIPLIER * sc.move_speed) * dt);
     }
 
     FireControl &fc = registry.fireControl.get(playerEntity);
