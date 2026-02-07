@@ -324,6 +324,20 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	
 	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
 
+	// Apply DamageMultiplier power up
+	for (Entity& dm_entity : registry.damageMultiplier.entities)
+	{
+		if (registry.target.has(dm_entity))
+		{
+			Target &t = registry.target.get(dm_entity);
+			if (t.target == owner)
+			{
+				DamageMultiplier &dm = registry.damageMultiplier.get(dm_entity);
+				attack_config.damage *= dm.multiplier;
+			}
+		}
+	}
+
 	Bullet &bullet = registry.bullet.insert(entity, {attack_config.damage, owner});
 	registry.expiration.emplace(entity, attack_config.lifespan_ms);
 
