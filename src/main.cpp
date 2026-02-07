@@ -57,7 +57,11 @@ int main()
 	// variable timestep loop
 	auto t = Clock::now();
 	while (!world_system.is_over()) {
-		
+		// Prepare new GUI frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		// processes system messages, if this wasn't present the window would become unresponsive
 		glfwPollEvents();
 
@@ -79,10 +83,29 @@ int main()
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
 		world_system.handle_expiration(elapsed_ms);
-
 		collision_system.step(elapsed_ms);
 
+		// Draw GUIs
+		ImGui::ShowDemoWindow();
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
+		ImGui::SetNextWindowSize(ImVec2(200, 0));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(.2f, .2f, .2f, .9f));
+		ImGui::Begin("Respawn", nullptr, window_flags);
+		if (ImGui::Button(("Respawn " + registry.players.entities[0].name_id()).c_str()))
+		{
+			world_system.respawn_player();
+		}
+		ImGui::End();
+		ImGui::PopStyleColor();
+
+		// Render
 		renderer_system.draw();
+		renderer_system.renderGUI();
+
+		// flicker-free display with a double buffer
+		glfwSwapBuffers(window);
+		gl_has_errors();
 	}
 
 	renderer_system.shutdown();

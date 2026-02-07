@@ -75,14 +75,16 @@ public:
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the vignette shader
 	bool initScreenTexture();
-	
-	void RenderSystem::shutdown();
 
 	// Destroy resources associated to one or all entities created by the system
 	~RenderSystem();
 
 	// Draw all entities
 	void draw();
+	
+	void renderGUI();
+
+	void shutdown();
 
 	mat3 createProjectionMatrix();
 	mat3 createViewMatrix();

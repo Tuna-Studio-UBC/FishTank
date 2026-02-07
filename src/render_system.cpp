@@ -299,33 +299,6 @@ void RenderSystem::drawToScreen()
 		nullptr); // one triangle = 3 vertices; nullptr indicates that there is
 				  // no offset from the bound index buffer
 	gl_has_errors();
-
-	// Prepare new GUI frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
-	// Draw UI components
-	// ImGui::ShowDemoWindow();
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
-	ImGui::Begin("Hello", nullptr, window_flags);
-	ImGui::Text("This window cannot be moved or resized.");
-	if (ImGui::Button("A Button"))
-	{
-			// Do something
-	}
-	ImGui::End();
-
-	// Render UI
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void RenderSystem::shutdown()
-{
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
 }
 
 // Render our game world
@@ -376,12 +349,20 @@ void RenderSystem::draw()
 	}
 
 	// draw framebuffer to screen
-	// adding "vignette" effect when applied
 	drawToScreen();
+}
 
-	// flicker-free display with a double buffer
-	glfwSwapBuffers(window);
-	gl_has_errors();
+void RenderSystem::renderGUI()
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void RenderSystem::shutdown()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 mat3 RenderSystem::createProjectionMatrix()
