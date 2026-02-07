@@ -133,9 +133,6 @@ bool WorldSystem::start_and_load_sounds() {
 
 void WorldSystem::start_wave(Progress &progress)
 {
-	if (WAVE_CONFIGS.size() <= progress.wave) {
-		return;
-	}
 	auto config = WAVE_CONFIGS[progress.wave];
 	progress.remaining_enemies = config.enemies.size();
 
@@ -177,16 +174,26 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
-	// Updating window title with points
+	// Updating window title
 	std::stringstream title_ss;
 	title_ss << GAME_NAME;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	Progress& progress = registry.progress.components[0];
+	if (progress.game_over == true) {
+		return false;
+	}
+
 	if (progress.remaining_enemies == 0) {
 		std::cout << "Wave " << progress.wave << " complete, starting next wave." << std::endl;
 		progress.wave += 1; 
-		start_wave(progress);
+
+		if (WAVE_CONFIGS.size() > progress.wave) {
+			start_wave(progress);
+		}
+		else {
+			progress.game_over = true;
+		}
 	}
 
 	for (Entity b : registry.distractionTriggers.entities)
@@ -223,6 +230,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	    registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	return true;
+}
+
+void WorldSystem::game_over() {
+	
 }
 
 // Compute collisions between entities

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "death_system.hpp"
+#include <world_system.hpp>
 
 void DeathSystem::step(float elapsed_ms)
 {
@@ -19,7 +20,7 @@ void DeathSystem::step(float elapsed_ms)
         if (registry.players.has(e))
         {
           // TODO: Handle player death
-
+            registry.progress.components[0].game_over = true;
           std::cout << "Player is dead" << std::endl;
         }
         else if (registry.enemies.has(e))

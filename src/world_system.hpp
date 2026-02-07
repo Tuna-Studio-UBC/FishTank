@@ -31,6 +31,8 @@ public:
 
 	void start_wave(Progress &progress);
 
+	void game_over();
+
 	// starts the game
 	void init(RenderSystem* renderer);
 
