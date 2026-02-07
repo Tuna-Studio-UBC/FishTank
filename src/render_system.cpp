@@ -305,14 +305,16 @@ void RenderSystem::drawToScreen()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-  ImGuiIO &io = ImGui::GetIO();
-	if (!io.WantCaptureMouse)
-	{
-		// Handle inputs
-	}
-
 	// Draw UI components
-	ImGui::ShowDemoWindow();
+	// ImGui::ShowDemoWindow();
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
+	ImGui::Begin("Hello", nullptr, window_flags);
+	ImGui::Text("This window cannot be moved or resized.");
+	if (ImGui::Button("A Button"))
+	{
+			// Do something
+	}
+	ImGui::End();
 
 	// Render UI
 	ImGui::Render();

@@ -347,11 +347,15 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods)
 {
 	Entity e = registry.players.entities[0];
 	MouseInputState &mi = registry.mouseInput.get(e);
+	ImGuiIO &io = ImGui::GetIO();
 	if (action == GLFW_PRESS)
 	{
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		if (!io.WantCaptureMouse) // Ignore if ImGui is focused
 		{
-			mi.current_action = MouseActions::LeftClick;
+			if (button == GLFW_MOUSE_BUTTON_LEFT)
+			{
+				mi.current_action = MouseActions::LeftClick;
+			}
 		}
 	} else {
 		mi.current_action = MouseActions::MouseActionsCount;
