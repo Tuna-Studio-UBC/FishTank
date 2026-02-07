@@ -62,6 +62,7 @@ public:
 	ComponentContainer<vec3> colors;
 	ComponentContainer<TileSet> tilesets;
 	ComponentContainer<TileMap> tilemaps;
+	ComponentContainer<Overlay> overlays;
 
 	ComponentContainer<Debug> debugComponents;
 
@@ -120,6 +121,7 @@ public:
 		registry_list.push_back(&colors);
 		registry_list.push_back(&tilesets);
 		registry_list.push_back(&tilemaps);
+		registry_list.push_back(&overlays);
 
 		registry_list.push_back(&debugComponents);
 	}

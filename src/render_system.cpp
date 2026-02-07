@@ -355,6 +355,10 @@ void RenderSystem::draw()
 	// adding "vignette" effect when applied
 	drawToScreen();
 
+	for (Entity entity : registry.overlays.entities) {
+		drawTexturedMesh(entity, projection_2D, view_2D);
+	}
+
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
 	gl_has_errors();

@@ -341,6 +341,11 @@ struct TileSet
 	}
 };
 
+struct Overlay
+{
+
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -368,7 +373,9 @@ struct TileSet
 enum class TEXTURE_ASSET_ID {
 	TEXTURE_TILESET = 0,
 	TEXTURE_PROJECTILE = 1,
-	TEXTURE_COUNT = TEXTURE_PROJECTILE + 1
+	TEXTURE_WIN_OVERLAY = 2,
+	TEXTURE_LOSE_OVERLAY = 3,
+	TEXTURE_COUNT = TEXTURE_LOSE_OVERLAY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

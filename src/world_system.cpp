@@ -200,6 +200,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 		else {
 			progress.game_over = true;
+
+			Entity& e = Entity();
+			registry.overlays.emplace(e);
+			auto &motion = registry.motions.emplace(e);
+			motion.position = registry.motions.get(registry.players.entities[0]).position;
+			motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
+			registry.renderRequests.insert(
+				e,
+				{ TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
 		}
 	}
 
