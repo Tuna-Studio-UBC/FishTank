@@ -5,6 +5,7 @@
 #include <array>
 #include "../ext/stb_image/stb_image.h"
 #include "configs/attack_pattern.hpp"
+#include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 
 #pragma region Entity
@@ -22,14 +23,6 @@ struct Enemy
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
-struct Bullet
-{
-	int damage;
-	Entity owner; // track who fired to prevent self hit
-};
-// Uses: Motion
-// Optional: Bouncy
-
 struct DistractionTrigger
 {
     float interact_radius_px = 80.f; // distance to e
@@ -45,17 +38,42 @@ struct DistractionEvent
 
 struct Wall
 {
-	vec2 position;
-};
-
-// used for Entities that cause damage
-struct Mine
-{
-	int damage;
 };
 // Uses: Motion
 
+
 #pragma endregion Entity
+
+#pragma region Hazards
+// =================================================================================
+// Hazards
+// =================================================================================
+
+struct Hazard
+{
+	HAZARD_TYPE type;
+	Hazard(HAZARD_TYPE type) { this->type = type; };
+};
+
+struct Bullet
+{
+	int damage;
+	Entity owner; // track who fired to prevent self hit
+};
+// Uses: Motion
+// Optional: Bouncy
+
+struct Mine
+{
+};
+// Uses: Motion
+
+struct Anemone
+{
+};
+// Uses: Motion
+
+#pragma endregion Hazards
 
 #pragma region Behaviour
 // =================================================================================

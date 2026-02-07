@@ -15,6 +15,7 @@ void DeathSystem::step(float elapsed_ms)
       Health &h = registry.health.get(e);
       if (h.hp <= 0 && h.max_hp > 0)
       {
+        std::cout << e.name_id() << " has died" << std::endl;
         registry.dead.emplace(e);
 
         if (registry.players.has(e))
@@ -31,13 +32,10 @@ void DeathSystem::step(float elapsed_ms)
                 { TEXTURE_ASSET_ID::TEXTURE_LOSE_OVERLAY,
                     EFFECT_ASSET_ID::TEXTURED,
                     GEOMETRY_BUFFER_ID::SPRITE });
-          std::cout << "Player is dead" << std::endl;
         }
         else if (registry.enemies.has(e))
         {
           // TODO: Handle enemy death
-
-          std::cout << "Enemy " << e.id() << " is dead" << std::endl;
 
           // Drop crackers
           if (registry.dropsCrackers.has(e))
@@ -47,7 +45,7 @@ void DeathSystem::step(float elapsed_ms)
             Wallet &wallet = registry.wallet.get(player);
             wallet.crackers += drops.cracker;
 
-            std::cout << "Player collected " << drops.cracker << " crackers! Total: " << wallet.crackers << std::endl;
+            std::cout << player.name_id() << " collected " << drops.cracker << " crackers! Total: " << wallet.crackers << std::endl;
           }
 
           registry.remove_all_components_of(e);
