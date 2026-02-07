@@ -55,6 +55,10 @@ struct Mine
 };
 // Uses: Motion
 
+struct Camera
+{
+};
+
 #pragma endregion Entity
 
 #pragma region Behaviour

@@ -171,6 +171,15 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 	return entity;
 }
 
+Entity createCamera(vec2 position)
+{
+	auto entity = Entity();
+
+	registry.camera.emplace(entity);
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	return entity;
+}
 /*Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 patrol_b, float speed_px_s)
 {
     auto entity = Entity();

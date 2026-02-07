@@ -16,6 +16,7 @@ public:
 	ComponentContainer<Bullet> bullet;
 	ComponentContainer<Wall> wall;
 	ComponentContainer<Mine> mine;
+	ComponentContainer<Camera> camera;
 
 	// Behaviour
 	ComponentContainer<Health> health;
@@ -73,6 +74,7 @@ public:
 		registry_list.push_back(&bullet);
 		registry_list.push_back(&wall);
 		registry_list.push_back(&mine);
+		registry_list.push_back(&camera);
 
 		// Behaviour
 		registry_list.push_back(&health);

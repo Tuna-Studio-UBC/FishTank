@@ -50,10 +50,10 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
 	Entity &player = registry.players.entities[0];
 	vec2& player_pos = registry.motions.get(player).position;
 	// Only render the tiles that are on screen
-	int min_x = max(((int)(player_pos.x - (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) - 1, 0);
-	int max_x = min(((int)(player_pos.x + (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) + 1, (int) tilemap.width);
-	int min_y = max(((int)(player_pos.y - (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) - 1, 0);
-	int max_y = min(((int)(player_pos.y + (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) + 1, (int) tilemap.height);
+	int min_x = max(((int)(player_pos.x - (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) - 2, 0);
+	int max_x = min(((int)(player_pos.x + (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) + 2, (int) tilemap.width);
+	int min_y = max(((int)(player_pos.y - (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) - 2, 0);
+	int max_y = min(((int)(player_pos.y + (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) + 2, (int) tilemap.height);
 
 	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
 
@@ -388,8 +388,8 @@ mat3 RenderSystem::createProjectionMatrix()
 
 mat3 RenderSystem::createViewMatrix()
 {
-	Entity player = registry.players.entities[0];
-	Motion &m = registry.motions.get(player);
+	Entity camera = registry.camera.entities[0];
+	Motion &m = registry.motions.get(camera);
 	
 	return {
 		{1.f, 0.f, 0.f},

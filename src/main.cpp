@@ -12,6 +12,7 @@
 #include "systems/heal_damage_system.hpp"
 #include "systems/death_system.hpp"
 #include "systems/pick_up_system.hpp"
+#include "systems/camera_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
@@ -35,6 +36,7 @@ int main()
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
 	BulletSystem bullet_system;
+	CameraSystem camera_system;
 
 	// initialize window
 	GLFWwindow* window = world_system.create_window();
@@ -79,6 +81,7 @@ int main()
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
 		world_system.handle_expiration(elapsed_ms);
+		camera_system.step();
 
 		collision_system.step(elapsed_ms);
 
