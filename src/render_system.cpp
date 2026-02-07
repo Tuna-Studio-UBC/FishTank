@@ -109,6 +109,11 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
 	glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float*)&view);
 	gl_has_errors();
 
+	GLuint tile_size_loc = glGetUniformLocation(program, "tile_size");
+	glUniform1f(tile_size_loc, tileset.tile_width_px);
+	gl_has_errors();
+
+
 	// https://learnopengl.com/Getting-started/Textures
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
