@@ -42,8 +42,8 @@ struct Bell
 
 struct Wall
 {
-	vec2 position;
 };
+// Uses: Motion
 
 
 #pragma endregion Entity

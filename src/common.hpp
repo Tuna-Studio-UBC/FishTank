@@ -55,7 +55,7 @@ inline const std::string WINDOW_SIZE = "hd";
 const int WINDOW_WIDTH_PX = SCREEN_SIZES[WINDOW_SIZE].first;
 const int WINDOW_HEIGHT_PX = SCREEN_SIZES[WINDOW_SIZE].second;
 
-const int TILE_SIZE_PX = 32;
+const int TILE_SIZE_PX = 50;
 const int TILE_WIDTH_PX = TILE_SIZE_PX;
 const int TILE_HEIGHT_PX = TILE_SIZE_PX;
 
