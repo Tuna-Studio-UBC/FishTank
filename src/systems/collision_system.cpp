@@ -1,4 +1,5 @@
 #include "collision_system.hpp"
+#include "../world_init.hpp"
 
 // Compute collisions between entities
 void CollisionSystem::step(float elapsed_ms)
@@ -11,38 +12,73 @@ void CollisionSystem::step(float elapsed_ms)
     Entity entity_b = collision_registry.components[i].other;
 
     handle_bullets(entity_a, entity_b);
+    handle_hazards(entity_a, entity_b);
   }
 
   // Clear all collisions for the current step
   registry.collisions.clear();
 }
 
-void CollisionSystem::handle_bullets(Entity entity_a, Entity entity_b)
+void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
 {
-  // Bullet hit player
-  if (registry.bullet.has(entity_a) && registry.players.has(entity_b))
+  if (registry.bullet.has(bullet_entity))
   {
-    Bullet &bullet = registry.bullet.get(entity_a);
-    if (bullet.owner != entity_b)
+    // Bullet hit player
+    if (registry.players.has(other_entity))
     {
-      registry.damage.emplace(entity_b, bullet.damage);
-      registry.remove_all_components_of(entity_a); // remove bullet
+      Bullet &bullet = registry.bullet.get(bullet_entity);
+      if (bullet.owner != other_entity)
+      {
+        registry.damage.emplace(other_entity, bullet.damage);
+        registry.remove_all_components_of(bullet_entity);
+      }
+    }
+    // Bullet hit enemy
+    else if (registry.enemies.has(other_entity))
+    {
+      Bullet &bullet = registry.bullet.get(bullet_entity);
+      if (bullet.owner != other_entity && registry.health.has(other_entity))
+      {
+        registry.damage.emplace(other_entity, bullet.damage);
+        registry.remove_all_components_of(bullet_entity);
+      }
+    }
+    // Bullet hit bullet
+    else if (registry.bullet.has(other_entity))
+    {
+      registry.remove_all_components_of(bullet_entity);
+      registry.remove_all_components_of(other_entity);
     }
   }
-  // Bullet hit enemy
-  else if (registry.bullet.has(entity_a) && registry.enemies.has(entity_b))
+}
+
+// TODO: Handle applying hazards FX
+void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity)
+{
+  if (registry.hazard.has(hazard_entity))
   {
-    Bullet &bullet = registry.bullet.get(entity_a);
-    if (bullet.owner != entity_b && registry.health.has(entity_b))
+    Hazard &hazard = registry.hazard.get(hazard_entity);
+    auto &config = HAZARD_CONFIGS[(int)hazard.type];
+
+    // Handle hazards against player
+    if (registry.players.has(other_entity))
     {
-      registry.damage.emplace(entity_b, bullet.damage);
-      registry.remove_all_components_of(entity_a); // remove bullet
+      if (config.duration_ms > 0.f && config.interval_ms > 0.f)
+      {
+        createOverTimeEffect<Damage>(other_entity, config.interval_ms, config.duration_ms, config.amount);
+        registry.remove_all_components_of(hazard_entity);
+      }
+      else
+      {
+        registry.damage.emplace(other_entity, config.amount);
+        registry.remove_all_components_of(hazard_entity);
+      }
     }
-  }
-  // Bullet hit bullet
-  else if (registry.bullet.has(entity_a) && registry.bullet.has(entity_b))
-  {
-    registry.remove_all_components_of(entity_a); // remove bullet
-    registry.remove_all_components_of(entity_b); // remove bullet
+    // Handle hazards against enemy
+    else if (registry.enemies.has(other_entity))
+    {
+      registry.damage.emplace(other_entity, config.amount);
+      registry.remove_all_components_of(hazard_entity);
+    }
   }
 }
