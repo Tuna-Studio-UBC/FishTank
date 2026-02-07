@@ -188,14 +188,14 @@ void AISystem::handle_detection() {
 			motion_i.velocity = vec2(speed, 0.f);
 
 			// log to console for now
-			std::cout << "player detected by enemy " << enemy_i.id() << std::endl;
+			std::cout << enemy_i.name_id() << " detected " << player.name_id() << std::endl;
 		}
 		if (registry.pursuit.has(enemy_i) && !in_radius) {
 			registry.pursuit.remove(enemy_i);
 			motion_i.velocity = vec2(0.f, 0.f);
 
 			// log to console for now
-			std::cout << "player no longer detected by enemy " << enemy_i.id() << std::endl;
+			std::cout << enemy_i.name_id() << " no longer detecting " << player.name_id() << std::endl;
 		}
 	}
 }

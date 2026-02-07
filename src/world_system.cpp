@@ -190,7 +190,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		if (evt.remaining_ms <= 0.f)
 		{
 			registry.remove_all_components_of(evt_e);
-			std::cout << "[Bell] Distracted expired\n";
+			std::cout << "[Bell] " << evt_e.name_id() << " expired\n";
 		}
 	}*/
 
@@ -216,7 +216,7 @@ void WorldSystem::handle_expiration(float elapsed_ms)
 
 		if (exp.lifespan_ms <= 0)
 		{
-			std::cout << "Entity " << e.id() << " has expired" << std::endl;
+			std::cout << e.name_id() << " has expired" << std::endl;
 			registry.remove_all_components_of(e);
 		}
 	}
@@ -260,13 +260,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (action == GLFW_PRESS && key == GLFW_KEY_E)
 	{
 		if (registry.players.entities.size() == 0) {
-			std::cout << "[Bell] No player entity found\n";
+			std::cout << "[Bell] No Player entity found\n";
 			return;
 		}
 
 		Entity player = registry.players.entities[0];
 		if (!registry.motions.has(player)) {
-			std::cout << "[Bell] Player has no Motion\n";
+			std::cout << "[Bell] " << player.name_id() << " has no Motion\n";
 			return;
 		}
 
@@ -297,13 +297,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		if (best_dist2 > radius2) {
 			float dist = sqrtf(best_dist2);
-			std::cout << "[Bell] Too far to interact. dist=" << dist
+			std::cout << "[Bell] " << best_bell.name_id() << " too far to interact. dist=" << dist
 					<< " (need <= " << radius << ")\n";
 			return;
 		}
 
 		if (bell.cooldown_timer > 0.f) {
-			std::cout << "[Bell] Bell on cooldown: " << bell.cooldown_timer << "ms\n";
+			std::cout << "[Bell] " << best_bell.name_id() << " on cooldown: " << bell.cooldown_timer << "ms\n";
 			return;
 		}
 
@@ -321,7 +321,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		bell.cooldown_timer = bell.cooldown_ms;
 
-		std::cout << "[Bell] Triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
+		std::cout << "[Bell] " << best_bell.name_id() << " triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
 	}
 
 	// Debug
