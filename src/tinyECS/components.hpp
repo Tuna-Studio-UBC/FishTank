@@ -28,7 +28,7 @@ struct Bullet
 	int damage;
 	Entity owner; // track who fired to prevent self hit
 };
-// Uses: Motion, OverTimeEffect
+// Uses: Motion
 // Optional: Bouncy
 
 struct Bell
@@ -58,14 +58,6 @@ struct Hazard
 	HAZARD_TYPE type;
 	Hazard(HAZARD_TYPE type) { this->type = type; };
 };
-
-struct Bullet
-{
-	int damage;
-	Entity owner; // track who fired to prevent self hit
-};
-// Uses: Motion
-// Optional: Bouncy
 
 struct Mine
 {
