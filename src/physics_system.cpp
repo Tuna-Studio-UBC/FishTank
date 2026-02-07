@@ -47,35 +47,77 @@ bool collision_AABB(const Motion& motion1, const Motion& motion2)
 	bool collisionY = bottom1 >= top2 && top1 <= bottom2;
 	return collisionX && collisionY;
 }
+bool collides_with_wall(const Motion& entity_motion, Entity& out_wall_entity) {
+	vec2 entity_box = get_bounding_box(entity_motion);
 
+	//Loop through all wall entites
+	for (Entity wall_entity : registry.wall.entities) {
+		if (!registry.motions.has(wall_entity))
+			continue;
+		Motion& wall_motion = registry.motions.get(wall_entity);
+		if (collision_AABB(entity_motion, wall_motion)) {
+			out_wall_entity = wall_entity;
+			return true;
+		}
+	}
+	
+	return false;
+}
 void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move each entity that has motion
 	auto& motion_registry = registry.motions;
-	for(Motion& motion : motion_registry.components)
+	for (uint i = 0; i < motion_registry.components.size(); i++) // changed so i can use index to get entity, sorry
 	{
+		Motion& motion = motion_registry.components[i];
+		Entity entity = motion_registry.entities[i];
+		vec2 old_position = motion.position;
+
 		auto velocity = motion.velocity * elapsed_ms / 1000.f;
 		auto angle = motion.angle;
 		float vx_prime = cos(angle) * velocity.x - sin(angle) * velocity.y;
 		float vy_prime = sin(angle) * velocity.x + cos(angle) * velocity.y;
-		motion.position += vec2(vx_prime, vy_prime);
+		//motion.position += vec2(vx_prime, vy_prime);
+
+		vec2 movement = vec2(vx_prime, vy_prime);
+		motion.position += movement;
+
+		if (registry.players.has(entity) || registry.enemies.has(entity))
+		{
+			Entity wall_entity;
+			if (collides_with_wall(motion, wall_entity)) {
+				motion.position = old_position; // try only moving horiontally
+				motion.position.x += movement.x;
+
+				if (collides_with_wall(motion, wall_entity))
+				{
+					// x movement blocked, revert x
+					motion.position.x = old_position.x;
+				}
+				// try moving only vertically
+				motion.position.y = old_position.y + movement.y;
+				if (collides_with_wall(motion, wall_entity)) {
+					// y movement blocked, revert y
+					motion.position.y = old_position.y;
+				}
+			}
+		}
 	}
 	// Clamp player to arena bounds
 	for (Entity player_entity : registry.players.entities)
 	{
-		if (motion_registry.has(player_entity))
-		{
-			Motion& player_motion = motion_registry.get(player_entity);
-			vec2 half = get_bounding_box(player_motion) / 2.f;
-			float margin = TILE_SIZE_PX;
-			float min_x = margin + half.x;
-			float max_x = WINDOW_WIDTH_PX - margin - half.x;
-			float min_y = margin + half.y;
-			float max_y = WINDOW_HEIGHT_PX - margin - half.y;
+		assert(motion_registry.has(player_entity) && "Player has no motion entity!");
+		Motion& player_motion = motion_registry.get(player_entity);
+		TileMap& tilemap = registry.tilemaps.components[0];
+		vec2 half = get_bounding_box(player_motion) / 2.f;
+		vec2 margin = vec2(TILE_SIZE_PX + half.x, TILE_SIZE_PX + half.y);
+		float min_x = margin.x;
+		float max_x = tilemap.width * TILE_SIZE_PX - margin.x;
+		float min_y = margin.y;
+		float max_y = tilemap.height * TILE_SIZE_PX - margin.y;
 
-			player_motion.position.x = glm::clamp(player_motion.position.x, min_x, max_x);
-			player_motion.position.y = glm::clamp(player_motion.position.y, min_y, max_y);
-		}
+		player_motion.position.x = glm::clamp(player_motion.position.x, min_x, max_x);
+		player_motion.position.y = glm::clamp(player_motion.position.y, min_y, max_y);
 	}
 	// check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;

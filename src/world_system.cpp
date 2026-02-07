@@ -131,11 +131,10 @@ bool WorldSystem::start_and_load_sounds() {
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
-
 	this->renderer = renderer_arg;
 
 	init_tiles();
-
+	init_tile_walls();
 	// Create player entity
 	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 	createBell(renderer, { 300.f, 400.f }, 80.f);
@@ -161,6 +160,32 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	//Commented out duo to compiler errors
 	/*std::cout << "Starting music..." << std::endl;
 	Mix_PlayMusic(background_music, -1);*/
+
+	// walls
+	TileMap& tilemap = registry.tilemaps.components[0];
+	float arena_width = tilemap.width * TILE_SIZE_PX;
+	float arena_height = tilemap.height * TILE_SIZE_PX;
+	float wall_thickness = TILE_SIZE_PX;
+	// top
+	createWall(
+		vec2(arena_width / 2.f, wall_thickness / 2.f),
+		vec2(arena_width, wall_thickness)
+	);
+	// bottom
+	createWall(
+		vec2(arena_width / 2.f, arena_height - wall_thickness / 2.f),
+		vec2(arena_width, wall_thickness)
+	);
+	// left
+	createWall(
+		vec2(wall_thickness / 2.f, arena_height / 2.f),
+		vec2(wall_thickness, arena_height)
+	);
+	// right
+	createWall(
+		vec2(arena_width - wall_thickness / 2.f, arena_height / 2.f),
+		vec2(wall_thickness, arena_height)
+	);
 }
 
 // Update our game world
