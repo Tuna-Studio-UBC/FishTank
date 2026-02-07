@@ -5,6 +5,7 @@
 #include <array>
 #include "../ext/stb_image/stb_image.h"
 #include "configs/attack_pattern.hpp"
+#include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 
 #pragma region Entity
@@ -44,14 +45,39 @@ struct Wall
 	vec2 position;
 };
 
-// used for Entities that cause damage
-struct Mine
+
+#pragma endregion Entity
+
+#pragma region Hazards
+// =================================================================================
+// Hazards
+// =================================================================================
+
+struct Hazard
+{
+	HAZARD_TYPE type;
+	Hazard(HAZARD_TYPE type) { this->type = type; };
+};
+
+struct Bullet
 {
 	int damage;
+	Entity owner; // track who fired to prevent self hit
+};
+// Uses: Motion
+// Optional: Bouncy
+
+struct Mine
+{
 };
 // Uses: Motion
 
-#pragma endregion Entity
+struct Anemone
+{
+};
+// Uses: Motion
+
+#pragma endregion Hazards
 
 #pragma region Behaviour
 // =================================================================================

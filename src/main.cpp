@@ -12,6 +12,7 @@
 #include "systems/heal_damage_system.hpp"
 #include "systems/death_system.hpp"
 #include "systems/pick_up_system.hpp"
+#include "systems/player_input_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"

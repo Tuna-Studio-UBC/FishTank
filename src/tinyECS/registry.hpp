@@ -13,9 +13,13 @@ public:
 	// Entity
 	ComponentContainer<Player> players;
 	ComponentContainer<Enemy> enemies;
-	ComponentContainer<Bullet> bullet;
 	ComponentContainer<Wall> wall;
+
+	// Hazards
+	ComponentContainer<Hazard> hazard;
+	ComponentContainer<Bullet> bullet;
 	ComponentContainer<Mine> mine;
+	ComponentContainer<Anemone> anemone;
 	ComponentContainer<Bell> bells;
 
 	// Behaviour
@@ -69,9 +73,13 @@ public:
 		// Entity
 		registry_list.push_back(&players);
 		registry_list.push_back(&enemies);
-		registry_list.push_back(&bullet);
 		registry_list.push_back(&wall);
+
+		// Hazards
+		registry_list.push_back(&hazard);
+		registry_list.push_back(&bullet);
 		registry_list.push_back(&mine);
+		registry_list.push_back(&anemone);
 		registry_list.push_back(&bells);
 
 		// Behaviour
