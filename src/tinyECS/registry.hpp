@@ -21,6 +21,7 @@ public:
 	ComponentContainer<Health> health;
 	ComponentContainer<Dead> dead;
 	ComponentContainer<Damage> damage;
+	ComponentContainer<Expiration> expiration;
 	ComponentContainer<OverTimeEffect> overTimeEffect;
 	ComponentContainer<FireControl> fireControl;
 	ComponentContainer<SpeedControl> speedControl;
@@ -36,7 +37,10 @@ public:
 	// Pickups
 	ComponentContainer<PickUp> pickUp;
 
+	ComponentContainer<PowerUp> powerUp;
 	ComponentContainer<Heal> heal;
+	ComponentContainer<SpeedMultiplier> speedMultiplier;
+	ComponentContainer<DamageMultiplier> damageMultiplier;
 
 	// Physics
 	ComponentContainer<Motion> motions;
@@ -75,6 +79,7 @@ public:
 		registry_list.push_back(&health);
 		registry_list.push_back(&dead);
 		registry_list.push_back(&damage);
+		registry_list.push_back(&expiration);
 		registry_list.push_back(&overTimeEffect);
 		registry_list.push_back(&fireControl);
 		registry_list.push_back(&speedControl);
@@ -94,7 +99,10 @@ public:
 		// Pickups
 		registry_list.push_back(&pickUp);
 
+		registry_list.push_back(&powerUp);
 		registry_list.push_back(&heal);
+		registry_list.push_back(&speedMultiplier);
+		registry_list.push_back(&damageMultiplier);
 
 		// Physics
 		registry_list.push_back(&motions);
@@ -147,6 +155,8 @@ public:
 	template <typename Component> ComponentContainer<Component> &get();
 	template <> ComponentContainer<Damage> &get<Damage>() { return damage; }
 	template <> ComponentContainer<Heal> &get<Heal>() { return heal; }
+	template <> ComponentContainer<SpeedMultiplier> &get<SpeedMultiplier>() { return speedMultiplier; }
+	template <> ComponentContainer<DamageMultiplier> &get<DamageMultiplier>() { return damageMultiplier; }
 };
 
 extern ECSRegistry registry;

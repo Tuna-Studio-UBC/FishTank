@@ -7,5 +7,4 @@ class BulletSystem
 {
 public:
 	void step(float elapsed_ms);
-	void handle_collisions();
 };

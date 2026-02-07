@@ -164,7 +164,12 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
-	*/
+
+	// ! FOR TESTING !
+	createPowerUp(renderer, {500.f, 500.f}, POWER_UP_TYPE::HEAL);
+	createPowerUp(renderer, {700.f, 500.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
+	createPowerUp(renderer, {600.f, 500.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
+
 	// start playing background music indefinitely
 	//Commented out duo to compiler errors
 	/*std::cout << "Starting music..." << std::endl;
@@ -232,37 +237,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	return true;
 }
 
-void WorldSystem::game_over() {
-	
-}
+void WorldSystem::handle_expiration(float elapsed_ms)
+{
+	for (Entity e : registry.expiration.entities)
+	{
+		Expiration &exp = registry.expiration.get(e);
+		exp.lifespan_ms -= elapsed_ms;
 
-// Compute collisions between entities
-void WorldSystem::handle_collisions() {
-
-	ComponentContainer<Collision>& collision_registry = registry.collisions;
-	for (uint i = 0; i < collision_registry.components.size(); i++) {
-		Entity entity_a = collision_registry.entities[i];
-		Entity entity_b = collision_registry.components[i].other;
-
-		//Bullet hit player
-		if (registry.bullet.has(entity_a) && registry.players.has(entity_b)) {
-			Bullet& bullet = registry.bullet.get(entity_a);
-			if (bullet.owner != entity_b) {
-				registry.damage.emplace(entity_b, bullet.damage);
-				registry.remove_all_components_of(entity_a); // remove bullet
-			}
-		}
-		//Bullet hit enemy
-		else if (registry.bullet.has(entity_a) && registry.enemies.has(entity_b)) {
-			Bullet& bullet = registry.bullet.get(entity_a);
-			if (bullet.owner != entity_b && registry.health.has(entity_b))
-			{
-				registry.damage.emplace(entity_b, bullet.damage);
-				registry.remove_all_components_of(entity_a); // remove bullet
-			}
+		if (exp.lifespan_ms <= 0)
+		{
+			std::cout << "Entity " << e.id() << " has expired" << std::endl;
+			registry.remove_all_components_of(e);
 		}
 	}
-		registry.collisions.clear();
 }
 
 // Should the game be over ?
