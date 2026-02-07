@@ -17,7 +17,7 @@ struct Wave
 const std::vector<Wave> WAVE_CONFIGS = {
 	{
 		{ {ENEMY_TYPE::FOLLOWER, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }} }
-	}/*,
+	},
 	{
 		{ {ENEMY_TYPE::FOLLOWER, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }},
 		{ENEMY_TYPE::URCHIN, vec2{ TILE_SIZE_PX * 10, TILE_SIZE_PX * 10 }}}
@@ -27,5 +27,5 @@ const std::vector<Wave> WAVE_CONFIGS = {
 		{ENEMY_TYPE::SWARM, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 10 }},
 		{ENEMY_TYPE::SWARM, vec2{ TILE_SIZE_PX * 10, TILE_SIZE_PX * 5 }},
 		{ENEMY_TYPE::SWARM, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 10 }}}
-	}*/
+	}
 };
