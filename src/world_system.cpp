@@ -49,7 +49,6 @@ void WorldSystem::close_window() {
 // World initialization
 // Note, this has a lot of OpenGL specific things, could be moved to the renderer
 GLFWwindow* WorldSystem::create_window() {
-
 	///////////////////////////////////////
 	// Initialize GLFW
 	glfwSetErrorCallback(glfw_err_cb);
@@ -98,7 +97,7 @@ GLFWwindow* WorldSystem::create_window() {
 	const int x = (mode->width - WINDOW_WIDTH_PX) / 2;
 	const int y = (mode->height - WINDOW_HEIGHT_PX) / 2;
 	glfwSetWindowPos(window, x, y);
-
+	
 	return window;
 }
 
@@ -142,13 +141,12 @@ void WorldSystem::start_wave(Progress &progress)
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
-
 	this->renderer = renderer_arg;
 
 	init_tiles();
 
 	// Create player entity
-	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f}, 80, 100);
+	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 	
 	auto e = Entity();
 	auto &progress = registry.progress.emplace(e);
@@ -186,6 +184,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	Progress& progress = registry.progress.components[0];
 	if (progress.game_over == true) {
+		ScreenState& screen = registry.screenStates.components[0];
+		if (screen.darken_screen_factor < 0.9f) {
+			screen.darken_screen_factor += elapsed_ms_since_last_update / 1000.f;
+		}
 		return false;
 	}
 
@@ -287,9 +289,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_E)
+	if (action == GLFW_PRESS)
 	{
-		if (registry.players.entities.size() == 0) {
+		if (key == GLFW_KEY_E) {
+if (registry.players.entities.size() == 0) {
 			std::cout << "[Bell] No player entity found\n";
 			return;
 		}
@@ -358,6 +361,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		trig.cooldown_remaining_ms = trig.cooldown_ms;
 
 		std::cout << "[Bell] Triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
+		}
+
+		if (key == GLFW_KEY_R) {
+			if (registry.progress.components[0].game_over) {
+				restart_game();
+			}
+		}
 	}
 
 	// Debug
@@ -386,4 +396,9 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods)
 	} else {
 		mi.current_action = MouseActions::MouseActionsCount;
 	}
+}
+
+void WorldSystem::restart_game() {
+	registry.clear_all_components();
+	init(renderer);
 }

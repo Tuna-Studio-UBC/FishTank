@@ -11,11 +11,11 @@ struct AttackConfig
 
 static const AttackConfig ATTACK_CONFIGS[attack_count] =
 {
-    // Player
-    { PROJECTILE_SPEED, PROJECTILE_SPEED, 10, 10000.f },
+    // Player CHANGE IT BACK
+    { PROJECTILE_SPEED, PROJECTILE_SPEED, 100, 10000.f },
 
     // Single
-    { PROJECTILE_SPEED, PROJECTILE_SPEED, 10, 5000.f },
+    { PROJECTILE_SPEED, PROJECTILE_SPEED, 100, 5000.f },
 
     // Urchin
     { PROJECTILE_SPEED, PROJECTILE_SPEED, 10, 5000.f }

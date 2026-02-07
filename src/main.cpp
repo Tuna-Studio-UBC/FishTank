@@ -34,7 +34,6 @@ int main()
 	RenderSystem  renderer_system;
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
-	BulletSystem bullet_system;
 
 	// initialize window
 	GLFWwindow* window = world_system.create_window();
@@ -76,6 +75,7 @@ int main()
 			ai_system.step(elapsed_ms);
 			pick_up_system.step(elapsed_ms);
 			physics_system.step(elapsed_ms);
+			collision_system.step(elapsed_ms);
 			player_input_system.step(elapsed_ms);
 		}
 

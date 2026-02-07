@@ -275,6 +275,9 @@ void RenderSystem::drawToScreen()
 
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 	
+	if (!registry.screenStates.has(screen_state_entity)) {
+		registry.screenStates.emplace(screen_state_entity);
+	}
 	ScreenState &screen = registry.screenStates.get(screen_state_entity);
 	// std::cout << "screen.darken_screen_factor: " << screen.darken_screen_factor << " entity id: " << screen_state_entity << std::endl;
 	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
