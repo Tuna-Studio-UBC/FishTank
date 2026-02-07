@@ -152,6 +152,10 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	createPowerUp(renderer, {700.f, 500.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
 	createPowerUp(renderer, {600.f, 500.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
 
+	// ! FOR TESTING !
+	createMine(renderer, {500.f, 400.f});
+	createAnemone(renderer, {500.f, 600.f});
+
 	// start playing background music indefinitely
 	//Commented out duo to compiler errors
 	/*std::cout << "Starting music..." << std::endl;
@@ -211,7 +215,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		if (evt.remaining_ms <= 0.f)
 		{
 			registry.remove_all_components_of(evt_e);
-			std::cout << "[Bell] DistractionEvent expired\n";
+			std::cout << "[Bell] " << evt_e.name_id() << " expired\n";
 		}
 	}
 
@@ -237,7 +241,7 @@ void WorldSystem::handle_expiration(float elapsed_ms)
 
 		if (exp.lifespan_ms <= 0)
 		{
-			std::cout << "Entity " << e.id() << " has expired" << std::endl;
+			std::cout << e.name_id() << " has expired" << std::endl;
 			registry.remove_all_components_of(e);
 		}
 	}
@@ -281,13 +285,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (action == GLFW_PRESS && key == GLFW_KEY_E)
 	{
 		if (registry.players.entities.size() == 0) {
-			std::cout << "[Bell] No player entity found\n";
+			std::cout << "[Bell] No Player entity found\n";
 			return;
 		}
 
 		Entity player = registry.players.entities[0];
 		if (!registry.motions.has(player)) {
-			std::cout << "[Bell] Player has no Motion\n";
+			std::cout << "[Bell] " << player.name_id() << " has no Motion\n";
 			return;
 		}
 
@@ -318,13 +322,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		if (best_dist2 > radius2) {
 			float dist = sqrtf(best_dist2);
-			std::cout << "[Bell] Too far to interact. dist=" << dist
+			std::cout << "[Bell] " << best_bell.name_id() << " too far to interact. dist=" << dist
 					<< " (need <= " << radius << ")\n";
 			return;
 		}
 
 		if (trig.cooldown_remaining_ms > 0.f) {
-			std::cout << "[Bell] Bell on cooldown: " << trig.cooldown_remaining_ms << "ms\n";
+			std::cout << "[Bell] " << best_bell.name_id() << " on cooldown: " << trig.cooldown_remaining_ms << "ms\n";
 			return;
 		}
 
@@ -339,7 +343,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 		else
 		{
-			Entity evt_e = Entity();
+			Entity evt_e = Entity("DistractionEvent");
 			DistractionEvent evt;
 			evt.position = bell_pos;
 			evt.remaining_ms = 2000.f;
@@ -348,7 +352,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		trig.cooldown_remaining_ms = trig.cooldown_ms;
 
-		std::cout << "[Bell] Triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
+		std::cout << "[Bell] " << best_bell.name_id() << " triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
 	}
 
 	// Debug
