@@ -15,5 +15,8 @@ public:
   CollisionSystem() {}
 
 private:
-  void handle_bullets(Entity entity_a, Entity entity_b);
+  void handle_walls(Entity entity_a, Entity entity_b);
+  void handle_entities_vs_walls(Entity entity_a, Entity entity_b);
+  void handle_bullets(Entity bullet_entity, Entity other_entity);
+  void handle_hazards(Entity hazard_entity, Entity other_entity);
 };

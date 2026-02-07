@@ -28,7 +28,7 @@ void OverTimeEffectSystem::step(float elapsed_ms)
     if (ot.duration_time_ms <= 0)
     {
       registry.remove_all_components_of(e);
-      // std::cout << "OverTimeEffect effect " << e.id() << " expired" << std::endl;
+      // std::cout << e.name_id() << " has expired" << std::endl;
     }
   }
 }

@@ -13,10 +13,10 @@
 #include "systems/death_system.hpp"
 #include "systems/pick_up_system.hpp"
 #include "systems/camera_system.hpp"
+#include "systems/player_input_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
-#include "player_input_system.hpp"
 #include "bullet_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
