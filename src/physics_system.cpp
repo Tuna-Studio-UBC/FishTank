@@ -72,9 +72,25 @@ void PhysicsSystem::step(float elapsed_ms)
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
 		vec2 old_position = motion.position;
-
+    
 		auto velocity = motion.velocity * elapsed_ms / 1000.f;
 		auto angle = motion.angle;
+
+		// TODO: Optimize this nested loop
+		// Apply SpeedMultiplier power up
+		for (Entity& sm_entity : registry.speedMultiplier.entities)
+		{
+			if (registry.target.has(sm_entity))
+			{
+				Target &t = registry.target.get(sm_entity);
+				if (t.target == entity)
+				{
+					SpeedMultiplier &sm = registry.speedMultiplier.get(sm_entity);
+					velocity *= sm.multiplier;
+				}
+			}
+		}
+
 		float vx_prime = cos(angle) * velocity.x - sin(angle) * velocity.y;
 		float vy_prime = sin(angle) * velocity.x + cos(angle) * velocity.y;
 		//motion.position += vec2(vx_prime, vy_prime);
