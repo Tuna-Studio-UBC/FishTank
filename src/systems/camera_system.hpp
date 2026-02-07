@@ -10,4 +10,8 @@ public:
 	void step();
 
 	CameraSystem () {}
+
+private:
+	const float interp_coefficient = 0.03;
+
 };

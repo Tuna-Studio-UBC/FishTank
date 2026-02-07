@@ -7,7 +7,5 @@ void CameraSystem::step()
 	vec2 &camera_pos = registry.motions.get(camera).position;
 	vec2 &player_pos = registry.motions.get(player).position;
 
-	vec2 displacement = player_pos - camera_pos;
-	vec2 lerp = displacement / 30.f;
-	camera_pos += lerp;
+	camera_pos = camera_pos * (1 - interp_coefficient) + player_pos * interp_coefficient;
 }
