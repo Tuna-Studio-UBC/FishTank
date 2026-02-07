@@ -85,5 +85,7 @@ int main()
 		renderer_system.draw();
 	}
 
+	renderer_system.shutdown();
+
 	return EXIT_SUCCESS;
 }

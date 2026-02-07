@@ -52,12 +52,28 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	glBindVertexArray(vao);
 	gl_has_errors();
 
+	initializeGUI(window);
 	initScreenTexture();
-    initializeGlTextures();
+	initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 
 	return true;
+}
+
+void RenderSystem::initializeGUI(GLFWwindow* window)
+{
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io     = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	ImGui::StyleColorsDark();
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init();
 }
 
 void RenderSystem::initializeGlTextures()

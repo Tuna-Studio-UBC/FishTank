@@ -3,6 +3,10 @@
 #include <array>
 #include <utility>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include "common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/tiny_ecs.hpp"
@@ -53,6 +57,8 @@ public:
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
+	void initializeGUI(GLFWwindow* window);
+
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
@@ -69,6 +75,8 @@ public:
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the vignette shader
 	bool initScreenTexture();
+	
+	void RenderSystem::shutdown();
 
 	// Destroy resources associated to one or all entities created by the system
 	~RenderSystem();

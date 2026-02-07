@@ -299,6 +299,31 @@ void RenderSystem::drawToScreen()
 		nullptr); // one triangle = 3 vertices; nullptr indicates that there is
 				  // no offset from the bound index buffer
 	gl_has_errors();
+
+	// Prepare new GUI frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+  ImGuiIO &io = ImGui::GetIO();
+	if (!io.WantCaptureMouse)
+	{
+		// Handle inputs
+	}
+
+	// Draw UI components
+	ImGui::ShowDemoWindow();
+
+	// Render UI
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void RenderSystem::shutdown()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 // Render our game world
