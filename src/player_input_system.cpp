@@ -100,13 +100,14 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     if (mouse_input.current_action == MouseActions::LeftClick && fc.cooldown_timer == 0.f)
     {
-        Motion &player_motion = registry.motions.get(registry.players.entities[0]);
-        vec2& player_pos = player_motion.position;
+        //Motion &player_motion = registry.motions.get(registry.players.entities[0]);
+        vec2& player_pos = registry.motions.get(registry.players.entities[0]).position;
+        vec2& camera_pos = registry.motions.get(registry.camera .entities[0]).position;
 
         // If we wanted to change this so that the player isn't always centered, we would need to add the new 
         // center coordinates, then subtract the player coordinates. As it stands, since player is the center,
         // we would be both adding and subtracting the player coordinates.
-        vec2 mouse_relative_pos = mouse_input.mouse_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
+        vec2 mouse_relative_pos = mouse_input.mouse_pos + camera_pos - player_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
         // https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
         float angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);
         Entity player = registry.players.entities[0];
