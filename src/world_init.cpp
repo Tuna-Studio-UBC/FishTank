@@ -42,7 +42,7 @@ void print_tileset(TileSet &tileset)
 
 void init_tiles()
 {
-	Entity entity = Entity();
+	Entity entity = Entity("Tiles");
 
 	TileMap tilemap = parse_tilemap(TILEMAP_JSON);
 	TileSet tileset = parse_tileset(TILESET_JSON);
@@ -70,7 +70,7 @@ void init_tiles()
 // Player creation function
 Entity createPlayer(RenderSystem *renderer, vec2 position)
 {
-	auto entity = Entity();
+	auto entity = Entity("Player");
 
 	PlayerConfig config;
 	registry.players.emplace(entity);
@@ -114,7 +114,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 {
-	auto entity = Entity();
+	auto entity = Entity("Enemy");
 
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -158,7 +158,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 
 /*Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 patrol_b, float speed_px_s)
 {
-    auto entity = Entity();
+    auto entity = Entity("Enemy");
     Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
 
@@ -200,7 +200,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type)
 {
-	auto entity = Entity();
+	auto entity = Entity("Power Up");
 
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -235,7 +235,7 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type)
 
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px)
 {
-    auto entity = Entity();
+    auto entity = Entity("Bell");
     Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
     registry.meshPtrs.emplace(entity, &mesh);
 
@@ -270,7 +270,7 @@ Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_p
 
 Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner)
 {
-	auto entity = Entity();
+	auto entity = Entity("Projectile");
 	
 	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
 
@@ -295,7 +295,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
 Entity createMine(RenderSystem *renderer, vec2 position)
 {
-	auto entity = Entity();
+	auto entity = Entity("Mine");
 
 	auto &config = HAZARD_CONFIGS[(int)HAZARD_TYPE::MINE];
 	registry.mine.emplace(entity);
@@ -322,7 +322,7 @@ Entity createMine(RenderSystem *renderer, vec2 position)
 
 Entity createAnemone(RenderSystem *renderer, vec2 position)
 {
-	auto entity = Entity();
+	auto entity = Entity("Anemone");
 
 	auto &config = HAZARD_CONFIGS[(int)HAZARD_TYPE::ANEMONE];
 	registry.anemone.emplace(entity);

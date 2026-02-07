@@ -49,7 +49,7 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     // Process Turn Input
     if (key_pressed(KeyboardActions::QuickTurn, keyboard_input) && !quick_turn_active) {
-        Entity e = Entity();
+        Entity e = Entity("PlayerQuickTurn");
         PlayerQuickTurn &qt = registry.playerQuickTurn.emplace(e);
         qt.direction = -1;
         qt.duration_ms = quick_turn_duration;
