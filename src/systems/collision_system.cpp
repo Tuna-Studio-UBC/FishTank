@@ -69,3 +69,34 @@ void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
         }
     }
 }
+
+void CollisionSystem::handle_entities_vs_walls(Entity entity_a, Entity entity_b) {
+    // player vs wall
+    if (registry.players.has(entity_a) && registry.wall.has(entity_b))
+    {
+        Motion &player_motion = registry.motions.get(entity_a);
+        Motion& wall_motion = registry.motions.get(entity_b);
+
+        // seperation vector to push player out of wall
+        vec2 seperation = player_motion.position - wall_motion.position;
+        vec2 wall_half_size = wall_motion.scale / 2.f;
+        vec2 player_half_size = player_motion.scale / 2.f;
+
+        // overlap
+        float overlap_x = (wall_half_size.x + player_half_size.x) - abs(seperation.x);
+        float overlap_y = (wall_half_size.y + player_half_size.y) - abs(seperation.y);
+
+        // push player out along the axis
+        if (overlap_x < overlap_y)
+        {
+            // horizontal push
+            if (seperation.x > 0) player_motion.position.x += overlap_x;
+            else player_motion.position.x -= overlap_x;
+        }
+        else {
+            //vertical push
+            if (seperation.y > 0) player_motion.position.y += overlap_y;
+            else player_motion.position.y -= overlap_y;
+        }
+    }
+}

@@ -17,4 +17,5 @@ public:
 private:
   void handle_bullets(Entity entity_a, Entity entity_b);
   void handle_walls(Entity entity_a, Entity entity_b);
+  void handle_entities_vs_walls(Entity entity_a, Entity entity_b);
 };

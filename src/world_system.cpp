@@ -159,6 +159,9 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	Mix_PlayMusic(background_music, -1);*/
 
 	// walls
+	TileMap& tilemap = registry.tilemaps.components[0];
+	float arena_width = tilemap.width * TILE_SIZE_PX;
+	float arena_height = tilemap.height * TILE_SIZE_PX;
 	float wall_thickness = TILE_SIZE_PX;
 	// top
 	createWall(
@@ -167,18 +170,18 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	);
 	// bottom
 	createWall(
-		vec2(WINDOW_WIDTH_PX / 2.f, WINDOW_HEIGHT_PX - wall_thickness / 2.f),
+		vec2(WINDOW_WIDTH_PX / 2.f, arena_height - wall_thickness / 2.f),
 		vec2(WINDOW_WIDTH_PX, wall_thickness)
 	);
 	// left
 	createWall(
-		vec2(wall_thickness / 2.f, WINDOW_HEIGHT_PX / 2.f),
-		vec2(wall_thickness, WINDOW_HEIGHT_PX)
+		vec2(wall_thickness / 2.f, arena_height / 2.f),
+		vec2(wall_thickness, arena_height)
 	);
 	// right
 	createWall(
-		vec2(WINDOW_WIDTH_PX - wall_thickness / 2.f, WINDOW_HEIGHT_PX / 2.f),
-		vec2(wall_thickness, WINDOW_HEIGHT_PX)
+		vec2(arena_width - wall_thickness / 2.f, arena_height / 2.f),
+		vec2(wall_thickness, arena_height)
 	);
 }
 
