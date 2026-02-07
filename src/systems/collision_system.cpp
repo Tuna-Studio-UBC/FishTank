@@ -12,6 +12,9 @@ void CollisionSystem::step(float elapsed_ms)
     Entity entity_b = collision_registry.components[i].other;
 
     handle_bullets(entity_a, entity_b);
+	handle_walls(entity_a, entity_b);
+    handle_entities_vs_walls(entity_a, entity_b);
+	handle_hazards(entity_a, entity_b);
   }
 
   // Clear all collisions for the current step

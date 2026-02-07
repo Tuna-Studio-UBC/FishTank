@@ -401,6 +401,8 @@ Entity createWall(const vec2& position, const vec2& scale)
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = position;
 	motion.scale = scale;
+	motion.velocity = vec2(0.f, 0.f);
+	motion.angle = 0.f;
 
 	registry.wall.emplace(entity);
 
