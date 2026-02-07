@@ -168,13 +168,13 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	float wall_thickness = TILE_SIZE_PX;
 	// top
 	createWall(
-		vec2(WINDOW_WIDTH_PX / 2.f, wall_thickness / 2.f),
-		vec2(WINDOW_WIDTH_PX, wall_thickness)
+		vec2(arena_width / 2.f, wall_thickness / 2.f),
+		vec2(arena_width, wall_thickness)
 	);
 	// bottom
 	createWall(
-		vec2(WINDOW_WIDTH_PX / 2.f, arena_height - wall_thickness / 2.f),
-		vec2(WINDOW_WIDTH_PX, wall_thickness)
+		vec2(arena_width / 2.f, arena_height - wall_thickness / 2.f),
+		vec2(arena_width, wall_thickness)
 	);
 	// left
 	createWall(
