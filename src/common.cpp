@@ -65,7 +65,7 @@ vec2 direction_to_unit_vector(float radians)
 	return unit_vec;
 }
 
-void change_vector_direction(vec2 &in_vec, float radians)
+void change_vector_direction(vec2& in_vec, float radians)
 {
 	float c = std::cos(radians);
 	float s = std::sin(radians);
@@ -75,4 +75,15 @@ void change_vector_direction(vec2 &in_vec, float radians)
 
 	in_vec.x = x;
 	in_vec.y = y;
+}
+
+bool entity_in_radius(vec2 dist, vec2 target_scale, float radius) 
+{
+	float true_radius =
+		radius + std::max(target_scale.x,
+			target_scale.y);
+
+	float dist2 = dist.x * dist.x + dist.y * dist.y;
+
+	return dist2 <= true_radius * true_radius;
 }

@@ -196,20 +196,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	title_ss << GAME_NAME;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
-	for (Entity b : registry.distractionTriggers.entities)
+	for (Entity b : registry.bells.entities)
 	{
-		DistractionTrigger& trig = registry.distractionTriggers.get(b);
-		if (trig.cooldown_remaining_ms > 0.f) {
-			trig.cooldown_remaining_ms -= elapsed_ms_since_last_update;
-			if (trig.cooldown_remaining_ms < 0.f)
-				trig.cooldown_remaining_ms = 0.f;
+		Bell& bell = registry.bells.get(b);
+		if (bell.cooldown_timer > 0.f) {
+			bell.cooldown_timer -= elapsed_ms_since_last_update;
+			if (bell.cooldown_timer < 0.f)
+				bell.cooldown_timer = 0.f;
 		}
 	}
 
-	if (registry.distractionEvents.entities.size() > 0)
+	/*if (registry.distracted.entities.size() > 0)
 	{
-		Entity evt_e = registry.distractionEvents.entities[0];
-		DistractionEvent& evt = registry.distractionEvents.get(evt_e);
+		Entity evt_e = registry.distracted.entities[0];
+		Distracted& evt = registry.distracted.get(evt_e);
 		evt.remaining_ms -= elapsed_ms_since_last_update;
 
 		if (evt.remaining_ms <= 0.f)
@@ -217,7 +217,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			registry.remove_all_components_of(evt_e);
 			std::cout << "[Bell] " << evt_e.name_id() << " expired\n";
 		}
-	}
+	}*/
 
 	// Create bullet entities requested by enemies in AISystem
 	for (BulletRequest req : registry.bullet_requests.components) {
@@ -299,7 +299,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		float best_dist2 = 1e30f;
 		Entity best_bell;
 
-		for (Entity b : registry.distractionTriggers.entities)
+		for (Entity b : registry.bells.entities)
 		{
 			if (!registry.motions.has(b)) continue;
 			vec2 bell_pos = registry.motions.get(b).position;
@@ -316,8 +316,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			return;
 		}
 
-		DistractionTrigger& trig = registry.distractionTriggers.get(best_bell);
-		float radius = trig.interact_radius_px;
+		Bell& bell = registry.bells.get(best_bell);
+		float radius = bell.interact_radius_px;
 		float radius2 = radius * radius;
 
 		if (best_dist2 > radius2) {
@@ -327,30 +327,24 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			return;
 		}
 
-		if (trig.cooldown_remaining_ms > 0.f) {
-			std::cout << "[Bell] " << best_bell.name_id() << " on cooldown: " << trig.cooldown_remaining_ms << "ms\n";
+		if (bell.cooldown_timer > 0.f) {
+			std::cout << "[Bell] " << best_bell.name_id() << " on cooldown: " << bell.cooldown_timer << "ms\n";
 			return;
 		}
 
 		vec2 bell_pos = registry.motions.get(best_bell).position;
 
-		if (registry.distractionEvents.entities.size() > 0)
-		{
-			Entity evt_e = registry.distractionEvents.entities[0];
-			DistractionEvent& evt = registry.distractionEvents.get(evt_e);
-			evt.position = bell_pos;
-			evt.remaining_ms = 2000.f;
-		}
-		else
-		{
-			Entity evt_e = Entity("DistractionEvent");
-			DistractionEvent evt;
-			evt.position = bell_pos;
-			evt.remaining_ms = 2000.f;
-			registry.distractionEvents.insert(evt_e, evt);
+		for (Entity enemy : registry.enemies.entities) {
+			Motion &enemy_motion = registry.motions.get(enemy);
+			if (!registry.distracted.has(enemy) && entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
+				if (registry.pursuit.has(enemy)) {
+					registry.pursuit.remove(enemy);
+				}
+				registry.distracted.insert(enemy, {best_bell, bell.distraction_ms});
+			}
 		}
 
-		trig.cooldown_remaining_ms = trig.cooldown_ms;
+		bell.cooldown_timer = bell.cooldown_ms;
 
 		std::cout << "[Bell] " << best_bell.name_id() << " triggered at (" << bell_pos.x << ", " << bell_pos.y << ")\n";
 	}
