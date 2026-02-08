@@ -45,10 +45,10 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
         Motion &m = registry.motions.get(bullet_entity);
         Entity e = Entity("Particle Emitter");
         ParticleEmitter &pe = registry.particleEmitters.emplace(e);
-        pe.life_ms = 5000;
-        pe.particle_life_ms = 5000;
+        pe.life_ms = 500;
+        pe.particle_life_ms = 500;
         pe.max_particles = 1000;
-        pe.particle_speed = 15;
+        pe.particle_speed = 120;
         pe.spawn_interval_ms = 50;
         pe.position = m.position;
 
