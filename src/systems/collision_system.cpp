@@ -30,7 +30,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
     {
       if (bullet.owner != other_entity)
       {
-        registry.damage.emplace(other_entity, bullet.damage);
+        registry.damage.emplace_with_duplicates(other_entity, bullet.damage);
         registry.remove_all_components_of(bullet_entity);
       }
     }
@@ -39,7 +39,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
     {
       if (bullet.owner != other_entity && registry.health.has(other_entity))
       {
-        registry.damage.emplace(other_entity, bullet.damage);
+        registry.damage.emplace_with_duplicates(other_entity, bullet.damage);
 
         // Temp use bullet collision as trigger
         Motion &m = registry.motions.get(bullet_entity);
@@ -84,14 +84,14 @@ void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity)
       }
       else
       {
-        registry.damage.emplace(other_entity, config.amount);
+        registry.damage.emplace_with_duplicates(other_entity, config.amount);
         registry.remove_all_components_of(hazard_entity);
       }
     }
     // Handle hazards against enemy
     else if (registry.enemies.has(other_entity))
     {
-      registry.damage.emplace(other_entity, config.amount);
+      registry.damage.emplace_with_duplicates(other_entity, config.amount);
       registry.remove_all_components_of(hazard_entity);
     }
   }
