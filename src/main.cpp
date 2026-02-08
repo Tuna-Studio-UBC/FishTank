@@ -87,9 +87,13 @@ int main()
 		collision_system.step(elapsed_ms);
 
 		// Draw GUIs
-		game_ui.draw_demo();
 		game_ui.draw_healthbar();
+
+		// Debugging UI
+		#ifdef ENABLE_DEBUG_UI
+		game_ui.draw_demo();
 		game_ui.draw_respawn(&world_system);
+		#endif
 
 		// Render
 		renderer_system.draw();
