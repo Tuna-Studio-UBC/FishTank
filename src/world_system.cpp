@@ -144,7 +144,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	// createOverTimeEffect<Damage>(player, 1000.f, 5000.f, 10);
 	// createOverTimeEffect<Heal>(player, 1000.f, 5000.f, 10);
 
-	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
+	ENEMY_TYPE type = ENEMY_TYPE::URCHIN; // TESTING: change this out to test types
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
 
 	// ! FOR TESTING !
@@ -245,6 +245,14 @@ void WorldSystem::handle_expiration(float elapsed_ms)
 			registry.remove_all_components_of(e);
 		}
 	}
+}
+
+void WorldSystem::respawn_player()
+{
+	Entity &player = registry.players.entities[0];
+	registry.remove_all_components_of(player);
+	registry.players.remove(player);
+	createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 }
 
 // Should the game be over ?
@@ -366,12 +374,14 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods)
 {
 	Entity e = registry.players.entities[0];
 	MouseInputState &mi = registry.mouseInput.get(e);
-	if (action == GLFW_PRESS)
+
+	ImGuiIO &io = ImGui::GetIO();
+	if (action == GLFW_PRESS && !io.WantCaptureMouse) // Ignore if ImGui is focused
 	{
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
-		{
-			mi.current_action = MouseActions::LeftClick;
-		}
+			if (button == GLFW_MOUSE_BUTTON_LEFT)
+			{
+				mi.current_action = MouseActions::LeftClick;
+			}
 	} else {
 		mi.current_action = MouseActions::MouseActionsCount;
 	}

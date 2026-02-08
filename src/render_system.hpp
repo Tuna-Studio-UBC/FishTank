@@ -3,6 +3,10 @@
 #include <array>
 #include <utility>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include "common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/tiny_ecs.hpp"
@@ -31,7 +35,8 @@ class RenderSystem {
 	// TODO
 	const std::array<std::string, texture_count> texture_paths = {
 		tileset_texture_path("greybox_tiles.png"),
-		textures_path("white_bubble.png")
+		textures_path("white_bubble.png"),
+		textures_path("black.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -53,6 +58,8 @@ class RenderSystem {
 public:
 	// Initialize the window
 	bool init(GLFWwindow* window);
+
+	void initializeGUI(GLFWwindow* window);
 
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
@@ -78,6 +85,10 @@ public:
 
 	// Draw all entities
 	void draw();
+	
+	void renderGUI();
+
+	void shutdown();
 
 	mat3 createProjectionMatrix();
 	mat3 createViewMatrix();

@@ -129,8 +129,8 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 	// thus ORDER IS IMPORTANT
 	Transform transform;
 	transform.translate(motion.position);
-	transform.scale(motion.scale);
 	transform.rotate(motion.angle);
+	transform.scale(motion.scale);
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
@@ -418,12 +418,20 @@ void RenderSystem::draw()
 	drawParticles(projection_2D, view_2D);
 
 	// draw framebuffer to screen
-	// adding "vignette" effect when applied
 	drawToScreen();
+}
 
-	// flicker-free display with a double buffer
-	glfwSwapBuffers(window);
-	gl_has_errors();
+void RenderSystem::renderGUI()
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void RenderSystem::shutdown()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 mat3 RenderSystem::createProjectionMatrix()

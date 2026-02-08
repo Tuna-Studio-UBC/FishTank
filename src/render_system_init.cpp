@@ -52,8 +52,9 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	glBindVertexArray(vao);
 	gl_has_errors();
 
+	initializeGUI(window);
 	initScreenTexture();
-    initializeGlTextures();
+	initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 	initializeParticles();
@@ -73,6 +74,26 @@ void RenderSystem::initializeParticles()
 		particle_buffer_capacity * sizeof(vec3),
 		nullptr,
 		GL_STREAM_DRAW);
+}
+
+void RenderSystem::initializeGUI(GLFWwindow* window)
+{
+  // Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io     = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+	// Styling
+	ImGui::StyleColorsDark();
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.FontSizeBase = 16.0f;
+	io.Fonts->AddFontDefault();
+
+  // Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
 }
 
 void RenderSystem::initializeGlTextures()

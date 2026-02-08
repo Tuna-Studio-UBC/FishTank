@@ -31,6 +31,11 @@ struct Bullet
 // Uses: Motion
 // Optional: Bouncy
 
+struct Turret
+{
+    float barrel_length_px = 30.f;
+};
+
 struct Bell
 {
     float interact_radius_px = 80.f; // distance to e
@@ -390,7 +395,8 @@ struct TileSet
 enum class TEXTURE_ASSET_ID {
 	TEXTURE_TILESET = 0,
 	TEXTURE_PROJECTILE = 1,
-	TEXTURE_COUNT = TEXTURE_PROJECTILE + 1
+	TEXTURE_BLACK = 2,
+	TEXTURE_COUNT = TEXTURE_BLACK + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

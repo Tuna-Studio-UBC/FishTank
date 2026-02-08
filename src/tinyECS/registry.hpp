@@ -13,6 +13,7 @@ public:
 	// Entity
 	ComponentContainer<Player> players;
 	ComponentContainer<Enemy> enemies;
+	ComponentContainer<Turret> turrets;
 	ComponentContainer<Wall> wall;
 
 	// Hazards
@@ -73,6 +74,7 @@ public:
 		// Entity
 		registry_list.push_back(&players);
 		registry_list.push_back(&enemies);
+		registry_list.push_back(&turrets);
 		registry_list.push_back(&wall);
 
 		// Hazards
