@@ -9,6 +9,7 @@
 
 #include "physics_system.hpp"
 #include "configs/wave_config.cpp"
+#include "systems/particle_system.hpp"
 
 // create the world
 WorldSystem::WorldSystem()
@@ -504,6 +505,7 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods)
 }
 
 void WorldSystem::restart_game() {
+	particle_system.clear_all_particles();
 	registry.clear_all_components();
 	init(renderer);
 }
