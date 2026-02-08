@@ -13,6 +13,7 @@
 #include "systems/death_system.hpp"
 #include "systems/pick_up_system.hpp"
 #include "systems/player_input_system.hpp"
+#include "systems/particle_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
@@ -84,6 +85,8 @@ int main()
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
 		world_system.handle_expiration(elapsed_ms);
+		particle_system.step(elapsed_ms);
+
 		collision_system.step(elapsed_ms);
 
 		// Draw GUIs

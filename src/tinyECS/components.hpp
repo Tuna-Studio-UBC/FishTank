@@ -241,6 +241,16 @@ struct Collision
 	Entity other; // the second object involved in the collision
 };
 
+struct ParticleEmitter
+{
+    vec2 position;				// Position of the particle spawn
+    int max_particles;
+	float particle_speed;		// Speed of particle in px / s
+    float spawn_interval_ms;	// Minimum ms between particle spawns
+    float life_ms;				// Duration of particle spawns
+    float particle_life_ms;		// Duration of each particle
+};
+
 #pragma endregion Physics
 
 #pragma region Game State
@@ -390,18 +400,21 @@ enum class TEXTURE_ASSET_ID {
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-enum class EFFECT_ASSET_ID {
+enum class EFFECT_ASSET_ID 
+{
 	COLOURED = 0,
 	EGG = COLOURED + 1,
 	CHICKEN = EGG + 1,
 	TEXTURED = CHICKEN + 1,
 	VIGNETTE = TEXTURED + 1,
 	TILEMAP = VIGNETTE + 1,
-	EFFECT_COUNT = TILEMAP + 1
+	PARTICLE = TILEMAP + 1,
+	EFFECT_COUNT = PARTICLE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
-enum class GEOMETRY_BUFFER_ID {
+enum class GEOMETRY_BUFFER_ID
+{
 	CHICKEN = 0,
 	SPRITE = CHICKEN + 1,
 	EGG = SPRITE + 1,
@@ -409,6 +422,7 @@ enum class GEOMETRY_BUFFER_ID {
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
+
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 struct RenderRequest {
