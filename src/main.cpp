@@ -18,6 +18,8 @@
 #include "world_system.hpp"
 #include "bullet_system.hpp"
 
+#include "ui/game_ui.hpp"
+
 using Clock = std::chrono::high_resolution_clock;
 
 // Entry point
@@ -35,6 +37,8 @@ int main()
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
 	BulletSystem bullet_system;
+
+	GameUI game_ui;
 
 	// initialize window
 	GLFWwindow* window = world_system.create_window();
@@ -86,18 +90,9 @@ int main()
 		collision_system.step(elapsed_ms);
 
 		// Draw GUIs
-		ImGui::ShowDemoWindow();
-
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
-		ImGui::SetNextWindowSize(ImVec2(200, 0));
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(.2f, .2f, .2f, .9f));
-		ImGui::Begin("Respawn", nullptr, window_flags);
-		if (ImGui::Button(("Respawn " + registry.players.entities[0].name_id()).c_str()))
-		{
-			world_system.respawn_player();
-		}
-		ImGui::End();
-		ImGui::PopStyleColor();
+		game_ui.draw_demo();
+		game_ui.draw_healthbar();
+		game_ui.draw_respawn(&world_system);
 
 		// Render
 		renderer_system.draw();

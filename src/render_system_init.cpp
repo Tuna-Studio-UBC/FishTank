@@ -63,17 +63,22 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 void RenderSystem::initializeGUI(GLFWwindow* window)
 {
-  // Setup Dear ImGui context
+  // Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io     = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-	ImGui::StyleColorsDark();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-  // Setup Platform/Renderer backends
+	// Styling
+	ImGui::StyleColorsDark();
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.FontSizeBase = 16.0f;
+	io.Fonts->AddFontDefault();
+
+  // Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
-  ImGui_ImplOpenGL3_Init();
+	ImGui_ImplOpenGL3_Init();
 }
 
 void RenderSystem::initializeGlTextures()
