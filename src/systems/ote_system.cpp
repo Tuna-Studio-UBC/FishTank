@@ -46,7 +46,7 @@ void OverTimeEffectSystem::handle_heal(Entity e, Entity target_entity)
   if (!registry.heal.has(target_entity))
   {
     int amount = registry.heal.get(e).amount;
-    registry.heal.emplace(target_entity, amount);
+    registry.heal.emplace_with_duplicates(target_entity, amount);
   }
 }
 
@@ -62,6 +62,6 @@ void OverTimeEffectSystem::handle_damage(Entity e, Entity target_entity)
   if (!registry.damage.has(target_entity))
   {
     int amount = registry.damage.get(e).amount;
-    registry.damage.emplace(target_entity, amount);
+    registry.damage.emplace_with_duplicates(target_entity, amount);
   }
 }
