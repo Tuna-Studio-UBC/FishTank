@@ -242,7 +242,8 @@ struct ParticleEmitter
     int max_particles;
 	float particle_speed;		// Speed of particle in px / s
     float spawn_interval_ms;	// Minimum ms between particle spawns
-    float life_ms;				// Duration of this effect
+    float life_ms;				// Duration of particle spawns
+    float particle_life_ms;		// Duration of each particle
 };
 
 #pragma endregion Physics

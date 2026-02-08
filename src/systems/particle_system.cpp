@@ -13,9 +13,29 @@ void spawn_particle(ParticleEmitterRuntime &rt, ParticleEmitter &pe) {
   rt.particles.push_back({
     pe.position,
     pe.particle_speed * random_direction_unit_vector(),
-    pe.life_ms
+    pe.particle_life_ms
   });
 };
+
+void update_particle_positions(ParticleEmitterRuntime &rt, float elapsed_ms) {
+  float dt = (elapsed_ms / 1000.f);
+  for (Particle &p : rt.particles)
+  {
+    p.life_ms -= elapsed_ms;
+    // For now, just move particle in a straight line
+    p.position += p.velocity * dt;
+  }
+}
+
+void erase_expired_particles(ParticleEmitterRuntime &rt) {
+  rt.particles.erase(
+      std::remove_if(
+          rt.particles.begin(),
+          rt.particles.end(),
+          [](const Particle &p)
+          { return p.life_ms <= 0.f; }),
+      rt.particles.end());
+}
 
 void ParticleSystem::step(float elapsed_ms)
 {
@@ -28,10 +48,18 @@ void ParticleSystem::step(float elapsed_ms)
     // Destroy expired particle effects
     if (pe.life_ms <= 0.f)
     {
+      update_particle_positions(rt, elapsed_ms);
+      erase_expired_particles(rt);
+
+      if (rt.particles.size() > 0) {
+        continue;
+      }
+
+      std::cout << "Destroyed particle emitter: " << e.name_id() << std::endl;
       runtimes.erase(e.id());
       registry.remove_all_components_of(e);
       continue;
-    }    
+    }
 
     // Add to our accumulator and only spawn particles when we have enough "saved up" time
     rt.spawn_accumulator_ms += elapsed_ms;
@@ -43,24 +71,11 @@ void ParticleSystem::step(float elapsed_ms)
       spawn_particle(rt, pe);
     }
 
-    float dt = (elapsed_ms / 1000.f);
-
     // Update particle positions
-    for (Particle &p : rt.particles)
-    {
-      p.life_ms -= elapsed_ms;
-      // For now, just move particle in a straight line
-      p.position += p.velocity * dt;
-    }
+    update_particle_positions(rt, elapsed_ms);
 
     // Finally, erase dead particles
-    rt.particles.erase(
-        std::remove_if(
-            rt.particles.begin(),
-            rt.particles.end(),
-            [](const Particle &p)
-            { return p.life_ms <= 0.f; }),
-        rt.particles.end());
+    erase_expired_particles(rt);
   }
 }
 
