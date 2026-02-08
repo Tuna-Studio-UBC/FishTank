@@ -128,8 +128,8 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 	// thus ORDER IS IMPORTANT
 	Transform transform;
 	transform.translate(motion.position);
-	transform.scale(motion.scale);
 	transform.rotate(motion.angle);
+	transform.scale(motion.scale);
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);

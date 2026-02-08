@@ -9,6 +9,9 @@
 #include "configs/attack_pattern.hpp"
 #include "configs/hazard_config.hpp"
 #include "configs/power_up_config.hpp"
+#include "tinyECS/registry.hpp"
+#include "utility"
+extern ECSRegistry registry;
 
 // Initiate tile map
 void init_tiles();
@@ -16,7 +19,10 @@ void init_tiles();
 void init_tile_walls();
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
+
 Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
+
+Entity createTurret(RenderSystem* renderer, vec2 position);
 
 Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_px);
 

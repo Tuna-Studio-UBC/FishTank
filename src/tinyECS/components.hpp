@@ -31,6 +31,11 @@ struct Bullet
 // Uses: Motion
 // Optional: Bouncy
 
+struct Turret
+{
+    float barrel_length_px = 30.f;
+};
+
 struct Bell
 {
     float interact_radius_px = 80.f; // distance to e
@@ -393,8 +398,9 @@ struct Overlay
 enum class TEXTURE_ASSET_ID {
 	TEXTURE_TILESET = 0,
 	TEXTURE_PROJECTILE = 1,
-	TEXTURE_WIN_OVERLAY = 2,
-	TEXTURE_LOSE_OVERLAY = 3,
+	TEXTURE_BLACK = 2,
+	TEXTURE_WIN_OVERLAY = 3,
+	TEXTURE_LOSE_OVERLAY = 4,
 	TEXTURE_COUNT = TEXTURE_LOSE_OVERLAY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

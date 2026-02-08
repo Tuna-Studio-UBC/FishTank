@@ -131,7 +131,6 @@ bool WorldSystem::start_and_load_sounds() {
 }
 
 void WorldSystem::init_free_tiles() {
-	std::cout << "initializing free tiles" << std::endl;
 	free_tiles.clear();
 	TileMap& tilemap = registry.tilemaps.components[0];
 	TileSet& tileset = registry.tilesets.components[0];
@@ -151,7 +150,6 @@ void WorldSystem::init_free_tiles() {
 }
 
 vec2 WorldSystem::get_random_position() {
-	std::cout << "getting random position" << std::endl;
 	int idx = (int)(uniform_dist(rng) * free_tiles.size()) - 1;
 	vec2 tile = free_tiles[idx];
 	free_tiles[idx] = free_tiles.back();

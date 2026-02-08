@@ -150,6 +150,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position)
 
 	registry.colors.emplace(entity, config.colour);
 
+	createTurret(renderer, position);
 	return entity;
 }
 
@@ -196,6 +197,34 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 
 	return entity;
 }
+
+Entity createTurret(RenderSystem* renderer, vec2 position)
+{
+    Entity entity = Entity();
+
+    Turret& t = registry.turrets.emplace(entity);
+    t.barrel_length_px = 30.f;
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    Motion& m = registry.motions.emplace(entity);
+    m.position = position;
+    m.velocity = {0.f, 0.f};
+    m.angle = 0.f;
+    m.scale = {70.f, 18.f};
+
+	registry.renderRequests.insert(
+		entity,
+		{TEXTURE_ASSET_ID::TEXTURE_BLACK,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE});
+
+    //registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));
+
+    return entity;
+}
+
 
 /*Entity createEnemy(RenderSystem* renderer, vec2 position, vec2 patrol_a, vec2 patrol_b, float speed_px_s)
 {
@@ -409,7 +438,7 @@ Entity createAnemone(RenderSystem *renderer, vec2 position)
 
 Entity createWall(const vec2& position, const vec2& scale)
 {
-	auto entity = Entity();
+	auto entity = Entity("Wall");
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = position;

@@ -32,6 +32,7 @@ class RenderSystem {
 	const std::array<std::string, texture_count> texture_paths = {
 		tileset_texture_path("greybox_tiles.png"),
 		textures_path("white_bubble.png"),
+		textures_path("black.png"),
 		textures_path("win.png"),
 		textures_path("lose.png")
 	};
