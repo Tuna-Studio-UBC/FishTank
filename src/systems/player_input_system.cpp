@@ -99,7 +99,8 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     // ===== Turret aim =====
     vec2 player_pos = motion.position;
-    vec2 mouse_relative_pos = mouse_input.mouse_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
+    vec2& camera_pos = registry.motions.get(registry.camera.entities[0]).position;
+    vec2 mouse_relative_pos = mouse_input.mouse_pos + camera_pos - player_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
     float aim_angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);
 
     if (!registry.turrets.entities.empty())
@@ -112,30 +113,19 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     if (mouse_input.current_action == MouseActions::LeftClick && fc.cooldown_timer == 0.f)
     {
-        // Motion &player_motion = registry.motions.get(registry.players.entities[0]);
-        // vec2& player_pos = player_motion.position;
+        //Motion &player_motion = registry.motions.get(registry.players.entities[0]);
+        //vec2& player_pos = registry.motions.get(registry.players.entities[0]).position;
+        //vec2& camera_pos = registry.motions.get(registry.camera .entities[0]).position;
 
-        // // If we wanted to change this so that the player isn't always centered, we would need to add the new 
-        // // center coordinates, then subtract the player coordinates. As it stands, since player is the center,
-        // // we would be both adding and subtracting the player coordinates.
-        // vec2 mouse_relative_pos = mouse_input.mouse_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
-        // // https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
-        // // We assume there is exactly 1 player and 1 turret
-        // Entity player = registry.players.entities[0];
-        // float barrel_len = 30.f;
-        // if (registry.turrets.entities.size() > 0)
-        // {
-        //     Entity turret_entity = registry.turrets.entities[0];
-        //     if (registry.turrets.has(turret_entity))
-        //         barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
-        // }
-
-        // // bullet spawn at turret tip
-        // vec2 forward = { cosf(aim_angle), sinf(aim_angle) };
-        // vec2 bullet_spawn_pos = motion.position + forward * barrel_len;
-
-        // createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
-        // fc.cooldown_timer = fc.cooldown_ms;
+        // If we wanted to change this so that the player isn't always centered, we would need to add the new 
+        // center coordinates, then subtract the player coordinates. As it stands, since player is the center,
+        // we would be both adding and subtracting the player coordinates.
+        //vec2 mouse_relative_pos = mouse_input.mouse_pos + camera_pos - player_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
+        // https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
+        //float angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);
+        //Entity player = registry.players.entities[0];
+		//createProjectile(player_pos, angle, ATTACK_PATTERN::PLAYER, player); // player is the owner of the bullet (hopefully)
+        //fc.cooldown_timer = fc.cooldown_ms;
 
         // debug_print_player_motion(motion);
         // debug_print_input_state(keyboard_input);

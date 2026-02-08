@@ -202,6 +202,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	init_tile_walls();
 	// Create player entity
 	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
+	createCamera({ WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
 	
 	auto e = Entity();
 	auto &progress = registry.progress.emplace(e);

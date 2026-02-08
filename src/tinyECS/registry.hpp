@@ -20,6 +20,7 @@ public:
 	ComponentContainer<Hazard> hazard;
 	ComponentContainer<Bullet> bullet;
 	ComponentContainer<Mine> mine;
+	ComponentContainer<Camera> camera;
 	ComponentContainer<Anemone> anemone;
 	ComponentContainer<Bell> bells;
 
@@ -83,6 +84,7 @@ public:
 		registry_list.push_back(&hazard);
 		registry_list.push_back(&bullet);
 		registry_list.push_back(&mine);
+		registry_list.push_back(&camera);
 		registry_list.push_back(&anemone);
 		registry_list.push_back(&bells);
 

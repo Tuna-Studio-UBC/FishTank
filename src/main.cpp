@@ -12,6 +12,7 @@
 #include "systems/heal_damage_system.hpp"
 #include "systems/death_system.hpp"
 #include "systems/pick_up_system.hpp"
+#include "systems/camera_system.hpp"
 #include "systems/player_input_system.hpp"
 #include "systems/particle_system.hpp"
 #include "physics_system.hpp"
@@ -36,6 +37,7 @@ int main()
 	RenderSystem  renderer_system;
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
+	CameraSystem camera_system;
 
 	GameUI game_ui;
 
@@ -88,6 +90,7 @@ int main()
 			world_system.handle_expiration(elapsed_ms);
 		  	particle_system.step(elapsed_ms);
 			collision_system.step(elapsed_ms);
+			camera_system.step();
 		}
 
 		// Draw GUIs
