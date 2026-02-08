@@ -43,3 +43,31 @@ void HealDamageSystem::handle_healing()
     }
   }
 }
+
+// TODO: refactor to generic duplicate check if needed
+void HealDamageSystem::add_damage(Entity entity, int amount)
+{
+  if (!registry.damage.has(entity))
+  {
+    registry.damage.emplace(entity, amount);
+  }
+  else
+  {
+    std::cout << "DUPLICATE DAMAGE WAS CALLED" << std::endl;
+    Damage &d = registry.damage.get(entity);
+    d.amount += amount;
+  }
+}
+
+void HealDamageSystem::add_heal(Entity entity, int amount)
+{
+  if (!registry.heal.has(entity))
+  {
+    registry.heal.emplace(entity, amount);
+  }
+  else
+  {
+    Heal &h = registry.heal.get(entity);
+    h.amount += amount;
+  }
+}
