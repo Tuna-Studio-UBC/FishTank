@@ -13,6 +13,7 @@
 #include "systems/death_system.hpp"
 #include "systems/pick_up_system.hpp"
 #include "systems/player_input_system.hpp"
+#include "systems/particle_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
@@ -74,6 +75,7 @@ int main()
 		t = now;
 
 		// CK: be mindful of the order of your systems and rearrange this list only if necessary
+
 		if (world_system.step(elapsed_ms)) {
 			ote_system.step(elapsed_ms);
 			heal_damage_system.step(elapsed_ms);
@@ -84,13 +86,18 @@ int main()
 			physics_system.step(elapsed_ms);
 			player_input_system.step(elapsed_ms);
 			world_system.handle_expiration(elapsed_ms);
+		  particle_system.step(elapsed_ms);
 			collision_system.step(elapsed_ms);
 		}
 
 		// Draw GUIs
-		game_ui.draw_demo();
 		game_ui.draw_healthbar();
+
+		// Debugging UI
+		#ifdef ENABLE_DEBUG_UI
+		game_ui.draw_demo();
 		game_ui.draw_respawn(&world_system);
+		#endif
 
 		// Render
 		renderer_system.draw();
