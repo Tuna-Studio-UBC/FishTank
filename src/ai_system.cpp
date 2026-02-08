@@ -151,7 +151,7 @@ void AISystem::step(float elapsed_ms)
 					req.position = position;
 					req.angle = incAngle;
 					req.owner = enemy_i; //this is new, to prevent self hit
-					angle += M_PI / 4.f;
+					incAngle += M_PI / 4.f;
 				}
 			}
 			else {

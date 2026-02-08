@@ -24,10 +24,10 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
 {
   if (registry.bullet.has(bullet_entity))
   {
+      Bullet &bullet = registry.bullet.get(bullet_entity);
     // Bullet hit player
     if (registry.players.has(other_entity))
     {
-      Bullet &bullet = registry.bullet.get(bullet_entity);
       if (bullet.owner != other_entity)
       {
         registry.damage.emplace(other_entity, bullet.damage);
@@ -37,7 +37,6 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
     // Bullet hit enemy
     else if (registry.enemies.has(other_entity))
     {
-      Bullet &bullet = registry.bullet.get(bullet_entity);
       if (bullet.owner != other_entity && registry.health.has(other_entity))
       {
         registry.damage.emplace(other_entity, bullet.damage);
@@ -47,8 +46,10 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
     // Bullet hit bullet
     else if (registry.bullet.has(other_entity))
     {
-      registry.remove_all_components_of(bullet_entity);
-      registry.remove_all_components_of(other_entity);
+        if (bullet.owner != registry.bullet.get(other_entity).owner) {
+            registry.remove_all_components_of(bullet_entity);
+            registry.remove_all_components_of(other_entity);
+        }
     }
   }
 }

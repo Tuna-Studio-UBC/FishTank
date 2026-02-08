@@ -215,7 +215,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	// createOverTimeEffect<Damage>(player, 1000.f, 5000.f, 10);
 	// createOverTimeEffect<Heal>(player, 1000.f, 5000.f, 10);
 
-	ENEMY_TYPE type = ENEMY_TYPE::FOLLOWER; // TESTING: change this out to test types
+	ENEMY_TYPE type = ENEMY_TYPE::URCHIN; // TESTING: change this out to test types
 	Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
 
 	// ! FOR TESTING !
