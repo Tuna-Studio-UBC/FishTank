@@ -43,6 +43,8 @@ public:
 	// check for expired entities and remove them
 	void handle_expiration(float elapsed_ms);
 
+	void respawn_player();
+
 	// should the game be over ?
 	bool is_over() const;
 

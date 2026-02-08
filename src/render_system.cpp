@@ -356,7 +356,6 @@ void RenderSystem::draw()
 	}
 
 	// draw framebuffer to screen
-	// adding "vignette" effect when applied
 	drawToScreen();
 
 	for (Entity entity : registry.overlays.entities) {
@@ -366,6 +365,19 @@ void RenderSystem::draw()
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
 	gl_has_errors();
+}
+
+void RenderSystem::renderGUI()
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void RenderSystem::shutdown()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 mat3 RenderSystem::createProjectionMatrix()

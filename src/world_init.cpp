@@ -175,6 +175,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 	registry.health.emplace(entity);
 
 	auto &fire = registry.fireControl.emplace(entity);
+	fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
 	fire.attack_pattern = config.attack_pattern;
 
 	auto &speed = registry.speedControl.emplace(entity);
@@ -367,6 +368,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	motion.scale = vec2(PROJECTILE_SIZE_PX);
 
 	Bouncy& bouncy = registry.bouncy.emplace(entity);
+
 
 	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
 	registry.renderRequests.insert(
