@@ -409,7 +409,7 @@ Entity createAnemone(RenderSystem *renderer, vec2 position)
 
 Entity createWall(const vec2& position, const vec2& scale)
 {
-	auto entity = Entity();
+	auto entity = Entity("Wall");
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = position;
