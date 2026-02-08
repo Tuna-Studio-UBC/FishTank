@@ -199,6 +199,16 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type)
 	return entity;
 }
 
+Entity createCamera(vec2 position)
+{
+	auto entity = Entity();
+
+	registry.camera.emplace(entity);
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	return entity;
+}
+
 Entity createTurret(RenderSystem* renderer, vec2 position)
 {
     Entity entity = Entity();

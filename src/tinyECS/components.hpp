@@ -50,6 +50,10 @@ struct Wall
 };
 // Uses: Motion
 
+struct Camera
+{
+};
+// Uses: Motion
 
 #pragma endregion Entity
 
