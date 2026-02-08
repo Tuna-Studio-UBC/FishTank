@@ -97,3 +97,4 @@ bool gl_has_errors();
 
 vec2 direction_to_unit_vector(float radians);
 void change_vector_direction(vec2 &in_vec, float radians);
+bool entity_in_radius(vec2 dist, vec2 entity_scale, float radius);

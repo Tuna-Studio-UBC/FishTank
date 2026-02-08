@@ -37,7 +37,7 @@ if (IS_OS_MAC)
     link_directories(/opt/homebrew/lib)
 endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/configs/enemy_config.cpp" "src/configs/attack_pattern.cpp" "src/configs/wave_config.cpp" "src/bullet_system.cpp")
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/configs/enemy_config.cpp" "src/configs/attack_pattern.cpp" "src/configs/wave_config.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 # Added this so policy CMP0065 doesn't scream
