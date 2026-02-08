@@ -130,13 +130,69 @@ bool WorldSystem::start_and_load_sounds() {
 	return true;
 }
 
+void WorldSystem::init_free_tiles() {
+	std::cout << "initializing free tiles" << std::endl;
+	free_tiles.clear();
+	TileMap& tilemap = registry.tilemaps.components[0];
+	TileSet& tileset = registry.tilesets.components[0];
+	
+	for (unsigned int y = 0; y < tilemap.height; y++) {
+		for (unsigned int x = 0; x < tilemap.width; x++) {
+			int tile_id = tilemap.tile_ids[x+ y * tilemap.width ];
+
+			bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
+			bool blocked = tileset.collisions[tile_id];
+
+			if (!blocked && !is_border) {
+				free_tiles.push_back({ x,y });
+			}
+		}
+	}
+}
+
+vec2 WorldSystem::get_random_position() {
+	std::cout << "getting random position" << std::endl;
+	int idx = (int)(uniform_dist(rng) * free_tiles.size()) - 1;
+	vec2 tile = free_tiles[idx];
+	free_tiles[idx] = free_tiles.back();
+	free_tiles.pop_back();
+	return vec2(tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX/2), tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX/2));
+}
+
 void WorldSystem::start_wave(Progress &progress)
 {
 	auto config = WAVE_CONFIGS[progress.wave];
 	progress.remaining_enemies = config.enemies.size();
 
 	for (auto enemy : config.enemies) {
-		createEnemy(renderer, enemy.position, enemy.type);
+		vec2 pos = get_random_position();
+		createEnemy(renderer, pos, enemy);
+	}
+}
+
+void WorldSystem::load_level(Progress& progress) {
+	init_free_tiles();
+	auto config = LEVEL_CONFIGS[progress.level];
+	vec2 pos;
+
+	for (auto item : config.hazards) {
+		pos = get_random_position();
+		if (item == HAZARD_TYPE::MINE) {
+			createMine(renderer, pos);
+		}
+		else if (item == HAZARD_TYPE::ANEMONE) {
+			createAnemone(renderer, pos);
+		}
+	}
+
+	for (auto item : config.powerups) {
+		pos = get_random_position();
+			createPowerUp(renderer, pos, item);
+	}
+
+	for (auto bell : config.bells) {
+		pos = get_random_position();
+		createBell(renderer, pos, bell);
 	}
 }
 
@@ -150,6 +206,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	
 	auto e = Entity();
 	auto &progress = registry.progress.emplace(e);
+	load_level(progress);
 	start_wave(progress);
 
 	/* Uncomment to use old testing entities
@@ -226,6 +283,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		progress.wave += 1; 
 
 		if (WAVE_CONFIGS.size() > progress.wave) {
+			if (progress.wave > LEVEL_CONFIGS[progress.level].last_wave) {
+				progress.level += 1;
+				load_level (progress);
+			}
 			start_wave(progress);
 		}
 		else {

@@ -283,7 +283,7 @@ struct MouseInputState
 struct Progress
 {
 	int wave = 0;
-	int level = 1;
+	int level = 0;
 	int remaining_enemies = -1;
 	bool game_over = false;
 };
