@@ -99,6 +99,7 @@ void PlayerInputSystem::step(float elapsed_ms)
 
     // ===== Turret aim =====
     vec2 player_pos = motion.position;
+    vec2& camera_pos = registry.motions.get(registry.camera.entities[0]).position;
     vec2 mouse_relative_pos = mouse_input.mouse_pos + camera_pos - player_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
     float aim_angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);
 
