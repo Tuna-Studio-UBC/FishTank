@@ -3,6 +3,10 @@
 #include <array>
 #include <utility>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include "common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/tiny_ecs.hpp"
@@ -54,6 +58,8 @@ public:
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
+	void initializeGUI(GLFWwindow* window);
+
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
@@ -76,6 +82,10 @@ public:
 
 	// Draw all entities
 	void draw();
+	
+	void renderGUI();
+
+	void shutdown();
 
 	mat3 createProjectionMatrix();
 	mat3 createViewMatrix();

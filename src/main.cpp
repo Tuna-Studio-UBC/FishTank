@@ -17,6 +17,8 @@
 #include "render_system.hpp"
 #include "world_system.hpp"
 
+#include "ui/game_ui.hpp"
+
 using Clock = std::chrono::high_resolution_clock;
 
 // Entry point
@@ -33,6 +35,8 @@ int main()
 	RenderSystem  renderer_system;
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
+
+	GameUI game_ui;
 
 	// initialize window
 	GLFWwindow* window = world_system.create_window();
@@ -55,7 +59,11 @@ int main()
 	// variable timestep loop
 	auto t = Clock::now();
 	while (!world_system.is_over()) {
-		
+		// Prepare new GUI frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		// processes system messages, if this wasn't present the window would become unresponsive
 		glfwPollEvents();
 
@@ -76,11 +84,23 @@ int main()
 		physics_system.step(elapsed_ms);
 		player_input_system.step(elapsed_ms);
 		world_system.handle_expiration(elapsed_ms);
-
 		collision_system.step(elapsed_ms);
 
+		// Draw GUIs
+		game_ui.draw_demo();
+		game_ui.draw_healthbar();
+		game_ui.draw_respawn(&world_system);
+
+		// Render
 		renderer_system.draw();
+		renderer_system.renderGUI();
+
+		// flicker-free display with a double buffer
+		glfwSwapBuffers(window);
+		gl_has_errors();
 	}
+
+	renderer_system.shutdown();
 
 	return EXIT_SUCCESS;
 }
