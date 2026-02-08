@@ -145,13 +145,13 @@ void AISystem::step(float elapsed_ms)
 		if (fire.cooldown_timer >= fire.cooldown_ms) {
 			if (fire.attack_pattern == ATTACK_PATTERN::URCHIN) {
 				float incAngle = 0.f;
-				for (int i = 0; i < 6; i++) {
+				for (int i = 0; i < 8; i++) {
 					auto& req = registry.bullet_requests.emplace_with_duplicates(enemy_i);
 					req.attack_pattern = fire.attack_pattern;
 					req.position = position;
 					req.angle = incAngle;
 					req.owner = enemy_i; //this is new, to prevent self hit
-					angle += M_PI / 4.f;
+					incAngle += M_PI / 4.f;
 				}
 			}
 			else {
