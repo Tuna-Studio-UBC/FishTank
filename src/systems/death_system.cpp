@@ -22,7 +22,7 @@ void DeathSystem::step(float elapsed_ms)
         {
           // TODO: Handle player death
             registry.progress.components[0].game_over = true;
-            Entity& e = Entity();
+            Entity e = Entity();
             registry.overlays.emplace(e);
             auto& motion = registry.motions.emplace(e);
             motion.position = registry.motions.get(registry.players.entities[0]).position;
