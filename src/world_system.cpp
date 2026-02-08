@@ -141,9 +141,9 @@ void WorldSystem::init_free_tiles() {
 			int tile_id = tilemap.tile_ids[x+ y * tilemap.width ];
 
 			bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
-			bool blocked = tileset.collisions[tile_id];
+			bool is_empty = (tile_id == 1);
 
-			if (!blocked && !is_border) {
+			if (is_empty && !is_border) {
 				free_tiles.push_back({ x,y });
 			}
 		}
@@ -305,7 +305,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	for (Entity b : registry.distractionTriggers.entities)
+	for (Entity b : registry.bells.entities)
 	{
 		Bell& bell = registry.bells.get(b);
 		if (bell.cooldown_timer > 0.f) {
