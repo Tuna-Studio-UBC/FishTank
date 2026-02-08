@@ -18,5 +18,4 @@ public:
 
 private:
   void on_pickup(Entity pickup, Entity player);
-  bool player_in_radius(vec2 player_pos, Motion &other_motion, float radius);
 };

@@ -288,6 +288,11 @@ Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_p
     auto entity = Entity("Bell");
     Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
     registry.meshPtrs.emplace(entity, &mesh);
+    
+	auto &bell = registry.bells.emplace(entity);
+	bell.interact_radius_px = interact_radius_px;
+	bell.cooldown_ms = 800.f;
+    bell.cooldown_timer = 0.f;
 
     auto& motion = registry.motions.emplace(entity);
     motion.position = position;
@@ -301,12 +306,6 @@ Entity createBell(RenderSystem* renderer, vec2 position, float interact_radius_p
         { TEXTURE_ASSET_ID::TEXTURE_COUNT,
           EFFECT_ASSET_ID::EGG,
           GEOMETRY_BUFFER_ID::EGG });
-
-    DistractionTrigger trig;
-    trig.interact_radius_px = interact_radius_px;
-    trig.cooldown_ms = 800.f;
-    trig.cooldown_remaining_ms = 0.f;
-    registry.distractionTriggers.insert(entity, trig);
 
     return entity;
 }

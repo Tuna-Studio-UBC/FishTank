@@ -23,17 +23,21 @@ struct Enemy
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
-struct DistractionTrigger
+struct Bullet
+{
+	int damage;
+	Entity owner; // track who fired to prevent self hit
+};
+// Uses: Motion
+// Optional: Bouncy
+
+struct Bell
 {
     float interact_radius_px = 80.f; // distance to e
+	float distraction_radius = 200.f;
     float cooldown_ms = 800.f;
-    float cooldown_remaining_ms = 0.f;
-};
-
-struct DistractionEvent
-{
-    vec2 position = {0.f, 0.f};   
-    float remaining_ms = 2000.f;
+    float cooldown_timer = 0.f;
+	float distraction_ms = 5000.f;
 };
 
 struct Wall
@@ -58,14 +62,6 @@ struct Hazard
 	HAZARD_TYPE type;
 	Hazard(HAZARD_TYPE type) { this->type = type; };
 };
-
-struct Bullet
-{
-	int damage;
-	Entity owner; // track who fired to prevent self hit
-};
-// Uses: Motion
-// Optional: Bouncy
 
 struct Mine
 {
@@ -170,6 +166,12 @@ struct Pursuit
 struct Bouncy
 {
 	int bounces_remaining = 3;
+};
+
+struct Distracted
+{
+	Entity bell;
+    float remaining_ms;
 };
 
 // used in AISystem to request projectile creation in WorldSystem
