@@ -39,7 +39,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
     {
       if (bullet.owner != other_entity && registry.health.has(other_entity))
       {
-        registry.damage.emplace(other_entity, bullet.damage);
+        registry.damage.emplace_with_duplicates(other_entity, bullet.damage);
 
         // Temp use bullet collision as trigger
         Motion &m = registry.motions.get(bullet_entity);
