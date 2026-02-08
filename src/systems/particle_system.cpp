@@ -37,6 +37,13 @@ void erase_expired_particles(ParticleEmitterRuntime &rt) {
       rt.particles.end());
 }
 
+void ParticleSystem::clear_all_particles() {
+  for (Entity e : registry.particleEmitters.entities) {
+    runtimes.erase(e.id());
+    registry.remove_all_components_of(e);
+  }
+}
+
 void ParticleSystem::step(float elapsed_ms)
 {
   for (Entity e : registry.particleEmitters.entities)

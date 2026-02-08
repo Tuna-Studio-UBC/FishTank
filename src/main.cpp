@@ -86,7 +86,7 @@ int main()
 			physics_system.step(elapsed_ms);
 			player_input_system.step(elapsed_ms);
 			world_system.handle_expiration(elapsed_ms);
-		  particle_system.step(elapsed_ms);
+		  	particle_system.step(elapsed_ms);
 			collision_system.step(elapsed_ms);
 		}
 

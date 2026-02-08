@@ -28,6 +28,8 @@ public:
     // Store separately from ECS and lazy load for better performance
     std::unordered_map<unsigned int, ParticleEmitterRuntime> runtimes;
 
+    void clear_all_particles();
+
     void step(float elapsed_ms);
 
     ParticleSystem() {}
