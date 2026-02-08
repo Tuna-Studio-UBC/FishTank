@@ -14,6 +14,9 @@ public:
 
   HealDamageSystem() {}
 
+  static void add_damage(Entity entity, int amount);
+  static void add_heal(Entity entity, int amount);
+
 private:
   void handle_damaging();
   void handle_healing();

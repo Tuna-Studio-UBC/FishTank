@@ -1,5 +1,7 @@
 #include "ote_system.hpp"
 
+#include "heal_damage_system.hpp"
+
 void OverTimeEffectSystem::step(float elapsed_ms)
 {
   // Handle OverTimeEffect effects
@@ -46,7 +48,7 @@ void OverTimeEffectSystem::handle_heal(Entity e, Entity target_entity)
   if (!registry.heal.has(target_entity))
   {
     int amount = registry.heal.get(e).amount;
-    registry.heal.emplace_with_duplicates(target_entity, amount);
+    HealDamageSystem::add_heal(target_entity, amount);
   }
 }
 
@@ -62,6 +64,6 @@ void OverTimeEffectSystem::handle_damage(Entity e, Entity target_entity)
   if (!registry.damage.has(target_entity))
   {
     int amount = registry.damage.get(e).amount;
-    registry.damage.emplace_with_duplicates(target_entity, amount);
+    HealDamageSystem::add_damage(target_entity, amount);
   }
 }
