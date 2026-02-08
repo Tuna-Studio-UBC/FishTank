@@ -4,7 +4,6 @@ vec2 get_bounding_box(const Motion& motion);
 // Compute collisions between entities
 void CollisionSystem::step(float elapsed_ms)
 {
-
   ComponentContainer<Collision> &collision_registry = registry.collisions;
   for (uint i = 0; i < collision_registry.components.size(); i++)
   {

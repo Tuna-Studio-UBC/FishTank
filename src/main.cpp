@@ -75,19 +75,20 @@ int main()
 		t = now;
 
 		// CK: be mindful of the order of your systems and rearrange this list only if necessary
-		world_system.step(elapsed_ms);
-		ote_system.step(elapsed_ms);
-		heal_damage_system.step(elapsed_ms);
-		death_system.step(elapsed_ms);
-		pick_up_system.step(elapsed_ms);
-		ai_system.handle_detection();
-		ai_system.step(elapsed_ms);
-		physics_system.step(elapsed_ms);
-		player_input_system.step(elapsed_ms);
-		world_system.handle_expiration(elapsed_ms);
-		particle_system.step(elapsed_ms);
 
-		collision_system.step(elapsed_ms);
+		if (world_system.step(elapsed_ms)) {
+			ote_system.step(elapsed_ms);
+			heal_damage_system.step(elapsed_ms);
+			death_system.step(elapsed_ms);
+			pick_up_system.step(elapsed_ms);
+			ai_system.handle_detection();
+			ai_system.step(elapsed_ms);
+			physics_system.step(elapsed_ms);
+			player_input_system.step(elapsed_ms);
+			world_system.handle_expiration(elapsed_ms);
+		  particle_system.step(elapsed_ms);
+			collision_system.step(elapsed_ms);
+		}
 
 		// Draw GUIs
 		game_ui.draw_healthbar();

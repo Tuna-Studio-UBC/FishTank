@@ -29,6 +29,8 @@ public:
 	// call to close the window
 	void close_window();
 
+	void restart_game();
+
 	// starts the game
 	void init(RenderSystem* renderer);
 
@@ -47,6 +49,12 @@ public:
 	bool is_over() const;
 
 private:
+
+	void start_wave(Progress &progress);
+	void load_level(Progress& progress);
+	void init_free_tiles();
+	vec2 get_random_position();
+
 	// input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
@@ -69,4 +77,6 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	std::vector<vec2> free_tiles;
 };

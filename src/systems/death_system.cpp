@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "death_system.hpp"
+#include <world_system.hpp>
 
 void DeathSystem::step(float elapsed_ms)
 {
@@ -20,7 +21,17 @@ void DeathSystem::step(float elapsed_ms)
         if (registry.players.has(e))
         {
           // TODO: Handle player death
-
+            registry.progress.components[0].game_over = true;
+            Entity& e = Entity();
+            registry.overlays.emplace(e);
+            auto& motion = registry.motions.emplace(e);
+            motion.position = registry.motions.get(registry.players.entities[0]).position;
+            motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
+            registry.renderRequests.insert(
+                e,
+                { TEXTURE_ASSET_ID::TEXTURE_LOSE_OVERLAY,
+                    EFFECT_ASSET_ID::TEXTURED,
+                    GEOMETRY_BUFFER_ID::SPRITE });
         }
         else if (registry.enemies.has(e))
         {
@@ -38,6 +49,7 @@ void DeathSystem::step(float elapsed_ms)
           }
 
           registry.remove_all_components_of(e);
+          registry.progress.components[0].remaining_enemies -= 1;
         }
       }
     }

@@ -297,6 +297,14 @@ struct MouseInputState
 	MouseActions current_action = MouseActionsCount;
 };
 
+struct Progress
+{
+	int wave = 0;
+	int level = 0;
+	int remaining_enemies = -1;
+	bool game_over = false;
+};
+
 #pragma endregion Game State
 
 #pragma region Rendering
@@ -368,6 +376,11 @@ struct TileSet
 	}
 };
 
+struct Overlay
+{
+
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -396,7 +409,9 @@ enum class TEXTURE_ASSET_ID {
 	TEXTURE_TILESET = 0,
 	TEXTURE_PROJECTILE = 1,
 	TEXTURE_BLACK = 2,
-	TEXTURE_COUNT = TEXTURE_BLACK + 1
+	TEXTURE_WIN_OVERLAY = 3,
+	TEXTURE_LOSE_OVERLAY = 4,
+	TEXTURE_COUNT = TEXTURE_LOSE_OVERLAY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
