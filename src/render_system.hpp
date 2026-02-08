@@ -42,7 +42,8 @@ class RenderSystem {
 		shader_path("chicken"),
 		shader_path("textured"),
 		shader_path("vignette"),
-		shader_path("tilemap")
+		shader_path("tilemap"),
+		shader_path("particle")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -59,8 +60,10 @@ public:
 	void initializeGlTextures();
 
 	void initializeGlEffects();
-
+	
 	void initializeGlMeshes();
+	
+	void initializeParticles();
 
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
@@ -85,6 +88,7 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTile(const RenderRequest &render_request, const TileMap &tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3 &projection, const mat3 &view);
 	void drawTilemap(const Entity &e, const mat3 &projection, const mat3 &view);
+	void drawParticles(const mat3 &projection, const mat3 &view);
 	void drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view);
 	void drawToScreen();
 
@@ -95,6 +99,10 @@ private:
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
+
+	GLuint vao;
+	GLuint vbo;
+	unsigned int particle_buffer_capacity;
 
 	Entity screen_state_entity;
 };

@@ -47,7 +47,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 	// We are not really using VAO's but without at least one bound we will crash in
 	// some systems.
-	GLuint vao;
+
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	gl_has_errors();
@@ -56,8 +56,23 @@ bool RenderSystem::init(GLFWwindow* window_arg)
     initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
+	initializeParticles();
 
 	return true;
+}
+
+void RenderSystem::initializeParticles()
+{
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	particle_buffer_capacity = 4096;
+
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		particle_buffer_capacity * sizeof(vec3),
+		nullptr,
+		GL_STREAM_DRAW);
 }
 
 void RenderSystem::initializeGlTextures()

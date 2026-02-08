@@ -51,7 +51,7 @@ public:
 	// Physics
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
-
+	ComponentContainer<ParticleEmitter> particleEmitters;
 
 	// Game State
 	ComponentContainer<ScreenState> screenStates;
@@ -111,6 +111,7 @@ public:
 		// Physics
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
+		registry_list.push_back(&particleEmitters);
 
 		// Game State
 		registry_list.push_back(&screenStates);
