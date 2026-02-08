@@ -154,8 +154,8 @@ void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
 }
 
 void CollisionSystem::handle_entities_vs_walls(Entity entity_a, Entity entity_b) {
-    // player vs wall
-    if (registry.players.has(entity_a) && registry.wall.has(entity_b))
+    // player or enemy vs wall
+    if ((registry.players.has(entity_a) || registry.enemies.has(entity_a)) && registry.wall.has(entity_b))
     {
         Motion &player_motion = registry.motions.get(entity_a);
         Motion& wall_motion = registry.motions.get(entity_b);
