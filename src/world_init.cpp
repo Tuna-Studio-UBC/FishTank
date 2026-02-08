@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <set>
+#include <map>
 #include "world_init.hpp"
 #include "tinyECS/registry.hpp"
 #include "configs/player_config.cpp"
@@ -40,6 +41,46 @@ void print_tileset(TileSet &tileset)
 }
 #endif
 
+void generate_collision(TileMap& tilemap, TileSet& tileset)
+{
+	auto& tileset_collision_info = tileset.collisions;
+	for (int y = 1; y < tilemap.height - 1; y++)
+	{
+		for (int x = 1; x < tilemap.width - 1; x++)
+		{
+			if (tileset_collision_info[tilemap.tile_ids[GET_2D_POS(x, y, tilemap.width)] - 1])
+			{
+				createWall(vec2(x * TILE_SIZE_PX, y * TILE_SIZE_PX));
+			}
+		}
+	}
+}
+// tiles -> wall entites
+void init_tile_walls() {
+	TileMap& tilemap = registry.tilemaps.components[0];
+	TileSet& tileset = registry.tilesets.components[0];
+	
+	int walls_created = 0;
+	int floor_tile_id = 1; //guessing -> confirmed from output
+	for (unsigned int y = 0; y < tilemap.height; y++) {
+		for (unsigned int x = 0; x < tilemap.width; x++) {
+			int tile_id = tilemap.tile_ids[x+ y * tilemap.width ];
+
+			// skip empty/floor tiles, skip outer border tiles
+			bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
+			bool is_non_empty = (tile_id != floor_tile_id);
+
+			if (is_non_empty && !is_border) {
+				vec2 position = vec2(
+					x * TILE_SIZE_PX + TILE_SIZE_PX / 2.f,
+					y * TILE_SIZE_PX + TILE_SIZE_PX / 2.f);
+				vec2 scale = vec2(TILE_SIZE_PX, TILE_SIZE_PX);
+				createWall(position, scale);
+				walls_created++;
+			}
+		}
+	}
+}
 void init_tiles()
 {
 	Entity entity = Entity("Tiles");
@@ -274,6 +315,20 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	
 	AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
 
+	// Apply DamageMultiplier power up
+	for (Entity& dm_entity : registry.damageMultiplier.entities)
+	{
+		if (registry.target.has(dm_entity))
+		{
+			Target &t = registry.target.get(dm_entity);
+			if (t.target == owner)
+			{
+				DamageMultiplier &dm = registry.damageMultiplier.get(dm_entity);
+				attack_config.damage *= dm.multiplier;
+			}
+		}
+	}
+
 	Bullet &bullet = registry.bullet.insert(entity, {attack_config.damage, owner});
 	registry.expiration.emplace(entity, attack_config.lifespan_ms);
 
@@ -282,6 +337,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 	motion.position = position;
 	motion.angle = angle;
 	motion.scale = vec2(PROJECTILE_SIZE_PX);
+
+	Bouncy& bouncy = registry.bouncy.emplace(entity);
 
 	registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
 	registry.renderRequests.insert(
@@ -348,3 +405,21 @@ Entity createAnemone(RenderSystem *renderer, vec2 position)
 }
 
 #pragma endregion Hazards
+
+#pragma region StaticObjects
+
+Entity createWall(const vec2& position, const vec2& scale)
+{
+	auto entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = scale;
+	motion.velocity = vec2(0.f, 0.f);
+	motion.angle = 0.f;
+
+	registry.wall.emplace(entity);
+
+	return entity;
+}
+#pragma endregion StaticObjects

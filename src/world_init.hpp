@@ -12,7 +12,8 @@
 
 // Initiate tile map
 void init_tiles();
-
+// create tile walls
+void init_tile_walls();
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type);
@@ -24,6 +25,8 @@ Entity createMine(RenderSystem *renderer, vec2 position);
 Entity createAnemone(RenderSystem *renderer, vec2 position);
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
+
+Entity createWall(const vec2& position, const vec2& scale = vec2(TILE_SIZE_PX));
 
 // Component can be: DamageMultiplier, SpeedMultiplier
 template <typename Component, typename... Args>
