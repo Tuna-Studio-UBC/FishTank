@@ -16,7 +16,7 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] =
     { 0.f, M_PI, 200.f, ATTACK_PATTERN::SINGLE },
 
     // Urchin
-    { 0.f, 0.f, 300.f ,ATTACK_PATTERN::URCHIN },
+    { 0.f, 0.f, 500.f ,ATTACK_PATTERN::URCHIN },
 
     // Follower
     { 50.f, M_PI / 2.f, 200.f, ATTACK_PATTERN::SINGLE },

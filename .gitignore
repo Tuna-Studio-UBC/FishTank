@@ -1,4 +1,6 @@
-build
-
 .vs/*
+
+build
 ext/project_path.hpp
+
+imgui.ini

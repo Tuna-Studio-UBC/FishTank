@@ -13,6 +13,7 @@ public:
 	// Entity
 	ComponentContainer<Player> players;
 	ComponentContainer<Enemy> enemies;
+	ComponentContainer<Turret> turrets;
 	ComponentContainer<Wall> wall;
 
 	// Hazards
@@ -52,12 +53,13 @@ public:
 	// Physics
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
-
+	ComponentContainer<ParticleEmitter> particleEmitters;
 
 	// Game State
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<KeyboardInputState> keyboardInput;
 	ComponentContainer<MouseInputState> mouseInput;
+	ComponentContainer<Progress> progress;
 
 	// Rendering
 	ComponentContainer<Mesh*> meshPtrs;
@@ -65,6 +67,7 @@ public:
 	ComponentContainer<vec3> colors;
 	ComponentContainer<TileSet> tilesets;
 	ComponentContainer<TileMap> tilemaps;
+	ComponentContainer<Overlay> overlays;
 
 	ComponentContainer<Debug> debugComponents;
 
@@ -74,6 +77,7 @@ public:
 		// Entity
 		registry_list.push_back(&players);
 		registry_list.push_back(&enemies);
+		registry_list.push_back(&turrets);
 		registry_list.push_back(&wall);
 
 		// Hazards
@@ -113,11 +117,13 @@ public:
 		// Physics
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
+		registry_list.push_back(&particleEmitters);
 
 		// Game State
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&keyboardInput);
 		registry_list.push_back(&mouseInput);
+		registry_list.push_back(&progress);
 
 		// Rendering
 		registry_list.push_back(&meshPtrs);
@@ -125,6 +131,7 @@ public:
 		registry_list.push_back(&colors);
 		registry_list.push_back(&tilesets);
 		registry_list.push_back(&tilemaps);
+		registry_list.push_back(&overlays);
 
 		registry_list.push_back(&debugComponents);
 	}

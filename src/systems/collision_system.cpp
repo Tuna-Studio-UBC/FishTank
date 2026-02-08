@@ -4,7 +4,6 @@ vec2 get_bounding_box(const Motion& motion);
 // Compute collisions between entities
 void CollisionSystem::step(float elapsed_ms)
 {
-
   ComponentContainer<Collision> &collision_registry = registry.collisions;
   for (uint i = 0; i < collision_registry.components.size(); i++)
   {
@@ -25,10 +24,10 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
 {
   if (registry.bullet.has(bullet_entity))
   {
+      Bullet &bullet = registry.bullet.get(bullet_entity);
     // Bullet hit player
     if (registry.players.has(other_entity))
     {
-      Bullet &bullet = registry.bullet.get(bullet_entity);
       if (bullet.owner != other_entity)
       {
         registry.damage.emplace(other_entity, bullet.damage);
@@ -38,18 +37,31 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity)
     // Bullet hit enemy
     else if (registry.enemies.has(other_entity))
     {
-      Bullet &bullet = registry.bullet.get(bullet_entity);
       if (bullet.owner != other_entity && registry.health.has(other_entity))
       {
         registry.damage.emplace(other_entity, bullet.damage);
+
+        // Temp use bullet collision as trigger
+        Motion &m = registry.motions.get(bullet_entity);
+        Entity e = Entity("Particle Emitter");
+        ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+        pe.life_ms = 5000;
+        pe.particle_life_ms = 5000;
+        pe.max_particles = 1000;
+        pe.particle_speed = 15;
+        pe.spawn_interval_ms = 50;
+        pe.position = m.position;
+
         registry.remove_all_components_of(bullet_entity);
       }
     }
     // Bullet hit bullet
     else if (registry.bullet.has(other_entity))
     {
-      registry.remove_all_components_of(bullet_entity);
-      registry.remove_all_components_of(other_entity);
+        if (bullet.owner != registry.bullet.get(other_entity).owner) {
+            registry.remove_all_components_of(bullet_entity);
+            registry.remove_all_components_of(other_entity);
+        }
     }
   }
 }

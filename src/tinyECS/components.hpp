@@ -31,6 +31,11 @@ struct Bullet
 // Uses: Motion
 // Optional: Bouncy
 
+struct Turret
+{
+    float barrel_length_px = 30.f;
+};
+
 struct Bell
 {
     float interact_radius_px = 80.f; // distance to e
@@ -240,6 +245,16 @@ struct Collision
 	Entity other; // the second object involved in the collision
 };
 
+struct ParticleEmitter
+{
+    vec2 position;				// Position of the particle spawn
+    int max_particles;
+	float particle_speed;		// Speed of particle in px / s
+    float spawn_interval_ms;	// Minimum ms between particle spawns
+    float life_ms;				// Duration of particle spawns
+    float particle_life_ms;		// Duration of each particle
+};
+
 #pragma endregion Physics
 
 #pragma region Game State
@@ -284,6 +299,14 @@ struct MouseInputState
 {
 	vec2 mouse_pos;
 	MouseActions current_action = MouseActionsCount;
+};
+
+struct Progress
+{
+	int wave = 0;
+	int level = 0;
+	int remaining_enemies = -1;
+	bool game_over = false;
 };
 
 #pragma endregion Game State
@@ -357,6 +380,11 @@ struct TileSet
 	}
 };
 
+struct Overlay
+{
+
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -384,22 +412,28 @@ struct TileSet
 enum class TEXTURE_ASSET_ID {
 	TEXTURE_TILESET = 0,
 	TEXTURE_PROJECTILE = 1,
-	TEXTURE_COUNT = TEXTURE_PROJECTILE + 1
+	TEXTURE_BLACK = 2,
+	TEXTURE_WIN_OVERLAY = 3,
+	TEXTURE_LOSE_OVERLAY = 4,
+	TEXTURE_COUNT = TEXTURE_LOSE_OVERLAY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-enum class EFFECT_ASSET_ID {
+enum class EFFECT_ASSET_ID 
+{
 	COLOURED = 0,
 	EGG = COLOURED + 1,
 	CHICKEN = EGG + 1,
 	TEXTURED = CHICKEN + 1,
 	VIGNETTE = TEXTURED + 1,
 	TILEMAP = VIGNETTE + 1,
-	EFFECT_COUNT = TILEMAP + 1
+	PARTICLE = TILEMAP + 1,
+	EFFECT_COUNT = PARTICLE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
-enum class GEOMETRY_BUFFER_ID {
+enum class GEOMETRY_BUFFER_ID
+{
 	CHICKEN = 0,
 	SPRITE = CHICKEN + 1,
 	EGG = SPRITE + 1,
@@ -407,6 +441,7 @@ enum class GEOMETRY_BUFFER_ID {
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
+
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 struct RenderRequest {

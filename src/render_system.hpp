@@ -3,6 +3,10 @@
 #include <array>
 #include <utility>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include "common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/tiny_ecs.hpp"
@@ -31,7 +35,10 @@ class RenderSystem {
 	// TODO
 	const std::array<std::string, texture_count> texture_paths = {
 		tileset_texture_path("greybox_tiles.png"),
-		textures_path("white_bubble.png")
+		textures_path("white_bubble.png"),
+		textures_path("black.png"),
+		textures_path("win.png"),
+		textures_path("lose.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -42,7 +49,8 @@ class RenderSystem {
 		shader_path("chicken"),
 		shader_path("textured"),
 		shader_path("vignette"),
-		shader_path("tilemap")
+		shader_path("tilemap"),
+		shader_path("particle")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -53,14 +61,18 @@ public:
 	// Initialize the window
 	bool init(GLFWwindow* window);
 
+	void initializeGUI(GLFWwindow* window);
+
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void initializeGlTextures();
 
 	void initializeGlEffects();
-
+	
 	void initializeGlMeshes();
+	
+	void initializeParticles();
 
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
@@ -75,6 +87,10 @@ public:
 
 	// Draw all entities
 	void draw();
+	
+	void renderGUI();
+
+	void shutdown();
 
 	mat3 createProjectionMatrix();
 	mat3 createViewMatrix();
@@ -85,6 +101,7 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTile(const RenderRequest &render_request, const TileMap &tilemap, const ivec2 &tile_pos, const ivec2 &tileset_size, const mat3 &projection, const mat3 &view);
 	void drawTilemap(const Entity &e, const mat3 &projection, const mat3 &view);
+	void drawParticles(const mat3 &projection, const mat3 &view);
 	void drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view);
 	void drawToScreen();
 
@@ -95,6 +112,10 @@ private:
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
+
+	GLuint vao;
+	GLuint vbo;
+	unsigned int particle_buffer_capacity;
 
 	Entity screen_state_entity;
 };

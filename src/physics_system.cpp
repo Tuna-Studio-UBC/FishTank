@@ -47,22 +47,27 @@ bool collision_AABB(const Motion& motion1, const Motion& motion2)
 	bool collisionY = bottom1 >= top2 && top1 <= bottom2;
 	return collisionX && collisionY;
 }
-bool collides_with_wall(const Motion& entity_motion, Entity& out_wall_entity) {
+
+bool collides_with_wall(const Motion& entity_motion, Entity* out_wall_entity) {
 	vec2 entity_box = get_bounding_box(entity_motion);
 
 	//Loop through all wall entites
-	for (Entity wall_entity : registry.wall.entities) {
+	for (uint i = 0; i < registry.wall.entities.size(); i++)
+	{
+		Entity wall_entity = registry.wall.entities[i];
 		if (!registry.motions.has(wall_entity))
 			continue;
+		
 		Motion& wall_motion = registry.motions.get(wall_entity);
 		if (collision_AABB(entity_motion, wall_motion)) {
-			out_wall_entity = wall_entity;
-			return true;
+			out_wall_entity = &registry.wall.entities[i];
+			return false;
 		}
 	}
 	
 	return false;
 }
+
 void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move each entity that has motion
@@ -100,16 +105,17 @@ void PhysicsSystem::step(float elapsed_ms)
 
 		if (registry.players.has(entity) || registry.enemies.has(entity))
 		{
-			Entity wall_entity;
+			Entity *wall_entity = nullptr;
 			if (collides_with_wall(motion, wall_entity)) {
-				motion.position = old_position; // try only moving horiontally
-				motion.position.x += movement.x;
+				motion.position = old_position;
 
-				if (collides_with_wall(motion, wall_entity))
-				{
+				// try only moving horizontally
+				motion.position.x += movement.x;
+				if (collides_with_wall(motion, wall_entity)) {
 					// x movement blocked, revert x
 					motion.position.x = old_position.x;
 				}
+
 				// try moving only vertically
 				motion.position.y = old_position.y + movement.y;
 				if (collides_with_wall(motion, wall_entity)) {

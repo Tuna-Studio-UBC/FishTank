@@ -6,6 +6,7 @@
 // internal
 #include "render_system.hpp"
 #include "tinyECS/registry.hpp"
+#include "systems/particle_system.hpp"
 
 void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, const GLuint program)
 {
@@ -132,8 +133,8 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 	// thus ORDER IS IMPORTANT
 	Transform transform;
 	transform.translate(motion.position);
-	transform.scale(motion.scale);
 	transform.rotate(motion.angle);
+	transform.scale(motion.scale);
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
@@ -283,6 +284,9 @@ void RenderSystem::drawToScreen()
 
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 	
+	if (!registry.screenStates.has(screen_state_entity)) {
+		registry.screenStates.emplace(screen_state_entity);
+	}
 	ScreenState &screen = registry.screenStates.get(screen_state_entity);
 	// std::cout << "screen.darken_screen_factor: " << screen.darken_screen_factor << " entity id: " << screen_state_entity << std::endl;
 	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
@@ -306,6 +310,68 @@ void RenderSystem::drawToScreen()
 		GL_TRIANGLES, 3, GL_UNSIGNED_SHORT,
 		nullptr); // one triangle = 3 vertices; nullptr indicates that there is
 				  // no offset from the bound index buffer
+	gl_has_errors();
+}
+
+void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view)
+{
+	static std::vector<vec3> positions;
+	positions.clear();
+
+	for (auto &[entity_id, rt] : particle_system.runtimes)
+	{
+		for (const Particle &p : rt.particles)
+		{
+			positions.push_back({p.position.x, p.position.y, 0.f});
+		}
+	}
+
+	if (positions.empty())
+	{
+		return;
+	}
+
+	// std::cout << "Particle count: " << positions.size() << std::endl;
+
+	if (positions.size() > particle_buffer_capacity)
+	{
+		particle_buffer_capacity = positions.size() * 2;
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(
+			GL_ARRAY_BUFFER,
+			particle_buffer_capacity * sizeof(vec3),
+			nullptr,
+			GL_STREAM_DRAW);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(
+		GL_ARRAY_BUFFER,
+		0,
+		positions.size() * sizeof(vec3),
+		positions.data());
+	gl_has_errors();
+
+	const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
+	glUseProgram(program);
+	gl_has_errors();
+
+	GLuint projection_loc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+	gl_has_errors();
+	
+	GLuint view_loc = glGetUniformLocation(program, "view");
+	glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+	gl_has_errors();
+	
+	GLint in_position_loc = glGetAttribLocation(program, "in_position");
+	glEnableVertexAttribArray(in_position_loc);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
+	gl_has_errors();
+
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	glDrawArrays(GL_POINTS, 0, (GLsizei)positions.size());
 	gl_has_errors();
 }
 
@@ -356,13 +422,27 @@ void RenderSystem::draw()
 		}
 	}
 
+	drawParticles(projection_2D, view_2D);
+
 	// draw framebuffer to screen
-	// adding "vignette" effect when applied
 	drawToScreen();
 
-	// flicker-free display with a double buffer
-	glfwSwapBuffers(window);
-	gl_has_errors();
+	for (Entity entity : registry.overlays.entities) {
+		drawTexturedMesh(entity, projection_2D, view_2D);
+	}
+}
+
+void RenderSystem::renderGUI()
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void RenderSystem::shutdown()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 mat3 RenderSystem::createProjectionMatrix()

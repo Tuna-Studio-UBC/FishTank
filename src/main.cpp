@@ -14,9 +14,12 @@
 #include "systems/pick_up_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/player_input_system.hpp"
+#include "systems/particle_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+
+#include "ui/game_ui.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -35,6 +38,8 @@ int main()
 	PhysicsSystem physics_system;
 	PlayerInputSystem player_input_system;
 	CameraSystem camera_system;
+
+	GameUI game_ui;
 
 	// initialize window
 	GLFWwindow* window = world_system.create_window();
@@ -57,7 +62,11 @@ int main()
 	// variable timestep loop
 	auto t = Clock::now();
 	while (!world_system.is_over()) {
-		
+		// Prepare new GUI frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		// processes system messages, if this wasn't present the window would become unresponsive
 		glfwPollEvents();
 
@@ -68,22 +77,41 @@ int main()
 		t = now;
 
 		// CK: be mindful of the order of your systems and rearrange this list only if necessary
-		world_system.step(elapsed_ms);
-		ote_system.step(elapsed_ms);
-		heal_damage_system.step(elapsed_ms);
-		death_system.step(elapsed_ms);
-		pick_up_system.step(elapsed_ms);
-		ai_system.handle_detection();
-		ai_system.step(elapsed_ms);
-		physics_system.step(elapsed_ms);
-		player_input_system.step(elapsed_ms);
-		world_system.handle_expiration(elapsed_ms);
-		camera_system.step();
 
-		collision_system.step(elapsed_ms);
+		if (world_system.step(elapsed_ms)) {
+			ote_system.step(elapsed_ms);
+			heal_damage_system.step(elapsed_ms);
+			death_system.step(elapsed_ms);
+			pick_up_system.step(elapsed_ms);
+			ai_system.handle_detection();
+			ai_system.step(elapsed_ms);
+			physics_system.step(elapsed_ms);
+			player_input_system.step(elapsed_ms);
+			world_system.handle_expiration(elapsed_ms);
+		  	particle_system.step(elapsed_ms);
+			collision_system.step(elapsed_ms);
+			camera_system.step();
+		}
 
+		// Draw GUIs
+		game_ui.draw_healthbar();
+
+		// Debugging UI
+		#ifdef ENABLE_DEBUG_UI
+		game_ui.draw_demo();
+		game_ui.draw_respawn(&world_system);
+		#endif
+
+		// Render
 		renderer_system.draw();
+		renderer_system.renderGUI();
+
+		// flicker-free display with a double buffer
+		glfwSwapBuffers(window);
+		gl_has_errors();
 	}
+
+	renderer_system.shutdown();
 
 	return EXIT_SUCCESS;
 }
