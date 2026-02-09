@@ -1,29 +1,26 @@
 #include "enemy_config.hpp"
-#include "attack_pattern.hpp"
 #include "../common.hpp"
+#include "attack_pattern.hpp"
 
-struct EnemyConfig
-{
+struct EnemyConfig {
     float move_speed;
     float turn_speed;
     float detection_radius;
     ATTACK_PATTERN attack_pattern;
 };
 
-static const EnemyConfig ENEMY_CONFIGS[enemy_count] =
-{
+static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
     // Turret
-    { 0.f, M_PI, 200.f, ATTACK_PATTERN::SINGLE },
+    {0.f, M_PI, 200.f, ATTACK_PATTERN::SINGLE},
 
     // Urchin
-    { 0.f, 0.f, 500.f ,ATTACK_PATTERN::URCHIN },
+    {0.f, 0.f, 500.f, ATTACK_PATTERN::URCHIN},
 
     // Follower
-    { 50.f, M_PI / 2.f, 200.f, ATTACK_PATTERN::SINGLE },
+    {50.f, M_PI / 2.f, 200.f, ATTACK_PATTERN::SINGLE},
 
     // Swarm
-    { 50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE },
+    {50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE},
 
     // Patroller
-    { 50.f, M_PI / 2.f, 0.f, ATTACK_PATTERN::SINGLE }
-}; 
+    {50.f, M_PI / 2.f, 0.f, ATTACK_PATTERN::SINGLE}};

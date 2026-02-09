@@ -1,13 +1,13 @@
 #pragma once
-#include <fstream>
-#include <string>
-#include <iostream>
+#include "../../ext/rapidjson/document.h"
+#include "tinyECS/components.hpp"
 #include <array>
-#include "../tinyECS/components.hpp"
-#include "../ext/rapidjson/document.h"
+#include <fstream>
+#include <iostream>
+#include <string>
 
 std::string parse_file(const std::string &path);
 
-TileMap parse_tilemap(const std::string& path);
+TileMap parse_tilemap(const std::string &path);
 
-TileSet parse_tileset(const std::string& path);
+TileSet parse_tileset(const std::string &path);

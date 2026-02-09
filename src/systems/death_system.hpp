@@ -6,10 +6,9 @@
 #include "tinyECS/tiny_ecs.hpp"
 
 // Updates player and enemy health
-class DeathSystem
-{
-public:
-  void step(float elapsed_ms);
+class DeathSystem {
+  public:
+    void step(float elapsed_ms);
 
-  DeathSystem() {}
+    DeathSystem() {}
 };

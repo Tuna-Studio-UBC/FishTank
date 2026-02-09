@@ -1,7 +1,6 @@
 #pragma once
 
-enum class ENEMY_TYPE
-{
+enum class ENEMY_TYPE {
     TURRET = 0,
     URCHIN = TURRET + 1,
     FOLLOWER = URCHIN + 1,
