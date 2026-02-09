@@ -1,6 +1,6 @@
 # FishTank! Test Plan
 
-**Last Updated:** Feb 6, 2026
+**Last Updated:** Feb 8, 2026
 
 ## Table of Contents
 
@@ -17,6 +17,9 @@
     - [Projectiles](#projectiles)
     - [Enemies](#enemies)
   - [Bug List](#bug-list)
+    - [P5: Urchin enemy projectiles not appearing #52](#p5-urchin-enemy-projectiles-not-appearing-52)
+    - [P4: New ID increment issue (Too many IDs used) #47](#p4-new-id-increment-issue-too-many-ids-used-47)
+    - [P3: Linear Interpolated Camera causes tiles to cull too early #44](#p3-linear-interpolated-camera-causes-tiles-to-cull-too-early-44)
     - [P3: TileMap Texture Bleeding #39](#p3-tilemap-texture-bleeding-39)
     - [P2: Tileset tiles are renderering incorrect IDs #30](#p2-tileset-tiles-are-renderering-incorrect-ids-30)
     - [P4: ID increment issue (Too many IDs used) #27](#p4-id-increment-issue-too-many-ids-used-27)
@@ -70,6 +73,24 @@ Behaviours of various entity interactions, including collision, detection, and e
 - Exit detection distance: Enemy stops moving and shooting in M1
 
 ## Bug List
+
+### [P5: Urchin enemy projectiles not appearing #52](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/52)
+
+The urchin attack created projectiles as expected, but the projectiles never made it to render. This caused the Urchin to appear as if stationary and non-hostile. This was caused by the stacked projectiles being mistaken for a collision and removed.
+
+To test, move the player closer to the Urchin enemy, which should trigger the attack pattern. There should be 8 projectiles fired from the enemy in all directions.
+
+### [P4: New ID increment issue (Too many IDs used) #47](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/47)
+
+Once again, entity IDs were incrementing far too quickly. The cause this time were the wall entities being initialized at every pass through the physics system.
+
+To test, fire a bullet and ensure each bullet only uses 1 new ID. The easiest way is to fire a volley of bullets and wait for them to expire. If the first bullet expiry is `Entity x has expired`, the next bullet should print `Entity x+1 has expired`.
+
+### [P3: Linear Interpolated Camera causes tiles to cull too early #44](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/44)
+
+When moving horizontally quickly (with LERP camera), you can see tiles on the right side of the screen culling themselves, even when visible.
+
+To test, move player character quickly horizontally from right to left. All tiles on screen should remain visible.
 
 ### [P3: TileMap Texture Bleeding #39](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/39)
 

@@ -31,6 +31,6 @@ const std::vector<Wave> WAVE_CONFIGS = {
 
 const std::vector<Level> LEVEL_CONFIGS = {
 	{
-		{ 2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {300.f}}
+		{ 2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}}
 	}
 };

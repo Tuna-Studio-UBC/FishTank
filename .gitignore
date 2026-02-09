@@ -4,3 +4,4 @@ build
 ext/project_path.hpp
 
 imgui.ini
+.DS_Store
