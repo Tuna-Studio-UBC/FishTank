@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    - id: trailing-whitespace
+      stages: [pre-commit]
+      files: src*
+    - id: end-of-file-fixer
+      stages: [pre-commit]
+      files: src*
+    - id: check-added-large-files
+      stages: [pre-commit]
+      files: src*
+
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: clang-format
+        stages: [pre-commit]
+        files: src*
+        args: [-i, --style=file]
