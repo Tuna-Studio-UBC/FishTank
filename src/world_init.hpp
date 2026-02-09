@@ -3,7 +3,7 @@
 #include "common.hpp"
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
-#include "render_system.hpp"
+#include "systems/render_system.hpp"
 #include "utilities/parse_tiled.hpp"
 #include "configs/enemy_config.hpp"
 #include "configs/attack_pattern.hpp"

@@ -11,7 +11,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-#include "render_system.hpp"
+#include "systems/render_system.hpp"
 
 // Container for all our entities and game logic.
 // Individual rendering / updates are deferred to the update() methods.

@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "death_system.hpp"
-#include <world_system.hpp>
+#include <systems/world_system.hpp>
 
 void DeathSystem::step(float elapsed_ms)
 {

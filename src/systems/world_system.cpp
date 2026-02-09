@@ -1,5 +1,5 @@
 // Header
-#include "world_system.hpp"
+#include "systems/world_system.hpp"
 #include "world_init.hpp"
 
 // stlib
@@ -7,7 +7,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "physics_system.hpp"
+#include "systems/physics_system.hpp"
 #include "configs/wave_config.cpp"
 #include "systems/particle_system.hpp"
 

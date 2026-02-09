@@ -6,7 +6,7 @@
 
 // internal
 #include "../ext/stb_image/stb_image.h"
-#include "render_system.hpp"
+#include "systems/render_system.hpp"
 #include "tinyECS/registry.hpp"
 
 

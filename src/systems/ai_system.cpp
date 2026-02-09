@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ai_system.hpp"
+#include "systems/ai_system.hpp"
 #include "world_init.hpp"
 #include <cmath>
 #include <random>

@@ -6,7 +6,7 @@
 #include <iostream>
 
 // internal
-#include "ai_system.hpp"
+#include "systems/ai_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/ote_system.hpp"
 #include "systems/heal_damage_system.hpp"
@@ -15,9 +15,9 @@
 #include "systems/camera_system.hpp"
 #include "systems/player_input_system.hpp"
 #include "systems/particle_system.hpp"
-#include "physics_system.hpp"
-#include "render_system.hpp"
-#include "world_system.hpp"
+#include "systems/physics_system.hpp"
+#include "systems/render_system.hpp"
+#include "systems/world_system.hpp"
 
 #include "ui/game_ui.hpp"
 

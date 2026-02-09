@@ -4,7 +4,7 @@
 #include <iostream>
 
 // internal
-#include "render_system.hpp"
+#include "systems/render_system.hpp"
 #include "tinyECS/registry.hpp"
 #include "systems/particle_system.hpp"
 

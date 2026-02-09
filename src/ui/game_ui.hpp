@@ -9,7 +9,7 @@
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
 #include "../common.hpp"
-#include "world_system.hpp"
+#include "systems/world_system.hpp"
 
 struct GameUI
 {
