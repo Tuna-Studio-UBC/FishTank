@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <random>
+#include <spdlog/spdlog.h>
 
 static vec2 direction_vector(vec2 v, vec2 fallback) {
     float len = sqrtf(v.x * v.x + v.y * v.y);
@@ -177,14 +178,14 @@ void AISystem::handle_detection() {
             motion_i.velocity = vec2(speed, 0.f);
 
             // log to console for now
-            std::cout << enemy_i.name_id() << " detected " << player.name_id() << std::endl;
+            spdlog::debug("{} detected {}", enemy_i.name_id(), player.name_id());
         }
         if (registry.pursuit.has(enemy_i) && !in_radius) {
             registry.pursuit.remove(enemy_i);
             motion_i.velocity = vec2(0.f, 0.f);
 
             // log to console for now
-            std::cout << enemy_i.name_id() << " no longer detecting " << player.name_id() << std::endl;
+            spdlog::debug("{} no longer detecting {}", enemy_i.name_id(), player.name_id());
         }
     }
 }

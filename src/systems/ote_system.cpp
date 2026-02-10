@@ -1,6 +1,7 @@
 #include "ote_system.hpp"
 
 #include "heal_damage_system.hpp"
+#include <spdlog/spdlog.h>
 
 void OverTimeEffectSystem::step(float elapsed_ms) {
     // Handle OverTimeEffect effects
@@ -25,7 +26,7 @@ void OverTimeEffectSystem::step(float elapsed_ms) {
         // Effect expired
         if (ot.duration_time_ms <= 0) {
             registry.remove_all_components_of(e);
-            // std::cout << e.name_id() << " has expired" << std::endl;
+            spdlog::debug("{} has expired", e.name_id());
         }
     }
 }

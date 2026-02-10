@@ -1,5 +1,7 @@
 #include "heal_damage_system.hpp"
 
+#include <spdlog/spdlog.h>
+
 void HealDamageSystem::step(float elapsed_ms) {
     (void)elapsed_ms;
 
@@ -17,8 +19,7 @@ void HealDamageSystem::handle_damaging() {
 
             // TODO: Handle visual indicators
 
-            std::cout << e.name_id() << " took " << d.amount << " damage and now has " << h.hp << "/" << h.max_hp
-                      << " HP" << std::endl;
+            spdlog::info("{} took {} damage and now has {}/{} HP", e.name_id(), d.amount, h.hp, h.max_hp);
         }
     }
 }
@@ -33,8 +34,7 @@ void HealDamageSystem::handle_healing() {
 
             // TODO: Handle visual indicators
 
-            std::cout << e.name_id() << " took " << h.amount << " healing and now has " << he.hp << "/" << he.max_hp
-                      << " HP" << std::endl;
+            spdlog::info("{} took {} healing and now has {}/{} HP", e.name_id(), h.amount, he.hp, he.max_hp);
         }
     }
 }
@@ -44,7 +44,7 @@ void HealDamageSystem::add_damage(Entity entity, int amount) {
     if (!registry.damage.has(entity)) {
         registry.damage.emplace(entity, amount);
     } else {
-        std::cout << "DUPLICATE DAMAGE WAS CALLED" << std::endl;
+        spdlog::debug("DUPLICATE DAMAGE WAS CALLED");
         Damage &d = registry.damage.get(entity);
         d.amount += amount;
     }
@@ -54,6 +54,7 @@ void HealDamageSystem::add_heal(Entity entity, int amount) {
     if (!registry.heal.has(entity)) {
         registry.heal.emplace(entity, amount);
     } else {
+        spdlog::debug("DUPLICATE HEAL WAS CALLED");
         Heal &h = registry.heal.get(entity);
         h.amount += amount;
     }

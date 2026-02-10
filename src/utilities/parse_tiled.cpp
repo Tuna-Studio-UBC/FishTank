@@ -1,5 +1,7 @@
 #include "parse_tiled.hpp"
 
+#include <spdlog/spdlog.h>
+
 std::string parse_file(const std::string &path) {
     std::string line, text = "";
     std::ifstream ifs(path);
@@ -8,7 +10,7 @@ std::string parse_file(const std::string &path) {
             text += line + "\n";
         }
     } else {
-        std::cout << "ERROR: Could not parse file" << std::endl;
+        spdlog::error("Could not parse file {}", path);
     }
     return text;
 }

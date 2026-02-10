@@ -5,6 +5,7 @@
 // stlib
 #include <cassert>
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 #include "configs/wave_config.cpp"
@@ -36,7 +37,7 @@ WorldSystem::~WorldSystem() {
 
 // Debugging
 namespace {
-void glfw_err_cb(int error, const char *desc) { std::cerr << error << ": " << desc << std::endl; }
+void glfw_err_cb(int error, const char *desc) { spdlog::error("GLFW Error {}: {}", error, desc); }
 } // namespace
 
 // call to close the window, wrapper around GLFW commands
@@ -49,7 +50,7 @@ GLFWwindow *WorldSystem::create_window() {
     // Initialize GLFW
     glfwSetErrorCallback(glfw_err_cb);
     if (!glfwInit()) {
-        std::cerr << "ERROR: Failed to initialize GLFW in world_system.cpp" << std::endl;
+        spdlog::error("ERROR: Failed to initialize GLFW in world_system.cpp");
         return nullptr;
     }
 
@@ -72,7 +73,7 @@ GLFWwindow *WorldSystem::create_window() {
     // Create the main window (for rendering, keyboard, and mouse input)
     window = glfwCreateWindow(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX, GAME_NAME, nullptr, nullptr);
     if (window == nullptr) {
-        std::cerr << "ERROR: Failed to glfwCreateWindow in world_system.cpp" << std::endl;
+        spdlog::error("ERROR: Failed to glfwCreateWindow in world_system.cpp");
         return nullptr;
     }
 
@@ -203,7 +204,7 @@ void WorldSystem::init(RenderSystem *renderer_arg) {
     Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
     createCamera({WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 
-    auto e = Entity();
+    auto e = Entity("Progress");
     auto &progress = registry.progress.emplace(e);
     load_level(progress);
     start_wave(progress);
@@ -230,7 +231,7 @@ void WorldSystem::init(RenderSystem *renderer_arg) {
 
     // start playing background music indefinitely
     //Commented out duo to compiler errors
-    /*std::cout << "Starting music..." << std::endl;
+    spdlog::info("Starting music...");
     Mix_PlayMusic(background_music, -1);*/
 
     // walls
@@ -266,7 +267,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     }
 
     if (progress.remaining_enemies == 0) {
-        std::cout << "Wave " << progress.wave << " complete, starting next wave." << std::endl;
+        spdlog::info("Wave {} complete, starting next wave.", progress.wave);
         progress.wave += 1;
 
         if (WAVE_CONFIGS.size() > progress.wave) {
@@ -278,7 +279,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         } else {
             progress.game_over = true;
 
-            Entity e = Entity();
+            Entity e = Entity("Overlay");
             registry.overlays.emplace(e);
             auto &motion = registry.motions.emplace(e);
             motion.position = registry.motions.get(registry.players.entities[0]).position;
@@ -306,7 +307,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             if (evt.remaining_ms <= 0.f)
             {
                     registry.remove_all_components_of(evt_e);
-                    std::cout << "[Bell] " << evt_e.name_id() << " expired\n";
+                    spdlog::info("[Bell] {} expired", evt_e.name_id());
             }
     }*/
 
@@ -329,7 +330,7 @@ void WorldSystem::handle_expiration(float elapsed_ms) {
         exp.lifespan_ms -= elapsed_ms;
 
         if (exp.lifespan_ms <= 0) {
-            std::cout << e.name_id() << " has expired" << std::endl;
+            spdlog::debug("{} has expired", e.name_id());
             registry.remove_all_components_of(e);
         }
     }
@@ -378,13 +379,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_E) {
             if (registry.players.entities.size() == 0) {
-                std::cout << "[Bell] No player entity found\n";
+                spdlog::debug("[Bell] No player entity found");
                 return;
             }
 
             Entity player = registry.players.entities[0];
             if (!registry.motions.has(player)) {
-                std::cout << "[Bell] " << player.name_id() << " has no Motion\n";
+                spdlog::debug("[Bell] {} has no Motion", player.name_id());
                 return;
             }
 
@@ -405,7 +406,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             }
 
             if (best_dist2 > 9e29f) {
-                std::cout << "[Bell] No bell in the world\n";
+                spdlog::debug("[Bell] No bell in the world");
                 return;
             }
 
@@ -415,13 +416,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             if (best_dist2 > radius2) {
                 float dist = sqrtf(best_dist2);
-                std::cout << "[Bell] " << best_bell.name_id() << " too far to interact. dist=" << dist
-                          << " (need <= " << radius << ")\n";
+                spdlog::debug("[Bell] {} too far to interact. dist={:.2f} (need <= {:.2f})", best_bell.name_id(), dist,
+                              radius);
                 return;
             }
 
             if (bell.cooldown_timer > 0.f) {
-                std::cout << "[Bell] " << best_bell.name_id() << " on cooldown: " << bell.cooldown_timer << "ms\n";
+                spdlog::debug("[Bell] {} on cooldown: {:.2f}ms", best_bell.name_id(), bell.cooldown_timer);
                 return;
             }
 
@@ -440,8 +441,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             bell.cooldown_timer = bell.cooldown_ms;
 
-            std::cout << "[Bell] " << best_bell.name_id() << " triggered at (" << bell_pos.x << ", " << bell_pos.y
-                      << ")\n";
+            spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
         }
 
         if (key == GLFW_KEY_R) {

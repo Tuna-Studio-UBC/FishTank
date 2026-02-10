@@ -1,5 +1,7 @@
 #include "pick_up_system.hpp"
 
+#include <spdlog/spdlog.h>
+
 void PickUpSystem::step(float elapsed_ms) {
     for (Entity e : registry.pickUp.entities) {
         Entity player = registry.players.entities[0];
@@ -19,7 +21,7 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
         PowerUp powerUp = registry.powerUp.get(pickUp);
         auto &config = POWER_UP_CONFIGS[(int)powerUp.type];
 
-        std::cout << "Picked up " << pickUp.name_id() << " of type: " << (int)powerUp.type << std::endl;
+        spdlog::debug("Picked up {} of type: {}", pickUp.name_id(), (int)powerUp.type);
 
         // TODO: Add more power ups!!!
         switch (powerUp.type) {
@@ -33,7 +35,7 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
             createExpirationEffect<DamageMultiplier>(player, config.duration_ms, config.amount);
             break;
         default:
-            std::cout << "Unknown power up type" << std::endl;
+            spdlog::warn("Unknown power up type");
             break;
         }
     }

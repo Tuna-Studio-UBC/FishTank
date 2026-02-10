@@ -4,15 +4,17 @@ cmake_minimum_required(VERSION 3.31)
 project(fishtank)
 
 # use C++17
-set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+
+include(FetchContent)
 
 # nice hierarchichal structure in MSVC
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # detect OS
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(IS_OS_MAC 1)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(IS_OS_LINUX 1)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(IS_OS_WINDOWS 1)
@@ -29,7 +31,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CU
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.hpp)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
-if (IS_OS_MAC)
+if(IS_OS_MAC)
     include_directories(/usr/local/include)
     link_directories(/usr/local/lib)
     # 2024-09-24 - added for M-series Mac's
@@ -50,9 +52,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ext/gl3w)
 # Find OpenGL
 find_package(OpenGL REQUIRED)
 
-if (OPENGL_FOUND)
-   target_include_directories(${PROJECT_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
-   target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENGL_gl_LIBRARY})
+if(OPENGL_FOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENGL_gl_LIBRARY})
 endif()
 
 set(glm_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/glm/cmake/glm) # if necessary
@@ -72,8 +74,18 @@ add_library(imgui
 target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
 
+# spdlog
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.17.0
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
+
 # glfw, sdl could be precompiled (on windows) or installed by a package manager (on OSX and Linux)
-if (IS_OS_LINUX OR IS_OS_MAC)
+if(IS_OS_LINUX OR IS_OS_MAC)
     # Try to find packages rather than to use the precompiled ones
     # Since we're on OSX or Linux, we can just use pkgconfig.
     find_package(PkgConfig REQUIRED)
@@ -84,16 +96,16 @@ if (IS_OS_LINUX OR IS_OS_MAC)
     pkg_search_module(SDL2MIXER REQUIRED SDL2_mixer)
 
     # Link Frameworks on OSX
-    if (IS_OS_MAC)
-       find_library(COCOA_LIBRARY Cocoa)
-       find_library(CF_LIBRARY CoreFoundation)
-       target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY} ${CF_LIBRARY})
+    if(IS_OS_MAC)
+        find_library(COCOA_LIBRARY Cocoa)
+        find_library(CF_LIBRARY CoreFoundation)
+        target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY} ${CF_LIBRARY})
     endif()
 
     # Increase warning level
     target_compile_options(${PROJECT_NAME} PUBLIC "-Wall")
-elseif (IS_OS_WINDOWS)
-# https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
+elseif(IS_OS_WINDOWS)
+    # https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
     set(GLFW_FOUND TRUE)
     set(SDL2_FOUND TRUE)
 
@@ -113,17 +125,17 @@ elseif (IS_OS_WINDOWS)
 
     # copy DLLs to build folder and remove if necessary name
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${GLFW_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/glfw3.dll")
 
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${SDL_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SDL2.dll")
 
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${SDLMIXER_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SDL2_mixer.dll")
 
@@ -144,11 +156,11 @@ elseif (IS_OS_WINDOWS)
 endif()
 
 # if we can't find the include and lib, then report error and quit.
-if (NOT GLFW_FOUND OR NOT SDL2_FOUND)
-    if (NOT GLFW_FOUND)
-        message(FATAL_ERROR "Can't find GLFW." )
-    else ()
-        message(FATAL_ERROR "Can't find SDL." )
+if(NOT GLFW_FOUND OR NOT SDL2_FOUND)
+    if(NOT GLFW_FOUND)
+        message(FATAL_ERROR "Can't find GLFW.")
+    else()
+        message(FATAL_ERROR "Can't find SDL.")
     endif()
 endif()
 

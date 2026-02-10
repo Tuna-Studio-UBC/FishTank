@@ -1,6 +1,7 @@
 #include "particle_system.hpp"
 #include <iostream>
 #include <random>
+#include <spdlog/spdlog.h>
 
 std::mt19937 gen(123);
 std::uniform_real_distribution<double> dist(0.0, 2.0 * M_PI);
@@ -48,7 +49,7 @@ void ParticleSystem::step(float elapsed_ms) {
                 continue;
             }
 
-            std::cout << "Destroyed particle emitter: " << e.name_id() << std::endl;
+            spdlog::info("Destroyed particle emitter: {}", e.name_id());
             runtimes.erase(e.id());
             registry.remove_all_components_of(e);
             continue;

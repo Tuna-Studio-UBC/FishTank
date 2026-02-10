@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <glm/trigonometric.hpp>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 // internal
 #include "systems/particle_system.hpp"
@@ -275,8 +276,8 @@ void RenderSystem::drawToScreen() {
         registry.screenStates.emplace(screen_state_entity);
     }
     ScreenState &screen = registry.screenStates.get(screen_state_entity);
-    // std::cout << "screen.darken_screen_factor: " << screen.darken_screen_factor << " entity id: " <<
-    // screen_state_entity << std::endl;
+    // spdlog::debug("screen.darken_screen_factor: {} entity id: {}", screen.darken_screen_factor,
+    //               screen_state_entity);
     glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
     gl_has_errors();
 
@@ -314,7 +315,7 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
         return;
     }
 
-    // std::cout << "Particle count: " << positions.size() << std::endl;
+    // spdlog::debug("Particle count: {}", positions.size());
 
     if (positions.size() > particle_buffer_capacity) {
         particle_buffer_capacity = positions.size() * 2;

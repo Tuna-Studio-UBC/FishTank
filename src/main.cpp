@@ -1,6 +1,8 @@
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
 
+#include <spdlog/spdlog.h>
+
 // stdlib
 #include <chrono>
 #include <iostream>
@@ -40,19 +42,23 @@ int main() {
 
     GameUI game_ui;
 
+    // Configure spdlog
+    spdlog::set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] [%l]%$ %v");
+    spdlog::set_level(spdlog::level::debug);
+
     // initialize window
     GLFWwindow *window = world_system.create_window();
     if (!window) {
         // Time to read the error message
-        std::cerr << "ERROR: Failed to create window.  Press any key to exit" << std::endl;
+        spdlog::error("Failed to create window.  Press any key to exit");
         getchar();
         return EXIT_FAILURE;
     }
 
-    // Commented out duo to compiler errors
-    /*if (!world_system.start_and_load_sounds()) {
-            std::cerr << "ERROR: Failed to start or load sounds." << std::endl;
-    }*/
+    // Start and load audio
+    if (!world_system.start_and_load_sounds()) {
+        spdlog::error("Failed to start or load sounds.");
+    }
 
     // initialize the main systems
     renderer_system.init(window);

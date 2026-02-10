@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "death_system.hpp"
+#include <spdlog/spdlog.h>
 #include <systems/world_system.hpp>
 
 void DeathSystem::step(float elapsed_ms) {
@@ -11,13 +12,14 @@ void DeathSystem::step(float elapsed_ms) {
         if (registry.health.has(e)) {
             Health &h = registry.health.get(e);
             if (h.hp <= 0 && h.max_hp > 0) {
-                std::cout << e.name_id() << " has died" << std::endl;
+
+                spdlog::info("{} has died", e.name_id());
                 registry.dead.emplace(e);
 
                 if (registry.players.has(e)) {
                     // TODO: Handle player death
                     registry.progress.components[0].game_over = true;
-                    Entity e = Entity();
+                    Entity e = Entity("Overlay");
                     registry.overlays.emplace(e);
                     auto &motion = registry.motions.emplace(e);
                     motion.position = registry.motions.get(registry.players.entities[0]).position;
@@ -34,8 +36,8 @@ void DeathSystem::step(float elapsed_ms) {
                         Wallet &wallet = registry.wallet.get(player);
                         wallet.crackers += drops.cracker;
 
-                        std::cout << player.name_id() << " collected " << drops.cracker
-                                  << " crackers! Total: " << wallet.crackers << std::endl;
+                        spdlog::info("{} collected {} crackers! Total: {}", player.name_id(), drops.cracker,
+                                     wallet.crackers);
                     }
 
                     registry.remove_all_components_of(e);
