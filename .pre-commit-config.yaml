@@ -4,18 +4,18 @@ repos:
     hooks:
     - id: trailing-whitespace
       stages: [pre-commit]
-      files: src*
+      files: src*|shaders*
     - id: end-of-file-fixer
       stages: [pre-commit]
-      files: src*
+      files: src*|shaders*
     - id: check-added-large-files
       stages: [pre-commit]
-      files: src*
+      files: src*|shaders*
 
   - repo: https://github.com/pocc/pre-commit-hooks
     rev: v1.3.5
     hooks:
       - id: clang-format
         stages: [pre-commit]
-        files: src*
+        files: src*|shaders*
         args: [-i, --style=file]
