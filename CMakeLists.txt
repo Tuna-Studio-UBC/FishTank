@@ -1,12 +1,14 @@
 # CMakeLists.txt
 cmake_minimum_required(VERSION 3.31)
-
 project(fishtank)
-
-# use C++17
 set(CMAKE_CXX_STANDARD 17)
 
-include(FetchContent)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Add cmake folder to module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+include(Dependency)
 
 # nice hierarchichal structure in MSVC
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -51,7 +53,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ext/gl3w)
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
-
 if(OPENGL_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENGL_gl_LIBRARY})
@@ -59,30 +60,6 @@ endif()
 
 set(glm_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/glm/cmake/glm) # if necessary
 find_package(glm REQUIRED)
-
-# Dear ImGui
-set(imgui_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui")
-add_library(imgui
-    ${imgui_SOURCE_DIR}/imgui.cpp
-    ${imgui_SOURCE_DIR}/imgui_demo.cpp
-    ${imgui_SOURCE_DIR}/imgui_draw.cpp
-    ${imgui_SOURCE_DIR}/imgui_tables.cpp
-    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
-)
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
-target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
-
-# spdlog
-FetchContent_Declare(
-    spdlog
-    GIT_REPOSITORY https://github.com/gabime/spdlog.git
-    GIT_TAG v1.17.0
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(spdlog)
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
 
 # glfw, sdl could be precompiled (on windows) or installed by a package manager (on OSX and Linux)
 if(IS_OS_LINUX OR IS_OS_MAC)
@@ -110,11 +87,11 @@ elseif(IS_OS_WINDOWS)
     set(SDL2_FOUND TRUE)
 
     # include directories
-    set(GLFW_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include")
+    set(GLFW_INCLUDE_DIRS PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include")
     set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/include/SDL")
 
     # library files
-    set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x64.lib")
+    set(GLFW_LIBRARIES PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x64.lib")
     set(SDL2_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x64.lib")
     set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.lib")
 
@@ -167,12 +144,13 @@ endif()
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm imgui)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm)
 
-target_compile_definitions(${PROJECT_NAME}
-    PRIVATE TILESET_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/tilesets/tileset.json"
-    PRIVATE TILEMAP_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/maps/map.json"
-)
+# Link dependencies from cmake/Dependency.cmake
+link_engine_dependencies(${PROJECT_NAME})
+
+target_include_directories(imgui PUBLIC ${GLFW_INCLUDE_DIRS})
+target_link_libraries(imgui PUBLIC ${GLFW_LIBRARIES} OpenGL::GL)
 
 # needed to add this for Linux
 if(IS_OS_LINUX)
