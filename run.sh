@@ -8,7 +8,7 @@ if [[ "$1" == "clean" ]]; then
 elif [[ "$1" == "build" ]]; then
     shift
     # Full rebuild
-    if [[ $1 == -+(-full|f) ]]; then
+    if [[ $1 =~ ^-(-?full|f)$ ]]; then
         rm -rf build
         cmake -B build
     fi
@@ -18,11 +18,11 @@ elif [[ "$1" == "build" ]]; then
 elif [[ "$1" == "run" ]]; then
     shift
     # Full rebuild
-    if [[ $1 == -+(-full|f) ]]; then
+    if [[ $1 =~ ^-(-?full|f)$ ]]; then
         rm -rf build
         cmake -B build
         cmake --build build
-    elif [[ $1 == -+(-build|b) ]]; then
+    elif [[ $1 =~ ^-(-?build|b)$ ]]; then
         cmake --build build
     fi
 
@@ -33,7 +33,7 @@ elif [[ "$1" == "run" ]]; then
 elif [[ "$1" == "devops" ]]; then
     shift
     # Install dependencies
-    if [[ $* == -+(-install|i|-all|a) ]]; then
+    if [[ $1 =~ ^-(-?install|i|-?all|a)$ ]]; then
         # Mac
         if [[ "$OSTYPE" == "darwin"* ]]; then
             if ![[ python --version &> /dev/null ]]; then
@@ -58,8 +58,8 @@ elif [[ "$1" == "devops" ]]; then
     fi
 
     # Test run pre-commit
-    if [[ $* == -+(-pre-commit|p|-all|a) ]]; then
-        pre-commit install
+    if [[ $1 =~ ^-(-?pre-commit|p|-?all|a)$ ]]; then
+        pre-commit install-hooks
         pre-commit run --all-files
     fi
 
