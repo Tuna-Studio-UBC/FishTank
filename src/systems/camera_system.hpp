@@ -11,7 +11,15 @@ public:
 
 	CameraSystem () {}
 
+	void init();
+
 private:
-	const float interp_coefficient = 0.03;
+
+	vec2 get_camera_dest();
+
+	const float INTERP_COEFFICIENT = 0.03f;
+	const float MOUSE_SENSITIVITY_FACTOR = 0.2f;
+	const float MAX_OFFSET = 50.f;
+	const int TILE_OOB_BUFFER = 1; // Number of tiles the player can see out of bounds
 
 };

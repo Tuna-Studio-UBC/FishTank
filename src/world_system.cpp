@@ -202,7 +202,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	init_tile_walls();
 	// Create player entity
 	Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
-	createCamera({ WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f });
 	
 	auto e = Entity();
 	auto &progress = registry.progress.emplace(e);
@@ -295,7 +294,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Entity e = Entity();
 			registry.overlays.emplace(e);
 			auto &motion = registry.motions.emplace(e);
-			motion.position = registry.motions.get(registry.players.entities[0]).position;
+			motion.position = registry.motions.get(registry.camera.entities[0]).position;
 			motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
 			registry.renderRequests.insert(
 				e,
