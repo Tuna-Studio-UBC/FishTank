@@ -1,17 +1,15 @@
 #pragma once
+#include "../common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
-#include "../common.hpp"
 
-class CameraSystem
-{
-public:
-	void step();
+class CameraSystem {
+  public:
+    void step();
 
-	CameraSystem () {}
+    CameraSystem() {}
 
-private:
-	const float interp_coefficient = 0.03;
-
+  private:
+    const float interp_coefficient = 0.03;
 };

@@ -1,18 +1,22 @@
 # CMakeLists.txt
 cmake_minimum_required(VERSION 3.31)
-
 project(fishtank)
+set(CMAKE_CXX_STANDARD 17)
 
-# use C++17
-set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Add cmake folder to module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+include(Dependency)
 
 # nice hierarchichal structure in MSVC
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # detect OS
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(IS_OS_MAC 1)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(IS_OS_LINUX 1)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(IS_OS_WINDOWS 1)
@@ -29,7 +33,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CU
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.hpp)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
-if (IS_OS_MAC)
+if(IS_OS_MAC)
     include_directories(/usr/local/include)
     link_directories(/usr/local/lib)
     # 2024-09-24 - added for M-series Mac's
@@ -49,31 +53,16 @@ target_include_directories(${PROJECT_NAME} PUBLIC ext/gl3w)
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
-
-if (OPENGL_FOUND)
-   target_include_directories(${PROJECT_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
-   target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENGL_gl_LIBRARY})
+if(OPENGL_FOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENGL_gl_LIBRARY})
 endif()
 
 set(glm_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/glm/cmake/glm) # if necessary
 find_package(glm REQUIRED)
 
-# Dear ImGui
-set(imgui_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui")
-add_library(imgui
-    ${imgui_SOURCE_DIR}/imgui.cpp
-    ${imgui_SOURCE_DIR}/imgui_demo.cpp
-    ${imgui_SOURCE_DIR}/imgui_draw.cpp
-    ${imgui_SOURCE_DIR}/imgui_tables.cpp
-    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
-)
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
-target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
-
 # glfw, sdl could be precompiled (on windows) or installed by a package manager (on OSX and Linux)
-if (IS_OS_LINUX OR IS_OS_MAC)
+if(IS_OS_LINUX OR IS_OS_MAC)
     # Try to find packages rather than to use the precompiled ones
     # Since we're on OSX or Linux, we can just use pkgconfig.
     find_package(PkgConfig REQUIRED)
@@ -84,25 +73,25 @@ if (IS_OS_LINUX OR IS_OS_MAC)
     pkg_search_module(SDL2MIXER REQUIRED SDL2_mixer)
 
     # Link Frameworks on OSX
-    if (IS_OS_MAC)
-       find_library(COCOA_LIBRARY Cocoa)
-       find_library(CF_LIBRARY CoreFoundation)
-       target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY} ${CF_LIBRARY})
+    if(IS_OS_MAC)
+        find_library(COCOA_LIBRARY Cocoa)
+        find_library(CF_LIBRARY CoreFoundation)
+        target_link_libraries(${PROJECT_NAME} PUBLIC ${COCOA_LIBRARY} ${CF_LIBRARY})
     endif()
 
     # Increase warning level
     target_compile_options(${PROJECT_NAME} PUBLIC "-Wall")
-elseif (IS_OS_WINDOWS)
-# https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
+elseif(IS_OS_WINDOWS)
+    # https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
     set(GLFW_FOUND TRUE)
     set(SDL2_FOUND TRUE)
 
     # include directories
-    set(GLFW_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include")
+    set(GLFW_INCLUDE_DIRS PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include")
     set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/include/SDL")
 
     # library files
-    set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x64.lib")
+    set(GLFW_LIBRARIES PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x64.lib")
     set(SDL2_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x64.lib")
     set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.lib")
 
@@ -113,17 +102,17 @@ elseif (IS_OS_WINDOWS)
 
     # copy DLLs to build folder and remove if necessary name
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${GLFW_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/glfw3.dll")
 
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${SDL_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SDL2.dll")
 
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${SDLMIXER_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SDL2_mixer.dll")
 
@@ -144,23 +133,24 @@ elseif (IS_OS_WINDOWS)
 endif()
 
 # if we can't find the include and lib, then report error and quit.
-if (NOT GLFW_FOUND OR NOT SDL2_FOUND)
-    if (NOT GLFW_FOUND)
-        message(FATAL_ERROR "Can't find GLFW." )
-    else ()
-        message(FATAL_ERROR "Can't find SDL." )
+if(NOT GLFW_FOUND OR NOT SDL2_FOUND)
+    if(NOT GLFW_FOUND)
+        message(FATAL_ERROR "Can't find GLFW.")
+    else()
+        message(FATAL_ERROR "Can't find SDL.")
     endif()
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm imgui)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm)
 
-target_compile_definitions(${PROJECT_NAME}
-    PRIVATE TILESET_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/tilesets/tileset.json"
-    PRIVATE TILEMAP_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/maps/map.json"
-)
+# Link dependencies from cmake/Dependency.cmake
+link_engine_dependencies(${PROJECT_NAME})
+
+target_include_directories(imgui PUBLIC ${GLFW_INCLUDE_DIRS})
+target_link_libraries(imgui PUBLIC ${GLFW_LIBRARIES} OpenGL::GL)
 
 # needed to add this for Linux
 if(IS_OS_LINUX)
