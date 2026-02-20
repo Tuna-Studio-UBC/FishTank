@@ -14,13 +14,17 @@ void CollisionSystem::step(float elapsed_ms) {
 
         handle_bullets(entity_a, entity_b);
         handle_walls(entity_a, entity_b);
-        handle_entities_vs_walls(entity_a, entity_b);
+        handle_actors_vs_walls(entity_a, entity_b);
         handle_hazards(entity_a, entity_b);
+        handle_actor_actor(entity_a, entity_b);
     }
 
     // Clear all collisions for the current step
     registry.collisions.clear();
 }
+
+// Player or Enemy
+bool CollisionSystem::is_actor(Entity entity) { return registry.players.has(entity) || registry.enemies.has(entity); }
 
 void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) {
     if (registry.bullet.has(bullet_entity)) {
@@ -140,9 +144,8 @@ void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
     }
 }
 
-void CollisionSystem::handle_entities_vs_walls(Entity entity_a, Entity entity_b) {
-    // player or enemy vs wall
-    if ((registry.players.has(entity_a) || registry.enemies.has(entity_a)) && registry.wall.has(entity_b)) {
+void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
+    if (is_actor(entity_a) && registry.wall.has(entity_b)) {
         Motion &player_motion = registry.motions.get(entity_a);
         Motion &wall_motion = registry.motions.get(entity_b);
 
@@ -168,6 +171,27 @@ void CollisionSystem::handle_entities_vs_walls(Entity entity_a, Entity entity_b)
                 player_motion.position.y += overlap_y;
             else
                 player_motion.position.y -= overlap_y;
+        }
+    }
+}
+
+void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
+    if (is_actor(entity_a) && (is_actor(entity_b))) {
+        Motion &motion_a = registry.motions.get(entity_a);
+        Motion &motion_b = registry.motions.get(entity_b);
+
+        vec2 separation = motion_a.position - motion_b.position;
+        float radius_a = motion_a.scale.x / 2.f;
+        float radius_b = motion_b.scale.x / 2.f;
+
+        float overlap = (radius_a + radius_b) - length(separation);
+        if (overlap > 0.f) {
+            float tolerance = 0.01f;
+            float correction_mag = max(overlap - tolerance, 0.f) / 2.f;
+            vec2 correction = normalize(separation) * correction_mag;
+
+            motion_a.position += correction;
+            motion_b.position -= correction;
         }
     }
 }
