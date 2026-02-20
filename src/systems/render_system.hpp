@@ -35,13 +35,13 @@ class RenderSystem {
     // TODO
     const std::array<std::string, texture_count> texture_paths = {
         tileset_texture_path("greybox_tiles.png"), textures_path("white_bubble.png"), textures_path("black.png"),
-        textures_path("win.png"), textures_path("lose.png")};
+        textures_path("win.png"), textures_path("lose.png"), textures_path("bubble.png"), sprite_sheet_texture_path("bubble_sheet.png")};
 
     std::array<GLuint, effect_count> effects;
     // Make sure these paths remain in sync with the associated enumerators.
     const std::array<std::string, effect_count> effect_paths = {
         shader_path("coloured"), shader_path("egg"),     shader_path("chicken"), shader_path("textured"),
-        shader_path("vignette"), shader_path("tilemap"), shader_path("particle")};
+        shader_path("vignette"), shader_path("tilemap"), shader_path("particle"), shader_path("animate")};
 
     std::array<GLuint, geometry_count> vertex_buffers;
     std::array<GLuint, geometry_count> index_buffers;
