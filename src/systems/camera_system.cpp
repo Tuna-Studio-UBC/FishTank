@@ -4,8 +4,8 @@
 void CameraSystem::step() 
 {
 	auto& camera = registry.camera.entities[0];
-	vec2 &camera_pos = registry.motions.get(camera).position;
-	auto& camera_dest = get_camera_dest();
+	vec2& camera_pos = registry.motions.get(camera).position;
+	auto  camera_dest = get_camera_dest();
 
 	camera_pos = camera_pos * (1 - INTERP_COEFFICIENT) + camera_dest * INTERP_COEFFICIENT;
 }
