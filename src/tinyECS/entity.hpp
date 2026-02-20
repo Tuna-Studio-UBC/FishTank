@@ -3,14 +3,12 @@
 #include <string>
 
 // Unique identifier for all entities
-class Entity
-{
+class Entity {
     unsigned int m_id;
     std::string m_name;
-    static unsigned int id_count;   // defaults to 0 (invalid), need to init 1
+    static unsigned int id_count; // defaults to 0 (invalid), need to init 1
 
-public:
-
+  public:
     Entity(std::string name = "Entity") {
         // ensure that each entity gets a unique ID
         m_id = id_count++; // assign and increment
@@ -25,9 +23,7 @@ public:
     }
     */
 
-    ~Entity()
-    {
-    }
+    ~Entity() {}
 
     operator unsigned int() { return m_id; } // enables automatic casting to int
 
