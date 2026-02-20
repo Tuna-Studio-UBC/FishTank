@@ -155,6 +155,29 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 
     // texture-mapped entities - use data location as in the vertex buffer
     if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED) {
+        vec2 uv_offset = {0.f, 0.f};
+        vec2 uv_scale = {1.f, 1.f};
+
+        // Reuse the textured mesh shader so that we don't need custom functionality for animations
+        if (registry.animations.has(entity)) {
+            Animation &an = registry.animations.get(entity);
+
+            float frame_width = 1.f / an.columns;
+            float frame_height = 1.f / an.rows;
+
+            int col = an.current_frame % an.columns;
+            int row = an.current_frame / an.columns;
+
+            uv_offset = {col * frame_width, row * frame_height};
+            uv_scale = {frame_width, frame_height};
+        }
+
+        GLint offset_loc = glGetUniformLocation(program, "uv_offset");
+        GLint scale_loc = glGetUniformLocation(program, "uv_scale");
+        glUniform2fv(offset_loc, 1, (float *)&uv_offset);
+        glUniform2fv(scale_loc, 1, (float *)&uv_scale);
+        gl_has_errors();
+
         GLint in_position_loc = glGetAttribLocation(program, "in_position");
         GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
         gl_has_errors();

@@ -309,6 +309,15 @@ struct TileSet {
 
 struct Overlay {};
 
+struct Animation {
+    int current_frame = 0;
+    int frame_count;            // Info for looping, useful also if count != cols x rows
+    float frame_time = 1000;    // ms for frame transition, defaults to 1000
+    float accumulator = 0;
+    int columns;                // Columns in sprite sheet
+    int rows = 1;               // Rows in sprite sheet
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -353,8 +362,7 @@ enum class EFFECT_ASSET_ID {
     VIGNETTE = TEXTURED + 1,
     TILEMAP = VIGNETTE + 1,
     PARTICLE = TILEMAP + 1,
-    ANIMATE = PARTICLE + 1,
-    EFFECT_COUNT = ANIMATE + 1,
+    EFFECT_COUNT = PARTICLE + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
