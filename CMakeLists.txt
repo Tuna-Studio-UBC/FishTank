@@ -146,6 +146,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm)
 
+# Hot reload for Visual Studio
+if(MSVC AND WIN32 AND NOT MSVC_VERSION VERSION_LESS 142)
+    target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/ZI>)
+endif()
+
 # Link dependencies from cmake/Dependency.cmake
 link_engine_dependencies(${PROJECT_NAME})
 
