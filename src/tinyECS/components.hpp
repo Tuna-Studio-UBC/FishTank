@@ -362,7 +362,7 @@ enum class EFFECT_ASSET_ID {
     VIGNETTE = TEXTURED + 1,
     TILEMAP = VIGNETTE + 1,
     PARTICLE = TILEMAP + 1,
-    EFFECT_COUNT = PARTICLE + 1,
+    EFFECT_COUNT = PARTICLE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
