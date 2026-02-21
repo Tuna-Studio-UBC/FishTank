@@ -189,10 +189,11 @@ struct DamageMultiplier {
 // =================================================================================
 
 struct Motion {
-    vec2 position = {0, 0}; // WORLD COORDINATE px
-    float angle = 0;        // Angle in RADIANS
-    vec2 velocity = {0, 0}; // px / s
-    vec2 scale = {10, 10};  // px
+    vec2 position = {0, 0};     // WORLD COORDINATE px
+    float angle = 0;            // Angle in RADIANS
+    float angular_velocity = 0; // Also in RADIANS / s
+    vec2 velocity = {0, 0};     // px / s
+    vec2 scale = {10, 10};      // px
 };
 
 // Stucture to store collision information
