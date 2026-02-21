@@ -234,6 +234,7 @@ enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, KeyboardActi
 struct KeyboardInputState {
     bool current_actions[KeyboardActions::KeyboardActionsCount];
     bool previous_actions[KeyboardActions::KeyboardActionsCount];
+    KeyboardActions most_recent_turn = KeyboardActions::TurnRight;
 };
 
 enum MouseActions { LeftClick, MouseActionsCount };

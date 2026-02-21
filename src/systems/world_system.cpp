@@ -368,9 +368,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
     if (key == GLFW_KEY_A) {
         ps.current_actions[KeyboardActions::TurnLeft] = key_pressed;
+        ps.most_recent_turn = KeyboardActions::TurnLeft;
     }
     if (key == GLFW_KEY_D) {
         ps.current_actions[KeyboardActions::TurnRight] = key_pressed;
+        ps.most_recent_turn = KeyboardActions::TurnRight;
     }
     if (key == GLFW_KEY_S) {
         ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;

@@ -49,7 +49,11 @@ void PlayerInputSystem::step(float elapsed_ms) {
         Entity e = Entity("PlayerQuickTurn");
         PlayerQuickTurn &qt = registry.playerQuickTurn.emplace(e);
         motion.angular_velocity = 0;
-        qt.direction = -1;
+        if (keyboard_input.most_recent_turn == KeyboardActions::TurnLeft) {
+            qt.direction = -1;
+        } else {
+            qt.direction = 1;
+        }
         qt.duration_ms = quick_turn_duration;
     } else if (!quick_turn_active) {
         float turn_dir = 0.f;
