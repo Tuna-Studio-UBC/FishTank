@@ -20,6 +20,7 @@
 #include "systems/player_input_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/world_system.hpp"
+#include "systems/animation_system.hpp"
 
 #include "ui/game_ui.hpp"
 
@@ -39,6 +40,7 @@ int main() {
     PhysicsSystem physics_system;
     PlayerInputSystem player_input_system;
     CameraSystem camera_system;
+    AnimationSystem animation_system;
 
     GameUI game_ui;
 
@@ -94,6 +96,7 @@ int main() {
             player_input_system.step(elapsed_ms);
             world_system.handle_expiration(elapsed_ms);
             particle_system.step(elapsed_ms);
+            animation_system.step(elapsed_ms);
             collision_system.step(elapsed_ms);
             camera_system.step();
         }
