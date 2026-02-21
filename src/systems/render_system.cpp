@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <glm/trigonometric.hpp>
 #include <iostream>
+#include <queue>
 #include <spdlog/spdlog.h>
 
 // internal
@@ -373,6 +374,22 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
     gl_has_errors();
 }
 
+// Z-sort render requests; stores draw order of entities in draw_list
+void RenderSystem::sortRenderRequests(std::vector<Entity> *draw_list) {
+    std::priority_queue<EntityRRPair, std::vector<EntityRRPair>, EntityRRPairCompare> sorted_rr;
+    for (int i = 0; i < registry.renderRequests.entities.size(); i++) {
+        Entity entity = registry.renderRequests.entities[i];
+        RenderRequest &rr = registry.renderRequests.components[i];
+        sorted_rr.emplace(entity, rr);
+    }
+
+    while (!sorted_rr.empty()) {
+        Entity entity = sorted_rr.top().first;
+        sorted_rr.pop();
+        draw_list->push_back(entity);
+    }
+}
+
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
 void RenderSystem::draw() {
@@ -406,7 +423,10 @@ void RenderSystem::draw() {
     mat3 view_2D = createViewMatrix();
 
     // draw all entities with a render request to the frame buffer
-    for (Entity entity : registry.renderRequests.entities) {
+    std::vector<Entity> draw_list = {};
+    sortRenderRequests(&draw_list);
+
+    for (Entity entity : draw_list) {
         // filter to entities that have a motion component
         if (registry.motions.has(entity)) {
             // Note, its not very efficient to access elements indirectly via the entity
