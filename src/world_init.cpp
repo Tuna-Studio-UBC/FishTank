@@ -111,6 +111,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 
     FireControl &fc = registry.fireControl.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;
+    fc.ammo = STARTING_AMMO;
 
     SpeedControl &sc = registry.speedControl.emplace(entity);
     sc.move_speed = config.move_speed;

@@ -29,16 +29,19 @@ bool key_pressed(KeyboardActions a, const KeyboardInputState &keyboard_input) {
 
 bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) { return keyboard_input.current_actions[a]; }
 
-// STUB FUNCTION -- REPLACE WHEN WE IMPLEMENT DIFFERENT AMMO TYPES
+// TODO: STUB FUNCTION -- REPLACE WHEN WE IMPLEMENT DIFFERENT AMMO TYPES
 int PlayerInputSystem::get_player_ammo_cost()
 {
     return 1;
 }
 
+/**
+    Tries to fire a projectile if the firing cooldown is 0, and the player has sufficient ammo. Does nothing otherwise.
+*/
 void PlayerInputSystem::try_fire_projectile(Motion& player_motion, FireControl& fc, const float& aim_angle)
 {
     int ammo_cost = get_player_ammo_cost();
-    if (fc.cooldown_ms > 0.f || fc.ammo < ammo_cost)
+    if (fc.cooldown_timer > 0.f || fc.ammo < ammo_cost)
         return;
 
     float barrel_len = DEFAULT_BARREL_LEN;
@@ -54,6 +57,7 @@ void PlayerInputSystem::try_fire_projectile(Motion& player_motion, FireControl& 
     createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
 
     fc.cooldown_timer = fc.cooldown_ms;
+    fc.ammo -= ammo_cost;
 }
 
 void PlayerInputSystem::step(float elapsed_ms) {
