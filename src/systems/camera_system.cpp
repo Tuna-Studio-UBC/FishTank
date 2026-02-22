@@ -14,6 +14,9 @@ vec2 CameraSystem::get_camera_dest() {
     vec2 &player_pos = registry.motions.get(player).position;
     vec2 &mouse_pos = registry.mouseInput.components[0].mouse_pos;
 
+    if (mouse_pos == vec2(0))
+        mouse_pos = player_pos;
+
     vec2 offset = (mouse_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2)) * MOUSE_SENSITIVITY_FACTOR;
     offset = glm::clamp(offset, vec2(-MAX_OFFSET), vec2(MAX_OFFSET));
 
