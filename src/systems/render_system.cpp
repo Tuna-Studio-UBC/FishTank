@@ -1,5 +1,6 @@
 
 #include <SDL.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
 #include <iostream>
 #include <queue>
@@ -28,11 +29,11 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
     vec2 atlas_offset =
         vec2((tile_id % tileset_width) / (float)tileset_width, (tile_id / tileset_width) / (float)tileset_height);
     GLint atlas_offset_uloc = glGetUniformLocation(program, "atlas_offset");
-    glUniform2fv(atlas_offset_uloc, 1, (GLfloat *)&atlas_offset);
+    glUniform2fv(atlas_offset_uloc, 1, value_ptr(atlas_offset));
     gl_has_errors();
 
     GLuint transform_loc = glGetUniformLocation(program, "transform");
-    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
+    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, value_ptr(transform.mat));
     gl_has_errors();
 
     // Get number of indices from index buffer, which has elements uint16_t
@@ -94,19 +95,19 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
     // Getting uniform locations for glUniform* calls
     GLint color_uloc = glGetUniformLocation(program, "fcolor");
     const vec3 color = vec3(1);
-    glUniform3fv(color_uloc, 1, (float *)&color);
+    glUniform3fv(color_uloc, 1, value_ptr(color));
     gl_has_errors();
 
     GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
-    glUniform2fv(tileset_size_uloc, 1, (GLfloat *)&tileset.dimensions);
+    glUniform2fv(tileset_size_uloc, 1, value_ptr(tileset.dimensions));
     gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(program, "projection");
-    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
     gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(program, "view");
-    glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+    glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
     gl_has_errors();
 
     GLuint tile_size_loc = glGetUniformLocation(program, "tile_size");
@@ -175,8 +176,8 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 
         GLint offset_loc = glGetUniformLocation(program, "uv_offset");
         GLint scale_loc = glGetUniformLocation(program, "uv_scale");
-        glUniform2fv(offset_loc, 1, (float *)&uv_offset);
-        glUniform2fv(scale_loc, 1, (float *)&uv_scale);
+        glUniform2fv(offset_loc, 1, value_ptr(uv_offset));
+        glUniform2fv(scale_loc, 1, value_ptr(uv_scale));
         gl_has_errors();
 
         GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -223,7 +224,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     // Getting uniform locations for glUniform* calls
     GLint color_uloc = glGetUniformLocation(program, "fcolor");
     const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-    glUniform3fv(color_uloc, 1, (float *)&color);
+    glUniform3fv(color_uloc, 1, value_ptr(color));
     gl_has_errors();
 
     // Get number of indices from index buffer, which has elements uint16_t
@@ -238,15 +239,15 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     // Setting uniform values to the currently bound program
     GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
+    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, value_ptr(transform.mat));
     gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
     gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(currProgram, "view");
-    glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+    glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
     gl_has_errors();
 
     // Drawing of num_indices/3 triangles specified in the index buffer
@@ -357,11 +358,11 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
     gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(program, "projection");
-    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
     gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(program, "view");
-    glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+    glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
     gl_has_errors();
 
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
