@@ -195,13 +195,17 @@ void WorldSystem::load_level(Progress &progress) {
     }
 }
 
-void WorldSystem::init(RenderSystem *renderer_arg) {
+void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     this->renderer = renderer_arg;
+    this->camera_system = camera_arg;
 
     init_tiles();
     init_tile_walls();
     // Create player entity
     Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
+
+    // Create camera
+    camera_system->init();
 
     auto e = Entity("Progress");
     auto &progress = registry.progress.emplace(e);
@@ -480,5 +484,5 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 void WorldSystem::restart_game() {
     particle_system.clear_all_particles();
     registry.clear_all_components();
-    init(renderer);
+    init(renderer, camera_system);
 }
