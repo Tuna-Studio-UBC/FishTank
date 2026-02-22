@@ -104,6 +104,7 @@ struct FireControl {
     float cooldown_timer = 0; // ms
     float cooldown_ms = 2000; // ms
     ATTACK_PATTERN attack_pattern;
+    int ammo = 0;
 };
 
 struct SpeedControl {

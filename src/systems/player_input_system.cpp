@@ -29,6 +29,33 @@ bool key_pressed(KeyboardActions a, const KeyboardInputState &keyboard_input) {
 
 bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) { return keyboard_input.current_actions[a]; }
 
+// STUB FUNCTION -- REPLACE WHEN WE IMPLEMENT DIFFERENT AMMO TYPES
+int PlayerInputSystem::get_player_ammo_cost()
+{
+    return 1;
+}
+
+void PlayerInputSystem::try_fire_projectile(Motion& player_motion, FireControl& fc, const float& aim_angle)
+{
+    int ammo_cost = get_player_ammo_cost();
+    if (fc.cooldown_ms > 0.f || fc.ammo < ammo_cost)
+        return;
+
+    float barrel_len = DEFAULT_BARREL_LEN;
+    if (!registry.turrets.entities.empty()) {
+        Entity turret_entity = registry.turrets.entities[0];
+        barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
+    }
+
+    vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
+    vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
+
+    Entity player = registry.players.entities[0];
+    createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
+
+    fc.cooldown_timer = fc.cooldown_ms;
+}
+
 void PlayerInputSystem::step(float elapsed_ms) {
     // We should have 1 and only ever 1 player input component
     assert(registry.keyboardInput.components.size() == 1);
@@ -105,38 +132,8 @@ void PlayerInputSystem::step(float elapsed_ms) {
         tm.angle = aim_angle;
     }
 
-    if (mouse_input.current_action == MouseActions::LeftClick && fc.cooldown_timer == 0.f) {
-        // Motion &player_motion = registry.motions.get(registry.players.entities[0]);
-        // vec2& player_pos = registry.motions.get(registry.players.entities[0]).position;
-        // vec2& camera_pos = registry.motions.get(registry.camera .entities[0]).position;
-
-        // If we wanted to change this so that the player isn't always centered, we would need to add the new
-        // center coordinates, then subtract the player coordinates. As it stands, since player is the center,
-        // we would be both adding and subtracting the player coordinates.
-        // vec2 mouse_relative_pos = mouse_input.mouse_pos + camera_pos - player_pos - vec2(WINDOW_WIDTH_PX / 2,
-        // WINDOW_HEIGHT_PX / 2);
-        // https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
-        // float angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);
-        // Entity player = registry.players.entities[0];
-        // createProjectile(player_pos, angle, ATTACK_PATTERN::PLAYER, player); // player is the owner of the bullet
-        // (hopefully)
-        // fc.cooldown_timer = fc.cooldown_ms;
-
-        // debug_print_player_motion(motion);
-        // debug_print_input_state(keyboard_input);
-        float barrel_len = 30.f;
-        if (!registry.turrets.entities.empty()) {
-            Entity turret_entity = registry.turrets.entities[0];
-            barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
-        }
-
-        vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
-        vec2 bullet_spawn_pos = motion.position + forward * barrel_len;
-
-        Entity player = registry.players.entities[0];
-        createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
-
-        fc.cooldown_timer = fc.cooldown_ms;
+    if (mouse_input.current_action == MouseActions::LeftClick) {
+        try_fire_projectile(motion, fc, aim_angle);
     }
 
     // Shift action over
