@@ -5,6 +5,7 @@
 
 float MAX_SPEED_MULTIPLIER = 2;                 // Max speed = move speed * x
 float DECELERATION_MULTIPLIER = 2;              // Deceleration = move speed * x
+float QUICK_TURN_MULTIPLIER = 2;                // QT speed = turn speed * x
 float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4;     // How fast we lose rotation velocity
 
 void debug_print_input_state(KeyboardInputState &keyboard_input) {
@@ -42,8 +43,8 @@ void PlayerInputSystem::step(float elapsed_ms) {
 
     float dt = elapsed_ms / 1000.0f;
     bool quick_turn_active = (registry.playerQuickTurn.size() != 0);
-    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f;
-    
+    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f / QUICK_TURN_MULTIPLIER;
+
     // Process Turn Input
     if (key_pressed(KeyboardActions::QuickTurn, keyboard_input) && !quick_turn_active) {
         Entity e = Entity("PlayerQuickTurn");
