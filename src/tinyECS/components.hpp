@@ -319,11 +319,11 @@ struct Overlay {};
 
 struct Animation {
     int current_frame = 0;
-    int frame_count;            // Info for looping, useful also if count != cols x rows
-    float frame_time = 1000;    // ms for frame transition, defaults to 1000
+    int frame_count;         // Info for looping, useful also if count != cols x rows
+    float frame_time = 1000; // ms for frame transition, defaults to 1000
     float accumulator = 0;
-    int columns;                // Columns in sprite sheet
-    int rows = 1;               // Rows in sprite sheet
+    int columns;  // Columns in sprite sheet
+    int rows = 1; // Rows in sprite sheet
 };
 
 /**
@@ -390,6 +390,12 @@ struct RenderRequest {
     TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
     EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
     GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+    int layer = 0; // Larger numbers are drawn on top
+};
+
+typedef std::pair<Entity, RenderRequest> EntityRRPair;
+struct EntityRRPairCompare {
+    bool operator()(const EntityRRPair &a, const EntityRRPair &b) const { return a.second.layer > b.second.layer; }
 };
 
 #pragma endregion Rendering

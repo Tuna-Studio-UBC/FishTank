@@ -200,7 +200,7 @@ Entity createTurret(RenderSystem *renderer, vec2 position) {
     m.scale = {70.f, 18.f};
 
     registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_BLACK, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+        entity, {TEXTURE_ASSET_ID::TEXTURE_BLACK, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE, 1});
 
     // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));
 
