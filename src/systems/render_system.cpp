@@ -1,7 +1,9 @@
 
 #include <SDL.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
 #include <iostream>
+#include <queue>
 #include <spdlog/spdlog.h>
 
 // internal
@@ -27,11 +29,11 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
     vec2 atlas_offset =
         vec2((tile_id % tileset_width) / (float)tileset_width, (tile_id / tileset_width) / (float)tileset_height);
     GLint atlas_offset_uloc = glGetUniformLocation(program, "atlas_offset");
-    glUniform2fv(atlas_offset_uloc, 1, (GLfloat *)&atlas_offset);
+    glUniform2fv(atlas_offset_uloc, 1, value_ptr(atlas_offset));
     gl_has_errors();
 
     GLuint transform_loc = glGetUniformLocation(program, "transform");
-    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
+    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, value_ptr(transform.mat));
     gl_has_errors();
 
     // Get number of indices from index buffer, which has elements uint16_t
@@ -93,19 +95,19 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
     // Getting uniform locations for glUniform* calls
     GLint color_uloc = glGetUniformLocation(program, "fcolor");
     const vec3 color = vec3(1);
-    glUniform3fv(color_uloc, 1, (float *)&color);
+    glUniform3fv(color_uloc, 1, value_ptr(color));
     gl_has_errors();
 
     GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
-    glUniform2fv(tileset_size_uloc, 1, (GLfloat *)&tileset.dimensions);
+    glUniform2fv(tileset_size_uloc, 1, value_ptr(tileset.dimensions));
     gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(program, "projection");
-    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
     gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(program, "view");
-    glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+    glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
     gl_has_errors();
 
     GLuint tile_size_loc = glGetUniformLocation(program, "tile_size");
@@ -155,6 +157,29 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 
     // texture-mapped entities - use data location as in the vertex buffer
     if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED) {
+        vec2 uv_offset = {0.f, 0.f};
+        vec2 uv_scale = {1.f, 1.f};
+
+        // Reuse the textured mesh shader so that we don't need custom functionality for animations
+        if (registry.animations.has(entity)) {
+            Animation &an = registry.animations.get(entity);
+
+            float frame_width = 1.f / an.columns;
+            float frame_height = 1.f / an.rows;
+
+            int col = an.current_frame % an.columns;
+            int row = an.current_frame / an.columns;
+
+            uv_offset = {col * frame_width, row * frame_height};
+            uv_scale = {frame_width, frame_height};
+        }
+
+        GLint offset_loc = glGetUniformLocation(program, "uv_offset");
+        GLint scale_loc = glGetUniformLocation(program, "uv_scale");
+        glUniform2fv(offset_loc, 1, value_ptr(uv_offset));
+        glUniform2fv(scale_loc, 1, value_ptr(uv_scale));
+        gl_has_errors();
+
         GLint in_position_loc = glGetAttribLocation(program, "in_position");
         GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
         gl_has_errors();
@@ -199,7 +224,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     // Getting uniform locations for glUniform* calls
     GLint color_uloc = glGetUniformLocation(program, "fcolor");
     const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-    glUniform3fv(color_uloc, 1, (float *)&color);
+    glUniform3fv(color_uloc, 1, value_ptr(color));
     gl_has_errors();
 
     // Get number of indices from index buffer, which has elements uint16_t
@@ -214,15 +239,15 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
     // Setting uniform values to the currently bound program
     GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
+    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, value_ptr(transform.mat));
     gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
     gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(currProgram, "view");
-    glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+    glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
     gl_has_errors();
 
     // Drawing of num_indices/3 triangles specified in the index buffer
@@ -333,11 +358,11 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
     gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(program, "projection");
-    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
     gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(program, "view");
-    glUniformMatrix3fv(view_loc, 1, GL_FALSE, (float *)&view);
+    glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
     gl_has_errors();
 
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -348,6 +373,22 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(GL_POINTS, 0, (GLsizei)positions.size());
     gl_has_errors();
+}
+
+// Z-sort render requests; stores draw order of entities in draw_list
+void RenderSystem::sortRenderRequests(std::vector<Entity> *draw_list) {
+    std::priority_queue<EntityRRPair, std::vector<EntityRRPair>, EntityRRPairCompare> sorted_rr;
+    for (int i = 0; i < registry.renderRequests.entities.size(); i++) {
+        Entity entity = registry.renderRequests.entities[i];
+        RenderRequest &rr = registry.renderRequests.components[i];
+        sorted_rr.emplace(entity, rr);
+    }
+
+    while (!sorted_rr.empty()) {
+        Entity entity = sorted_rr.top().first;
+        sorted_rr.pop();
+        draw_list->push_back(entity);
+    }
 }
 
 // Render our game world
@@ -383,7 +424,10 @@ void RenderSystem::draw() {
     mat3 view_2D = createViewMatrix();
 
     // draw all entities with a render request to the frame buffer
-    for (Entity entity : registry.renderRequests.entities) {
+    std::vector<Entity> draw_list = {};
+    sortRenderRequests(&draw_list);
+
+    for (Entity entity : draw_list) {
         // filter to entities that have a motion component
         if (registry.motions.has(entity)) {
             // Note, its not very efficient to access elements indirectly via the entity

@@ -313,6 +313,15 @@ struct TileSet {
 
 struct Overlay {};
 
+struct Animation {
+    int current_frame = 0;
+    int frame_count;         // Info for looping, useful also if count != cols x rows
+    float frame_time = 1000; // ms for frame transition, defaults to 1000
+    float accumulator = 0;
+    int columns;  // Columns in sprite sheet
+    int rows = 1; // Rows in sprite sheet
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -343,7 +352,9 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_BLACK = 2,
     TEXTURE_WIN_OVERLAY = 3,
     TEXTURE_LOSE_OVERLAY = 4,
-    TEXTURE_COUNT = TEXTURE_LOSE_OVERLAY + 1
+    TEXTURE_BUBBLE = 5,
+    TEXTURE_BUBBLE_SHEET = 6,
+    TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -374,6 +385,12 @@ struct RenderRequest {
     TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
     EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
     GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+    int layer = 0; // Larger numbers are drawn on top
+};
+
+typedef std::pair<Entity, RenderRequest> EntityRRPair;
+struct EntityRRPairCompare {
+    bool operator()(const EntityRRPair &a, const EntityRRPair &b) const { return a.second.layer > b.second.layer; }
 };
 
 #pragma endregion Rendering

@@ -37,6 +37,9 @@ inline std::string textures_path(const std::string &name) {
 inline std::string tileset_texture_path(const std::string &name) {
     return std::string(PROJECT_SOURCE_DIR) + "res/tileset_images/" + std::string(name);
 };
+inline std::string sprite_sheet_texture_path(const std::string &name) {
+    return std::string(PROJECT_SOURCE_DIR) + "res/sprite_sheet/" + std::string(name);
+};
 inline std::string audio_path(const std::string &name) { return data_path() + "/audio/" + std::string(name); };
 inline std::string mesh_path(const std::string &name) { return data_path() + "/meshes/" + std::string(name); };
 
