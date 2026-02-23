@@ -161,7 +161,6 @@ void AISystem::step(float elapsed_ms) {
             //pursuit.path = path_finding_a(motion_i.position, target_pos);
             pursuit.curr_index = 0;
             pursuit.repath_timer = 0;
-            spdlog::debug("{} found path of size {}", enemy_i.name_id(), pursuit.path.size());
         }
         pursuit.repath_timer += elapsed_ms;
 
@@ -172,7 +171,6 @@ void AISystem::step(float elapsed_ms) {
                 if (pursuit.curr_index + 1 < pursuit.path.size()) {
                     pursuit.curr_index += 1;
                     next_pos = pursuit.path[pursuit.curr_index];
-                    spdlog::debug("{} going to next position ({},{})", enemy_i.name_id(), next_pos.x, next_pos.y);
                 }
             }
 
@@ -183,7 +181,9 @@ void AISystem::step(float elapsed_ms) {
         float angle = adjust_angle(motion_i, registry.speedControl.get(enemy_i), target_pos, player_pos, elapsed_ms, (TILE_SIZE_PX*1.5));
 
         // Firing logic
-        fire_projectiles(enemy_i, elapsed_ms, angle);
+        if (walkable_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos), registry.tilemaps.components[0])) {
+            fire_projectiles(enemy_i, elapsed_ms, angle);
+        }
     }
 }
 

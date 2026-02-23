@@ -53,46 +53,46 @@ int h_cost(const ivec2 &a, const ivec2 &b) {
 }
 
 bool walkable_bresenhams_line(ivec2 a, ivec2 b, const TileMap &map) { 
-    int x0 = a.x;
-    int y0 = a.y;
-    int x1 = b.x;
-    int y1 = b.y;
+    int x1 = a.x;
+    int y1 = a.y;
+    int x2 = b.x;
+    int y2 = b.y;
 
-    int dx = abs(x1 - x0);
-    int dy = abs(y1 - y0);
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
 
-    int sx = (x0 < x1) ? 1 : -1;
-    int sy = (y0 < y1) ? 1 : -1;
+    int sx = (x1 < x2) ? 1 : -1;
+    int sy = (y1 < y2) ? 1 : -1;
 
     int err = dx - dy;
 
     while (true) {
-        if (!is_walkable(map, x0, y0)) {
+        if (!is_walkable(map, x1, y1)) {
             return false;
         }
 
-        if (x0 == x1 && y0 == y1) {
+        if (x1 == x2 && y1 == y2) {
             break;
         }
 
         int e2 = 2 * err;
-        int prev_x = x0;
-        int prev_y = y0;
+        int prev_x = x1;
+        int prev_y = y1;
 
         if (e2 > -dy) {
             err -= dy;
-            x0 += sx;
+            x1 += sx;
         }
         if (e2 < dx) {
             err += dx;
-            y0 += sy;
+            y1 += sy;
         }
 
         // modify Bresenham's to check both tiles in a diagonal
-        if (x0 != prev_x && y0 != prev_y) {
-            if (!is_walkable(map, prev_x, y0))
+        if (x1 != prev_x && y1 != prev_y) {
+            if (!is_walkable(map, prev_x, y1))
                 return false;
-            if (!is_walkable(map, x0, prev_y))
+            if (!is_walkable(map, x1, prev_y))
                 return false;
         }
     }
