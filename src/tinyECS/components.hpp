@@ -135,7 +135,7 @@ struct Patrolling {};
 struct Pursuit {
     std::vector<vec2> path;
     size_t curr_index = 0;
-    float repath_timer = 0;
+    ivec2 goal;
 };
 
 struct Bouncy {

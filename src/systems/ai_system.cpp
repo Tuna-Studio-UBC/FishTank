@@ -156,13 +156,12 @@ void AISystem::step(float elapsed_ms) {
 
         // Pathfinding using BFS
         Pursuit &pursuit = pursuit_container.get(enemy_i);
-        if (pursuit.repath_timer >= 2000.f || pursuit.path.size() == 0) {
-            pursuit.path = path_finding_bfs(motion_i.position, target_pos);
-            //pursuit.path = path_finding_a(motion_i.position, target_pos);
+        if (pursuit.goal != world_to_tile(player_pos) || pursuit.path.size() == 0) {
+            //pursuit.path = path_finding_bfs(motion_i.position, target_pos);
+            pursuit.path = path_finding_a(motion_i.position, target_pos);
             pursuit.curr_index = 0;
-            pursuit.repath_timer = 0;
+            pursuit.goal = world_to_tile(player_pos);
         }
-        pursuit.repath_timer += elapsed_ms;
 
         if (pursuit.curr_index < pursuit.path.size() && pursuit.path.size() > 0) {
             vec2 next_pos = pursuit.path[pursuit.curr_index];
@@ -200,7 +199,8 @@ void AISystem::handle_detection() {
         bool in_radius = entity_in_radius(player_pos - motion_i.position, motion_i.scale, radius_i);
 
         if (!registry.pursuit.has(enemy_i) && in_radius && !registry.distracted.has(enemy_i)) {
-            registry.pursuit.emplace(enemy_i);
+            Pursuit &p = registry.pursuit.emplace(enemy_i);
+            p.goal = world_to_tile(player_pos);
             float speed = registry.speedControl.get(enemy_i).move_speed;
             motion_i.velocity = vec2(speed, 0.f);
 

@@ -1,15 +1,8 @@
 #include "pathfinding_system.hpp"
-#include <algorithm>
-#include <array>
 #include <queue>
 #include "../tinyECS/registry.hpp"
-#include <spdlog/spdlog.h>
 
 const ivec2 four_directions[4] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-const ivec2 eight_directions[8] = {
-    {1, 0}, {-1, 0}, {0, 1},  {0, -1}, // straight
-    {1, 1}, {-1, 1}, {1, -1}, {-1, -1} // diagonal
-};
 
 struct Node {
     int x, y;
@@ -27,18 +20,15 @@ bool is_out_of_bounds(int width, int height, int x, int y) { return x < 0 || y <
 
 static bool is_walkable(const TileMap &map, int x, int y) {
     if (is_out_of_bounds((int)map.width, (int)map.height, x, y)) {
-        //spdlog::debug("neighbour is out of bounds");
         return false;
     }
     int tile_id = map.tile_ids[x + y * map.width];
 
     bool is_empty = (tile_id == 1);
     if (!is_empty) {
-        //spdlog::debug("neighbour is not empty");
         return false;
     }
 
-    //spdlog::debug("found walkable");
     return true;
 }
 
@@ -67,9 +57,6 @@ bool walkable_bresenhams_line(ivec2 a, ivec2 b, const TileMap &map) {
     int err = dx - dy;
 
     while (true) {
-        if (!is_walkable(map, x1, y1)) {
-            return false;
-        }
 
         if (x1 == x2 && y1 == y2) {
             break;
@@ -90,10 +77,9 @@ bool walkable_bresenhams_line(ivec2 a, ivec2 b, const TileMap &map) {
 
         // modify Bresenham's to check both tiles in a diagonal
         if (x1 != prev_x && y1 != prev_y) {
-            if (!is_walkable(map, prev_x, y1))
+            if (!is_walkable(map, prev_x, y1) || !is_walkable(map, x1, prev_y)) {
                 return false;
-            if (!is_walkable(map, x1, prev_y))
-                return false;
+            }
         }
     }
 
@@ -173,7 +159,6 @@ std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_wor
     // check if goal visited
     int goal_index = get_map_index(width, goal.x, goal.y);
     if (!visited[goal_index]) {
-        //spdlog::debug("goal cannot be reached");
         return {};
     }
 
@@ -211,7 +196,6 @@ std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world
 
     if (is_out_of_bounds((int)map.width, (int)map.height, start.x, start.y) ||
         is_out_of_bounds((int)map.width, (int)map.height, goal.x, goal.y)) {
-        spdlog::debug("goal or start out of bounds");
         return {};
     }
 
@@ -252,14 +236,12 @@ std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world
             int neighbour_y = current.y + dir.y;
 
             if (!is_walkable(map, neighbour_x, neighbour_y)) {
-                spdlog::debug("neighbour isn't walkable");
                 continue;
             }
 
             int neighbour_id = get_map_index(width, neighbour_x, neighbour_y);
 
             if (closed[neighbour_id]) {
-                spdlog::debug("neighbour is closed");
                 continue;
             }
 
@@ -272,7 +254,6 @@ std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world
                 int f = tentative_g + h_cost({neighbour_x, neighbour_y}, goal);
 
                 open.push({neighbour_x, neighbour_y, tentative_g, f});
-                spdlog::debug("pushing ({},{}) to open", neighbour_x, neighbour_y);
             }
         }
     }
@@ -300,7 +281,6 @@ std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world
     world_path.reserve(tile_path.size());
 
     for (const auto &t : tile_path) {
-        spdlog::debug("pushing tile ({},{}) to path", t.x, t.y);
         world_path.push_back(tile_center_to_world(t));
     }
         
