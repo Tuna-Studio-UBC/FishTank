@@ -5,8 +5,8 @@
 #include "../tinyECS/registry.hpp"
 #include <spdlog/spdlog.h>
 
-const Int2 four_directions[4] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-const Int2 eight_directions[8] = {
+const ivec2 four_directions[4] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+const ivec2 eight_directions[8] = {
     {1, 0}, {-1, 0}, {0, 1},  {0, -1}, // straight
     {1, 1}, {-1, 1}, {1, -1}, {-1, -1} // diagonal
 };
@@ -42,7 +42,7 @@ static bool is_walkable(const TileMap &map, int x, int y) {
     return true;
 }
 
-int h_cost(const Int2 &a, const Int2 &b) { 
+int h_cost(const ivec2 &a, const ivec2 &b) { 
     int dx = abs(a.x - b.x); 
     int dy = abs(a.y - b.y);
 
@@ -52,11 +52,80 @@ int h_cost(const Int2 &a, const Int2 &b) {
     return (14 * min_d) + (10 * (max_d - min_d));
 }
 
+bool walkable_bresenhams_line(ivec2 a, ivec2 b, const TileMap &map) { 
+    int x0 = a.x;
+    int y0 = a.y;
+    int x1 = b.x;
+    int y1 = b.y;
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+
+    int err = dx - dy;
+
+    while (true) {
+        if (!is_walkable(map, x0, y0)) {
+            return false;
+        }
+
+        if (x0 == x1 && y0 == y1) {
+            break;
+        }
+
+        int e2 = 2 * err;
+        int prev_x = x0;
+        int prev_y = y0;
+
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+
+        // modify Bresenham's to check both tiles in a diagonal
+        if (x0 != prev_x && y0 != prev_y) {
+            if (!is_walkable(map, prev_x, y0))
+                return false;
+            if (!is_walkable(map, x0, prev_y))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+std::vector<ivec2> prune_path(std::vector<ivec2> &path, const TileMap &map) { 
+    if (path.size() <= 2) {
+        return path;
+    }
+
+    std::vector<ivec2> pruned_path;
+    pruned_path.push_back(path[0]);
+
+    int curr = 0;
+
+    for (int i = 2; i < path.size(); i++) {
+        if (!walkable_bresenhams_line(path[curr], path[i], map)) {
+            pruned_path.push_back(path[i - 1]);
+            curr = i - 1;
+        }
+    }
+
+    pruned_path.push_back(path.back());
+    return pruned_path;
+}
+
 std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_world) {
     const TileMap &map = registry.tilemaps.components[0];
 
-    Int2 start = world_to_tile(start_world);
-    Int2 goal = world_to_tile(goal_world);
+    ivec2 start = world_to_tile(start_world);
+    ivec2 goal = world_to_tile(goal_world);
 
     if (is_out_of_bounds((int)map.width, (int)map.height, start.x, start.y) ||
         is_out_of_bounds((int)map.width, (int)map.height, goal.x, goal.y)) {
@@ -70,14 +139,14 @@ std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_wor
     std::vector<bool> visited(total, false);
     std::vector<int> parent(total, -1);
 
-    std::queue<Int2> queue;
+    std::queue<ivec2> queue;
 
     queue.push(start);
     visited[get_map_index(width, start.x, start.y)] = true;
 
     // algorithm loop
     while (!queue.empty()) {
-        Int2 current = queue.front();
+        ivec2 current = queue.front();
         queue.pop();
 
         if (current.x == goal.x && current.y == goal.y)
@@ -109,7 +178,7 @@ std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_wor
     }
 
     // reconstruct and convert tile path
-    std::vector<Int2> tile_path;
+    std::vector<ivec2> tile_path;
     int p = goal_index;
 
     while (p != -1) {
@@ -119,6 +188,7 @@ std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_wor
         p = parent[p];
     }
 
+    tile_path = prune_path(tile_path, map);
     std::reverse(tile_path.begin(), tile_path.end());
 
     std::vector<vec2> world_path;
@@ -136,8 +206,8 @@ std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_wor
 std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world) {
     const TileMap &map = registry.tilemaps.components[0];
 
-    Int2 start = world_to_tile(start_world);
-    Int2 goal = world_to_tile(goal_world);
+    ivec2 start = world_to_tile(start_world);
+    ivec2 goal = world_to_tile(goal_world);
 
     if (is_out_of_bounds((int)map.width, (int)map.height, start.x, start.y) ||
         is_out_of_bounds((int)map.width, (int)map.height, goal.x, goal.y)) {
@@ -213,7 +283,7 @@ std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world
     }
 
     // Reconstruct and convert tile path
-    std::vector<Int2> tile_path;
+    std::vector<ivec2> tile_path;
     int p = goal_idx;
 
     while (p != -1) {
@@ -223,6 +293,7 @@ std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world
         p = parent[p];
     }
 
+    tile_path = prune_path(tile_path, map);
     std::reverse(tile_path.begin(), tile_path.end());
 
     std::vector<vec2> world_path;

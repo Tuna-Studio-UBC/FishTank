@@ -2,5 +2,6 @@
 #include <vector>
 #include "../common.hpp"
 
+std::vector<ivec2> prune_path(std::vector<ivec2> path);
 std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_world);
 std::vector<vec2> path_finding_a(const vec2 &start_world, const vec2 &goal_world);

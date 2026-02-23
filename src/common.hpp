@@ -101,13 +101,6 @@ vec2 direction_to_unit_vector(float radians);
 void change_vector_direction(vec2 &in_vec, float radians);
 bool entity_in_radius(vec2 dist, vec2 entity_scale, float radius);
 
-struct Int2 {
-    int x;
-    int y;
+ivec2 world_to_tile(const vec2 &world_pos);
 
-    bool operator==(const Int2 &other) const { return x == other.x && y == other.y; }
-};
-
-Int2 world_to_tile(const vec2 &world_pos);
-
-vec2 tile_center_to_world(const Int2 &tile);
+vec2 tile_center_to_world(const ivec2 &tile);

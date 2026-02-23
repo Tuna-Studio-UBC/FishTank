@@ -157,8 +157,8 @@ void AISystem::step(float elapsed_ms) {
         // Pathfinding using BFS
         Pursuit &pursuit = pursuit_container.get(enemy_i);
         if (pursuit.repath_timer >= 2000.f || pursuit.path.size() == 0) {
-            //pursuit.path = path_finding_bfs(motion_i.position, target_pos);
-            pursuit.path = path_finding_a(motion_i.position, target_pos);
+            pursuit.path = path_finding_bfs(motion_i.position, target_pos);
+            //pursuit.path = path_finding_a(motion_i.position, target_pos);
             pursuit.curr_index = 0;
             pursuit.repath_timer = 0;
             spdlog::debug("{} found path of size {}", enemy_i.name_id(), pursuit.path.size());
