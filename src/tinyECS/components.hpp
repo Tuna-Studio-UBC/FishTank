@@ -106,6 +106,7 @@ struct FireControl {
     ATTACK_PATTERN attack_pattern;
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
+    float refill_progress = 0.f;
 };
 
 struct SpeedControl {
@@ -170,6 +171,10 @@ struct PowerUp {
 struct Heal {
     int amount;
     Heal(int amount) { this->amount = amount; };
+};
+
+struct Bubbler {
+    float ammo_per_second = 10.f;
 };
 // Optional: OverTimeEffect
 
@@ -352,7 +357,8 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_LOSE_OVERLAY = 4,
     TEXTURE_BUBBLE = 5,
     TEXTURE_BUBBLE_SHEET = 6,
-    TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
+    TEXTURE_BUBBLER = 7,
+    TEXTURE_COUNT = TEXTURE_BUBBLER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

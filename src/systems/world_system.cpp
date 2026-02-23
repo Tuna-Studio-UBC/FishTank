@@ -237,6 +237,9 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     spdlog::info("Starting music...");
     Mix_PlayMusic(background_music, -1);*/
 
+    // ! FOR TESTING !
+    createBubbler(renderer, vec2(125.f));
+
     // walls
     TileMap &tilemap = registry.tilemaps.components[0];
     float arena_width = tilemap.width * TILE_SIZE_PX;

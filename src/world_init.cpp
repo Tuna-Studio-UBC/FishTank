@@ -273,6 +273,26 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
     return entity;
 }
 
+Entity createBubbler(RenderSystem *renderer, vec2 position) { 
+    auto entity = Entity("Power Up");
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    registry.bubblers.emplace(entity);
+
+    auto &motion = registry.motions.emplace(entity);
+    motion.position = position;
+    motion.velocity = {0.f, 0.f};
+    motion.angle = 0.f;
+    motion.scale = {TILE_SIZE_PX, TILE_SIZE_PX};
+
+    registry.renderRequests.insert(entity,
+                                   {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
+    return entity;
+}
+
 #pragma endregion Pickups
 
 #pragma region Distractions
