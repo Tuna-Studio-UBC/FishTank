@@ -11,6 +11,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+#include "systems/camera_system.hpp"
 #include "systems/render_system.hpp"
 
 // Container for all our entities and game logic.
@@ -31,7 +32,7 @@ class WorldSystem {
     void restart_game();
 
     // starts the game
-    void init(RenderSystem *renderer);
+    void init(RenderSystem *renderer, CameraSystem *camera_system);
 
     // releases all associated resources
     ~WorldSystem();
@@ -63,6 +64,7 @@ class WorldSystem {
 
     // Game state
     RenderSystem *renderer;
+    CameraSystem *camera_system;
 
     // grid
     std::vector<Entity> grid_lines;
