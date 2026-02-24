@@ -8,8 +8,8 @@ std::uniform_real_distribution<double> dist(0.0, 2.0 * M_PI);
 
 vec2 random_direction_unit_vector() { return direction_to_unit_vector(dist(gen)); }
 
-void spawn_particle(ParticleEmitterRuntime &rt, ParticleEmitter &pe) {
-    rt.particles.push_back({pe.position, pe.particle_speed * random_direction_unit_vector(), pe.particle_life_ms});
+void spawn_particle(ParticleEmitterRuntime &rt, ParticleEmitter &pe, Motion &m) {
+    rt.particles.push_back({m.position, pe.particle_speed * random_direction_unit_vector(), pe.particle_life_ms});
 };
 
 void update_particle_positions(ParticleEmitterRuntime &rt, float elapsed_ms) {
@@ -38,6 +38,7 @@ void ParticleSystem::step(float elapsed_ms) {
     for (Entity e : registry.particleEmitters.entities) {
         ParticleEmitterRuntime &rt = runtimes[e.id()];
         ParticleEmitter &pe = registry.particleEmitters.get(e);
+        Motion &m = registry.motions.get(e);
         pe.life_ms -= elapsed_ms;
 
         // Destroy expired particle effects
@@ -60,7 +61,7 @@ void ParticleSystem::step(float elapsed_ms) {
 
         while (rt.spawn_accumulator_ms >= pe.spawn_interval_ms && rt.particles.size() < pe.max_particles) {
             rt.spawn_accumulator_ms -= pe.spawn_interval_ms;
-            spawn_particle(rt, pe);
+            spawn_particle(rt, pe, m);
         }
 
         // Update particle positions

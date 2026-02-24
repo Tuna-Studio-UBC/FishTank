@@ -201,8 +201,8 @@ struct Collision {
     Entity other; // the second object involved in the collision
 };
 
+// Entities with this require the motion component
 struct ParticleEmitter {
-    vec2 position; // Position of the particle spawn
     int max_particles;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
