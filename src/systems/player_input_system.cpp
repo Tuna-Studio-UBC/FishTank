@@ -3,8 +3,10 @@
 #include "world_init.hpp"
 #include <iostream>
 
-float MAX_SPEED_MULTIPLIER = 2;    // Max speed = move speed * x
-float DECELERATION_MULTIPLIER = 2; // Deceleration = move speed * x
+float MAX_SPEED_MULTIPLIER = 2;                 // Max speed = move speed * x
+float DECELERATION_MULTIPLIER = 2;              // Deceleration = move speed * x
+float QUICK_TURN_MULTIPLIER = 2;                // QT speed = turn speed * x
+float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4;     // How fast we lose rotation velocity
 
 void debug_print_input_state(KeyboardInputState &keyboard_input) {
     std::cout << "Current:  ";
@@ -68,13 +70,18 @@ void PlayerInputSystem::step(float elapsed_ms) {
 
     float dt = elapsed_ms / 1000.0f;
     bool quick_turn_active = (registry.playerQuickTurn.size() != 0);
-    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f;
+    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f / QUICK_TURN_MULTIPLIER;
 
     // Process Turn Input
     if (key_pressed(KeyboardActions::QuickTurn, keyboard_input) && !quick_turn_active) {
         Entity e = Entity("PlayerQuickTurn");
         PlayerQuickTurn &qt = registry.playerQuickTurn.emplace(e);
-        qt.direction = -1;
+        motion.angular_velocity = 0;
+        if (keyboard_input.most_recent_turn == KeyboardActions::TurnLeft) {
+            qt.direction = -1;
+        } else {
+            qt.direction = 1;
+        }
         qt.duration_ms = quick_turn_duration;
     } else if (!quick_turn_active) {
         float turn_dir = 0.f;
@@ -84,7 +91,14 @@ void PlayerInputSystem::step(float elapsed_ms) {
         if (key_held(KeyboardActions::TurnRight, keyboard_input)) {
             turn_dir += 1.f;
         }
-        motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
+        // motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
+        if (turn_dir != 0.f) {
+            motion.angular_velocity = turn_dir * sc.turn_speed;
+        } else if (motion.angular_velocity > 0) {
+            motion.angular_velocity = std::max(0.f, motion.angular_velocity - sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
+        } else if (motion.angular_velocity < 0) {
+            motion.angular_velocity = std::min(0.f, motion.angular_velocity + sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
+        }
     }
 
     // Process Quick Turn
