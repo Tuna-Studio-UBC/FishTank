@@ -340,10 +340,11 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
         entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
     ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
+    pe.offset = {-20, 0};
     pe.max_particles = 500;
     pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
-    pe.particle_speed = 60;
-    pe.spawn_interval_ms = 20;
+    pe.particle_speed = 80;
+    pe.spawn_interval_ms = 40;
     pe.particle_life_ms = 200;
 
     return entity;

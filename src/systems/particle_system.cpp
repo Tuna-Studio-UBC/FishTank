@@ -9,7 +9,7 @@ std::uniform_real_distribution<double> dist(0.0, 2.0 * M_PI);
 vec2 random_direction_unit_vector() { return direction_to_unit_vector(dist(gen)); }
 
 void spawn_particle(ParticleEmitterRuntime &rt, ParticleEmitter &pe, Motion &m) {
-    rt.particles.push_back({m.position, pe.particle_speed * random_direction_unit_vector(), pe.particle_life_ms});
+    rt.particles.push_back({m.position + get_vector_rotated(pe.offset, m.angle), pe.particle_speed * random_direction_unit_vector(), pe.particle_life_ms});
 };
 
 void update_particle_positions(ParticleEmitterRuntime &rt, float elapsed_ms) {

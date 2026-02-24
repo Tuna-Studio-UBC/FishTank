@@ -206,6 +206,7 @@ enum class TEXTURE_ASSET_ID;
 
 // Entities with this require the motion component
 struct ParticleEmitter {
+    vec2 offset = {0, 0};    // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
     int max_particles;
     TEXTURE_ASSET_ID texture;
     float particle_speed;    // Speed of particle in px / s
