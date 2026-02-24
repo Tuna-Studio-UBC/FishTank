@@ -35,6 +35,16 @@ void ParticleSystem::clear_all_particles() {
 }
 
 void ParticleSystem::step(float elapsed_ms) {
+    // See if we need to create any new runtimes
+    for (Entity e : registry.particleEmitters.entities) {
+        if (runtimes.find(e.id()) == runtimes.end()) {
+            auto result = runtimes.emplace(e.id(), ParticleEmitterRuntime{});
+            ParticleEmitterRuntime &rt = result.first->second;
+            ParticleEmitter &pe = registry.particleEmitters.get(e);
+            rt.texture = pe.texture;
+        }
+    }
+
     for (Entity e : registry.particleEmitters.entities) {
         ParticleEmitterRuntime &rt = runtimes[e.id()];
         ParticleEmitter &pe = registry.particleEmitters.get(e);

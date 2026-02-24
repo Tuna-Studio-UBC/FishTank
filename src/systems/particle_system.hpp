@@ -17,7 +17,8 @@ struct Particle {
 
 struct ParticleEmitterRuntime {
     std::vector<Particle> particles;
-    float spawn_accumulator_ms; // Interesting addition to prevent FPS dependent spawn rates
+    TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+    float spawn_accumulator_ms = 0.f; // Interesting addition to prevent FPS dependent spawn rates
 };
 
 class ParticleSystem {

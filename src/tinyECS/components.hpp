@@ -201,9 +201,13 @@ struct Collision {
     Entity other; // the second object involved in the collision
 };
 
+// Forward definition to avoid compilation issues, this is defined further down
+enum class TEXTURE_ASSET_ID;
+
 // Entities with this require the motion component
 struct ParticleEmitter {
     int max_particles;
+    TEXTURE_ASSET_ID texture;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
     float life_ms;           // Duration of particle spawns
