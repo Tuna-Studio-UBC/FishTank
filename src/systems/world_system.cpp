@@ -433,18 +433,17 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             for (Entity enemy : registry.enemies.entities) {
                 Motion &enemy_motion = registry.motions.get(enemy);
-                if (!registry.distracted.has(enemy) &&
-                    entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
-                    if (registry.pursuit.has(enemy)) {
-                        registry.pursuit.remove(enemy);
-                    }
-                    registry.distracted.insert(enemy, {best_bell, bell.distraction_ms});
+                if (!registry.distracted.has(enemy) && entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
+                    registry.senses.get(enemy).is_distracted = true;
+                    Distracted &distracted = registry.distracted.get(enemy);
+                    distracted.bell = best_bell;
+                    distracted.remaining_ms = bell.distraction_ms;
                 }
             }
 
             bell.cooldown_timer = bell.cooldown_ms;
 
-            spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
+            // spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
         }
 
         if (key == GLFW_KEY_R) {

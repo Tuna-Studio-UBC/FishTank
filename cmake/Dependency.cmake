@@ -59,10 +59,11 @@ target_include_directories(imgui PUBLIC
 
 function(link_engine_dependencies target)
 
-  # Tileset
+  # Tileset and Decision Trees
   target_compile_definitions(${PROJECT_NAME} PRIVATE
     TILESET_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/tilesets/tileset.json"
     TILEMAP_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/maps/map.json"
+    DECISION_TREES="${CMAKE_CURRENT_SOURCE_DIR}/res/decision_trees/"
   )
 
   # Remaining

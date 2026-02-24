@@ -1,0 +1,6 @@
+# NodeID,Type,ConditionName,TrueChildID,FalseChildID,Action
+1,Condition,is_distracted,2,3,
+2,Action, , , ,DISTRACTED
+3,Condition,sees_player,4,5,
+4,Action, , , ,PURSUE
+5,Action, , , ,IDLE

@@ -1,6 +1,6 @@
 #include "pathfinding_system.hpp"
 #include <queue>
-#include "../tinyECS/registry.hpp"
+#include "../../tinyECS/registry.hpp"
 
 const ivec2 four_directions[4] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 

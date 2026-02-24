@@ -161,6 +161,17 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     speed.move_speed = config.move_speed;
     speed.turn_speed = config.turn_speed;
 
+    registry.senses.emplace(entity);
+    AI &ai = registry.ais.emplace(entity);
+    ai.tree_file = "enemy_tree.txt";
+    ai.tree = load_tree(ai.tree_file);
+    ai.current_state = AIAction::IDLE;
+
+    if (type != ENEMY_TYPE::URCHIN) {
+        registry.pursuit.emplace(entity);
+        registry.distracted.emplace(entity);
+    }
+
     registry.dropsCrackers.emplace(entity);
 
     if (type == ENEMY_TYPE::PATROLLER) {

@@ -40,6 +40,8 @@ class ECSRegistry {
     ComponentContainer<Bouncy> bouncy;
     ComponentContainer<BulletRequest> bullet_requests;
     ComponentContainer<Distracted> distracted;
+    ComponentContainer<Sense> senses;
+    ComponentContainer<AI> ais;
 
     // Pickups
     ComponentContainer<PickUp> pickUp;
@@ -104,6 +106,8 @@ class ECSRegistry {
         registry_list.push_back(&bouncy);
         registry_list.push_back(&bullet_requests);
         registry_list.push_back(&distracted);
+        registry_list.push_back(&senses);
+        registry_list.push_back(&ais);
 
         // Pickups
         registry_list.push_back(&pickUp);

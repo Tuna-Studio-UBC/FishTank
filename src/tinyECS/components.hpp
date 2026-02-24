@@ -7,6 +7,7 @@
 #include <array>
 #include <unordered_map>
 #include <vector>
+#include <utilities/parse_tree.hpp>
 
 #pragma region Entity
 // =================================================================================
@@ -153,6 +154,34 @@ struct BulletRequest {
     vec2 position;
     float angle;
     Entity owner;
+};
+
+struct BezierPath {
+    vec2 p0;
+    vec2 p1;
+    vec2 p2;
+    vec2 p3;
+    float t = 0.f;
+    float speed = 0.5f;
+};
+
+struct Boid {
+    float perception_radius = 100.f;
+    float alignment_weight = 1.f;
+    float cohesian_weight = 1.f;
+    float separation_weight = 1.5f;
+};
+
+struct Sense {
+    bool detects_player = false;
+    bool is_distracted = false;
+    vec2 last_known_player_pos;
+};
+
+struct AI {
+    std::string tree_file; // Path to the scripted decision tree file
+    ScriptedTree tree;
+    AIAction current_state = AIAction::IDLE;
 };
 
 #pragma endregion Behaviour
