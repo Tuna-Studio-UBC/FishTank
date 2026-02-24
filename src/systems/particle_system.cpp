@@ -38,23 +38,21 @@ void ParticleSystem::step(float elapsed_ms) {
     for (Entity e : registry.particleEmitters.entities) {
         ParticleEmitterRuntime &rt = runtimes[e.id()];
         ParticleEmitter &pe = registry.particleEmitters.get(e);
-        if (!pe.infinite) {
-            pe.life_ms -= elapsed_ms;
+        pe.life_ms -= elapsed_ms;
 
-            // Destroy expired particle effects
-            if (pe.life_ms <= 0.f) {
-                update_particle_positions(rt, elapsed_ms);
-                erase_expired_particles(rt);
+        // Destroy expired particle effects
+        if (pe.life_ms <= 0.f) {
+            update_particle_positions(rt, elapsed_ms);
+            erase_expired_particles(rt);
 
-                if (rt.particles.size() > 0) {
-                    continue;
-                }
-
-                spdlog::info("Destroyed particle emitter: {}", e.name_id());
-                runtimes.erase(e.id());
-                registry.remove_all_components_of(e);
+            if (rt.particles.size() > 0) {
                 continue;
             }
+
+            spdlog::info("Destroyed particle emitter: {}", e.name_id());
+            runtimes.erase(e.id());
+            registry.remove_all_components_of(e);
+            continue;
         }
 
         // Add to our accumulator and only spawn particles when we have enough "saved up" time

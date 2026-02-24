@@ -9,6 +9,7 @@
 
 // internal
 #include "systems/ai_system.hpp"
+#include "systems/animation_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/death_system.hpp"
@@ -20,7 +21,6 @@
 #include "systems/player_input_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/world_system.hpp"
-#include "systems/animation_system.hpp"
 
 #include "ui/game_ui.hpp"
 

@@ -209,7 +209,6 @@ struct Collision {
 };
 
 struct ParticleEmitter {
-    bool infinite = false;
     vec2 position; // Position of the particle spawn
     int max_particles;
     float particle_speed;    // Speed of particle in px / s

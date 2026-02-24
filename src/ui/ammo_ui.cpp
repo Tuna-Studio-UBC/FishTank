@@ -26,7 +26,8 @@ void GameUI::draw_ammo() {
         ImVec2 rect_max_filled = ImVec2(pos.x + (size.x - padding) * ratio, pos.y + (size.y - padding));
         ImU32 colour = ImGui::ColorConvertFloat4ToU32(UI_COLOUR);
         draw_list->AddRectFilled(rect_min_filled, rect_max_filled, colour);
-        ImGui::TextColored(ImVec4(0.f, 0.f, 0.f, 1.f), std::string("AMMO: " + std::to_string(fc.ammo) + "/" + std::to_string(fc.max_ammo)).c_str());
+        ImGui::TextColored(ImVec4(0.f, 0.f, 0.f, 1.f),
+                           std::string("AMMO: " + std::to_string(fc.ammo) + "/" + std::to_string(fc.max_ammo)).c_str());
     }
 
     ImGui::End();

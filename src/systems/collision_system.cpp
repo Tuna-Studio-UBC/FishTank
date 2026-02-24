@@ -197,7 +197,7 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
     }
 }
 
-void CollisionSystem::handle_bubbler_collision(Entity &entity_a, Entity &entity_b, float& elapsed_ms) {
+void CollisionSystem::handle_bubbler_collision(Entity &entity_a, Entity &entity_b, float &elapsed_ms) {
     Entity player_entity, bubbler_entity;
     if (registry.players.has(entity_a) && registry.bubblers.has(entity_b)) {
         player_entity = entity_a;
@@ -211,7 +211,7 @@ void CollisionSystem::handle_bubbler_collision(Entity &entity_a, Entity &entity_
     if (registry.fireControl.has(player_entity)) {
         FireControl &fc = registry.fireControl.get(player_entity);
         Bubbler &bubbler = registry.bubblers.get(bubbler_entity);
-        
+
         fc.refill_progress = fc.refill_progress + elapsed_ms * bubbler.ammo_per_second;
         // Ammo cannot exceed max ammo
         int new_ammo = min((int)(fc.refill_progress / PROGRESS_PER_AMMO), fc.max_ammo - fc.ammo);
