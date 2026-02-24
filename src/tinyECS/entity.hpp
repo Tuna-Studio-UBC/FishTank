@@ -25,7 +25,7 @@ class Entity {
 
     ~Entity() {}
 
-    operator unsigned int() { return m_id; } // enables automatic casting to int
+    operator unsigned int() const { return m_id; } // enables automatic casting to int
 
     // Required for using entity as key in map
     // https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
