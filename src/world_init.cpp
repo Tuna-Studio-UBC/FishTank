@@ -329,7 +329,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
     registry.expiration.emplace(entity, attack_config.lifespan_ms);
 
     Motion &motion = registry.motions.emplace(entity);
-    motion.velocity = vec2(attack_config.move_speed, 0.f);
+    motion.velocity = vec2(attack_config.projectile_speed, 0.f);
     motion.position = position;
     motion.angle = angle;
     motion.scale = vec2(PROJECTILE_SIZE_PX);

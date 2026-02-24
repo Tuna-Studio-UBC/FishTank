@@ -2,19 +2,18 @@
 #include <common.hpp>
 
 struct AttackConfig {
-    float move_speed;
-    float turn_speed;
-    float cooldown_ms;
     int damage;
     float lifespan_ms;
+    float projectile_speed;
+    float cooldown_ms;
 };
 
 static const AttackConfig ATTACK_CONFIGS[attack_count] = {
     // Player
-    {TURN_SPEED, TURN_SPEED, 2000.f, 10, 10000.f},
+    {10, 10000.f, BASE_PROJECTILE_SPEED * 2.5, 2000.f},
 
     // Single
-    {TURN_SPEED, TURN_SPEED, 2000.f, 10, 5000.f},
+    {10, 5000.f, BASE_PROJECTILE_SPEED, 2000.f},
 
     // Urchin
-    {TURN_SPEED, TURN_SPEED, 5000.f, 10, 5000.f}};
+    {10, 5000.f, BASE_PROJECTILE_SPEED, 5000.f}};
