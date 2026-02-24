@@ -382,13 +382,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_E) {
             if (registry.players.entities.size() == 0) {
-                spdlog::debug("[Bell] No player entity found");
                 return;
             }
 
             Entity player = registry.players.entities[0];
             if (!registry.motions.has(player)) {
-                spdlog::debug("[Bell] {} has no Motion", player.name_id());
                 return;
             }
 
@@ -409,7 +407,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             }
 
             if (best_dist2 > 9e29f) {
-                spdlog::debug("[Bell] No bell in the world");
                 return;
             }
 
@@ -419,8 +416,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             if (best_dist2 > radius2) {
                 float dist = sqrtf(best_dist2);
-                spdlog::debug("[Bell] {} too far to interact. dist={:.2f} (need <= {:.2f})", best_bell.name_id(), dist,
-                              radius);
                 return;
             }
 
@@ -433,8 +428,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             for (Entity enemy : registry.enemies.entities) {
                 Motion &enemy_motion = registry.motions.get(enemy);
-                if (!registry.distracted.has(enemy) && entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
-                    registry.senses.get(enemy).is_distracted = true;
+                if (entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
+                    Sense &sense = registry.senses.get(enemy);
+                    sense.is_distracted = true;
                     Distracted &distracted = registry.distracted.get(enemy);
                     distracted.bell = best_bell;
                     distracted.remaining_ms = bell.distraction_ms;
