@@ -118,15 +118,15 @@ bool WorldSystem::start_and_load_sounds() {
         return false;
     }
 
-    /*background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
-    invader_hit_sound = Mix_LoadWAV(audio_path("invader_hit.wav").c_str());
-    tower_hit_sound = Mix_LoadWAV(audio_path("tower_hit.wav").c_str());
+    /*background_music = Mix_LoadMUS(get_path(FilePath::AUDIO, "music.wav").c_str());
+    invader_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "invader_hit.wav").c_str());
+    tower_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
 
     if (background_music == nullptr || invader_hit_sound == nullptr || tower_hit_sound == nullptr) {
             fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-                    audio_path("music.wav").c_str(),
-                    audio_path("invader_hit.wav").c_str(),
-                    audio_path("tower_hit.wav").c_str());
+                    get_path(FilePath::AUDIO, "music.wav").c_str(),
+                    get_path(FilePath::AUDIO, "invader_hit.wav").c_str(),
+                    get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
             return false;
     }*/
 
@@ -199,8 +199,10 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     this->renderer = renderer_arg;
     this->camera_system = camera_arg;
 
-    init_tiles();
+    // Set up world level
+    init_tiles("map.json", "tileset.json");
     init_tile_walls();
+
     // Create player entity
     Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 

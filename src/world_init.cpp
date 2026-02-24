@@ -45,6 +45,7 @@ void generate_collision(TileMap &tilemap, TileSet &tileset) {
         }
     }
 }
+
 // tiles -> wall entites
 void init_tile_walls() {
     TileMap &tilemap = registry.tilemaps.components[0];
@@ -69,11 +70,12 @@ void init_tile_walls() {
         }
     }
 }
-void init_tiles() {
+
+void init_tiles(std::string map_file_name, std::string tileset_file_name) {
     Entity entity = Entity("Tiles");
 
-    TileMap tilemap = parse_tilemap(TILEMAP_JSON);
-    TileSet tileset = parse_tileset(TILESET_JSON);
+    TileMap tilemap = parse_tilemap(get_path(FilePath::MAPS, map_file_name));
+    TileSet tileset = parse_tileset(get_path(FilePath::TILESETS, tileset_file_name));
 
     registry.tilemaps.insert(entity, tilemap);
     registry.tilesets.insert(entity, tileset);

@@ -59,17 +59,12 @@ target_include_directories(imgui PUBLIC
 # ============================================================
 
 function(link_engine_dependencies target)
-
-  # Tileset
-  target_compile_definitions(${PROJECT_NAME} PRIVATE
-    TILESET_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/tilesets/tileset.json"
-    TILEMAP_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/maps/map.json"
-  )
-
-  # Remaining
   target_link_libraries(${target} PUBLIC
     spdlog::spdlog
     imgui
   )
+
+  target_include_directories(imgui PUBLIC ${GLFW_INCLUDE_DIRS})
+  target_link_libraries(imgui PUBLIC ${GLFW_LIBRARIES} OpenGL::GL)
 
 endfunction()

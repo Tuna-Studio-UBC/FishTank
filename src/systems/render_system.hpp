@@ -27,25 +27,29 @@ class RenderSystem {
     // Make sure these paths remain in sync with the associated enumerators.
     // Associated id with .obj path
     const std::vector<std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths = {
-        std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN, mesh_path("chicken.obj"))
+        std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN,
+                                                   get_path(FilePath::MESHES, "chicken.obj"))
         // specify meshes of other assets here
     };
 
     // Make sure these paths remain in sync with the associated enumerators (see TEXTURE_ASSET_ID).
     // TODO
-    const std::array<std::string, texture_count> texture_paths = {tileset_texture_path("greybox_tiles.png"),
-                                                                  textures_path("white_bubble.png"),
-                                                                  textures_path("black.png"),
-                                                                  textures_path("win.png"),
-                                                                  textures_path("lose.png"),
-                                                                  textures_path("bubble.png"),
-                                                                  sprite_sheet_texture_path("bubble_sheet.png")};
+    const std::array<std::string, texture_count> texture_paths = {
+        get_path(FilePath::TILESET_IMAGES, "greybox_tiles.png"),
+        get_path(FilePath::TEXTURES, "white_bubble.png"),
+        get_path(FilePath::TEXTURES, "black.png"),
+        get_path(FilePath::TEXTURES, "win.png"),
+        get_path(FilePath::TEXTURES, "lose.png"),
+        get_path(FilePath::TEXTURES, "bubble.png"),
+        get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png")};
 
     std::array<GLuint, effect_count> effects;
     // Make sure these paths remain in sync with the associated enumerators.
     const std::array<std::string, effect_count> effect_paths = {
-        shader_path("coloured"), shader_path("egg"),     shader_path("chicken"), shader_path("textured"),
-        shader_path("vignette"), shader_path("tilemap"), shader_path("particle")};
+        get_path(FilePath::SHADERS, "coloured"), get_path(FilePath::SHADERS, "egg"),
+        get_path(FilePath::SHADERS, "chicken"),  get_path(FilePath::SHADERS, "textured"),
+        get_path(FilePath::SHADERS, "vignette"), get_path(FilePath::SHADERS, "tilemap"),
+        get_path(FilePath::SHADERS, "particle")};
 
     std::array<GLuint, geometry_count> vertex_buffers;
     std::array<GLuint, geometry_count> index_buffers;

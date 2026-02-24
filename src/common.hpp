@@ -23,25 +23,37 @@ using namespace glm;
 
 #include "tinyECS/tiny_ecs.hpp"
 
-// Simple utility functions to avoid mistyping directory name
-// audio_path("audio.ogg") -> data/audio/audio.ogg
 // Get defintion of PROJECT_SOURCE_DIR from:
 #include "../ext/project_path.hpp"
-inline std::string data_path() { return std::string(PROJECT_SOURCE_DIR) + "data"; };
-inline std::string shader_path(const std::string &name) {
-    return std::string(PROJECT_SOURCE_DIR) + "/shaders/" + name;
+
+//
+// Define directories
+//
+inline const std::string ROOT_DIR = std::string(PROJECT_SOURCE_DIR);
+
+enum FilePath { AUDIO, MAPS, MESHES, SHADERS, SPRITE_SHEETS, TEXTURES, TILESETS, TILESET_IMAGES };
+
+inline std::string get_path(FilePath path, const std::string &file_name) {
+    std::string file = std::string(file_name);
+    switch (path) {
+    case AUDIO:
+        return ROOT_DIR + "/res/audio/" + file;
+    case MAPS:
+        return ROOT_DIR + "/res/maps/" + file;
+    case MESHES:
+        return ROOT_DIR + "/res/meshes/" + file;
+    case SHADERS:
+        return ROOT_DIR + "/shaders/" + file;
+    case SPRITE_SHEETS:
+        return ROOT_DIR + "/res/sprite_sheets/" + file;
+    case TEXTURES:
+        return ROOT_DIR + "/res/textures/" + file;
+    case TILESETS:
+        return ROOT_DIR + "/res/tilesets/" + file;
+    case TILESET_IMAGES:
+        return ROOT_DIR + "/res/tileset_images/" + file;
+    }
 };
-inline std::string textures_path(const std::string &name) {
-    return std::string(PROJECT_SOURCE_DIR) + "res/textures/" + std::string(name);
-};
-inline std::string tileset_texture_path(const std::string &name) {
-    return std::string(PROJECT_SOURCE_DIR) + "res/tileset_images/" + std::string(name);
-};
-inline std::string sprite_sheet_texture_path(const std::string &name) {
-    return std::string(PROJECT_SOURCE_DIR) + "res/sprite_sheet/" + std::string(name);
-};
-inline std::string audio_path(const std::string &name) { return data_path() + "/audio/" + std::string(name); };
-inline std::string mesh_path(const std::string &name) { return data_path() + "/meshes/" + std::string(name); };
 
 //
 // Define screen sizes
@@ -70,6 +82,7 @@ constexpr size_t MAX_TILESET_SIZE = 2048;
 
 const int PROJECTILE_SPEED = 200;
 const int PROJECTILE_SIZE_PX = 20;
+
 // player constants
 
 // passive constants

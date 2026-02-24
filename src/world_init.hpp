@@ -12,8 +12,8 @@
 #include "utility"
 extern ECSRegistry registry;
 
-// Initiate tile map
-void init_tiles();
+// Initiate tile map:
+void init_tiles(std::string map_file_name, std::string tileset_file_name);
 // create tile walls
 void init_tile_walls();
 // Create player entity
