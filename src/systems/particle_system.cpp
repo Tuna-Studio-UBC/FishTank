@@ -42,11 +42,34 @@ void ParticleSystem::step(float elapsed_ms) {
             ParticleEmitterRuntime &rt = result.first->second;
             ParticleEmitter &pe = registry.particleEmitters.get(e);
             rt.texture = pe.texture;
+            rt.standalone = pe.standalone;
+            spdlog::info("Created new particle emitter: {}", e.name_id());
         }
     }
 
-    for (Entity e : registry.particleEmitters.entities) {
-        ParticleEmitterRuntime &rt = runtimes[e];
+    // Now loop through runtimes and update each
+    // cpp has some interesting behaviour for normal looping... we need to use iterator as we will erase from dict
+    // https://langdev.stackexchange.com/questions/3623/why-does-cs-unordered-maperase-fully-invalidate-iterators-not-even-support
+    for (auto it = runtimes.begin(); it != runtimes.end();) {
+        auto &e = it->first;
+        auto &rt = it->second;
+
+        // Check if this runtime is orphaned (Entity is gone)
+        if (!rt.standalone && (!registry.motions.has(e) || !registry.particleEmitters.has(e))) {
+            update_particle_positions(rt, elapsed_ms);
+            erase_expired_particles(rt);
+
+            if (rt.particles.size() > 0) {
+                ++it;
+                continue;
+            }
+            
+            spdlog::info("Destroyed orphaned standalone particle emitter: {}", e.name_id());
+            it = runtimes.erase(it);
+            continue;
+        }
+
+        // Not orphaned at this point in time
         ParticleEmitter &pe = registry.particleEmitters.get(e);
         Motion &m = registry.motions.get(e);
         pe.life_ms -= elapsed_ms;
@@ -57,14 +80,22 @@ void ParticleSystem::step(float elapsed_ms) {
             erase_expired_particles(rt);
 
             if (rt.particles.size() > 0) {
+                ++it;
                 continue;
             }
 
-            spdlog::info("Destroyed particle emitter: {}", e.name_id());
-            runtimes.erase(e);
-            registry.remove_all_components_of(e);
+            
+            if (pe.standalone) {
+                registry.remove_all_components_of(e);
+                spdlog::info("Destroyed standalone particle emitter: {}", e.name_id());
+            } else {
+                spdlog::info("Destroyed connected particle emitter: {}", e.name_id());
+            }
+            it = runtimes.erase(it);
             continue;
         }
+
+        // At this point, we have a still active emitter
 
         // Add to our accumulator and only spawn particles when we have enough "saved up" time
         rt.spawn_accumulator_ms += elapsed_ms;
@@ -74,11 +105,10 @@ void ParticleSystem::step(float elapsed_ms) {
             spawn_particle(rt, pe, m);
         }
 
-        // Update particle positions
+        // Update particle positions & erase dead particles
         update_particle_positions(rt, elapsed_ms);
-
-        // Finally, erase dead particles
         erase_expired_particles(rt);
+        ++it;
     }
 }
 

@@ -212,6 +212,7 @@ struct ParticleEmitter {
     float spawn_interval_ms; // Minimum ms between particle spawns
     float life_ms;           // Duration of particle spawns
     float particle_life_ms;  // Duration of each particle
+    bool standalone = false; // True iff this entity is only PE, everything deleted when PE expires
 };
 
 #pragma endregion Physics

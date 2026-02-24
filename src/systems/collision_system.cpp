@@ -50,6 +50,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
                 pe.max_particles = 1000;
                 pe.particle_speed = 120;
                 pe.spawn_interval_ms = 50;
+                pe.standalone = true;
                 Motion &pm = registry.motions.emplace(e);
                 pm.position = m.position;
 
