@@ -47,21 +47,17 @@ void generate_collision(TileMap &tilemap, TileSet &tileset) {
 }
 
 // tiles -> wall entites
-void init_tile_walls() {
-    TileMap &tilemap = registry.tilemaps.components[0];
-    TileSet &tileset = registry.tilesets.components[0];
-
+void init_tile_walls(TileMap *tilemap) {
     int walls_created = 0;
-    int floor_tile_id = 1; // guessing -> confirmed from output
-    for (unsigned int y = 0; y < tilemap.height; y++) {
-        for (unsigned int x = 0; x < tilemap.width; x++) {
-            int tile_id = tilemap.tile_ids[x + y * tilemap.width];
+    for (unsigned int y = 0; y < tilemap->height; y++) {
+        for (unsigned int x = 0; x < tilemap->width; x++) {
+            int tile_id = tilemap->tile_ids[x + y * tilemap->width];
 
             // skip empty/floor tiles, skip outer border tiles
-            bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
-            bool is_non_empty = (tile_id != floor_tile_id);
+            bool is_border = (y == 0 || y == tilemap->height - 1 || x == 0 || x == tilemap->width - 1);
+            bool is_empty = is_empty_tile(tile_id);
 
-            if (is_non_empty && !is_border) {
+            if (!is_empty && !is_border) {
                 vec2 position = vec2(x * TILE_SIZE_PX + TILE_SIZE_PX / 2.f, y * TILE_SIZE_PX + TILE_SIZE_PX / 2.f);
                 vec2 scale = vec2(TILE_SIZE_PX, TILE_SIZE_PX);
                 createWall(position, scale);
@@ -71,7 +67,7 @@ void init_tile_walls() {
     }
 }
 
-void init_tiles(std::string map_file_name, std::string tileset_file_name) {
+Entity init_tiles(std::string map_file_name, std::string tileset_file_name, int layer) {
     Entity entity = Entity("Tiles");
 
     TileMap tilemap = parse_tilemap(get_path(FilePath::MAPS, map_file_name));
@@ -81,12 +77,14 @@ void init_tiles(std::string map_file_name, std::string tileset_file_name) {
     registry.tilesets.insert(entity, tileset);
 
     registry.renderRequests.insert(
-        entity, {(TEXTURE_ASSET_ID)tilemap.tileset_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE});
+        entity, {(TEXTURE_ASSET_ID)tilemap.tileset_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, layer});
 
 #ifdef DEBUG_INIT_TILES
     print_tilemap(tilemap);
     print_tileset(tileset);
 #endif
+
+    return entity;
 }
 
 #pragma region Actors

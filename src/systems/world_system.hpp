@@ -48,6 +48,8 @@ class WorldSystem {
     // should the game be over ?
     bool is_over() const;
 
+    Entity get_current_map() const { return current_map; }
+
   private:
     void start_wave(Progress &progress);
     void load_level(Progress &progress);
@@ -66,8 +68,7 @@ class WorldSystem {
     RenderSystem *renderer;
     CameraSystem *camera_system;
 
-    // grid
-    std::vector<Entity> grid_lines;
+    Entity current_map;
 
     // music references
     // Mix_Music* background_music;

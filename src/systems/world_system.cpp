@@ -135,15 +135,15 @@ bool WorldSystem::start_and_load_sounds() {
 
 void WorldSystem::init_free_tiles() {
     free_tiles.clear();
-    TileMap &tilemap = registry.tilemaps.components[0];
-    TileSet &tileset = registry.tilesets.components[0];
+    TileMap &tilemap = registry.tilemaps.get(current_map);
+    TileSet &tileset = registry.tilesets.get(current_map);
 
     for (unsigned int y = 0; y < tilemap.height; y++) {
         for (unsigned int x = 0; x < tilemap.width; x++) {
             int tile_id = tilemap.tile_ids[x + y * tilemap.width];
 
             bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
-            bool is_empty = (tile_id == 1);
+            bool is_empty = is_empty_tile(tile_id);
 
             if (is_empty && !is_border) {
                 free_tiles.push_back({x, y});
@@ -200,14 +200,16 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     this->camera_system = camera_arg;
 
     // Set up world level
-    init_tiles("map.json", "tileset.json");
-    init_tile_walls();
+    init_tiles("background.json", "tileset.json", -1);
+
+    current_map = init_tiles("map.json", "tileset.json", 1);
+    init_tile_walls(&registry.tilemaps.get(current_map));
 
     // Create player entity
     Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 
     // Create camera
-    camera_system->init();
+    camera_system->init(current_map);
 
     auto e = Entity("Progress");
     auto &progress = registry.progress.emplace(e);

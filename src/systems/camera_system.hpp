@@ -10,11 +10,14 @@ class CameraSystem {
 
     CameraSystem() {}
 
-    void init();
+    void init(Entity current_map);
+
+    void set_current_map(Entity current_map) { this->current_map = current_map; }
 
   private:
     vec2 get_camera_dest();
 
+    Entity current_map;
     const float INTERP_COEFFICIENT = 0.03f;
     const float MOUSE_SENSITIVITY_FACTOR = 0.2f;
     const float MAX_OFFSET = 50.f;

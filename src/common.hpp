@@ -83,6 +83,8 @@ constexpr size_t MAX_TILESET_SIZE = 2048;
 const int PROJECTILE_SPEED = 200;
 const int PROJECTILE_SIZE_PX = 20;
 
+inline const bool is_empty_tile(int tile_id) { return (tile_id == 0 || tile_id == 1); }
+
 // player constants
 
 // passive constants

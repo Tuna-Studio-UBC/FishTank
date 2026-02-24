@@ -13,9 +13,10 @@
 extern ECSRegistry registry;
 
 // Initiate tile map:
-void init_tiles(std::string map_file_name, std::string tileset_file_name);
+Entity init_tiles(std::string map_file_name, std::string tileset_file_name, int layer = 0);
 // create tile walls
-void init_tile_walls();
+void init_tile_walls(TileMap *tilemap);
+
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 
