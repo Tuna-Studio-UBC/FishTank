@@ -336,9 +336,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
     Bouncy &bouncy = registry.bouncy.emplace(entity);
 
-    registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
     registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_PROJECTILE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+        entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
     ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
     pe.max_particles = 500;

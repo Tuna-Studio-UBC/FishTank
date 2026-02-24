@@ -68,7 +68,7 @@ const int TILE_HEIGHT_PX = TILE_SIZE_PX;
 constexpr size_t MAX_TILEMAP_SIZE = 4096;
 constexpr size_t MAX_TILESET_SIZE = 2048;
 
-const int PROJECTILE_SPEED = 200;
+const int TURN_SPEED = 200;
 const int PROJECTILE_SIZE_PX = 20;
 // player constants
 

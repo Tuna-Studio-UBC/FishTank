@@ -11,10 +11,10 @@ struct AttackConfig {
 
 static const AttackConfig ATTACK_CONFIGS[attack_count] = {
     // Player
-    {PROJECTILE_SPEED, PROJECTILE_SPEED, 2000.f, 10, 10000.f},
+    {TURN_SPEED, TURN_SPEED, 2000.f, 10, 10000.f},
 
     // Single
-    {PROJECTILE_SPEED, PROJECTILE_SPEED, 2000.f, 10, 5000.f},
+    {TURN_SPEED, TURN_SPEED, 2000.f, 10, 5000.f},
 
     // Urchin
-    {PROJECTILE_SPEED, PROJECTILE_SPEED, 5000.f, 10, 5000.f}};
+    {TURN_SPEED, TURN_SPEED, 5000.f, 10, 5000.f}};
