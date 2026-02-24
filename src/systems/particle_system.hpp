@@ -24,7 +24,7 @@ struct ParticleEmitterRuntime {
 class ParticleSystem {
   public:
     // Store separately from ECS and lazy load for better performance
-    std::unordered_map<unsigned int, ParticleEmitterRuntime> runtimes;
+    std::unordered_map<Entity, ParticleEmitterRuntime> runtimes;
 
     void clear_all_particles();
 

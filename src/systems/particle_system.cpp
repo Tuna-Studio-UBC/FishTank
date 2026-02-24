@@ -29,7 +29,7 @@ void erase_expired_particles(ParticleEmitterRuntime &rt) {
 
 void ParticleSystem::clear_all_particles() {
     for (Entity e : registry.particleEmitters.entities) {
-        runtimes.erase(e.id());
+        runtimes.erase(e);
         registry.remove_all_components_of(e);
     }
 }
@@ -37,8 +37,8 @@ void ParticleSystem::clear_all_particles() {
 void ParticleSystem::step(float elapsed_ms) {
     // See if we need to create any new runtimes
     for (Entity e : registry.particleEmitters.entities) {
-        if (runtimes.find(e.id()) == runtimes.end()) {
-            auto result = runtimes.emplace(e.id(), ParticleEmitterRuntime{});
+        if (runtimes.find(e) == runtimes.end()) {
+            auto result = runtimes.emplace(e, ParticleEmitterRuntime{});
             ParticleEmitterRuntime &rt = result.first->second;
             ParticleEmitter &pe = registry.particleEmitters.get(e);
             rt.texture = pe.texture;
@@ -46,7 +46,7 @@ void ParticleSystem::step(float elapsed_ms) {
     }
 
     for (Entity e : registry.particleEmitters.entities) {
-        ParticleEmitterRuntime &rt = runtimes[e.id()];
+        ParticleEmitterRuntime &rt = runtimes[e];
         ParticleEmitter &pe = registry.particleEmitters.get(e);
         Motion &m = registry.motions.get(e);
         pe.life_ms -= elapsed_ms;
@@ -61,7 +61,7 @@ void ParticleSystem::step(float elapsed_ms) {
             }
 
             spdlog::info("Destroyed particle emitter: {}", e.name_id());
-            runtimes.erase(e.id());
+            runtimes.erase(e);
             registry.remove_all_components_of(e);
             continue;
         }
