@@ -72,10 +72,14 @@ void ParticleSystem::step(float elapsed_ms) {
         // Not orphaned at this point in time
         ParticleEmitter &pe = registry.particleEmitters.get(e);
         Motion &m = registry.motions.get(e);
-        pe.life_ms -= elapsed_ms;
+
+        // Only update if not infinite
+        if (pe.life_ms != -99.f) {
+            pe.life_ms = std::max(pe.life_ms - elapsed_ms, 0.f);
+        }
 
         // Destroy expired particle effects
-        if (pe.life_ms <= 0.f) {
+        if (pe.life_ms != -99.f && pe.life_ms <= 0.f) {
             update_particle_positions(rt, elapsed_ms);
             erase_expired_particles(rt);
 

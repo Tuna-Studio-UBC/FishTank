@@ -210,9 +210,9 @@ struct ParticleEmitter {
     TEXTURE_ASSET_ID texture;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
-    float life_ms;           // Duration of particle spawns
     float particle_life_ms;  // Duration of each particle
-    bool standalone = false; // True iff this entity is only PE, everything deleted when PE expires
+    float life_ms = -99.f;   // Default -99 (infinite). Duration of particle spawns.
+    bool standalone = false; // Default false. True iff this entity is only PE, everything deleted when PE expires
 };
 
 #pragma endregion Physics
