@@ -68,7 +68,7 @@ const int TILE_HEIGHT_PX = TILE_SIZE_PX;
 constexpr size_t MAX_TILEMAP_SIZE = 4096;
 constexpr size_t MAX_TILESET_SIZE = 2048;
 
-const int PROJECTILE_SPEED = 200;
+const int BASE_PROJECTILE_SPEED = 200;
 const int PROJECTILE_SIZE_PX = 20;
 
 // player constants
@@ -105,6 +105,7 @@ bool gl_has_errors();
 
 vec2 direction_to_unit_vector(float radians);
 void change_vector_direction(vec2 &in_vec, float radians);
+vec2 get_vector_rotated(vec2 &in_vec, float radians);
 bool entity_in_radius(vec2 dist, vec2 entity_scale, float radius);
 
 ivec2 world_to_tile(const vec2 &world_pos);

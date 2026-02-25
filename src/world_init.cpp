@@ -358,16 +358,23 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
     registry.expiration.emplace(entity, attack_config.lifespan_ms);
 
     Motion &motion = registry.motions.emplace(entity);
-    motion.velocity = vec2(attack_config.move_speed, 0.f);
+    motion.velocity = vec2(attack_config.projectile_speed, 0.f);
     motion.position = position;
     motion.angle = angle;
     motion.scale = vec2(PROJECTILE_SIZE_PX);
 
     Bouncy &bouncy = registry.bouncy.emplace(entity);
 
-    registry.colors.emplace(entity, vec3(0.5f, 0.5f, 0.5f)); // Gray color
     registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_PROJECTILE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+        entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
+    ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
+    pe.offset = {-20, 0};
+    pe.max_particles = 500;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+    pe.particle_speed = 80;
+    pe.spawn_interval_ms = 40;
+    pe.particle_life_ms = 200;
 
     return entity;
 }
