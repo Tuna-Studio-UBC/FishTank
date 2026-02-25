@@ -1,5 +1,7 @@
 #include "tilemap_system.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include "../common.hpp"
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
@@ -44,9 +46,14 @@ void generate_collision(TileMap &tilemap, TileSet &tileset) {
     }
 }
 
+TileMapSystem::~TileMapSystem() {
+    registry.tilemaps.clear();
+    registry.tilesets.clear();
+}
+
 Entity TileMapSystem::init_tiles(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id,
                                  int layer) {
-    Entity entity = Entity("Tiles");
+    Entity entity = Entity(map_file_name);
 
     TileMap tilemap = parse_tilemap(get_path(FilePath::MAPS, map_file_name));
     TileSet tileset = parse_tileset(get_path(FilePath::TILESETS, tileset_file_name));
@@ -84,6 +91,39 @@ void TileMapSystem::init_tile_walls(TileMap *tilemap) {
     }
 }
 
+void TileMapSystem::init_free_tiles() {
+    free_tiles.clear();
+    TileMap &tilemap = registry.tilemaps.get(current_map);
+    TileSet &tileset = registry.tilesets.get(current_map);
+
+    for (unsigned int y = 0; y < tilemap.height; y++) {
+        for (unsigned int x = 0; x < tilemap.width; x++) {
+            int tile_id = tilemap.tile_ids[x + y * tilemap.width];
+
+            bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
+            bool is_empty = is_empty_tile(tile_id);
+
+            if (is_empty && !is_border) {
+                free_tiles.push_back({x, y});
+            }
+        }
+    }
+}
+
+vec2 TileMapSystem::get_random_position() {
+    int idx = (int)(uniform_dist(rng) * free_tiles.size()) - 1;
+    vec2 tile = free_tiles[idx];
+    free_tiles[idx] = free_tiles.back();
+    free_tiles.pop_back();
+    return vec2(tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2), tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2));
+}
+
+Entity TileMapSystem::load_map(MapType map_type) {
+    current_map = LOAD_MAP_FN[map_type]();
+    spdlog::debug("Loaded tile map: {}", current_map.name());
+    return current_map;
+}
+
 #pragma region Maps
 // =================================================================================
 // Maps
@@ -91,9 +131,9 @@ void TileMapSystem::init_tile_walls(TileMap *tilemap) {
 
 Entity TileMapSystem::load_test_map() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
-    Entity current_map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
-    init_tile_walls(&registry.tilemaps.get(current_map));
-    return current_map;
+    Entity map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
+    init_tile_walls(&registry.tilemaps.get(map));
+    return map;
 }
 
 #pragma endregion Maps

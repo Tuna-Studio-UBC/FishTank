@@ -13,6 +13,7 @@
 
 #include "systems/camera_system.hpp"
 #include "systems/render_system.hpp"
+#include "systems/tilemap_system.hpp"
 
 // Container for all our entities and game logic.
 // Individual rendering / updates are deferred to the update() methods.
@@ -32,7 +33,7 @@ class WorldSystem {
     void restart_game();
 
     // starts the game
-    void init(RenderSystem *renderer, CameraSystem *camera_system);
+    void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system);
 
     // releases all associated resources
     ~WorldSystem();
@@ -48,13 +49,9 @@ class WorldSystem {
     // should the game be over ?
     bool is_over() const;
 
-    Entity get_current_map() const { return current_map; }
-
   private:
     void start_wave(Progress &progress);
     void load_level(Progress &progress);
-    void init_free_tiles();
-    vec2 get_random_position();
 
     // input callback functions
     void on_key(int key, int, int action, int mod);
@@ -65,10 +62,9 @@ class WorldSystem {
     GLFWwindow *window;
 
     // Game state
+    TileMapSystem *tilemap_system;
     RenderSystem *renderer;
     CameraSystem *camera_system;
-
-    Entity current_map;
 
     // music references
     // Mix_Music* background_music;
@@ -78,6 +74,4 @@ class WorldSystem {
     // C++ random number generator
     std::default_random_engine rng;
     std::uniform_real_distribution<float> uniform_dist; // number between 0..1
-
-    std::vector<vec2> free_tiles;
 };

@@ -11,7 +11,6 @@
 #include "configs/wave_config.cpp"
 #include "systems/particle_system.hpp"
 #include "systems/physics_system.hpp"
-#include "systems/tilemap_system.hpp"
 
 // create the world
 WorldSystem::WorldSystem() {
@@ -133,50 +132,23 @@ bool WorldSystem::start_and_load_sounds() {
     return true;
 }
 
-void WorldSystem::init_free_tiles() {
-    free_tiles.clear();
-    TileMap &tilemap = registry.tilemaps.get(current_map);
-    TileSet &tileset = registry.tilesets.get(current_map);
-
-    for (unsigned int y = 0; y < tilemap.height; y++) {
-        for (unsigned int x = 0; x < tilemap.width; x++) {
-            int tile_id = tilemap.tile_ids[x + y * tilemap.width];
-
-            bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
-            bool is_empty = is_empty_tile(tile_id);
-
-            if (is_empty && !is_border) {
-                free_tiles.push_back({x, y});
-            }
-        }
-    }
-}
-
-vec2 WorldSystem::get_random_position() {
-    int idx = (int)(uniform_dist(rng) * free_tiles.size()) - 1;
-    vec2 tile = free_tiles[idx];
-    free_tiles[idx] = free_tiles.back();
-    free_tiles.pop_back();
-    return vec2(tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2), tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2));
-}
-
 void WorldSystem::start_wave(Progress &progress) {
     auto config = WAVE_CONFIGS[progress.wave];
     progress.remaining_enemies = config.enemies.size();
 
     for (auto enemy : config.enemies) {
-        vec2 pos = get_random_position();
+        vec2 pos = tilemap_system->get_random_position();
         createEnemy(renderer, pos, enemy);
     }
 }
 
 void WorldSystem::load_level(Progress &progress) {
-    init_free_tiles();
+    tilemap_system->init_free_tiles();
     auto config = LEVEL_CONFIGS[progress.level];
     vec2 pos;
 
     for (auto item : config.hazards) {
-        pos = get_random_position();
+        pos = tilemap_system->get_random_position();
         if (item == HAZARD_TYPE::MINE) {
             createMine(renderer, pos);
         } else if (item == HAZARD_TYPE::ANEMONE) {
@@ -185,28 +157,30 @@ void WorldSystem::load_level(Progress &progress) {
     }
 
     for (auto item : config.powerups) {
-        pos = get_random_position();
+        pos = tilemap_system->get_random_position();
         createPowerUp(renderer, pos, item);
     }
 
     for (auto bell : config.bells) {
-        pos = get_random_position();
+        pos = tilemap_system->get_random_position();
         createBell(renderer, pos, bell);
     }
 }
 
-void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
+void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg) {
     this->renderer = renderer_arg;
     this->camera_system = camera_arg;
+    this->tilemap_system = tilemap_arg;
 
     // Set up world level
-    current_map = TileMapSystem::load_map();
+    tilemap_system->init(rng);
+    tilemap_system->load_map(MapType::TEST_MAP);
 
     // Create player entity
     Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
 
     // Create camera
-    camera_system->init(current_map);
+    camera_system->init(tilemap_system->get_current_map());
 
     auto e = Entity("Progress");
     auto &progress = registry.progress.emplace(e);
@@ -487,5 +461,5 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 void WorldSystem::restart_game() {
     particle_system.clear_all_particles();
     registry.clear_all_components();
-    init(renderer, camera_system);
+    init(renderer, camera_system, tilemap_system);
 }
