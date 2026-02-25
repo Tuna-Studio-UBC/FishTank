@@ -93,7 +93,6 @@ Entity TileMapSystem::load_test_map() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
     Entity current_map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
     init_tile_walls(&registry.tilemaps.get(current_map));
-
     return current_map;
 }
 
