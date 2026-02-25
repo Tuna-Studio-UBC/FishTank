@@ -132,7 +132,11 @@ struct Wallet {
 
 struct Patrolling {};
 
-struct Pursuit {};
+struct Pursuit {
+    std::vector<vec2> path;
+    size_t curr_index = 0;
+    ivec2 goal;
+};
 
 struct Bouncy {
     int bounces_remaining = 3;
@@ -189,10 +193,11 @@ struct DamageMultiplier {
 // =================================================================================
 
 struct Motion {
-    vec2 position = {0, 0}; // WORLD COORDINATE px
-    float angle = 0;        // Angle in RADIANS
-    vec2 velocity = {0, 0}; // px / s
-    vec2 scale = {10, 10};  // px
+    vec2 position = {0, 0};     // WORLD COORDINATE px
+    float angle = 0;            // Angle in RADIANS
+    float angular_velocity = 0; // Also in RADIANS / s
+    vec2 velocity = {0, 0};     // px / s
+    vec2 scale = {10, 10};      // px
 };
 
 // Stucture to store collision information
@@ -239,6 +244,7 @@ enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, KeyboardActi
 struct KeyboardInputState {
     bool current_actions[KeyboardActions::KeyboardActionsCount];
     bool previous_actions[KeyboardActions::KeyboardActionsCount];
+    KeyboardActions most_recent_turn = KeyboardActions::TurnRight;
 };
 
 enum MouseActions { LeftClick, MouseActionsCount };

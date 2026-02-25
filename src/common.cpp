@@ -81,3 +81,15 @@ bool entity_in_radius(vec2 dist, vec2 target_scale, float radius) {
 
     return dist2 <= true_radius * true_radius;
 }
+
+ivec2 world_to_tile(const vec2 &world_pos) {
+    int tx = static_cast<int>(world_pos.x / TILE_WIDTH_PX);
+    int ty = static_cast<int>(world_pos.y / TILE_HEIGHT_PX);
+    return {tx, ty};
+}
+
+vec2 tile_center_to_world(const ivec2 &tile) {
+    float wx = tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2);
+    float wy = tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2);
+    return vec2(wx, wy);
+}
