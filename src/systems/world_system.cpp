@@ -67,8 +67,7 @@ GLFWwindow *WorldSystem::create_window() {
 #endif
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     // CK: setting GLFW_SCALE_TO_MONITOR to true will rescale window but then you must handle different scalings
-    // glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE);		// GLFW 3.3+
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_FALSE); // GLFW 3.3+
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE); // GLFW 3.3+
 
     // Create the main window (for rendering, keyboard, and mouse input)
     window = glfwCreateWindow(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX, GAME_NAME, nullptr, nullptr);
@@ -200,9 +199,9 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     this->camera_system = camera_arg;
 
     // Set up world level
-    init_tiles("background.json", "tileset.json", -1);
+    init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
 
-    current_map = init_tiles("map.json", "tileset.json", 1);
+    current_map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
     init_tile_walls(&registry.tilemaps.get(current_map));
 
     // Create player entity

@@ -46,7 +46,7 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
     gl_has_errors();
 }
 
-void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, const mat3 &view) {
+void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, const mat3 &view) {
     RenderRequest &render_request = registry.renderRequests.get(entity);
     TileMap &tilemap = registry.tilemaps.get(entity);
     TileSet &tileset = registry.tilesets.get(entity);
@@ -407,8 +407,8 @@ void RenderSystem::draw() {
     glViewport(0, 0, w, h);
     glDepthRange(0.00001, 10);
 
-    // white background
-    glClearColor(.5f, .5f, 1.0f, 1.0f);
+    // Background colour
+    glClearColor(50 / 255.f, 100 / 255.f, 225 / 255.f, 1.0f);
 
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -434,7 +434,7 @@ void RenderSystem::draw() {
             // albeit iterating through all Sprites in sequence. A good point to optimize
             drawTexturedMesh(entity, projection_2D, view_2D);
         } else if (registry.tilemaps.has(entity)) {
-            drawTilemap(entity, projection_2D, view_2D);
+            drawTileMap(entity, projection_2D, view_2D);
         }
     }
 

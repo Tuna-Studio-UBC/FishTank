@@ -282,7 +282,6 @@ struct Mesh {
 #define GET_2D_POS(x, y, width) x + width *y
 
 struct TileMap {
-    int tileset_id = 0; // TODO: Add ID functionality
     std::array<unsigned short, 4096> tile_ids;
     unsigned int width;
     unsigned int height;
@@ -298,7 +297,6 @@ struct TileMap {
 };
 
 struct TileSet {
-    int tileset_id = 1; // TODO: Add ID functionality
     vec2 dimensions;
     int tile_width_px;
     int tile_height_px;
@@ -345,13 +343,18 @@ struct Animation {
  */
 
 enum class TEXTURE_ASSET_ID {
-    TEXTURE_TILESET = 0,
-    TEXTURE_PROJECTILE = 1,
-    TEXTURE_BLACK = 2,
-    TEXTURE_WIN_OVERLAY = 3,
-    TEXTURE_LOSE_OVERLAY = 4,
-    TEXTURE_BUBBLE = 5,
-    TEXTURE_BUBBLE_SHEET = 6,
+    TEXTURE_GREYBOX_TILESET = 0,
+    TEXTURE_GREYBOX_TILESET2 = TEXTURE_GREYBOX_TILESET + 1,
+
+    TEXTURE_PROJECTILE = TEXTURE_GREYBOX_TILESET2 + 1,
+
+    TEXTURE_BLACK = TEXTURE_PROJECTILE + 1,
+    TEXTURE_WIN_OVERLAY = TEXTURE_BLACK + 1,
+    TEXTURE_LOSE_OVERLAY = TEXTURE_WIN_OVERLAY + 1,
+
+    TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
+    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLE + 1,
+
     TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -376,7 +379,6 @@ enum class GEOMETRY_BUFFER_ID {
     SCREEN_TRIANGLE = DEBUG_LINE + 1,
     GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
-
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 struct RenderRequest {

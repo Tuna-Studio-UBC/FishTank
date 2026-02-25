@@ -67,7 +67,7 @@ void init_tile_walls(TileMap *tilemap) {
     }
 }
 
-Entity init_tiles(std::string map_file_name, std::string tileset_file_name, int layer) {
+Entity init_tiles(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id, int layer) {
     Entity entity = Entity("Tiles");
 
     TileMap tilemap = parse_tilemap(get_path(FilePath::MAPS, map_file_name));
@@ -76,8 +76,7 @@ Entity init_tiles(std::string map_file_name, std::string tileset_file_name, int 
     registry.tilemaps.insert(entity, tilemap);
     registry.tilesets.insert(entity, tileset);
 
-    registry.renderRequests.insert(
-        entity, {(TEXTURE_ASSET_ID)tilemap.tileset_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, layer});
+    registry.renderRequests.insert(entity, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, layer});
 
 #ifdef DEBUG_INIT_TILES
     print_tilemap(tilemap);

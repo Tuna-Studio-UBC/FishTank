@@ -33,14 +33,16 @@ class RenderSystem {
     };
 
     // Make sure these paths remain in sync with the associated enumerators (see TEXTURE_ASSET_ID).
-    // TODO
     const std::array<std::string, texture_count> texture_paths = {
-        get_path(FilePath::TILESET_IMAGES, "greybox_tiles.png"),
-        get_path(FilePath::TEXTURES, "white_bubble.png"),
-        get_path(FilePath::TEXTURES, "black.png"),
-        get_path(FilePath::TEXTURES, "win.png"),
-        get_path(FilePath::TEXTURES, "lose.png"),
+        // Tileset images
+        get_path(FilePath::TILESET_IMAGES, "greybox.png"), get_path(FilePath::TILESET_IMAGES, "greybox2.png"),
+
+        // Textures
+        get_path(FilePath::TEXTURES, "white_bubble.png"), get_path(FilePath::TEXTURES, "black.png"),
+        get_path(FilePath::TEXTURES, "win.png"), get_path(FilePath::TEXTURES, "lose.png"),
         get_path(FilePath::TEXTURES, "bubble.png"),
+
+        // Sprite sheets
         get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png")};
 
     std::array<GLuint, effect_count> effects;
@@ -97,9 +99,7 @@ class RenderSystem {
 
   private:
     // Internal drawing functions for each entity type
-    void drawTile(const RenderRequest &render_request, const TileMap &tilemap, const ivec2 &tile_pos,
-                  const ivec2 &tileset_size, const mat3 &projection, const mat3 &view);
-    void drawTilemap(const Entity &e, const mat3 &projection, const mat3 &view);
+    void drawTileMap(const Entity &e, const mat3 &projection, const mat3 &view);
     void drawParticles(const mat3 &projection, const mat3 &view);
     void drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view);
     void drawToScreen();

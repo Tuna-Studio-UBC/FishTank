@@ -13,7 +13,8 @@
 extern ECSRegistry registry;
 
 // Initiate tile map:
-Entity init_tiles(std::string map_file_name, std::string tileset_file_name, int layer = 0);
+Entity init_tiles(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id,
+                  int layer = 0);
 // create tile walls
 void init_tile_walls(TileMap *tilemap);
 
