@@ -11,6 +11,7 @@
 #include "configs/wave_config.cpp"
 #include "systems/particle_system.hpp"
 #include "systems/physics_system.hpp"
+#include "systems/tilemap_system.hpp"
 
 // create the world
 WorldSystem::WorldSystem() {
@@ -199,10 +200,7 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     this->camera_system = camera_arg;
 
     // Set up world level
-    init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
-
-    current_map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
-    init_tile_walls(&registry.tilemaps.get(current_map));
+    current_map = TileMapSystem::load_test_map();
 
     // Create player entity
     Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
