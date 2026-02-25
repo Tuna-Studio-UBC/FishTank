@@ -111,6 +111,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 
     FireControl &fc = registry.fireControl.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;
+    fc.ammo = STARTING_AMMO;
 
     SpeedControl &sc = registry.speedControl.emplace(entity);
     sc.move_speed = config.move_speed;
@@ -268,6 +269,34 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
 
     registry.pickUp.emplace(entity);
     registry.powerUp.emplace(entity, type);
+
+    return entity;
+}
+
+Entity createBubbler(RenderSystem *renderer, vec2 position) {
+    auto entity = Entity("Power Up");
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    registry.bubblers.emplace(entity);
+
+    auto &motion = registry.motions.emplace(entity);
+    motion.position = position;
+    motion.velocity = {0.f, 0.f};
+    motion.angle = 0.f;
+    motion.scale = {TILE_SIZE_PX, TILE_SIZE_PX};
+
+    // ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
+    // pe.life_ms = 1;
+    // pe.particle_life_ms = 400;
+    // pe.max_particles = 10;
+    // pe.particle_speed = 75;
+    // pe.spawn_interval_ms = 100;
+    // pe.position = motion.position;
+
+    registry.renderRequests.insert(
+        entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
     return entity;
 }

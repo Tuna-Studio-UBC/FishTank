@@ -70,7 +70,10 @@ constexpr size_t MAX_TILESET_SIZE = 2048;
 
 const int PROJECTILE_SPEED = 200;
 const int PROJECTILE_SIZE_PX = 20;
+
 // player constants
+const int STARTING_AMMO = 30;
+const int PROGRESS_PER_AMMO = 1000;
 
 // passive constants
 

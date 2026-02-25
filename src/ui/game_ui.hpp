@@ -13,6 +13,7 @@
 
 struct GameUI {
     void draw_healthbar();
+    void draw_ammo();
     void draw_respawn(WorldSystem *world_system);
     inline void draw_demo() { ImGui::ShowDemoWindow(); }
 };

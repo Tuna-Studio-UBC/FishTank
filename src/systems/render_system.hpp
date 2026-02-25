@@ -39,7 +39,8 @@ class RenderSystem {
                                                                   textures_path("win.png"),
                                                                   textures_path("lose.png"),
                                                                   textures_path("bubble.png"),
-                                                                  sprite_sheet_texture_path("bubble_sheet.png")};
+                                                                  sprite_sheet_texture_path("bubble_sheet.png"),
+                                                                  textures_path("bubbler.png")};
 
     std::array<GLuint, effect_count> effects;
     // Make sure these paths remain in sync with the associated enumerators.
