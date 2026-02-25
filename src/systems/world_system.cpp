@@ -67,7 +67,8 @@ GLFWwindow *WorldSystem::create_window() {
 #endif
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     // CK: setting GLFW_SCALE_TO_MONITOR to true will rescale window but then you must handle different scalings
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE); // GLFW 3.3+
+    // TODO: Change this to true then handle different scalings
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_FALSE); // GLFW 3.3+
 
     // Create the main window (for rendering, keyboard, and mouse input)
     window = glfwCreateWindow(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX, GAME_NAME, nullptr, nullptr);
@@ -265,8 +266,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             auto &motion = registry.motions.emplace(e);
             motion.position = registry.motions.get(registry.camera.entities[0]).position;
             motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
-            registry.renderRequests.insert(
-                e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+            registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
+                                               GEOMETRY_BUFFER_ID::SPRITE, (int)RENDER_LAYER::OVERLAYS});
         }
     }
 

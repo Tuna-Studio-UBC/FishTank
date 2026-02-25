@@ -46,8 +46,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = vec2(50.0f, 50.0f);
 
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, (int)RENDER_LAYER::ACTORS});
 
     registry.colors.emplace(entity, config.colour);
 
@@ -89,8 +89,8 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     }
 
     registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, (int)RENDER_LAYER::ACTORS});
 
     return entity;
 }
@@ -119,8 +119,8 @@ Entity createTurret(RenderSystem *renderer, vec2 position) {
     m.angle = 0.f;
     m.scale = {70.f, 18.f};
 
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_BLACK, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE, 1});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BLACK, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, (int)RENDER_LAYER::TURRETS});
 
     // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));
 
@@ -145,7 +145,8 @@ Entity createTurret(RenderSystem *renderer, vec2 position) {
         entity,
         { TEXTURE_ASSET_ID::TEXTURE_COUNT,
           EFFECT_ASSET_ID::EGG,
-          GEOMETRY_BUFFER_ID::DEBUG_LINE });
+          GEOMETRY_BUFFER_ID::DEBUG_LINE,
+          RENDER_LAYER::ACTORS });
 
     registry.enemies.emplace(entity);
 
@@ -184,8 +185,8 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
     auto &config = POWER_UP_CONFIGS[(int)type];
 
     registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity,
-                                   {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::EGG});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::EGG, (int)RENDER_LAYER::INTERACTABLES});
 
     registry.pickUp.emplace(entity);
     registry.powerUp.emplace(entity, type);
@@ -215,8 +216,8 @@ Entity createBubbler(RenderSystem *renderer, vec2 position) {
     // pe.spawn_interval_ms = 100;
     // pe.position = motion.position;
 
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, (int)RENDER_LAYER::INTERACTABLES});
 
     return entity;
 }
@@ -245,8 +246,8 @@ Entity createBell(RenderSystem *renderer, vec2 position, float interact_radius_p
     motion.scale = {30.f, 30.f};
 
     registry.colors.emplace(entity, vec3(0.1f, 0.9f, 0.1f));
-    registry.renderRequests.insert(entity,
-                                   {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::EGG});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::EGG, (int)RENDER_LAYER::INTERACTABLES});
 
     return entity;
 }
@@ -285,8 +286,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
     Bouncy &bouncy = registry.bouncy.emplace(entity);
 
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, (int)RENDER_LAYER::PROJECTILES});
 
     ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
     pe.offset = {-20, 0};
@@ -316,8 +317,8 @@ Entity createMine(RenderSystem *renderer, vec2 position) {
     motion.scale = {40.f, 40.f};
 
     registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity,
-                                   {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::EGG});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::EGG, (int)RENDER_LAYER::INTERACTABLES});
 
     return entity;
 }
@@ -339,8 +340,8 @@ Entity createAnemone(RenderSystem *renderer, vec2 position) {
     motion.scale = {40.f, 40.f};
 
     registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity,
-                                   {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::EGG});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::EGG, (int)RENDER_LAYER::INTERACTABLES});
 
     return entity;
 }

@@ -61,7 +61,8 @@ Entity TileMapSystem::init_tiles(std::string map_file_name, std::string tileset_
     registry.tilemaps.insert(entity, tilemap);
     registry.tilesets.insert(entity, tileset);
 
-    registry.renderRequests.insert(entity, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, layer});
+    registry.renderRequests.insert(entity, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE,
+                                            (int)RENDER_LAYER::BACKGROUND + layer});
 
 #ifdef DEBUG_INIT_TILES
     print_tilemap(tilemap);

@@ -302,14 +302,19 @@ struct TileMap {
     std::array<unsigned short, 4096> tile_ids;
     unsigned int width;
     unsigned int height;
+    unsigned int x_offset = 0;
+    unsigned int y_offset = 0;
 
-    TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height)
-        : tile_ids(tile_ids), width(width), height(height) {}
+    TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height,
+            unsigned int x_offset = 0, unsigned int y_offset = 0)
+        : tile_ids(tile_ids), width(width), height(height), x_offset(x_offset), y_offset(y_offset) {}
 
     TileMap(const TileMap &other) {
         this->tile_ids = other.tile_ids;
         this->width = other.width;
         this->height = other.height;
+        this->x_offset = other.x_offset;
+        this->y_offset = other.y_offset;
     }
 };
 
@@ -399,11 +404,21 @@ enum class GEOMETRY_BUFFER_ID {
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
+enum class RENDER_LAYER {
+    BACKGROUND = 0,
+    INTERACTABLES = 5,
+    ACTORS = 10,
+    PROJECTILES = ACTORS + 1,
+    TURRETS = PROJECTILES + 1,
+    WALLS = 20,
+    OVERLAYS = 100
+};
+
 struct RenderRequest {
     TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
     EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
     GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
-    int layer = 0; // Larger numbers are drawn on top
+    int layer = (int)RENDER_LAYER::BACKGROUND; // Larger numbers are drawn on top
 };
 
 typedef std::pair<Entity, RenderRequest> EntityRRPair;
