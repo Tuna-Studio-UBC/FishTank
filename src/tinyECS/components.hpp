@@ -104,6 +104,9 @@ struct FireControl {
     float cooldown_timer = 0; // ms
     float cooldown_ms = 2000; // ms
     ATTACK_PATTERN attack_pattern;
+    int ammo = 0;
+    int max_ammo = STARTING_AMMO;
+    float refill_progress = 0.f;
 };
 
 struct SpeedControl {
@@ -132,7 +135,11 @@ struct Wallet {
 
 struct Patrolling {};
 
-struct Pursuit {};
+struct Pursuit {
+    std::vector<vec2> path;
+    size_t curr_index = 0;
+    ivec2 goal;
+};
 
 struct Bouncy {
     int bounces_remaining = 3;
@@ -169,6 +176,10 @@ struct Heal {
     int amount;
     Heal(int amount) { this->amount = amount; };
 };
+
+struct Bubbler {
+    float ammo_per_second = 10.f;
+};
 // Optional: OverTimeEffect
 
 struct SpeedMultiplier {
@@ -202,13 +213,19 @@ struct Collision {
     Entity other; // the second object involved in the collision
 };
 
+// Forward definition to avoid compilation issues, this is defined further down
+enum class TEXTURE_ASSET_ID;
+
+// Entities with this require the motion component
 struct ParticleEmitter {
-    vec2 position; // Position of the particle spawn
+    vec2 offset = {0, 0}; // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
     int max_particles;
+    TEXTURE_ASSET_ID texture;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
-    float life_ms;           // Duration of particle spawns
     float particle_life_ms;  // Duration of each particle
+    float life_ms = -99.f;   // Default -99 (infinite). Duration of particle spawns.
+    bool standalone = false; // Default false. True iff this entity is only PE, everything deleted when PE expires
 };
 
 #pragma endregion Physics
@@ -353,7 +370,8 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_LOSE_OVERLAY = TEXTURE_WIN_OVERLAY + 1,
 
     TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
-    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLE + 1,
+    TEXTURE_BUBBLER = TEXTURE_BUBBLE + 1,
+    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLER + 1,
 
     TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
 };

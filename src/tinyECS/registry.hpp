@@ -48,6 +48,7 @@ class ECSRegistry {
     ComponentContainer<Heal> heal;
     ComponentContainer<SpeedMultiplier> speedMultiplier;
     ComponentContainer<DamageMultiplier> damageMultiplier;
+    ComponentContainer<Bubbler> bubblers;
 
     // Physics
     ComponentContainer<Motion> motions;
@@ -112,6 +113,7 @@ class ECSRegistry {
         registry_list.push_back(&heal);
         registry_list.push_back(&speedMultiplier);
         registry_list.push_back(&damageMultiplier);
+        registry_list.push_back(&bubblers);
 
         // Physics
         registry_list.push_back(&motions);

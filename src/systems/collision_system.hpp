@@ -21,4 +21,5 @@ class CollisionSystem {
     void handle_hazards(Entity hazard_entity, Entity other_entity);
     void handle_actors_vs_walls(Entity entity_a, Entity entity_b);
     void handle_actor_actor(Entity entity_a, Entity entity_b);
+    void handle_bubbler_collision(Entity &entity_a, Entity &entity_b, float &elapsed_ms);
 };
