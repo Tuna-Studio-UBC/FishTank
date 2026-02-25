@@ -132,7 +132,11 @@ struct Wallet {
 
 struct Patrolling {};
 
-struct Pursuit {};
+struct Pursuit {
+    std::vector<vec2> path;
+    size_t curr_index = 0;
+    ivec2 goal;
+};
 
 struct Bouncy {
     int bounces_remaining = 3;
