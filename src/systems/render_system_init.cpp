@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 
+// freetype
 #include <freetype/freetype.h>
 
 // internal
@@ -62,6 +63,98 @@ bool RenderSystem::init(GLFWwindow *window_arg) {
     initializeGlEffects();
     initializeGlGeometryBuffers();
     initializeParticles();
+
+    std::string font_filename = PROJECT_SOURCE_DIR + std::string("res/fonts/Kenney_Pixel_Square.ttf");
+    initializeFonts(window, font_filename);
+
+    return true;
+}
+
+bool RenderSystem::initializeFonts(GLFWwindow *window, const std::string &font_filename,
+                                   unsigned int font_default_size) {
+    glGenVertexArrays(1, &font_vao);
+    glGenBuffers(1, &font_vbo);
+    gl_has_errors();
+
+    const GLuint program = (GLuint)effects[(int)EFFECT_ASSET_ID::FONT];
+    glUseProgram(program);
+    gl_has_errors();
+
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    mat4 projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+    GLint projection_loc = glGetUniformLocation(program, "projection");
+    glUniformMatrix4fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
+    gl_has_errors();
+
+    // init FreeType fonts
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft)) {
+        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return false;
+    }
+
+    FT_Face face;
+    if (FT_New_Face(ft, font_filename.c_str(), 0, &face)) {
+        std::cerr << "ERROR::FREETYPE: Failed to load font: " << font_filename << std::endl;
+        return false;
+    }
+
+    // extract a default size
+    FT_Set_Pixel_Sizes(face, 0, font_default_size);
+
+    // disable byte-alignment restriction in OpenGL
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // load each of the chars - note only first 128 ASCII chars
+    for (unsigned char c = (unsigned char)0; c < (unsigned char)128; c++) {
+        // load character glyph
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+            std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+            continue;
+        }
+
+        // generate texture
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        // std::cout << "texture: " << c << " = " << texture << std::endl;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED,
+                     GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
+        // set texture options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // now store character for later use
+        Character character = {texture, ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+                               ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+                               static_cast<unsigned int>(face->glyph->advance.x), (char)c};
+        ft_characters.insert(std::pair<char, Character>(c, character));
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    gl_has_errors();
+
+    // clean up
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+    // bind buffers
+    glBindVertexArray(font_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, font_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    gl_has_errors();
+
+    // release buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(vao);
+    gl_has_errors();
 
     return true;
 }

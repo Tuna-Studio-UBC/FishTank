@@ -326,6 +326,14 @@ struct TileSet {
           collisions(collisions) {}
 };
 
+struct Text {
+    std::string text = "";
+    vec2 position = {0.f, 0.f};
+    float scale = 1.f;
+    vec3 color = {0.f, 0.f, 0.f};
+    glm::mat4 trans = glm::mat4(1.f);
+};
+
 struct Overlay {};
 
 struct Animation {

@@ -1,7 +1,13 @@
 #pragma once
 
 #include <array>
+#include <map>
 #include <utility>
+
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_int2.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/trigonometric.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -10,6 +16,15 @@
 #include "common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/tiny_ecs.hpp"
+
+// font character structure
+struct Character {
+    unsigned int TextureID; // ID handle of the glyph texture
+    ivec2 Size;             // Size of glyph
+    ivec2 Bearing;          // Offset from baseline to left/top of glyph
+    unsigned int Advance;   // Offset to advance to next glyph
+    char character;
+};
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
@@ -23,6 +38,9 @@ class RenderSystem {
      */
     std::array<GLuint, texture_count> texture_gl_handles;
     std::array<ivec2, texture_count> texture_dimensions;
+
+    // Font characters
+    std::map<char, Character> ft_characters;
 
     // Make sure these paths remain in sync with the associated enumerators.
     // Associated id with .obj path
@@ -55,6 +73,8 @@ class RenderSystem {
   public:
     // Initialize the window
     bool init(GLFWwindow *window);
+
+    bool initializeFonts(GLFWwindow *window, const std::string &font_filename, unsigned int font_default_size = 24);
 
     void initializeGUI(GLFWwindow *window);
 
@@ -99,7 +119,10 @@ class RenderSystem {
     void drawTilemap(const Entity &e, const mat3 &projection, const mat3 &view);
     void drawParticles(const mat3 &projection, const mat3 &view);
     void drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view);
+
+    // On-screen rendering
     void drawToScreen();
+    void drawText(Entity entity);
 
     void sortRenderRequests(std::vector<Entity> *draw_list);
 
@@ -114,6 +137,9 @@ class RenderSystem {
     GLuint vao;
     GLuint vbo;
     unsigned int particle_buffer_capacity;
+
+    GLuint font_vao;
+    GLuint font_vbo;
 
     Entity screen_state_entity;
 };
