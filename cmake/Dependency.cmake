@@ -38,7 +38,12 @@ FetchContent_Declare(
   URL "https://download.savannah.gnu.org/releases/freetype/ft${FREETYPE_VERSION}.zip"
 )
 FetchContent_MakeAvailable(Freetype)
-add_library(Freetype::Freetype ALIAS freetype)
+
+set(FREETYPE_LIBRARY freetype)
+add_library(Freetype::Freetype ALIAS ${FREETYPE_LIBRARY})
+
+set(FREETYPE_INCLUDE_DIRS ${Freetype_SOURCE_DIR}/include)
+target_include_directories(freetype PUBLIC ${FREETYPE_INCLUDE_DIRS})
 
 # ============================================================
 # RmlUi
@@ -91,6 +96,7 @@ function(link_engine_dependencies target)
   # Remaining
   target_link_libraries(${target} PUBLIC
     spdlog::spdlog
+    freetype
     rmlui
     imgui
   )

@@ -1,12 +1,15 @@
+#include "systems/render_system.hpp"
+
 // stdlib
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
+#include <freetype/freetype.h>
+
 // internal
 #include "../ext/stb_image/stb_image.h"
-#include "systems/render_system.hpp"
 #include "tinyECS/registry.hpp"
 
 // Render initialization

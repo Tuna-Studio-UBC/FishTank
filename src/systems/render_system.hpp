@@ -3,9 +3,9 @@
 #include <array>
 #include <utility>
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "common.hpp"
 #include "tinyECS/components.hpp"
@@ -45,8 +45,8 @@ class RenderSystem {
     std::array<GLuint, effect_count> effects;
     // Make sure these paths remain in sync with the associated enumerators.
     const std::array<std::string, effect_count> effect_paths = {
-        shader_path("coloured"), shader_path("egg"),     shader_path("chicken"), shader_path("textured"),
-        shader_path("vignette"), shader_path("tilemap"), shader_path("particle")};
+        shader_path("coloured"), shader_path("egg"),      shader_path("chicken"), shader_path("textured"),
+        shader_path("font"),     shader_path("vignette"), shader_path("tilemap"), shader_path("particle")};
 
     std::array<GLuint, geometry_count> vertex_buffers;
     std::array<GLuint, geometry_count> index_buffers;
