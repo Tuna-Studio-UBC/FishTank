@@ -17,13 +17,15 @@ struct Particle {
 
 struct ParticleEmitterRuntime {
     std::vector<Particle> particles;
-    float spawn_accumulator_ms; // Interesting addition to prevent FPS dependent spawn rates
+    TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+    float spawn_accumulator_ms = 0.f; // Interesting addition to prevent FPS dependent spawn rates
+    bool standalone = false;          // True iff this entity is only PE, everything deleted when PE expires
 };
 
 class ParticleSystem {
   public:
     // Store separately from ECS and lazy load for better performance
-    std::unordered_map<unsigned int, ParticleEmitterRuntime> runtimes;
+    std::unordered_map<Entity, ParticleEmitterRuntime> runtimes;
 
     void clear_all_particles();
 

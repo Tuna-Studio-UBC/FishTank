@@ -5,7 +5,7 @@ void GameUI::draw_healthbar() {
     float bar_height = 10;
     float padding = 2;
     ImGui::SetNextWindowSize(ImVec2(bar_width, bar_height));
-    ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH_PX * .5f, WINDOW_HEIGHT_PX * .9f), ImGuiCond_Once, ImVec2(.5f, .5f));
+    ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH_PX * .33f, WINDOW_HEIGHT_PX * .9f), ImGuiCond_Once, ImVec2(.5f, .5f));
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(.2f, .2f, .2f, .9f));

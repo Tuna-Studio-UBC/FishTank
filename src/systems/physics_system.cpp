@@ -75,6 +75,9 @@ void PhysicsSystem::step(float elapsed_ms) {
         vec2 old_position = motion.position;
 
         auto velocity = motion.velocity * elapsed_ms / 1000.f;
+
+        // Adjust angle based on angular velocity
+        motion.angle += motion.angular_velocity * elapsed_ms / 1000.f;
         auto angle = motion.angle;
 
         // TODO: Optimize this nested loop

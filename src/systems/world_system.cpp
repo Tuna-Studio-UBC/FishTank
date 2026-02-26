@@ -237,6 +237,9 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     spdlog::info("Starting music...");
     Mix_PlayMusic(background_music, -1);*/
 
+    // ! FOR TESTING !
+    createBubbler(renderer, vec2(125.f));
+
     // walls
     TileMap &tilemap = registry.tilemaps.components[0];
     float arena_width = tilemap.width * TILE_SIZE_PX;
@@ -366,16 +369,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
     // We handle the inputs separately since we need to deal with game logic
     // E.g. how to handle multiple conflicting inputs
-    if (key == GLFW_KEY_W) {
+    if (key == GLFW_KEY_W || key == GLFW_KEY_UP) {
         ps.current_actions[KeyboardActions::MoveForward] = key_pressed;
     }
-    if (key == GLFW_KEY_A) {
+    if (key == GLFW_KEY_A || key == GLFW_KEY_LEFT) {
         ps.current_actions[KeyboardActions::TurnLeft] = key_pressed;
+        ps.most_recent_turn = KeyboardActions::TurnLeft;
     }
-    if (key == GLFW_KEY_D) {
+    if (key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) {
         ps.current_actions[KeyboardActions::TurnRight] = key_pressed;
+        ps.most_recent_turn = KeyboardActions::TurnRight;
     }
-    if (key == GLFW_KEY_S) {
+    if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN) {
         ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
     }
 

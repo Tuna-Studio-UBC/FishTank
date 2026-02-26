@@ -68,6 +68,12 @@ void change_vector_direction(vec2 &in_vec, float radians) {
     in_vec.y = y;
 }
 
+vec2 get_vector_rotated(vec2 &in_vec, float radians) {
+    float c = std::cos(radians);
+    float s = std::sin(radians);
+    return {in_vec.x * c - in_vec.y * s, in_vec.x * s + in_vec.y * c};
+}
+
 bool entity_in_radius(vec2 dist, vec2 target_scale, float radius) {
     float true_radius = radius + std::max(target_scale.x, target_scale.y);
 

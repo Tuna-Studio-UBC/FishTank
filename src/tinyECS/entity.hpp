@@ -25,9 +25,21 @@ class Entity {
 
     ~Entity() {}
 
-    operator unsigned int() { return m_id; } // enables automatic casting to int
+    operator unsigned int() const { return m_id; } // enables automatic casting to int
 
-    unsigned int id() { return m_id; }
-    std::string name() { return m_name; }
-    std::string name_id() { return m_name + " (ID=" + std::to_string(m_id) + ")"; }
+    // Required for using entity as key in map
+    // https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
+    bool operator==(const Entity &other) const { return m_id == other.m_id; }
+
+    unsigned int id() const { return m_id; }
+    std::string name() const { return m_name; }
+    std::string name_id() const { return m_name + " (ID=" + std::to_string(m_id) + ")"; }
 };
+
+// Required for using entity as key in map
+// https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
+namespace std {
+template <> struct hash<Entity> {
+    std::size_t operator()(const Entity &e) const noexcept { return std::hash<unsigned int>{}(e.id()); }
+};
+}

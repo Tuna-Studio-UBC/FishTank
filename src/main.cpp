@@ -8,6 +8,7 @@
 #include <iostream>
 
 // internal
+#include "systems/animation_system.hpp"
 #include "systems/ai/ai_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/collision_system.hpp"
@@ -20,7 +21,6 @@
 #include "systems/player_input_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/world_system.hpp"
-#include "systems/animation_system.hpp"
 
 #include "ui/game_ui.hpp"
 
@@ -102,6 +102,7 @@ int main() {
 
         // Draw GUIs
         game_ui.draw_healthbar();
+        game_ui.draw_ammo();
 
 // Debugging UI
 #ifdef ENABLE_DEBUG_UI
