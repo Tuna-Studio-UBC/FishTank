@@ -102,6 +102,7 @@ int main() {
 
         // Draw GUIs
         game_ui.draw_healthbar();
+        game_ui.draw_minimap();
 
 // Debugging UI
 #ifdef ENABLE_DEBUG_UI
