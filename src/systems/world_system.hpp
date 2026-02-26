@@ -66,6 +66,11 @@ class WorldSystem {
     RenderSystem *renderer;
     CameraSystem *camera_system;
 
+    // grid
+    std::vector<Entity> grid_lines;
+
+    float fps;
+
     // music references
     // Mix_Music* background_music;
     // Mix_Chunk* invader_hit_sound;

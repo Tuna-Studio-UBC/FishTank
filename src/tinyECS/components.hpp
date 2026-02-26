@@ -329,6 +329,14 @@ struct TileSet {
           collisions(collisions) {}
 };
 
+struct Text {
+    std::string text = "";
+    vec2 position = {0.f, 0.f};
+    float scale = 1.f;
+    vec3 color = {0.f, 0.f, 0.f};
+    glm::mat4 trans = glm::mat4(1.f);
+};
+
 struct Overlay {};
 
 struct Animation {
@@ -387,7 +395,8 @@ enum class EFFECT_ASSET_ID {
     EGG = COLOURED + 1,
     CHICKEN = EGG + 1,
     TEXTURED = CHICKEN + 1,
-    VIGNETTE = TEXTURED + 1,
+    FONT = TEXTURED + 1,
+    VIGNETTE = FONT + 1,
     TILEMAP = VIGNETTE + 1,
     PARTICLE = TILEMAP + 1,
     EFFECT_COUNT = PARTICLE + 1
