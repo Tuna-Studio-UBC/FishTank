@@ -175,7 +175,7 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
 
     // Set up world level
     tilemap_system->init(rng);
-    tilemap_system->load_map(MapType::TEST_MAP);
+    tilemap_system->load_map(MapType::TEST_MAP2);
 
     // Create player entity
     Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});

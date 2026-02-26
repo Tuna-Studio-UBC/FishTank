@@ -9,6 +9,7 @@
 
 const enum class MapType {
     TEST_MAP = 0,
+    TEST_MAP2 = TEST_MAP + 1,
 };
 
 class TileMapSystem {
@@ -24,6 +25,7 @@ class TileMapSystem {
     static void init_tile_walls(TileMap *tilemap);
 
     static Entity load_test_map();
+    static Entity load_test_map2();
 
   public:
     TileMapSystem() {};
@@ -43,5 +45,6 @@ class TileMapSystem {
 
         // Define loadable maps here
         LOAD_MAP_FN.emplace(MapType::TEST_MAP, TileMapSystem::load_test_map);
+        LOAD_MAP_FN.emplace(MapType::TEST_MAP2, TileMapSystem::load_test_map2);
     }
 };

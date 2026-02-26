@@ -137,4 +137,11 @@ Entity TileMapSystem::load_test_map() {
     return map;
 }
 
+Entity TileMapSystem::load_test_map2() {
+    init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
+    Entity map = init_tiles("map2.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
+    init_tile_walls(&registry.tilemaps.get(map));
+    return map;
+}
+
 #pragma endregion Maps
