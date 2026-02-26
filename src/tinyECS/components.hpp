@@ -404,21 +404,21 @@ enum class GEOMETRY_BUFFER_ID {
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
-enum class RENDER_LAYER {
+enum RENDER_LAYER {
     BACKGROUND = 0,
     INTERACTABLES = 5,
     ACTORS = 10,
     PROJECTILES = ACTORS + 1,
     TURRETS = PROJECTILES + 1,
     WALLS = 20,
-    OVERLAYS = 100
+    OVERLAYS = 100,
 };
 
 struct RenderRequest {
     TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
     EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
     GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
-    int layer = (int)RENDER_LAYER::BACKGROUND; // Larger numbers are drawn on top
+    int layer = RENDER_LAYER::BACKGROUND; // Larger numbers are drawn on top
 };
 
 typedef std::pair<Entity, RenderRequest> EntityRRPair;

@@ -267,7 +267,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             motion.position = registry.motions.get(registry.camera.entities[0]).position;
             motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
             registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
-                                               GEOMETRY_BUFFER_ID::SPRITE, (int)RENDER_LAYER::OVERLAYS});
+                                               GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
         }
     }
 
