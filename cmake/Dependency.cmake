@@ -9,6 +9,8 @@ set(ENGINE_DEPENDENCIES_LOADED TRUE)
 
 # Package Verisons
 set(SPDLOG_VERSION v1.17.0)
+set(FREETYPE_VERSION 2141)
+set(RMLUI_VERSION 6.2)
 set(IMGUI_VERSION v1.92.5)
 
 # Generic Options
@@ -26,6 +28,32 @@ FetchContent_Declare(
   URL "https://github.com/gabime/spdlog/archive/${SPDLOG_VERSION}.zip"
 )
 FetchContent_MakeAvailable(spdlog)
+
+# ============================================================
+# FreeType
+# ============================================================
+
+FetchContent_Declare(
+  Freetype
+  URL "https://download.savannah.gnu.org/releases/freetype/ft${FREETYPE_VERSION}.zip"
+)
+FetchContent_MakeAvailable(Freetype)
+
+set(FREETYPE_LIBRARY freetype)
+add_library(Freetype::Freetype ALIAS ${FREETYPE_LIBRARY})
+
+set(FREETYPE_INCLUDE_DIRS ${Freetype_SOURCE_DIR}/include)
+target_include_directories(freetype PUBLIC ${FREETYPE_INCLUDE_DIRS})
+
+# ============================================================
+# RmlUi
+# ============================================================
+
+FetchContent_Declare(
+  rmlui
+  URL "https://github.com/mikke89/RmlUi/archive/${RMLUI_VERSION}.zip"
+)
+FetchContent_MakeAvailable(rmlui)
 
 # ============================================================
 # Dear ImGui
@@ -68,6 +96,8 @@ function(link_engine_dependencies target)
   # Remaining
   target_link_libraries(${target} PUBLIC
     spdlog::spdlog
+    freetype
+    rmlui
     imgui
   )
 

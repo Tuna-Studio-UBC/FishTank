@@ -442,4 +442,25 @@ Entity createWall(const vec2 &position, const vec2 &scale) {
 
     return entity;
 }
+
 #pragma endregion StaticObjects
+
+#pragma region ScreenOverlays
+
+Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans) {
+    auto entity = Entity("Text");
+
+    Text &t = registry.text.emplace(entity);
+    t.text = text;
+    t.position = position;
+    t.scale = scale;
+    t.color = color;
+    t.trans = trans;
+
+    registry.renderRequests.insert(entity,
+                                   {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::FONT, GEOMETRY_BUFFER_ID::EGG});
+
+    return entity;
+}
+
+#pragma endregion ScreenOverlays

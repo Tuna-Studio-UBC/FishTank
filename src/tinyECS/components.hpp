@@ -218,7 +218,7 @@ enum class TEXTURE_ASSET_ID;
 
 // Entities with this require the motion component
 struct ParticleEmitter {
-    vec2 offset = {0, 0};    // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
+    vec2 offset = {0, 0}; // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
     int max_particles;
     TEXTURE_ASSET_ID texture;
     float particle_speed;    // Speed of particle in px / s
@@ -326,6 +326,14 @@ struct TileSet {
           collisions(collisions) {}
 };
 
+struct Text {
+    std::string text = "";
+    vec2 position = {0.f, 0.f};
+    float scale = 1.f;
+    vec3 color = {0.f, 0.f, 0.f};
+    glm::mat4 trans = glm::mat4(1.f);
+};
+
 struct Overlay {};
 
 struct Animation {
@@ -379,7 +387,8 @@ enum class EFFECT_ASSET_ID {
     EGG = COLOURED + 1,
     CHICKEN = EGG + 1,
     TEXTURED = CHICKEN + 1,
-    VIGNETTE = TEXTURED + 1,
+    FONT = TEXTURED + 1,
+    VIGNETTE = FONT + 1,
     TILEMAP = VIGNETTE + 1,
     PARTICLE = TILEMAP + 1,
     EFFECT_COUNT = PARTICLE + 1
