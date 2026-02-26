@@ -199,26 +199,18 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
     }
 }
 
-void CollisionSystem::handle_bubbler_collision(Entity &entity_a, Entity &entity_b, float &elapsed_ms) {
-    Entity player_entity, bubbler_entity;
+void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b, float &elapsed_ms) {
     if (registry.players.has(entity_a) && registry.bubblers.has(entity_b)) {
-        player_entity = entity_a;
-        bubbler_entity = entity_b;
-    } else if (registry.players.has(entity_b) && registry.bubblers.has(entity_a)) {
-        player_entity = entity_b;
-        bubbler_entity = entity_a;
-    } else
-        return;
+        if (registry.fireControl.has(entity_a)) {
+            FireControl &fc = registry.fireControl.get(entity_a);
+            Bubbler &bubbler = registry.bubblers.get(entity_b);
 
-    if (registry.fireControl.has(player_entity)) {
-        FireControl &fc = registry.fireControl.get(player_entity);
-        Bubbler &bubbler = registry.bubblers.get(bubbler_entity);
-
-        fc.refill_progress = fc.refill_progress + elapsed_ms * bubbler.ammo_per_second;
-        // Ammo cannot exceed max ammo
-        int new_ammo = min((int)(fc.refill_progress / PROGRESS_PER_AMMO), fc.max_ammo - fc.ammo);
-        fc.ammo += new_ammo;
-        // Refill progress cannot exceed PROGRESS_PER_AMMO
-        fc.refill_progress = min(fc.refill_progress - new_ammo * PROGRESS_PER_AMMO, (float)PROGRESS_PER_AMMO);
+            fc.refill_progress = fc.refill_progress + elapsed_ms * bubbler.ammo_per_second;
+            // Ammo cannot exceed max ammo
+            int new_ammo = min((int)(fc.refill_progress / PROGRESS_PER_AMMO), fc.max_ammo - fc.ammo);
+            fc.ammo += new_ammo;
+            // Refill progress cannot exceed PROGRESS_PER_AMMO
+            fc.refill_progress = min(fc.refill_progress - new_ammo * PROGRESS_PER_AMMO, (float)PROGRESS_PER_AMMO);
+        }
     }
 };
