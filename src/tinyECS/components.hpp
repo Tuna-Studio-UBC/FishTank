@@ -299,23 +299,26 @@ struct Mesh {
 #define GET_2D_POS(x, y, width) x + width *y
 
 struct TileMap {
-    int tileset_id = 0; // TODO: Add ID functionality
     std::array<unsigned short, 4096> tile_ids;
     unsigned int width;
     unsigned int height;
+    unsigned int x_offset = 0;
+    unsigned int y_offset = 0;
 
-    TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height)
-        : tile_ids(tile_ids), width(width), height(height) {}
+    TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height,
+            unsigned int x_offset = 0, unsigned int y_offset = 0)
+        : tile_ids(tile_ids), width(width), height(height), x_offset(x_offset), y_offset(y_offset) {}
 
     TileMap(const TileMap &other) {
         this->tile_ids = other.tile_ids;
         this->width = other.width;
         this->height = other.height;
+        this->x_offset = other.x_offset;
+        this->y_offset = other.y_offset;
     }
 };
 
 struct TileSet {
-    int tileset_id = 1; // TODO: Add ID functionality
     vec2 dimensions;
     int tile_width_px;
     int tile_height_px;
@@ -370,15 +373,20 @@ struct Animation {
  */
 
 enum class TEXTURE_ASSET_ID {
-    TEXTURE_TILESET = 0,
-    TEXTURE_PROJECTILE = 1,
-    TEXTURE_BLACK = 2,
-    TEXTURE_WIN_OVERLAY = 3,
-    TEXTURE_LOSE_OVERLAY = 4,
-    TEXTURE_BUBBLE = 5,
-    TEXTURE_BUBBLE_SHEET = 6,
-    TEXTURE_BUBBLER = 7,
-    TEXTURE_COUNT = TEXTURE_BUBBLER + 1
+    TEXTURE_GREYBOX_TILESET = 0,
+    TEXTURE_GREYBOX_TILESET2 = TEXTURE_GREYBOX_TILESET + 1,
+
+    TEXTURE_PROJECTILE = TEXTURE_GREYBOX_TILESET2 + 1,
+
+    TEXTURE_BLACK = TEXTURE_PROJECTILE + 1,
+    TEXTURE_WIN_OVERLAY = TEXTURE_BLACK + 1,
+    TEXTURE_LOSE_OVERLAY = TEXTURE_WIN_OVERLAY + 1,
+
+    TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
+    TEXTURE_BUBBLER = TEXTURE_BUBBLE + 1,
+    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLER + 1,
+
+    TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -403,14 +411,23 @@ enum class GEOMETRY_BUFFER_ID {
     SCREEN_TRIANGLE = DEBUG_LINE + 1,
     GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
-
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+
+enum RENDER_LAYER {
+    BACKGROUND = 0,
+    INTERACTABLES = 5,
+    ACTORS = 10,
+    PROJECTILES = ACTORS + 1,
+    TURRETS = PROJECTILES + 1,
+    WALLS = 20,
+    OVERLAYS = 100,
+};
 
 struct RenderRequest {
     TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
     EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
     GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
-    int layer = 0; // Larger numbers are drawn on top
+    int layer = RENDER_LAYER::BACKGROUND; // Larger numbers are drawn on top
 };
 
 typedef std::pair<Entity, RenderRequest> EntityRRPair;

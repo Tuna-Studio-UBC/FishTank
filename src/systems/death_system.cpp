@@ -24,8 +24,9 @@ void DeathSystem::step(float elapsed_ms) {
                     auto &motion = registry.motions.emplace(e);
                     motion.position = registry.motions.get(registry.camera.entities[0]).position;
                     motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
-                    registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_LOSE_OVERLAY,
-                                                       EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+                    registry.renderRequests.insert(e,
+                                                   {TEXTURE_ASSET_ID::TEXTURE_LOSE_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
+                                                    GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
                 } else if (registry.enemies.has(e)) {
                     // TODO: Handle enemy death
 
