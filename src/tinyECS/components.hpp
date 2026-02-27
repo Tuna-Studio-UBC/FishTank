@@ -1,12 +1,14 @@
 #pragma once
+#include <array>
+#include <unordered_map>
+#include <vector>
+
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "configs/attack_pattern.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
-#include <array>
-#include <unordered_map>
-#include <vector>
+#include "configs/spawn_type_config.hpp"
 
 #pragma region Entity
 // =================================================================================
@@ -298,19 +300,24 @@ struct Mesh {
 
 #define GET_2D_POS(x, y, width) x + width *y
 
+#define MAX_TILES 4096 // 64x64
+
 struct TileMap {
-    std::array<unsigned short, 4096> tile_ids;
+    std::array<unsigned short, MAX_TILES> tile_ids;
+    std::array<SPAWN_TYPE, MAX_TILES> spawn_tile_ids;
     unsigned int width;
     unsigned int height;
     unsigned int x_offset = 0;
     unsigned int y_offset = 0;
 
-    TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height,
-            unsigned int x_offset = 0, unsigned int y_offset = 0)
-        : tile_ids(tile_ids), width(width), height(height), x_offset(x_offset), y_offset(y_offset) {}
+    TileMap(std::array<unsigned short, MAX_TILES> tile_ids, std::array<unsigned int, MAX_TILES> spawn_tile_ids,
+            unsigned int width, unsigned int height, unsigned int x_offset = 0, unsigned int y_offset = 0)
+        : tile_ids(tile_ids), spawn_tile_ids(spawn_tile_ids), width(width), height(height), x_offset(x_offset),
+          y_offset(y_offset) {}
 
     TileMap(const TileMap &other) {
         this->tile_ids = other.tile_ids;
+        this->spawn_tile_ids = other.spawn_tile_ids;
         this->width = other.width;
         this->height = other.height;
         this->x_offset = other.x_offset;

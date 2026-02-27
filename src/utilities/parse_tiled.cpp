@@ -1,4 +1,5 @@
 #include "parse_tiled.hpp"
+#include "systems/tilemap_system.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -15,17 +16,25 @@ std::string parse_file(const std::string &path) {
     return text;
 }
 
+rapidjson::Value *get_layer(std::string layer_name, rapidjson::Document &map_dom) {
+    auto layer_array = map_dom["layers"].GetArray();
+    assert(layer_array.Size() > 0 && "Map must have at least one layer!");
+
+    for (rapidjson::Value &layer : layer_array) {
+        if (layer["name"].GetString() == layer_name) {
+            return &layer;
+        }
+    }
+    return nullptr;
+}
+
 TileMap parse_tilemap(const std::string &path) {
     auto json_str = parse_file(path);
     rapidjson::Document map_dom;
     map_dom.Parse(json_str.c_str());
 
-    auto layer_array = map_dom["layers"].GetArray();
-    assert(layer_array.Size() > 0 && "Map must have at least one layer!");
-
-    // TODO: Fix this, it should find the main layer?
-    rapidjson::Value &main_layer = layer_array[0];
-
+    // Parse main layer
+    rapidjson::Value &main_layer = *get_layer("main", map_dom);
     const int width = main_layer["width"].GetInt();
     const int height = main_layer["height"].GetInt();
     const int x_offset = main_layer["x"].GetInt();
@@ -37,7 +46,19 @@ TileMap parse_tilemap(const std::string &path) {
         tiles[i] = tile_data[i].GetInt();
     }
 
-    return TileMap(tiles, width, height, x_offset, y_offset);
+    // Parse spawn points if they exist
+    void *spawn_points_ptr = get_layer("spawn_points", map_dom);
+
+    std::array<SPAWN_TYPE, MAX_TILES> spawn_points{SpawnType::NONE};
+    if (spawn_points_ptr != nullptr) {
+        rapidjson::Value &spawn_points_layer = *(rapidjson::Value *)spawn_points_ptr;
+        const auto spawn_points_data = spawn_points_layer["data"].GetArray();
+        for (int i = 0; i < width * height; i++) {
+            spawn_points[i] = (SPAWN_TYPE)spawn_points_data[i].GetInt();
+        }
+    }
+
+    return TileMap(tiles, spawn_points, width, height, x_offset, y_offset);
 }
 
 TileSet parse_tileset(const std::string &path) {

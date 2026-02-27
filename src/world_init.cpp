@@ -195,7 +195,7 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
 }
 
 Entity createBubbler(RenderSystem *renderer, vec2 position) {
-    auto entity = Entity("Power Up");
+    auto entity = Entity("Bubbler");
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
