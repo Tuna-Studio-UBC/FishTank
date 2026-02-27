@@ -124,12 +124,15 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     motion.velocity = vec2(0.0f, 0.0f);
     motion.position = position;
     motion.angle = 0.f;
-    motion.scale = vec2(50.0f, 50.0f);
+    motion.scale = vec2(80.0f, 80.0f);
 
     registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
+        entity, {TEXTURE_ASSET_ID::TEXTURE_FISH_SHEET, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
-    registry.colors.emplace(entity, config.colour);
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 9;
+    an.frame_count = 9;
+    an.frame_time = 60;
 
     createTurret(renderer, position);
     return entity;
