@@ -224,6 +224,11 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     glUniform3fv(color_uloc, 1, value_ptr(color));
     gl_has_errors();
 
+    GLint tint_colour_uloc = glGetUniformLocation(program, "tintColour");
+    const vec3 tint_colour = render_request.tint;
+    glUniform3fv(tint_colour_uloc, 1, value_ptr(tint_colour));
+    gl_has_errors();
+
     // Get number of indices from index buffer, which has elements uint16_t
     GLint size = 0;
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);

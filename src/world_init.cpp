@@ -287,7 +287,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
     Bouncy &bouncy = registry.bouncy.emplace(entity);
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
-                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::PROJECTILES});
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::PROJECTILES,
+                                            attack_config.projectile_tint});
 
     ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
     pe.offset = {-20, 0};
