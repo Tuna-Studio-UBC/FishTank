@@ -191,21 +191,21 @@ Entity createTurret(RenderSystem *renderer, vec2 position) {
     Entity entity = Entity("Turret");
 
     Turret &t = registry.turrets.emplace(entity);
-    t.barrel_length_px = 30.f;
-
-    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-    registry.meshPtrs.emplace(entity, &mesh);
+    t.barrel_length_px = 10.f;
 
     Motion &m = registry.motions.emplace(entity);
     m.position = position;
     m.velocity = {0.f, 0.f};
     m.angle = 0.f;
-    m.scale = {70.f, 18.f};
+    m.scale = {48.f, 24.f};
 
     registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_BLACK, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE, 1});
+        entity, {TEXTURE_ASSET_ID::TEXTURE_TURRET_SHEET, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
-    // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 5;
+    an.frame_count = 5;
+    an.frame_time = 240;
 
     return entity;
 }
