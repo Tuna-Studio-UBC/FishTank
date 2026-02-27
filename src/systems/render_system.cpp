@@ -225,7 +225,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     gl_has_errors();
 
     GLint tint_colour_uloc = glGetUniformLocation(program, "tintColour");
-    const vec3 tint_colour = render_request.tint;
+    const vec3 tint_colour = registry.tints.has(entity) ? registry.tints.get(entity) : vec3(1);
     glUniform3fv(tint_colour_uloc, 1, value_ptr(tint_colour));
     gl_has_errors();
 

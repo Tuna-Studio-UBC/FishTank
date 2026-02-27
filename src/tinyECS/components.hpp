@@ -428,7 +428,6 @@ struct RenderRequest {
     EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
     GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
     int layer = RENDER_LAYER::BACKGROUND; // Larger numbers are drawn on top
-    vec3 tint = {1.f, 1.f, 1.f};
 };
 
 typedef std::pair<Entity, RenderRequest> EntityRRPair;
