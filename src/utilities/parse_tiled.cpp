@@ -28,6 +28,8 @@ TileMap parse_tilemap(const std::string &path) {
 
     const int width = main_layer["width"].GetInt();
     const int height = main_layer["height"].GetInt();
+    const int x_offset = main_layer["x"].GetInt();
+    const int y_offset = main_layer["y"].GetInt();
     const auto tile_data = main_layer["data"].GetArray();
 
     std::array<unsigned short, MAX_TILEMAP_SIZE> tiles{0};
@@ -35,7 +37,7 @@ TileMap parse_tilemap(const std::string &path) {
         tiles[i] = tile_data[i].GetInt();
     }
 
-    return TileMap(tiles, width, height);
+    return TileMap(tiles, width, height, x_offset, y_offset);
 }
 
 TileSet parse_tileset(const std::string &path) {
