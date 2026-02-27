@@ -139,12 +139,12 @@ void WorldSystem::start_wave(Progress &progress) {
     vec2 pos;
 
     if (registry.players.entities.size() > 0) {
-        // Teleport player to a random position each wave
-        Entity player = registry.players.entities[0];
-        registry.motions.get(player).position = tilemap_system->get_random_position(SpawnType::PLAYER);
+        // // Teleport player to a random position each wave
+        // Entity player = registry.players.entities[0];
+        // registry.motions.get(player).position = tilemap_system->get_random_position(SpawnTarget::PLAYER);
     } else {
         // Create player entity
-        pos = tilemap_system->get_random_position(SpawnType::PLAYER);
+        pos = tilemap_system->get_random_position(SpawnTarget::PLAYER);
         Entity player = createPlayer(renderer, pos);
 
         // Create camera
@@ -152,7 +152,7 @@ void WorldSystem::start_wave(Progress &progress) {
     }
 
     for (auto enemy : config.enemies) {
-        pos = tilemap_system->get_random_position(SpawnType::ENEMY);
+        pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
         createEnemy(renderer, pos, enemy);
     }
 }
@@ -163,7 +163,7 @@ void WorldSystem::load_level(Progress &progress) {
     vec2 pos;
 
     for (auto item : config.hazards) {
-        pos = tilemap_system->get_random_position(SpawnType::HAZARD);
+        pos = tilemap_system->get_random_position(SpawnTarget::HAZARD);
         if (item == HAZARD_TYPE::MINE) {
             createMine(renderer, pos);
         } else if (item == HAZARD_TYPE::ANEMONE) {
@@ -172,17 +172,17 @@ void WorldSystem::load_level(Progress &progress) {
     }
 
     for (auto bubbler : config.bubblers) {
-        pos = tilemap_system->get_random_position(SpawnType::AMMO);
+        pos = tilemap_system->get_random_position(SpawnTarget::AMMO);
         createBubbler(renderer, pos);
     }
 
     for (auto item : config.powerups) {
-        pos = tilemap_system->get_random_position(SpawnType::POWERUP);
+        pos = tilemap_system->get_random_position(SpawnTarget::POWERUP);
         createPowerUp(renderer, pos, item);
     }
 
     for (auto bell : config.bells) {
-        pos = tilemap_system->get_random_position(SpawnType::DISTRACTION);
+        pos = tilemap_system->get_random_position(SpawnTarget::DISTRACTION);
         createBell(renderer, pos, bell);
     }
 }

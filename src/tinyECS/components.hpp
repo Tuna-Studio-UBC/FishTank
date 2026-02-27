@@ -8,7 +8,7 @@
 #include "configs/attack_pattern.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
-#include "configs/spawn_type_config.hpp"
+#include "configs/spawn_target_config.hpp"
 
 #pragma region Entity
 // =================================================================================
@@ -304,7 +304,7 @@ struct Mesh {
 
 struct TileMap {
     std::array<unsigned short, MAX_TILES> tile_ids;
-    std::array<SPAWN_TYPE, MAX_TILES> spawn_tile_ids;
+    std::array<SPAWN_TARGET, MAX_TILES> spawn_tile_ids;
     unsigned int width;
     unsigned int height;
     unsigned int x_offset = 0;

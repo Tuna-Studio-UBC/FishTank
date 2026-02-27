@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "configs/spawn_type_config.hpp"
+#include "configs/spawn_target_config.hpp"
 #include "tinyECS/components.hpp"
 
 const enum class MapType {
@@ -16,7 +16,7 @@ const enum class MapType {
 class TileMapSystem {
   private:
     Entity current_map;
-    std::vector<std::pair<SPAWN_TYPE, vec2>> spawn_tiles;
+    std::vector<std::pair<SPAWN_TARGET, vec2>> spawn_tiles;
 
     std::default_random_engine rng;
     std::uniform_real_distribution<float> uniform_dist;
@@ -33,7 +33,7 @@ class TileMapSystem {
     ~TileMapSystem();
 
     void init_spawn_points();
-    vec2 get_random_position(SPAWN_TYPE spawn_type);
+    vec2 get_random_position(SPAWN_TARGET spawn_target);
     Entity get_current_map() const { return current_map; }
 
     Entity load_map(MapType map_type = MapType::TEST_MAP);

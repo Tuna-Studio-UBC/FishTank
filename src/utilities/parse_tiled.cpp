@@ -49,12 +49,12 @@ TileMap parse_tilemap(const std::string &path) {
     // Parse spawn points if they exist
     void *spawn_points_ptr = get_layer("spawn_points", map_dom);
 
-    std::array<SPAWN_TYPE, MAX_TILES> spawn_points{SpawnType::NONE};
+    std::array<SPAWN_TARGET, MAX_TILES> spawn_points{SpawnTarget::NONE};
     if (spawn_points_ptr != nullptr) {
         rapidjson::Value &spawn_points_layer = *(rapidjson::Value *)spawn_points_ptr;
         const auto spawn_points_data = spawn_points_layer["data"].GetArray();
         for (int i = 0; i < width * height; i++) {
-            spawn_points[i] = (SPAWN_TYPE)spawn_points_data[i].GetInt();
+            spawn_points[i] = (SPAWN_TARGET)spawn_points_data[i].GetInt();
         }
     }
 

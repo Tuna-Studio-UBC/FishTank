@@ -1,9 +1,9 @@
 #pragma once
 
-#define SPAWN_TYPE unsigned int
+#define SPAWN_TARGET unsigned int
 
 // Can store up to 32 different spawn types (unsigned int)
-const enum SpawnType : SPAWN_TYPE {
+const enum SpawnTarget : SPAWN_TARGET {
     NONE = 0,
     ANY = 1,
     PLAYER = 2,

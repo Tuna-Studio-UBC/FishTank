@@ -105,17 +105,17 @@ void TileMapSystem::init_spawn_points() {
     for (unsigned int y = 0; y < tilemap.height; y++) {
         for (unsigned int x = 0; x < tilemap.width; x++) {
             int spawn_tile_id = tilemap.spawn_tile_ids[x + y * tilemap.width];
-            spawn_tiles.push_back(std::pair<SPAWN_TYPE, vec2>((SPAWN_TYPE)spawn_tile_id, {x, y}));
+            spawn_tiles.push_back(std::pair<SPAWN_TARGET, vec2>((SPAWN_TARGET)spawn_tile_id, {x, y}));
         }
     }
 }
 
-vec2 TileMapSystem::get_random_position(SPAWN_TYPE spawn_type) {
+vec2 TileMapSystem::get_random_position(SPAWN_TARGET spawn_target) {
     std::vector<int> spawnable_tiles;
     for (int i = 0; i < spawn_tiles.size(); i++) {
         auto spawn_tile = spawn_tiles[i];
-        if (spawn_tile.first != SpawnType::NONE && spawn_tile.first & spawn_type ||
-            spawn_tile.first == SpawnType::ANY) {
+        if (spawn_tile.first != SpawnTarget::NONE && spawn_tile.first & spawn_target ||
+            spawn_tile.first == SpawnTarget::ANY) {
             spawnable_tiles.push_back(i);
         }
     }
@@ -130,7 +130,7 @@ vec2 TileMapSystem::get_random_position(SPAWN_TYPE spawn_type) {
     spawn_tiles[tile_idx] = spawn_tiles.back();
     spawn_tiles.pop_back();
 
-    spdlog::debug("Spawning {} at tile: {} {}", spawn_type, tile.x, tile.y);
+    spdlog::debug("Spawning {} at tile: {} {}", spawn_target, tile.x, tile.y);
 
     return vec2(tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2), tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2));
 }
