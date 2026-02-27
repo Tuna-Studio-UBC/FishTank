@@ -1,7 +1,5 @@
 
 #include <SDL.h>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/trigonometric.hpp>
 #include <iostream>
 #include <queue>
 #include <spdlog/spdlog.h>
@@ -46,7 +44,7 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
     gl_has_errors();
 }
 
-void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, const mat3 &view) {
+void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, const mat3 &view) {
     RenderRequest &render_request = registry.renderRequests.get(entity);
     TileMap &tilemap = registry.tilemaps.get(entity);
     TileSet &tileset = registry.tilesets.get(entity);
@@ -58,7 +56,6 @@ void RenderSystem::drawTilemap(const Entity &entity, const mat3 &projection, con
     int max_y = min(((int)(camera_pos.y + (WINDOW_HEIGHT_PX / 2)) / TILE_SIZE_PX) + 1, (int)tilemap.height);
 
     const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
-
     glUseProgram(program);
     gl_has_errors();
 
@@ -255,6 +252,70 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     gl_has_errors();
 }
 
+void RenderSystem::drawText(Entity entity) {
+    Text &t = registry.text.get(entity);
+    std::string text = t.text;
+    float x = t.position.x;
+    float y = t.position.y;
+    float scale = t.scale;
+    const glm::vec3 &color = t.color;
+    const glm::mat4 &trans = t.trans;
+
+    // enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    const GLuint program = (GLuint)effects[(int)EFFECT_ASSET_ID::FONT];
+    glUseProgram(program);
+
+    GLint transform_loc = glGetUniformLocation(program, "transform");
+    assert(transform_loc > -1);
+    glUniformMatrix4fv(transform_loc, 1, GL_FALSE, value_ptr(trans));
+
+    GLint textColor_loc = glGetUniformLocation(program, "textColor");
+    assert(textColor_loc > -1);
+    glUniform3f(textColor_loc, color.r, color.g, color.b);
+
+    glBindVertexArray(font_vao);
+
+    // iterate through characters of the text string
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++) {
+        Character ch = ft_characters[*c];
+
+        float xpos = x + ch.Bearing.x * scale;
+        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+        float w = ch.Size.x * scale;
+        float h = ch.Size.y * scale;
+
+        // update VBO for each character
+        float vertices[6][4] = {
+            {xpos, ypos + h, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 1.0f},     {xpos + w, ypos, 1.0f, 1.0f},
+
+            {xpos, ypos + h, 0.0f, 0.0f}, {xpos + w, ypos, 1.0f, 1.0f}, {xpos + w, ypos + h, 1.0f, 0.0f}};
+
+        // render glyph texture over quad
+
+        // bind current char texture
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+        // std::cout << "binding texture: " << ch.character << " = " << ch.TextureID << std::endl;
+
+        // update content of VBO memory
+        glBindBuffer(GL_ARRAY_BUFFER, font_vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // render quad
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // advance position for next glyph (note that advance is number of 1/64 pixels)
+        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(vao);
+}
+
 // first draw to an intermediate texture,
 // apply the "vignette" texture, when requested
 // then draw the intermediate texture
@@ -424,8 +485,8 @@ void RenderSystem::draw() {
     glViewport(0, 0, w, h);
     glDepthRange(0.00001, 10);
 
-    // white background
-    glClearColor(.5f, .5f, 1.0f, 1.0f);
+    // Background colour
+    glClearColor(50 / 255.f, 100 / 255.f, 225 / 255.f, 1.0f);
 
     glClearDepth(10.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -451,7 +512,9 @@ void RenderSystem::draw() {
             // albeit iterating through all Sprites in sequence. A good point to optimize
             drawTexturedMesh(entity, projection_2D, view_2D);
         } else if (registry.tilemaps.has(entity)) {
-            drawTilemap(entity, projection_2D, view_2D);
+            drawTileMap(entity, projection_2D, view_2D);
+        } else if (registry.text.has(entity)) {
+            drawText(entity);
         }
     }
 

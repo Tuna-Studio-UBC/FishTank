@@ -9,6 +9,7 @@
 
 // internal
 #include "systems/ai_system.hpp"
+#include "systems/animation_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/death_system.hpp"
@@ -19,8 +20,8 @@
 #include "systems/pick_up_system.hpp"
 #include "systems/player_input_system.hpp"
 #include "systems/render_system.hpp"
+#include "systems/tilemap_system.hpp"
 #include "systems/world_system.hpp"
-#include "systems/animation_system.hpp"
 
 #include "ui/game_ui.hpp"
 
@@ -41,6 +42,7 @@ int main() {
     PlayerInputSystem player_input_system;
     CameraSystem camera_system;
     AnimationSystem animation_system;
+    TileMapSystem tilemap_system;
 
     GameUI game_ui;
 
@@ -64,7 +66,7 @@ int main() {
 
     // initialize the main systems
     renderer_system.init(window);
-    world_system.init(&renderer_system, &camera_system);
+    world_system.init(&renderer_system, &camera_system, &tilemap_system);
 
     // variable timestep loop
     auto t = Clock::now();
@@ -102,6 +104,8 @@ int main() {
 
         // Draw GUIs
         game_ui.draw_healthbar();
+        game_ui.draw_minimap();
+        game_ui.draw_ammo();
 
 // Debugging UI
 #ifdef ENABLE_DEBUG_UI

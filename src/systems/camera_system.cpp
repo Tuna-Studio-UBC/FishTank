@@ -14,11 +14,14 @@ vec2 CameraSystem::get_camera_dest() {
     vec2 &player_pos = registry.motions.get(player).position;
     vec2 &mouse_pos = registry.mouseInput.components[0].mouse_pos;
 
+    if (mouse_pos == vec2(0))
+        mouse_pos = player_pos;
+
     vec2 offset = (mouse_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2)) * MOUSE_SENSITIVITY_FACTOR;
     offset = glm::clamp(offset, vec2(-MAX_OFFSET), vec2(MAX_OFFSET));
 
-    int tilemap_width = registry.tilemaps.components[0].width;
-    int tilemap_height = registry.tilemaps.components[0].height;
+    int tilemap_width = registry.tilemaps.get(current_map).width;
+    int tilemap_height = registry.tilemaps.get(current_map).height;
 
     vec2 min_pos = vec2(TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_WIDTH_PX / 2),
                         TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_HEIGHT_PX / 2));
@@ -30,7 +33,8 @@ vec2 CameraSystem::get_camera_dest() {
     return glm::clamp(offset + player_pos, min_pos, max_pos);
 }
 
-void CameraSystem::init() {
+void CameraSystem::init(Entity current_map) {
+    this->current_map = current_map;
     // Only one camera is allowed
     if (registry.camera.entities.empty())
         createCamera(get_camera_dest());

@@ -41,7 +41,7 @@ if(IS_OS_MAC)
     link_directories(/opt/homebrew/lib)
 endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/configs/enemy_config.cpp" "src/configs/attack_pattern.cpp" "src/configs/wave_config.cpp")
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/configs/enemy_config.cpp" "src/configs/attack_pattern.cpp" "src/configs/wave_config.cpp" "src/systems/pathfinding_system.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 # Added this so policy CMP0065 doesn't scream
@@ -154,9 +154,6 @@ endif()
 
 # Link dependencies from cmake/Dependency.cmake
 link_engine_dependencies(${PROJECT_NAME})
-
-target_include_directories(imgui PUBLIC ${GLFW_INCLUDE_DIRS})
-target_link_libraries(imgui PUBLIC ${GLFW_LIBRARIES} OpenGL::GL)
 
 # needed to add this for Linux
 if(IS_OS_LINUX)

@@ -12,10 +12,6 @@
 #include "utility"
 extern ECSRegistry registry;
 
-// Initiate tile map
-void init_tiles();
-// create tile walls
-void init_tile_walls();
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 
@@ -30,8 +26,12 @@ Entity createMine(RenderSystem *renderer, vec2 position);
 Entity createAnemone(RenderSystem *renderer, vec2 position);
 
 Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type);
+Entity createBubbler(RenderSystem *renderer, vec2 position);
 
 Entity createWall(const vec2 &position, const vec2 &scale = vec2(TILE_SIZE_PX));
+
+Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color = glm::vec3(0.f, 0.f, 0.f),
+                  const glm::mat4 &trans = glm::mat4(1.f));
 
 Entity createCamera(vec2 position);
 

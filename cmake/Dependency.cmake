@@ -9,6 +9,8 @@ set(ENGINE_DEPENDENCIES_LOADED TRUE)
 
 # Package Verisons
 set(SPDLOG_VERSION v1.17.0)
+set(FREETYPE_VERSION 2141)
+set(RMLUI_VERSION 6.2)
 set(IMGUI_VERSION v1.92.5)
 
 # Generic Options
@@ -26,6 +28,32 @@ FetchContent_Declare(
   URL "https://github.com/gabime/spdlog/archive/${SPDLOG_VERSION}.zip"
 )
 FetchContent_MakeAvailable(spdlog)
+
+# ============================================================
+# FreeType
+# ============================================================
+
+FetchContent_Declare(
+  Freetype
+  URL "https://download.savannah.gnu.org/releases/freetype/ft${FREETYPE_VERSION}.zip"
+)
+FetchContent_MakeAvailable(Freetype)
+
+set(FREETYPE_LIBRARY freetype)
+add_library(Freetype::Freetype ALIAS ${FREETYPE_LIBRARY})
+
+set(FREETYPE_INCLUDE_DIRS ${Freetype_SOURCE_DIR}/include)
+target_include_directories(freetype PUBLIC ${FREETYPE_INCLUDE_DIRS})
+
+# ============================================================
+# RmlUi
+# ============================================================
+
+FetchContent_Declare(
+  rmlui
+  URL "https://github.com/mikke89/RmlUi/archive/${RMLUI_VERSION}.zip"
+)
+FetchContent_MakeAvailable(rmlui)
 
 # ============================================================
 # Dear ImGui
@@ -46,8 +74,7 @@ add_library(imgui STATIC
   ${imgui_SOURCE_DIR}/imgui_tables.cpp
   ${imgui_SOURCE_DIR}/imgui_widgets.cpp
   ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-  ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
-)
+  ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp)
 
 target_include_directories(imgui PUBLIC
   ${imgui_SOURCE_DIR}
@@ -59,17 +86,14 @@ target_include_directories(imgui PUBLIC
 # ============================================================
 
 function(link_engine_dependencies target)
-
-  # Tileset
-  target_compile_definitions(${PROJECT_NAME} PRIVATE
-    TILESET_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/tilesets/tileset.json"
-    TILEMAP_JSON="${CMAKE_CURRENT_SOURCE_DIR}/res/maps/map.json"
-  )
-
-  # Remaining
   target_link_libraries(${target} PUBLIC
     spdlog::spdlog
+    freetype
+    rmlui
     imgui
   )
+
+  target_include_directories(imgui PUBLIC ${GLFW_INCLUDE_DIRS})
+  target_link_libraries(imgui PUBLIC ${GLFW_LIBRARIES} OpenGL::GL)
 
 endfunction()
