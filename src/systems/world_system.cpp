@@ -237,6 +237,15 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     spdlog::info("Starting music...");
     Mix_PlayMusic(background_music, -1);*/
 
+    // ! FOR TESTING !
+    createBubbler(renderer, vec2(125.f));
+
+    // ! FOR TESTING !
+    glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
+    glm::vec2 position = vec2(2.f, WINDOW_HEIGHT_PX - 24);
+    createText("FPS: 0", position, 1.f, font_color);
+    createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
+
     // walls
     TileMap &tilemap = registry.tilemaps.components[0];
     float arena_width = tilemap.width * TILE_SIZE_PX;
@@ -260,6 +269,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     title_ss << GAME_NAME;
     glfwSetWindowTitle(window, title_ss.str().c_str());
 
+    // Updating FPS
+    // ! FOR TESTING !
+    fps = 1000.0f / elapsed_ms_since_last_update;
+    if (registry.text.components.size() > 0)
+        registry.text.components[0].text = "FPS: " + std::to_string((int)fps);
+
     Progress &progress = registry.progress.components[0];
     if (progress.game_over == true) {
         ScreenState &screen = registry.screenStates.components[0];
@@ -272,6 +287,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     if (progress.remaining_enemies == 0) {
         spdlog::info("Wave {} complete, starting next wave.", progress.wave);
         progress.wave += 1;
+
+        // ! FOR TESTING !
+        if (registry.text.components.size() > 1)
+            registry.text.components[1].text = "Wave: " + std::to_string(progress.wave);
 
         if (WAVE_CONFIGS.size() > progress.wave) {
             if (progress.wave > LEVEL_CONFIGS[progress.level].last_wave) {
@@ -366,16 +385,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
     // We handle the inputs separately since we need to deal with game logic
     // E.g. how to handle multiple conflicting inputs
-    if (key == GLFW_KEY_W) {
+    if (key == GLFW_KEY_W || key == GLFW_KEY_UP) {
         ps.current_actions[KeyboardActions::MoveForward] = key_pressed;
     }
-    if (key == GLFW_KEY_A) {
+    if (key == GLFW_KEY_A || key == GLFW_KEY_LEFT) {
         ps.current_actions[KeyboardActions::TurnLeft] = key_pressed;
+        ps.most_recent_turn = KeyboardActions::TurnLeft;
     }
-    if (key == GLFW_KEY_D) {
+    if (key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) {
         ps.current_actions[KeyboardActions::TurnRight] = key_pressed;
+        ps.most_recent_turn = KeyboardActions::TurnRight;
     }
-    if (key == GLFW_KEY_S) {
+    if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN) {
         ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
     }
 

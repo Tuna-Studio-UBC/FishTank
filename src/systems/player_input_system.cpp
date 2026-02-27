@@ -3,8 +3,10 @@
 #include "world_init.hpp"
 #include <iostream>
 
-float MAX_SPEED_MULTIPLIER = 2;    // Max speed = move speed * x
-float DECELERATION_MULTIPLIER = 2; // Deceleration = move speed * x
+float MAX_SPEED_MULTIPLIER = 2;                 // Max speed = move speed * x
+float DECELERATION_MULTIPLIER = 2;              // Deceleration = move speed * x
+float QUICK_TURN_MULTIPLIER = 2;                // QT speed = turn speed * x
+float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4;     // How fast we lose rotation velocity
 
 void debug_print_input_state(KeyboardInputState &keyboard_input) {
     std::cout << "Current:  ";
@@ -29,6 +31,33 @@ bool key_pressed(KeyboardActions a, const KeyboardInputState &keyboard_input) {
 
 bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) { return keyboard_input.current_actions[a]; }
 
+// TODO: STUB FUNCTION -- REPLACE WHEN WE IMPLEMENT DIFFERENT AMMO TYPES
+int PlayerInputSystem::get_player_ammo_cost() { return 1; }
+
+/**
+    Tries to fire a projectile if the firing cooldown is 0, and the player has sufficient ammo. Does nothing otherwise.
+*/
+void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &fc, const float &aim_angle) {
+    int ammo_cost = get_player_ammo_cost();
+    if (fc.cooldown_timer > 0.f || fc.ammo < ammo_cost)
+        return;
+
+    float barrel_len = DEFAULT_BARREL_LEN;
+    if (!registry.turrets.entities.empty()) {
+        Entity turret_entity = registry.turrets.entities[0];
+        barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
+    }
+
+    vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
+    vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
+
+    Entity player = registry.players.entities[0];
+    createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
+
+    fc.cooldown_timer = fc.cooldown_ms;
+    fc.ammo -= ammo_cost;
+}
+
 void PlayerInputSystem::step(float elapsed_ms) {
     // We should have 1 and only ever 1 player input component
     assert(registry.keyboardInput.components.size() == 1);
@@ -41,13 +70,18 @@ void PlayerInputSystem::step(float elapsed_ms) {
 
     float dt = elapsed_ms / 1000.0f;
     bool quick_turn_active = (registry.playerQuickTurn.size() != 0);
-    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f;
+    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f / QUICK_TURN_MULTIPLIER;
 
     // Process Turn Input
     if (key_pressed(KeyboardActions::QuickTurn, keyboard_input) && !quick_turn_active) {
         Entity e = Entity("PlayerQuickTurn");
         PlayerQuickTurn &qt = registry.playerQuickTurn.emplace(e);
-        qt.direction = -1;
+        motion.angular_velocity = 0;
+        if (keyboard_input.most_recent_turn == KeyboardActions::TurnLeft) {
+            qt.direction = -1;
+        } else {
+            qt.direction = 1;
+        }
         qt.duration_ms = quick_turn_duration;
     } else if (!quick_turn_active) {
         float turn_dir = 0.f;
@@ -57,7 +91,14 @@ void PlayerInputSystem::step(float elapsed_ms) {
         if (key_held(KeyboardActions::TurnRight, keyboard_input)) {
             turn_dir += 1.f;
         }
-        motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
+        // motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
+        if (turn_dir != 0.f) {
+            motion.angular_velocity = turn_dir * sc.turn_speed;
+        } else if (motion.angular_velocity > 0) {
+            motion.angular_velocity = std::max(0.f, motion.angular_velocity - sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
+        } else if (motion.angular_velocity < 0) {
+            motion.angular_velocity = std::min(0.f, motion.angular_velocity + sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
+        }
     }
 
     // Process Quick Turn
@@ -105,38 +146,8 @@ void PlayerInputSystem::step(float elapsed_ms) {
         tm.angle = aim_angle;
     }
 
-    if (mouse_input.current_action == MouseActions::LeftClick && fc.cooldown_timer == 0.f) {
-        // Motion &player_motion = registry.motions.get(registry.players.entities[0]);
-        // vec2& player_pos = registry.motions.get(registry.players.entities[0]).position;
-        // vec2& camera_pos = registry.motions.get(registry.camera .entities[0]).position;
-
-        // If we wanted to change this so that the player isn't always centered, we would need to add the new
-        // center coordinates, then subtract the player coordinates. As it stands, since player is the center,
-        // we would be both adding and subtracting the player coordinates.
-        // vec2 mouse_relative_pos = mouse_input.mouse_pos + camera_pos - player_pos - vec2(WINDOW_WIDTH_PX / 2,
-        // WINDOW_HEIGHT_PX / 2);
-        // https://stackoverflow.com/questions/2339487/calculate-angle-of-2-points
-        // float angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);
-        // Entity player = registry.players.entities[0];
-        // createProjectile(player_pos, angle, ATTACK_PATTERN::PLAYER, player); // player is the owner of the bullet
-        // (hopefully)
-        // fc.cooldown_timer = fc.cooldown_ms;
-
-        // debug_print_player_motion(motion);
-        // debug_print_input_state(keyboard_input);
-        float barrel_len = 30.f;
-        if (!registry.turrets.entities.empty()) {
-            Entity turret_entity = registry.turrets.entities[0];
-            barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
-        }
-
-        vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
-        vec2 bullet_spawn_pos = motion.position + forward * barrel_len;
-
-        Entity player = registry.players.entities[0];
-        createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
-
-        fc.cooldown_timer = fc.cooldown_ms;
+    if (mouse_input.current_action == MouseActions::LeftClick) {
+        try_fire_projectile(motion, fc, aim_angle);
     }
 
     // Shift action over

@@ -104,6 +104,9 @@ struct FireControl {
     float cooldown_timer = 0; // ms
     float cooldown_ms = 2000; // ms
     ATTACK_PATTERN attack_pattern;
+    int ammo = 0;
+    int max_ammo = STARTING_AMMO;
+    float refill_progress = 0.f;
 };
 
 struct SpeedControl {
@@ -132,7 +135,11 @@ struct Wallet {
 
 struct Patrolling {};
 
-struct Pursuit {};
+struct Pursuit {
+    std::vector<vec2> path;
+    size_t curr_index = 0;
+    ivec2 goal;
+};
 
 struct Bouncy {
     int bounces_remaining = 3;
@@ -169,6 +176,10 @@ struct Heal {
     int amount;
     Heal(int amount) { this->amount = amount; };
 };
+
+struct Bubbler {
+    float ammo_per_second = 10.f;
+};
 // Optional: OverTimeEffect
 
 struct SpeedMultiplier {
@@ -189,10 +200,11 @@ struct DamageMultiplier {
 // =================================================================================
 
 struct Motion {
-    vec2 position = {0, 0}; // WORLD COORDINATE px
-    float angle = 0;        // Angle in RADIANS
-    vec2 velocity = {0, 0}; // px / s
-    vec2 scale = {10, 10};  // px
+    vec2 position = {0, 0};     // WORLD COORDINATE px
+    float angle = 0;            // Angle in RADIANS
+    float angular_velocity = 0; // Also in RADIANS / s
+    vec2 velocity = {0, 0};     // px / s
+    vec2 scale = {10, 10};      // px
 };
 
 // Stucture to store collision information
@@ -201,13 +213,19 @@ struct Collision {
     Entity other; // the second object involved in the collision
 };
 
+// Forward definition to avoid compilation issues, this is defined further down
+enum class TEXTURE_ASSET_ID;
+
+// Entities with this require the motion component
 struct ParticleEmitter {
-    vec2 position; // Position of the particle spawn
+    vec2 offset = {0, 0}; // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
     int max_particles;
+    TEXTURE_ASSET_ID texture;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
-    float life_ms;           // Duration of particle spawns
     float particle_life_ms;  // Duration of each particle
+    float life_ms = -99.f;   // Default -99 (infinite). Duration of particle spawns.
+    bool standalone = false; // Default false. True iff this entity is only PE, everything deleted when PE expires
 };
 
 #pragma endregion Physics
@@ -233,6 +251,7 @@ enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, KeyboardActi
 struct KeyboardInputState {
     bool current_actions[KeyboardActions::KeyboardActionsCount];
     bool previous_actions[KeyboardActions::KeyboardActionsCount];
+    KeyboardActions most_recent_turn = KeyboardActions::TurnRight;
 };
 
 enum MouseActions { LeftClick, MouseActionsCount };
@@ -307,6 +326,14 @@ struct TileSet {
           collisions(collisions) {}
 };
 
+struct Text {
+    std::string text = "";
+    vec2 position = {0.f, 0.f};
+    float scale = 1.f;
+    vec3 color = {0.f, 0.f, 0.f};
+    glm::mat4 trans = glm::mat4(1.f);
+};
+
 struct Overlay {};
 
 struct Animation {
@@ -350,7 +377,8 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_LOSE_OVERLAY = 4,
     TEXTURE_BUBBLE = 5,
     TEXTURE_BUBBLE_SHEET = 6,
-    TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
+    TEXTURE_BUBBLER = 7,
+    TEXTURE_COUNT = TEXTURE_BUBBLER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -359,7 +387,8 @@ enum class EFFECT_ASSET_ID {
     EGG = COLOURED + 1,
     CHICKEN = EGG + 1,
     TEXTURED = CHICKEN + 1,
-    VIGNETTE = TEXTURED + 1,
+    FONT = TEXTURED + 1,
+    VIGNETTE = FONT + 1,
     TILEMAP = VIGNETTE + 1,
     PARTICLE = TILEMAP + 1,
     EFFECT_COUNT = PARTICLE + 1

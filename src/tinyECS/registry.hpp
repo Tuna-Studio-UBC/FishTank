@@ -48,6 +48,7 @@ class ECSRegistry {
     ComponentContainer<Heal> heal;
     ComponentContainer<SpeedMultiplier> speedMultiplier;
     ComponentContainer<DamageMultiplier> damageMultiplier;
+    ComponentContainer<Bubbler> bubblers;
 
     // Physics
     ComponentContainer<Motion> motions;
@@ -66,8 +67,10 @@ class ECSRegistry {
     ComponentContainer<vec3> colors;
     ComponentContainer<TileSet> tilesets;
     ComponentContainer<TileMap> tilemaps;
-    ComponentContainer<Overlay> overlays;
     ComponentContainer<Animation> animations;
+
+    ComponentContainer<Text> text;
+    ComponentContainer<Overlay> overlays;
 
     ComponentContainer<Debug> debugComponents;
 
@@ -112,6 +115,7 @@ class ECSRegistry {
         registry_list.push_back(&heal);
         registry_list.push_back(&speedMultiplier);
         registry_list.push_back(&damageMultiplier);
+        registry_list.push_back(&bubblers);
 
         // Physics
         registry_list.push_back(&motions);
@@ -130,8 +134,10 @@ class ECSRegistry {
         registry_list.push_back(&colors);
         registry_list.push_back(&tilesets);
         registry_list.push_back(&tilemaps);
-        registry_list.push_back(&overlays);
         registry_list.push_back(&animations);
+
+        registry_list.push_back(&text);
+        registry_list.push_back(&overlays);
 
         registry_list.push_back(&debugComponents);
     }
