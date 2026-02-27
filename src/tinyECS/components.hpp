@@ -208,6 +208,7 @@ enum class TEXTURE_ASSET_ID;
 struct ParticleEmitter {
     int max_particles;
     TEXTURE_ASSET_ID texture;
+    float particle_scale = 10.f;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
     float particle_life_ms;  // Duration of each particle

@@ -64,12 +64,54 @@ bool RenderSystem::init(GLFWwindow *window_arg) {
 }
 
 void RenderSystem::initializeParticles() {
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glGenVertexArrays(1, &particle_vao);
+    glBindVertexArray(particle_vao);
+    gl_has_errors();
 
-    particle_buffer_capacity = 4096;
+    // Adapted from our initial in-class demo, in this case we store one quad instance
 
-    glBufferData(GL_ARRAY_BUFFER, particle_buffer_capacity * sizeof(vec3), nullptr, GL_STREAM_DRAW);
+    struct QuadVertex {
+        vec2 position;
+        vec2 texcoord;
+    };
+
+    QuadVertex quad[6] = {
+        {{-0.5f, -0.5f}, {0.f, 0.f}},
+        {{0.5f, -0.5f}, {1.f, 0.f}},
+        {{0.5f, 0.5f}, {1.f, 1.f}},
+
+        {{-0.5f, -0.5f}, {0.f, 0.f}},
+        {{0.5f, 0.5f}, {1.f, 1.f}},
+        {{-0.5f, 0.5f}, {0.f, 1.f}},
+    };
+
+    glGenBuffers(1, &quad_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+
+    // 0 is quad position, 1 is quad texcoord (See vertex shader)
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)0);
+    
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)sizeof(vec2));
+
+    // Initialize the instance position list vbo
+    glGenBuffers(1, &instance_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+    glBufferData(GL_ARRAY_BUFFER, instance_buffer_capacity * sizeof(vec2), nullptr, GL_STREAM_DRAW);
+
+    // 2 is instance positions
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), (void *)0);
+
+    // Tells attribute 2 (instance pos buffer) to advance once per instance not vertex
+    // https://learnopengl.com/Advanced-OpenGL/Instancing
+    glVertexAttribDivisor(2, 1);
+
+    // Prevent overwriting of our settings
+    glBindVertexArray(vao);
 }
 
 void RenderSystem::initializeGUI(GLFWwindow *window) {
