@@ -156,10 +156,9 @@ Entity TileMapSystem::load_test_map2() {
     return map;
 }
 
-// TODO: Fix not loading background layer properly
 Entity TileMapSystem::load_tutorial_map() {
-    init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
-    Entity map = init_tiles("tutorial_map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
+    init_tiles("tutorial_background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, -1);
+    Entity map = init_tiles("tutorial_map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
     init_tile_walls(&registry.tilemaps.get(map));
     return map;
 }
