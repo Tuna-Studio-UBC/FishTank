@@ -221,20 +221,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     glm::vec2 position = vec2(2.f, WINDOW_HEIGHT_PX - 24);
     createText("FPS: 0", position, 1.f, font_color);
     createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
-
-    // walls
-    TileMap &tilemap = registry.tilemaps.components[0];
-    float arena_width = tilemap.width * TILE_SIZE_PX;
-    float arena_height = tilemap.height * TILE_SIZE_PX;
-    float wall_thickness = TILE_SIZE_PX;
-    // top
-    createWall(vec2(arena_width / 2.f, wall_thickness / 2.f), vec2(arena_width, wall_thickness));
-    // bottom
-    createWall(vec2(arena_width / 2.f, arena_height - wall_thickness / 2.f), vec2(arena_width, wall_thickness));
-    // left
-    createWall(vec2(wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
-    // right
-    createWall(vec2(arena_width - wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
 }
 
 // Update our game world

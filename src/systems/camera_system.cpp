@@ -20,17 +20,29 @@ vec2 CameraSystem::get_camera_dest() {
     vec2 offset = (mouse_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2)) * MOUSE_SENSITIVITY_FACTOR;
     offset = glm::clamp(offset, vec2(-MAX_OFFSET), vec2(MAX_OFFSET));
 
-    int tilemap_width = registry.tilemaps.get(current_map).width;
-    int tilemap_height = registry.tilemaps.get(current_map).height;
-
-    vec2 min_pos = vec2(TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_WIDTH_PX / 2),
-                        TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_HEIGHT_PX / 2));
-    vec2 max_pos = vec2(TILE_SIZE_PX * (TILE_OOB_BUFFER + tilemap_width) - (WINDOW_WIDTH_PX / 2),
-                        TILE_SIZE_PX * (TILE_OOB_BUFFER + tilemap_height) - (WINDOW_HEIGHT_PX / 2));
-    // std::cout << "Offset: (" << (offset + player_pos).x << ", " << (offset + player_pos).y << ") | ";
-    // std::cout << "Min Pos: (" << min_pos.x <<", " << min_pos.y << ") | ";
-    // std::cout << "Max Pos: (" << max_pos.x <<", " << max_pos.y << ")" << std::endl;
     return glm::clamp(offset + player_pos, min_pos, max_pos);
+}
+
+void CameraSystem::set_camera_bounds(Entity& tilemap_entity) 
+{
+    assert(registry.tilemaps.has(tilemap_entity));
+    TileMap& tilemap = registry.tilemaps.get(tilemap_entity);
+    min_pos = vec2(TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_WIDTH_PX / 2),
+                   TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_HEIGHT_PX / 2));
+    max_pos = vec2(TILE_SIZE_PX * (TILE_OOB_BUFFER + tilemap.width ) - (WINDOW_WIDTH_PX  / 2),
+                   TILE_SIZE_PX * (TILE_OOB_BUFFER + tilemap.height) - (WINDOW_HEIGHT_PX / 2));
+    if (min_pos.x > max_pos.x)
+    {
+        float average_x = (min_pos.x + max_pos.x) / 2.f;
+        min_pos.x = average_x;
+        max_pos.x = average_x;
+    }
+    if (min_pos.y > max_pos.y) 
+    {
+        float average_y = (min_pos.y + max_pos.y) / 2.f;
+        min_pos.x = average_y;
+        max_pos.x = average_y;
+    }
 }
 
 void CameraSystem::init(Entity current_map) {

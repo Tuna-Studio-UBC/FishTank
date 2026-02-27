@@ -52,6 +52,8 @@ inline std::string get_path(FilePath path, const std::string &file_name) {
         return ROOT_DIR + "/res/tilesets/" + file;
     case TILESET_IMAGES:
         return ROOT_DIR + "/res/tileset_images/" + file;
+    default:
+        return "/";
     }
 };
 

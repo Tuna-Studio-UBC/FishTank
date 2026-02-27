@@ -90,6 +90,18 @@ void TileMapSystem::init_tile_walls(TileMap *tilemap) {
             }
         }
     }
+    // edge walls
+    float arena_width = tilemap->width * TILE_SIZE_PX;
+    float arena_height = tilemap->height * TILE_SIZE_PX;
+    float wall_thickness = TILE_SIZE_PX;
+    // top
+    createWall(vec2(arena_width / 2.f, wall_thickness / 2.f), vec2(arena_width, wall_thickness));
+    // bottom
+    createWall(vec2(arena_width / 2.f, arena_height - wall_thickness / 2.f), vec2(arena_width, wall_thickness));
+    // left
+    createWall(vec2(wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
+    // right
+    createWall(vec2(arena_width - wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
 }
 
 void TileMapSystem::init_free_tiles() {
@@ -140,6 +152,14 @@ Entity TileMapSystem::load_test_map() {
 Entity TileMapSystem::load_test_map2() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
     Entity map = init_tiles("map2.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
+    init_tile_walls(&registry.tilemaps.get(map));
+    return map;
+}
+
+// TODO: Fix not loading background layer properly
+Entity TileMapSystem::load_tutorial_map() {
+    init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
+    Entity map = init_tiles("tutorial_map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
     init_tile_walls(&registry.tilemaps.get(map));
     return map;
 }

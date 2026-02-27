@@ -14,8 +14,13 @@ class CameraSystem {
 
     void set_current_map(Entity current_map) { this->current_map = current_map; }
 
+    void set_camera_bounds(Entity& tilemap_entity);
+
   private:
     vec2 get_camera_dest();
+
+    vec2 min_pos = vec2(0.f, 0.f);
+    vec2 max_pos = vec2(0.f, 0.f);
 
     Entity current_map;
     const float INTERP_COEFFICIENT = 0.03f;
