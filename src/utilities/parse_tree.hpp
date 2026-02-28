@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <spdlog/spdlog.h>
+#include "../common.hpp"
 
 enum class NodeType{ CONDITION, ACTION, RANDOM };
 

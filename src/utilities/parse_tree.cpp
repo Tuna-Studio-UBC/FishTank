@@ -32,8 +32,7 @@ inline std::string trim(const std::string &s) {
 ScriptedTree load_tree(const std::string &filename) {
     ScriptedTree tree;
 
-    const std::string base_path = DECISION_TREES;
-    std::string full_path = base_path + filename;
+    std::string full_path = get_path(FilePath::DECISION_TREES, filename);;
 
     std::ifstream file(full_path);
     std::string line;
