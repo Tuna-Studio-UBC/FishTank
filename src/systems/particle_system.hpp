@@ -17,9 +17,10 @@ struct Particle {
 
 struct ParticleEmitterRuntime {
     std::vector<Particle> particles;
-    TEXTURE_ASSET_ID texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+    TEXTURE_ASSET_ID texture;
     float spawn_accumulator_ms = 0.f; // Interesting addition to prevent FPS dependent spawn rates
     bool standalone = false;          // True iff this entity is only PE, everything deleted when PE expires
+    float particle_scale;
 };
 
 class ParticleSystem {

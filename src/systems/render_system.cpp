@@ -388,34 +388,51 @@ void RenderSystem::drawToScreen() {
 }
 
 void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
-    static std::vector<vec3> positions;
+    static std::vector<vec2> instance_positions;
+
+    // Load program
+
+    const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
+    glUseProgram(program);
+    gl_has_errors();
+
+    glBindVertexArray(particle_vao);
+    gl_has_errors();
+    
     for (auto &[entity_id, rt] : particle_system.runtimes) {
-        positions.clear();
+        assert(rt.texture != TEXTURE_ASSET_ID::TEXTURE_COUNT);
 
-        for (const Particle &p : rt.particles) {
-            positions.push_back({p.position.x, p.position.y, 0.f});
-        }
-
-        if (positions.empty()) {
+        if (rt.particles.empty()) {
             continue;
         }
 
-        // spdlog::debug("Particle count: {}", positions.size());
+        instance_positions.clear();
 
-        if (positions.size() > particle_buffer_capacity) {
-            particle_buffer_capacity = positions.size() * 2;
-
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, particle_buffer_capacity * sizeof(vec3), nullptr, GL_STREAM_DRAW);
+        for (auto &p : rt.particles) {
+            instance_positions.push_back(p.position);
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(vec3), positions.data());
+        // spdlog::debug("Particle count: {}", instance_positions.size());
+
+        if (instance_positions.size() > instance_buffer_capacity) {
+            instance_buffer_capacity = instance_positions.size() * 2;
+
+            glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+            glBufferData(GL_ARRAY_BUFFER, instance_buffer_capacity * sizeof(vec2), nullptr, GL_STREAM_DRAW);
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, instance_positions.size() * sizeof(vec2), instance_positions.data());
         gl_has_errors();
 
-        const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
-        glUseProgram(program);
+        // Texture Items
+
+        glActiveTexture(GL_TEXTURE0);
+        GLuint texture_id = texture_gl_handles[(GLuint)rt.texture];
+        glBindTexture(GL_TEXTURE_2D, texture_id);
         gl_has_errors();
+
+        // Rendering
 
         GLuint projection_loc = glGetUniformLocation(program, "projection");
         glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
@@ -425,15 +442,15 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
         glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
         gl_has_errors();
 
-        GLint in_position_loc = glGetAttribLocation(program, "in_position");
-        glEnableVertexAttribArray(in_position_loc);
-        glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
-        gl_has_errors();
+        GLuint scale_loc = glGetUniformLocation(program, "particle_scale");
+        glUniform1f(scale_loc, rt.particle_scale);
 
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glDrawArrays(GL_POINTS, 0, (GLsizei)positions.size());
+        // Draw 6 vertices, instanced
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instance_positions.size());
         gl_has_errors();
     }
+    
+    glBindVertexArray(vao);
 }
 
 // Z-sort render requests; stores draw order of entities in draw_list

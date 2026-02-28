@@ -140,8 +140,12 @@ class RenderSystem {
     GLuint off_screen_render_buffer_depth;
 
     GLuint vao;
-    GLuint vbo;
-    unsigned int particle_buffer_capacity;
+    
+    // For instancing
+    GLuint particle_vao;
+    GLuint quad_vbo;
+    GLuint instance_vbo;
+    unsigned int instance_buffer_capacity = 1000;
 
     GLuint font_vao;
     GLuint font_vbo;
