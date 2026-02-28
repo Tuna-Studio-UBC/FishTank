@@ -11,10 +11,10 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+#include "systems/audio_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/tilemap_system.hpp"
-#include "systems/audio_system.hpp"
 
 // Container for all our entities and game logic.
 // Individual rendering / updates are deferred to the update() methods.
@@ -48,6 +48,14 @@ class WorldSystem {
 
     void respawn_player();
 
+    float get_fps() const {
+        float fps = 0.f;
+        for (float frame_fps : fps_avg)
+            fps += frame_fps;
+        return fps / fps_avg.size();
+    }
+    bool get_show_fps() const { return show_fps; }
+
     // should the game be over ?
     bool is_over() const;
 
@@ -73,7 +81,10 @@ class WorldSystem {
     // grid
     std::vector<Entity> grid_lines;
 
-    float fps;
+    // FPS
+    int fps_index = 0;
+    std::array<float, 100> fps_avg = {30.f}; // Store last 100 frames
+    bool show_fps = false;
 
     // music references
     // Mix_Music* background_music;
@@ -84,6 +95,6 @@ class WorldSystem {
     std::default_random_engine rng;
     std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 
-    //audio
+    // audio
     AudioSystem audio_system;
 };

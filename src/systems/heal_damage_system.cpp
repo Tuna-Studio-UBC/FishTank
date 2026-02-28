@@ -17,7 +17,14 @@ void HealDamageSystem::handle_damaging() {
             h.hp = std::max(h.hp - d.amount, 0);
             registry.damage.remove(e);
 
-            // TODO: Handle visual indicators
+            // Handle visual indicators
+            if (!registry.tints.has(e)) {
+                registry.tints.emplace(e, Tint(damage_tint, tint_duration_ms));
+            } else {
+                Tint &tint = registry.tints.get(e);
+                tint.tint = damage_tint;
+                tint.life_ms = tint_duration_ms;
+            }
 
             spdlog::info("{} took {} damage and now has {}/{} HP", e.name_id(), d.amount, h.hp, h.max_hp);
         }
@@ -33,6 +40,13 @@ void HealDamageSystem::handle_healing() {
             registry.heal.remove(e);
 
             // TODO: Handle visual indicators
+            if (!registry.tints.has(e)) {
+                registry.tints.emplace(e, Tint(heal_tint, tint_duration_ms));
+            } else {
+                Tint &tint = registry.tints.get(e);
+                tint.tint = heal_tint;
+                tint.life_ms = tint_duration_ms;
+            }
 
             spdlog::info("{} took {} healing and now has {}/{} HP", e.name_id(), h.amount, he.hp, he.max_hp);
         }

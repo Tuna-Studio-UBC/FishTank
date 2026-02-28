@@ -66,7 +66,7 @@ class ECSRegistry {
     ComponentContainer<Mesh *> meshPtrs;
     ComponentContainer<RenderRequest> renderRequests;
     ComponentContainer<vec3> colors;
-    ComponentContainer<vec3> tints;
+    ComponentContainer<Tint> tints;
     ComponentContainer<Animation> animations;
 
     // Map
