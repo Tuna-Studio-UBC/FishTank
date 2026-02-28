@@ -65,13 +65,17 @@ class ECSRegistry {
     ComponentContainer<Mesh *> meshPtrs;
     ComponentContainer<RenderRequest> renderRequests;
     ComponentContainer<vec3> colors;
-    ComponentContainer<TileSet> tilesets;
-    ComponentContainer<TileMap> tilemaps;
     ComponentContainer<Animation> animations;
 
+    // Map
+    ComponentContainer<TileSet> tilesets;
+    ComponentContainer<TileMap> tilemaps;
+
+    // UI
     ComponentContainer<Text> text;
     ComponentContainer<Overlay> overlays;
 
+    // Debug
     ComponentContainer<Debug> debugComponents;
 
     // constructor that adds all containers for looping over them
@@ -132,13 +136,17 @@ class ECSRegistry {
         registry_list.push_back(&meshPtrs);
         registry_list.push_back(&renderRequests);
         registry_list.push_back(&colors);
-        registry_list.push_back(&tilesets);
-        registry_list.push_back(&tilemaps);
         registry_list.push_back(&animations);
 
+        // Map
+        registry_list.push_back(&tilesets);
+        registry_list.push_back(&tilemaps);
+
+        // UI
         registry_list.push_back(&text);
         registry_list.push_back(&overlays);
 
+        // Debug
         registry_list.push_back(&debugComponents);
     }
 
