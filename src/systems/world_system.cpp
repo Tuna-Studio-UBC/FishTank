@@ -317,8 +317,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         progress.wave += 1;
 
         // ! FOR TESTING !
-        if (registry.text.components.size() > 1)
-            registry.text.components[1].text = "Wave: " + std::to_string(progress.wave);
+        if (registry.text.components.size() > 0)
+            registry.text.components[0].text = "Wave: " + std::to_string(progress.wave);
 
         if (WAVE_CONFIGS.size() > progress.wave && progress.wave < LEVEL_CONFIGS[progress.level].last_wave) {
             start_wave(progress);
