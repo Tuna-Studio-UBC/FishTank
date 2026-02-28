@@ -75,8 +75,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     motion.angle = 0.f;
     motion.scale = vec2(50.0f, 50.0f);
 
-    auto& health = registry.health.emplace(entity);
-    health.hp = 1;
+    registry.health.emplace(entity);
 
 
     auto &fire = registry.fireControl.emplace(entity);

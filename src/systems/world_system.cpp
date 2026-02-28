@@ -233,7 +233,7 @@ void WorldSystem::init_tutorial(RenderSystem* renderer_arg, CameraSystem* camera
 
     glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
     glm::vec2 position = vec2(2.f, WINDOW_HEIGHT_PX - 24);
-    createText("FPS: 0", position, 1.f, font_color);
+    // createText("FPS: 0", position, 1.f, font_color);
     createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 }
 
