@@ -12,6 +12,7 @@
 #include "utils.hpp"
 
 struct GameUI {
+    void draw_fps_counter(WorldSystem *world_system);
     void draw_healthbar();
     void draw_ammo();
     void draw_respawn(WorldSystem *world_system);
