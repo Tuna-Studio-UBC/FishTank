@@ -149,8 +149,7 @@ void run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     if (registry.pursuit.has(e)) {
         Pursuit &pursuit = registry.pursuit.get(e);
         if (pursuit.goal != world_to_tile(player_pos) || pursuit.path.size() == 0) {
-            // pursuit.path = path_finding_bfs(motion_i.position, target_pos);
-            pursuit.path = path_finding_a(motion_i.position, target_pos);
+            pursuit.path = path_finding(motion_i.position, target_pos);
             pursuit.curr_index = 0;
             pursuit.goal = world_to_tile(player_pos);
         }
@@ -173,7 +172,7 @@ void run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     }
 
     // Firing logic
-    if (walkable_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos), registry.tilemaps.components[0])) {
+    if (walkable_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos), registry.tilemaps.components.back())) {
         fire_projectiles(e, elapsed_ms, angle);
     }
 }
