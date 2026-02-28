@@ -1,12 +1,16 @@
+#include "systems/render_system.hpp"
+
 // stdlib
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
+// freetype
+#include <freetype/freetype.h>
+
 // internal
 #include "../ext/stb_image/stb_image.h"
-#include "systems/render_system.hpp"
 #include "tinyECS/registry.hpp"
 
 // Render initialization
@@ -60,16 +64,150 @@ bool RenderSystem::init(GLFWwindow *window_arg) {
     initializeGlGeometryBuffers();
     initializeParticles();
 
+    std::string font_filename = PROJECT_SOURCE_DIR + std::string("res/fonts/Kenney_Pixel_Square.ttf");
+    initializeFonts(window, font_filename);
+
+    return true;
+}
+
+bool RenderSystem::initializeFonts(GLFWwindow *window, const std::string &font_filename,
+                                   unsigned int font_default_size) {
+    glGenVertexArrays(1, &font_vao);
+    glGenBuffers(1, &font_vbo);
+    gl_has_errors();
+
+    const GLuint program = (GLuint)effects[(int)EFFECT_ASSET_ID::FONT];
+    glUseProgram(program);
+    gl_has_errors();
+
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    mat4 projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+    GLint projection_loc = glGetUniformLocation(program, "projection");
+    glUniformMatrix4fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
+    gl_has_errors();
+
+    // init FreeType fonts
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft)) {
+        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return false;
+    }
+
+    FT_Face face;
+    if (FT_New_Face(ft, font_filename.c_str(), 0, &face)) {
+        std::cerr << "ERROR::FREETYPE: Failed to load font: " << font_filename << std::endl;
+        return false;
+    }
+
+    // extract a default size
+    FT_Set_Pixel_Sizes(face, 0, font_default_size);
+
+    // disable byte-alignment restriction in OpenGL
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // load each of the chars - note only first 128 ASCII chars
+    for (unsigned char c = (unsigned char)0; c < (unsigned char)128; c++) {
+        // load character glyph
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+            std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+            continue;
+        }
+
+        // generate texture
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        // std::cout << "texture: " << c << " = " << texture << std::endl;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED,
+                     GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
+        // set texture options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // now store character for later use
+        Character character = {texture, ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+                               ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+                               static_cast<unsigned int>(face->glyph->advance.x), (char)c};
+        ft_characters.insert(std::pair<char, Character>(c, character));
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    gl_has_errors();
+
+    // clean up
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+    // bind buffers
+    glBindVertexArray(font_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, font_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    gl_has_errors();
+
+    // release buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(vao);
+    gl_has_errors();
+
     return true;
 }
 
 void RenderSystem::initializeParticles() {
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glGenVertexArrays(1, &particle_vao);
+    glBindVertexArray(particle_vao);
+    gl_has_errors();
 
-    particle_buffer_capacity = 4096;
+    // Adapted from our initial in-class demo, in this case we store one quad instance
 
-    glBufferData(GL_ARRAY_BUFFER, particle_buffer_capacity * sizeof(vec3), nullptr, GL_STREAM_DRAW);
+    struct QuadVertex {
+        vec2 position;
+        vec2 texcoord;
+    };
+
+    QuadVertex quad[6] = {
+        {{-0.5f, -0.5f}, {0.f, 0.f}},
+        {{0.5f, -0.5f}, {1.f, 0.f}},
+        {{0.5f, 0.5f}, {1.f, 1.f}},
+
+        {{-0.5f, -0.5f}, {0.f, 0.f}},
+        {{0.5f, 0.5f}, {1.f, 1.f}},
+        {{-0.5f, 0.5f}, {0.f, 1.f}},
+    };
+
+    glGenBuffers(1, &quad_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+
+    // 0 is quad position, 1 is quad texcoord (See vertex shader)
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)0);
+    
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)sizeof(vec2));
+
+    // Initialize the instance position list vbo
+    glGenBuffers(1, &instance_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+    glBufferData(GL_ARRAY_BUFFER, instance_buffer_capacity * sizeof(vec2), nullptr, GL_STREAM_DRAW);
+
+    // 2 is instance positions
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), (void *)0);
+
+    // Tells attribute 2 (instance pos buffer) to advance once per instance not vertex
+    // https://learnopengl.com/Advanced-OpenGL/Instancing
+    glVertexAttribDivisor(2, 1);
+
+    // Prevent overwriting of our settings
+    glBindVertexArray(vao);
 }
 
 void RenderSystem::initializeGUI(GLFWwindow *window) {

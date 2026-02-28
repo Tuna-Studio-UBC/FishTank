@@ -1,15 +1,30 @@
 #pragma once
 
 #include <array>
+#include <map>
 #include <utility>
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_int2.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/trigonometric.hpp>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/tiny_ecs.hpp"
+
+// font character structure
+struct Character {
+    unsigned int TextureID; // ID handle of the glyph texture
+    ivec2 Size;             // Size of glyph
+    ivec2 Bearing;          // Offset from baseline to left/top of glyph
+    unsigned int Advance;   // Offset to advance to next glyph
+    char character;
+};
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
@@ -24,29 +39,39 @@ class RenderSystem {
     std::array<GLuint, texture_count> texture_gl_handles;
     std::array<ivec2, texture_count> texture_dimensions;
 
+    // Font characters
+    std::map<char, Character> ft_characters;
+
     // Make sure these paths remain in sync with the associated enumerators.
     // Associated id with .obj path
     const std::vector<std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths = {
-        std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN, mesh_path("chicken.obj"))
+        std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN,
+                                                   get_path(FilePath::MESHES, "chicken.obj"))
         // specify meshes of other assets here
     };
 
     // Make sure these paths remain in sync with the associated enumerators (see TEXTURE_ASSET_ID).
-    // TODO
-    const std::array<std::string, texture_count> texture_paths = {tileset_texture_path("greybox_tiles.png"),
-                                                                  textures_path("white_bubble.png"),
-                                                                  textures_path("black.png"),
-                                                                  textures_path("win.png"),
-                                                                  textures_path("lose.png"),
-                                                                  textures_path("bubble.png"),
-                                                                  sprite_sheet_texture_path("bubble_sheet.png"),
-                                                                  textures_path("bubbler.png")};
+    const std::array<std::string, texture_count> texture_paths = {
+        // Tileset images
+        get_path(FilePath::TILESET_IMAGES, "greybox.png"), get_path(FilePath::TILESET_IMAGES, "greybox2.png"),
+
+        // Textures
+        get_path(FilePath::TEXTURES, "white_bubble.png"), 
+        
+        get_path(FilePath::TEXTURES, "black.png"), get_path(FilePath::TEXTURES, "win.png"), get_path(FilePath::TEXTURES, "lose.png"),
+
+        get_path(FilePath::TEXTURES, "bubble.png"), get_path(FilePath::TEXTURES, "bubbler.png"),
+
+        // Sprite sheets
+        get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "fish_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "turret_sheet.png")};
 
     std::array<GLuint, effect_count> effects;
     // Make sure these paths remain in sync with the associated enumerators.
     const std::array<std::string, effect_count> effect_paths = {
-        shader_path("coloured"), shader_path("egg"),     shader_path("chicken"), shader_path("textured"),
-        shader_path("vignette"), shader_path("tilemap"), shader_path("particle")};
+        get_path(FilePath::SHADERS, "coloured"), get_path(FilePath::SHADERS, "egg"),
+        get_path(FilePath::SHADERS, "chicken"),  get_path(FilePath::SHADERS, "textured"),
+        get_path(FilePath::SHADERS, "font"),     get_path(FilePath::SHADERS, "vignette"),
+        get_path(FilePath::SHADERS, "tilemap"),  get_path(FilePath::SHADERS, "particle")};
 
     std::array<GLuint, geometry_count> vertex_buffers;
     std::array<GLuint, geometry_count> index_buffers;
@@ -55,6 +80,8 @@ class RenderSystem {
   public:
     // Initialize the window
     bool init(GLFWwindow *window);
+
+    bool initializeFonts(GLFWwindow *window, const std::string &font_filename, unsigned int font_default_size = 24);
 
     void initializeGUI(GLFWwindow *window);
 
@@ -94,12 +121,13 @@ class RenderSystem {
 
   private:
     // Internal drawing functions for each entity type
-    void drawTile(const RenderRequest &render_request, const TileMap &tilemap, const ivec2 &tile_pos,
-                  const ivec2 &tileset_size, const mat3 &projection, const mat3 &view);
-    void drawTilemap(const Entity &e, const mat3 &projection, const mat3 &view);
+    void drawTileMap(const Entity &e, const mat3 &projection, const mat3 &view);
     void drawParticles(const mat3 &projection, const mat3 &view);
     void drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view);
+
+    // On-screen rendering
     void drawToScreen();
+    void drawText(Entity entity);
 
     void sortRenderRequests(std::vector<Entity> *draw_list);
 
@@ -112,8 +140,15 @@ class RenderSystem {
     GLuint off_screen_render_buffer_depth;
 
     GLuint vao;
-    GLuint vbo;
-    unsigned int particle_buffer_capacity;
+    
+    // For instancing
+    GLuint particle_vao;
+    GLuint quad_vbo;
+    GLuint instance_vbo;
+    unsigned int instance_buffer_capacity = 1000;
+
+    GLuint font_vao;
+    GLuint font_vbo;
 
     Entity screen_state_entity;
 };

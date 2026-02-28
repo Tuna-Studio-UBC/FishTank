@@ -7,7 +7,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <sstream>
-
+#include <unordered_set>
 #include "configs/wave_config.cpp"
 #include "systems/particle_system.hpp"
 #include "systems/physics_system.hpp"
@@ -26,6 +26,7 @@ WorldSystem::~WorldSystem() {
     // 	Mix_FreeChunk(invader_hit_sound);
     // if (tower_hit_sound != nullptr)
     // 	Mix_FreeChunk(tower_hit_sound);
+    audio_system.shutdown();
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -67,7 +68,7 @@ GLFWwindow *WorldSystem::create_window() {
 #endif
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     // CK: setting GLFW_SCALE_TO_MONITOR to true will rescale window but then you must handle different scalings
-    // glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE);		// GLFW 3.3+
+    // TODO: Change this to true then handle different scalings
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_FALSE); // GLFW 3.3+
 
     // Create the main window (for rendering, keyboard, and mouse input)
@@ -118,65 +119,56 @@ bool WorldSystem::start_and_load_sounds() {
         return false;
     }
 
-    /*background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
-    invader_hit_sound = Mix_LoadWAV(audio_path("invader_hit.wav").c_str());
-    tower_hit_sound = Mix_LoadWAV(audio_path("tower_hit.wav").c_str());
+    if(!audio_system.load()) {
+        fprintf(stderr, "Failed to load SFX\n");
+    }
+
+    /*background_music = Mix_LoadMUS(get_path(FilePath::AUDIO, "music.wav").c_str());
+    invader_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "invader_hit.wav").c_str());
+    tower_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
 
     if (background_music == nullptr || invader_hit_sound == nullptr || tower_hit_sound == nullptr) {
             fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-                    audio_path("music.wav").c_str(),
-                    audio_path("invader_hit.wav").c_str(),
-                    audio_path("tower_hit.wav").c_str());
+                    get_path(FilePath::AUDIO, "music.wav").c_str(),
+                    get_path(FilePath::AUDIO, "invader_hit.wav").c_str(),
+                    get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
             return false;
     }*/
 
     return true;
 }
 
-void WorldSystem::init_free_tiles() {
-    free_tiles.clear();
-    TileMap &tilemap = registry.tilemaps.components[0];
-    TileSet &tileset = registry.tilesets.components[0];
-
-    for (unsigned int y = 0; y < tilemap.height; y++) {
-        for (unsigned int x = 0; x < tilemap.width; x++) {
-            int tile_id = tilemap.tile_ids[x + y * tilemap.width];
-
-            bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
-            bool is_empty = (tile_id == 1);
-
-            if (is_empty && !is_border) {
-                free_tiles.push_back({x, y});
-            }
-        }
-    }
-}
-
-vec2 WorldSystem::get_random_position() {
-    int idx = (int)(uniform_dist(rng) * free_tiles.size()) - 1;
-    vec2 tile = free_tiles[idx];
-    free_tiles[idx] = free_tiles.back();
-    free_tiles.pop_back();
-    return vec2(tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2), tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2));
-}
-
 void WorldSystem::start_wave(Progress &progress) {
     auto config = WAVE_CONFIGS[progress.wave];
     progress.remaining_enemies = config.enemies.size();
+    vec2 pos;
+
+    if (registry.players.entities.size() > 0) {
+        // // Teleport player to a random position each wave
+        // Entity player = registry.players.entities[0];
+        // registry.motions.get(player).position = tilemap_system->get_random_position(SpawnTarget::PLAYER);
+    } else {
+        // Create player entity
+        pos = tilemap_system->get_random_position(SpawnTarget::PLAYER);
+        Entity player = createPlayer(renderer, pos);
+
+        // Create camera
+        camera_system->init(tilemap_system->get_current_map());
+    }
 
     for (auto enemy : config.enemies) {
-        vec2 pos = get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
         createEnemy(renderer, pos, enemy);
     }
 }
 
 void WorldSystem::load_level(Progress &progress) {
-    init_free_tiles();
+    tilemap_system->init_spawn_points();
     auto config = LEVEL_CONFIGS[progress.level];
     vec2 pos;
 
     for (auto item : config.hazards) {
-        pos = get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::HAZARD);
         if (item == HAZARD_TYPE::MINE) {
             createMine(renderer, pos);
         } else if (item == HAZARD_TYPE::ANEMONE) {
@@ -184,13 +176,18 @@ void WorldSystem::load_level(Progress &progress) {
         }
     }
 
+    for (auto bubbler : config.bubblers) {
+        pos = tilemap_system->get_random_position(SpawnTarget::AMMO);
+        createBubbler(renderer, pos);
+    }
+
     for (auto item : config.powerups) {
-        pos = get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::POWERUP);
         createPowerUp(renderer, pos, item);
     }
 
     for (auto bell : config.bells) {
-        pos = get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::DISTRACTION);
         createBell(renderer, pos, bell);
     }
 
@@ -204,17 +201,14 @@ void WorldSystem::load_level(Progress &progress) {
     }*/ 
 }
 
-void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
+void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg) {
     this->renderer = renderer_arg;
     this->camera_system = camera_arg;
+    this->tilemap_system = tilemap_arg;
 
-    init_tiles();
-    init_tile_walls();
-    // Create player entity
-    Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
-
-    // Create camera
-    camera_system->init();
+    // Set up world level
+    tilemap_system->init();
+    tilemap_system->load_map(MapType::TEST_MAP2);
 
     auto e = Entity("Progress");
     auto &progress = registry.progress.emplace(e);
@@ -247,7 +241,10 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
     Mix_PlayMusic(background_music, -1);*/
 
     // ! FOR TESTING !
-    createBubbler(renderer, vec2(125.f));
+    glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
+    glm::vec2 position = vec2(2.f, WINDOW_HEIGHT_PX - 24);
+    createText("FPS: 0", position, 1.f, font_color);
+    createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 
     // walls
     TileMap &tilemap = registry.tilemaps.components[0];
@@ -272,6 +269,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     title_ss << GAME_NAME;
     glfwSetWindowTitle(window, title_ss.str().c_str());
 
+    // Updating FPS
+    // ! FOR TESTING !
+    fps = 1000.0f / elapsed_ms_since_last_update;
+    if (registry.text.components.size() > 0)
+        registry.text.components[0].text = "FPS: " + std::to_string((int)fps);
+
     Progress &progress = registry.progress.components[0];
     if (progress.game_over == true) {
         ScreenState &screen = registry.screenStates.components[0];
@@ -284,6 +287,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     if (progress.remaining_enemies == 0) {
         spdlog::info("Wave {} complete, starting next wave.", progress.wave);
         progress.wave += 1;
+
+        // ! FOR TESTING !
+        if (registry.text.components.size() > 1)
+            registry.text.components[1].text = "Wave: " + std::to_string(progress.wave);
 
         if (WAVE_CONFIGS.size() > progress.wave) {
             if (progress.wave > LEVEL_CONFIGS[progress.level].last_wave) {
@@ -299,8 +306,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             auto &motion = registry.motions.emplace(e);
             motion.position = registry.motions.get(registry.camera.entities[0]).position;
             motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
-            registry.renderRequests.insert(
-                e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+            registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
+                                               GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
         }
     }
 
@@ -313,8 +320,28 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         }
     }
 
+    vec2 listener_pos = vec2(0.f, 0.f);
+    if (registry.players.entities.size() > 0 && registry.motions.has(registry.players.entities[0])) {
+        listener_pos = registry.motions.get(registry.players.entities[0]).position;
+    }
+
     // Create bullet entities requested by enemies in AISystem
+    std::unordered_set<unsigned int> shot_played;
     for (BulletRequest req : registry.bullet_requests.components) {
+        if (registry.enemies.has(req.owner)) {
+
+            unsigned int oid = (unsigned int)req.owner;
+            if (shot_played.find(oid) == shot_played.end()) {
+                shot_played.insert(oid);
+                vec2 enemy_pos = req.position;
+                if (registry.motions.has(req.owner)) {
+                    enemy_pos = registry.motions.get(req.owner).position;
+                }
+
+                audio_system.play_enemy_shot(enemy_pos, listener_pos);
+            }
+        }
+
         createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
     }
     registry.bullet_requests.clear();
@@ -323,6 +350,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+    audio_system.update_hazard_warning(listener_pos, elapsed_ms_since_last_update);
+    
     return true;
 }
 
@@ -480,5 +509,5 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 void WorldSystem::restart_game() {
     particle_system.clear_all_particles();
     registry.clear_all_components();
-    init(renderer, camera_system);
+    init(renderer, camera_system, tilemap_system);
 }

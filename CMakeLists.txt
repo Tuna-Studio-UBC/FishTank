@@ -155,9 +155,6 @@ endif()
 # Link dependencies from cmake/Dependency.cmake
 link_engine_dependencies(${PROJECT_NAME})
 
-target_include_directories(imgui PUBLIC ${GLFW_INCLUDE_DIRS})
-target_link_libraries(imgui PUBLIC ${GLFW_LIBRARIES} OpenGL::GL)
-
 # needed to add this for Linux
 if(IS_OS_LINUX)
     target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${CMAKE_DL_LIBS})

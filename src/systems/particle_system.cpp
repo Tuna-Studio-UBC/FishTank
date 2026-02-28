@@ -43,6 +43,7 @@ void ParticleSystem::step(float elapsed_ms) {
             ParticleEmitter &pe = registry.particleEmitters.get(e);
             rt.texture = pe.texture;
             rt.standalone = pe.standalone;
+            rt.particle_scale = pe.particle_scale;
             spdlog::info("Created new particle emitter: {}", e.name_id());
         }
     }

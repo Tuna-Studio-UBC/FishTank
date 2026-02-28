@@ -1,9 +1,14 @@
 #pragma once
+#include <array>
+#include <unordered_map>
+#include <vector>
+
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "configs/attack_pattern.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
+#include "configs/spawn_target_config.hpp"
 #include <array>
 #include <unordered_map>
 #include <vector>
@@ -248,9 +253,10 @@ enum class TEXTURE_ASSET_ID;
 
 // Entities with this require the motion component
 struct ParticleEmitter {
-    vec2 offset = {0, 0};    // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
+    vec2 offset = {0, 0}; // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
     int max_particles;
     TEXTURE_ASSET_ID texture;
+    float particle_scale = 10.f;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
     float particle_life_ms;  // Duration of each particle
@@ -328,24 +334,32 @@ struct Mesh {
 
 #define GET_2D_POS(x, y, width) x + width *y
 
+#define MAX_TILES 4096 // 64x64
+
 struct TileMap {
-    int tileset_id = 0; // TODO: Add ID functionality
-    std::array<unsigned short, 4096> tile_ids;
+    std::array<unsigned short, MAX_TILES> tile_ids;
+    std::array<SPAWN_TARGET, MAX_TILES> spawn_tile_ids;
     unsigned int width;
     unsigned int height;
+    unsigned int x_offset = 0;
+    unsigned int y_offset = 0;
 
-    TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height)
-        : tile_ids(tile_ids), width(width), height(height) {}
+    TileMap(std::array<unsigned short, MAX_TILES> tile_ids, std::array<unsigned int, MAX_TILES> spawn_tile_ids,
+            unsigned int width, unsigned int height, unsigned int x_offset = 0, unsigned int y_offset = 0)
+        : tile_ids(tile_ids), spawn_tile_ids(spawn_tile_ids), width(width), height(height), x_offset(x_offset),
+          y_offset(y_offset) {}
 
     TileMap(const TileMap &other) {
         this->tile_ids = other.tile_ids;
+        this->spawn_tile_ids = other.spawn_tile_ids;
         this->width = other.width;
         this->height = other.height;
+        this->x_offset = other.x_offset;
+        this->y_offset = other.y_offset;
     }
 };
 
 struct TileSet {
-    int tileset_id = 1; // TODO: Add ID functionality
     vec2 dimensions;
     int tile_width_px;
     int tile_height_px;
@@ -354,6 +368,14 @@ struct TileSet {
     TileSet(int width, int height, int tile_width_px, int tile_height_px, std::array<bool, 2048> collisions)
         : dimensions(vec2(width, height)), tile_width_px(tile_width_px), tile_height_px(tile_height_px),
           collisions(collisions) {}
+};
+
+struct Text {
+    std::string text = "";
+    vec2 position = {0.f, 0.f};
+    float scale = 1.f;
+    vec3 color = {0.f, 0.f, 0.f};
+    glm::mat4 trans = glm::mat4(1.f);
 };
 
 struct Overlay {};
@@ -392,16 +414,25 @@ struct Animation {
  */
 
 enum class TEXTURE_ASSET_ID {
-    TEXTURE_TILESET = 0,
-    TEXTURE_PROJECTILE = 1,
-    TEXTURE_BLACK = 2,
-    TEXTURE_WIN_OVERLAY = 3,
-    TEXTURE_LOSE_OVERLAY = 4,
-    TEXTURE_BUBBLE = 5,
-    TEXTURE_BUBBLE_SHEET = 6,
-    TEXTURE_BUBBLER = 7,
-    TEXTURE_COUNT = TEXTURE_BUBBLER + 1
+    TEXTURE_GREYBOX_TILESET = 0,
+    TEXTURE_GREYBOX_TILESET2 = TEXTURE_GREYBOX_TILESET + 1,
+
+    TEXTURE_PROJECTILE = TEXTURE_GREYBOX_TILESET2 + 1,
+
+    TEXTURE_BLACK = TEXTURE_PROJECTILE + 1,
+    TEXTURE_WIN_OVERLAY = TEXTURE_BLACK + 1,
+    TEXTURE_LOSE_OVERLAY = TEXTURE_WIN_OVERLAY + 1,
+
+    TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
+    TEXTURE_BUBBLER = TEXTURE_BUBBLE + 1,
+
+    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLER + 1,
+    TEXTURE_FISH_SHEET = TEXTURE_BUBBLE_SHEET + 1,
+    TEXTURE_TURRET_SHEET = TEXTURE_FISH_SHEET + 1,
+
+    TEXTURE_COUNT = TEXTURE_TURRET_SHEET + 1
 };
+
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
@@ -409,7 +440,8 @@ enum class EFFECT_ASSET_ID {
     EGG = COLOURED + 1,
     CHICKEN = EGG + 1,
     TEXTURED = CHICKEN + 1,
-    VIGNETTE = TEXTURED + 1,
+    FONT = TEXTURED + 1,
+    VIGNETTE = FONT + 1,
     TILEMAP = VIGNETTE + 1,
     PARTICLE = TILEMAP + 1,
     EFFECT_COUNT = PARTICLE + 1
@@ -424,14 +456,23 @@ enum class GEOMETRY_BUFFER_ID {
     SCREEN_TRIANGLE = DEBUG_LINE + 1,
     GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
-
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+
+enum RENDER_LAYER {
+    BACKGROUND = 0,
+    INTERACTABLES = 5,
+    ACTORS = 10,
+    PROJECTILES = ACTORS + 1,
+    TURRETS = PROJECTILES + 1,
+    WALLS = 20,
+    OVERLAYS = 100,
+};
 
 struct RenderRequest {
     TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
     EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
     GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
-    int layer = 0; // Larger numbers are drawn on top
+    int layer = RENDER_LAYER::BACKGROUND; // Larger numbers are drawn on top
 };
 
 typedef std::pair<Entity, RenderRequest> EntityRRPair;
