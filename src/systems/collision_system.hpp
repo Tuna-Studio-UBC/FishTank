@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <spdlog/spdlog.h>
+
 #include "../common.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/registry.hpp"
@@ -22,4 +24,5 @@ class CollisionSystem {
     void handle_actors_vs_walls(Entity entity_a, Entity entity_b);
     void handle_actor_actor(Entity entity_a, Entity entity_b);
     void handle_bubbler_collision(Entity entity_a, Entity entity_b, float &elapsed_ms);
+    void handle_tutorial_collision(Entity entity_a, Entity entity_b);
 };

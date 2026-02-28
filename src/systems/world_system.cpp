@@ -162,20 +162,26 @@ void WorldSystem::start_wave(Progress &progress) {
     }
 }
 
-void WorldSystem::load_level_tutorial(Progress& progress) {
+void WorldSystem::load_level_tutorial(Progress &progress) {
     vec2 spawn_pos = {200.f, 1500.f};
-    Entity player = createPlayer(renderer, {250.f,  1750.f});
+    Entity player = createPlayer(renderer, {250.f, 1750.f});
     auto &player_motion = registry.motions.get(player);
     player_motion.angle = -M_PI / 2;
     auto &player_fc = registry.fireControl.get(player);
     player_fc.ammo = 0;
 
-    Entity enemy_1 = createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::FOLLOWER);
-    Entity enemy_2 = createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::FOLLOWER);
-    Entity enemy_3 = createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::FOLLOWER);
+    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::FOLLOWER);
+    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::FOLLOWER);
+    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::FOLLOWER);
 
-    Entity bubbler_1 = createBubbler(renderer, {650.f, 900.f});
-    Entity bubbler_2 = createBubbler(renderer, {425.f, 400.f});
+    createBubbler(renderer, {625.f, 875.f});
+    createBubbler(renderer, {425.f, 400.f});
+
+    createMine(renderer, {450.f, 1150.f});
+    createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
+
+    createTutorialTrigger(vec2(200.f, 1125.f), vec2(100.f, 350.f), 1);
+    createTutorialTrigger(vec2(750.f,  875.f), vec2(400.f, 150.f), 2);
     progress.remaining_enemies = 3;
 
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
@@ -513,10 +519,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         }
 
         if (key == GLFW_KEY_R) {
+            restart_game();
+            /*
             auto &progress = registry.progress.components[0];
             if (progress.game_over) {
                 restart_game();
             }
+            */
         }
 
         if (key == GLFW_KEY_ENTER) {
