@@ -268,6 +268,7 @@ struct Progress {
     int level = 0;
     int remaining_enemies = -1;
     bool game_over = false;
+    bool beat_level = false;
 };
 
 #pragma endregion Game State

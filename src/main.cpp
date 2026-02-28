@@ -66,7 +66,8 @@ int main() {
 
     // initialize the main systems
     renderer_system.init(window);
-    world_system.init(&renderer_system, &camera_system, &tilemap_system);
+    world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system);
+    camera_system.init(tilemap_system.get_current_map());
 
     // variable timestep loop
     auto t = Clock::now();

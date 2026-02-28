@@ -23,10 +23,10 @@ vec2 CameraSystem::get_camera_dest() {
     return glm::clamp(offset + player_pos, min_pos, max_pos);
 }
 
-void CameraSystem::set_camera_bounds(Entity& tilemap_entity) 
+void CameraSystem::set_camera_bounds() 
 {
-    assert(registry.tilemaps.has(tilemap_entity));
-    TileMap& tilemap = registry.tilemaps.get(tilemap_entity);
+    assert(registry.tilemaps.has(current_map));
+    TileMap &tilemap = registry.tilemaps.get(current_map);
     min_pos = vec2(TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_WIDTH_PX / 2),
                    TILE_SIZE_PX * -TILE_OOB_BUFFER + (WINDOW_HEIGHT_PX / 2));
     max_pos = vec2(TILE_SIZE_PX * (TILE_OOB_BUFFER + tilemap.width ) - (WINDOW_WIDTH_PX  / 2),
@@ -47,7 +47,11 @@ void CameraSystem::set_camera_bounds(Entity& tilemap_entity)
 
 void CameraSystem::init(Entity current_map) {
     this->current_map = current_map;
-    // Only one camera is allowed
-    if (registry.camera.entities.empty())
-        createCamera(get_camera_dest());
+    set_camera_bounds();
+    if (registry.camera.entities.empty()) {
+        if (registry.players.entities.size() > 0)
+            createCamera(get_camera_dest());
+        else
+            createCamera(get_camera_dest());
+    }
 }

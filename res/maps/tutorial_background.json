@@ -43,7 +43,7 @@
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
          "height":38,
          "id":2,
-         "name":"Background",
+         "name":"main",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -55,7 +55,7 @@
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.11.2",
  "tileheight":32,
  "tilesets":[
         {
@@ -64,6 +64,6 @@
         }],
  "tilewidth":32,
  "type":"map",
- "version":"1.9",
+ "version":"1.11",
  "width":20
 }

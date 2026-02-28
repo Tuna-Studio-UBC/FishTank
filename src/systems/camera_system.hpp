@@ -14,7 +14,7 @@ class CameraSystem {
 
     void set_current_map(Entity current_map) { this->current_map = current_map; }
 
-    void set_camera_bounds(Entity& tilemap_entity);
+    void set_camera_bounds();
 
   private:
     vec2 get_camera_dest();
