@@ -3,14 +3,14 @@
 #include "world_init.hpp"
 
 // stlib
+#include "configs/wave_config.cpp"
+#include "systems/particle_system.hpp"
+#include "systems/physics_system.hpp"
 #include <cassert>
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <unordered_set>
-#include "configs/wave_config.cpp"
-#include "systems/particle_system.hpp"
-#include "systems/physics_system.hpp"
 
 // create the world
 WorldSystem::WorldSystem() {
@@ -119,7 +119,7 @@ bool WorldSystem::start_and_load_sounds() {
         return false;
     }
 
-    if(!audio_system.load()) {
+    if (!audio_system.load()) {
         fprintf(stderr, "Failed to load SFX\n");
     }
 
@@ -355,7 +355,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
     audio_system.update_hazard_warning(listener_pos, elapsed_ms_since_last_update);
-    
+
     return true;
 }
 
@@ -368,6 +368,17 @@ void WorldSystem::handle_expiration(float elapsed_ms) {
             spdlog::debug("{} has expired", e.name_id());
             registry.remove_all_components_of(e);
         }
+    }
+
+    for (Entity e : registry.tints.entities) {
+        Tint &tint = registry.tints.get(e);
+
+        if (tint.life_ms == -99.f)
+            continue;
+
+        tint.life_ms -= elapsed_ms;
+        if (tint.life_ms <= 0)
+            registry.tints.remove(e);
     }
 }
 

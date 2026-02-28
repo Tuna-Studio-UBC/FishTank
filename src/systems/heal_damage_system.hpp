@@ -17,6 +17,10 @@ class HealDamageSystem {
     static void add_heal(Entity entity, int amount);
 
   private:
+    float tint_duration_ms = 250.f;
+    vec3 damage_tint = vec3(1.f, 0.25f, 0.25f);
+    vec3 heal_tint = vec3(0.25f, 1.f, 0.25f);
+
     void handle_damaging();
     void handle_healing();
 };
