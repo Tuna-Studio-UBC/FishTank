@@ -233,8 +233,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
 
     // ! FOR TESTING !
     glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
-    glm::vec2 position = vec2(2.f, WINDOW_HEIGHT_PX - 24);
-    createText("FPS: 0", position, 1.f, font_color);
     createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 
     // walls
@@ -261,10 +259,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     glfwSetWindowTitle(window, title_ss.str().c_str());
 
     // Updating FPS
-    // ! FOR TESTING !
-    fps = 1000.0f / elapsed_ms_since_last_update;
-    if (registry.text.components.size() > 0)
-        registry.text.components[0].text = "FPS: " + std::to_string((int)fps);
+    fps_index = (fps_index + 1) % fps_avg.size();
+    fps_avg[fps_index] = 1000.0f / elapsed_ms_since_last_update;
 
     Progress &progress = registry.progress.components[0];
     if (progress.game_over == true) {
@@ -490,6 +486,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             bell.cooldown_timer = bell.cooldown_ms;
 
             spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
+        }
+
+        if (key == GLFW_KEY_F) {
+            show_fps = !show_fps;
         }
 
         if (key == GLFW_KEY_R) {
