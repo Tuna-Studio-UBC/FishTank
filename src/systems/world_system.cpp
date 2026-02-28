@@ -191,6 +191,7 @@ void WorldSystem::load_level(Progress &progress) {
         createBell(renderer, pos, bell);
     }
 
+    // SECRET FOR M3 SHHHHHH
     /*for (auto swarm : config.swarms) {
         pos = get_random_position();
         Entity leader = createLeader(renderer, pos);
