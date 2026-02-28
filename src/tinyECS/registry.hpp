@@ -60,6 +60,7 @@ class ECSRegistry {
     ComponentContainer<KeyboardInputState> keyboardInput;
     ComponentContainer<MouseInputState> mouseInput;
     ComponentContainer<Progress> progress;
+    ComponentContainer<TutorialTrigger> tutorialTriggers;
 
     // Rendering
     ComponentContainer<Mesh *> meshPtrs;
@@ -132,6 +133,7 @@ class ECSRegistry {
         registry_list.push_back(&keyboardInput);
         registry_list.push_back(&mouseInput);
         registry_list.push_back(&progress);
+        registry_list.push_back(&tutorialTriggers);
 
         // Rendering
         registry_list.push_back(&meshPtrs);

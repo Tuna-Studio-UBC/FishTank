@@ -557,6 +557,8 @@ void PhysicsSystem::step(float elapsed_ms) {
         }
     }
     // Clamp player to arena bounds
+    // Disabled since the walls surrounding the map should be sufficient
+    /*
     for (Entity player_entity : registry.players.entities) {
         assert(motion_registry.has(player_entity) && "Player has no motion entity!");
         Motion &player_motion = motion_registry.get(player_entity);
@@ -571,6 +573,7 @@ void PhysicsSystem::step(float elapsed_ms) {
         player_motion.position.x = glm::clamp(player_motion.position.x, min_x, max_x);
         player_motion.position.y = glm::clamp(player_motion.position.y, min_y, max_y);
     }
+    */
     // check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
     for (uint i = 0; i < motion_container.components.size(); i++) {

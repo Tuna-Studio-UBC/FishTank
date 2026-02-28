@@ -279,8 +279,14 @@ struct Progress {
     int level = 0;
     int remaining_enemies = -1;
     bool game_over = false;
+    bool beat_level = false;
 };
 
+struct TutorialTrigger {
+    int id;
+
+    TutorialTrigger(int id) : id(id) {};
+};
 #pragma endregion Game State
 
 #pragma region Rendering
