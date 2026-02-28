@@ -34,6 +34,7 @@ class WorldSystem {
     void restart_game();
 
     // starts the game
+    void init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg);
     void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system);
 
     // releases all associated resources
@@ -60,7 +61,9 @@ class WorldSystem {
 
   private:
     void start_wave(Progress &progress);
+    void load_level_tutorial(Progress &progress);
     void load_level(Progress &progress);
+    void load_next_level();
 
     // input callback functions
     void on_key(int key, int, int action, int mod);

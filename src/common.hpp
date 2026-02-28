@@ -54,6 +54,8 @@ inline std::string get_path(FilePath path, const std::string &file_name) {
         return ROOT_DIR + "/res/tileset_images/" + file;
     case DECISION_TREES:
         return ROOT_DIR + "/res/decision_trees/" + file;
+    default:
+        return "/";
     }
 };
 

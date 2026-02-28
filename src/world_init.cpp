@@ -77,6 +77,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
 
     registry.health.emplace(entity);
 
+
     auto &fire = registry.fireControl.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
     fire.attack_pattern = config.attack_pattern;
@@ -428,6 +429,27 @@ Entity createWall(const vec2 &position, const vec2 &scale) {
     motion.angle = 0.f;
 
     registry.wall.emplace(entity);
+
+    return entity;
+}
+
+const bool DRAW_TUTORIAL_TRIGGERS = true;
+
+Entity createTutorialTrigger(const vec2 position, const vec2 size, const int id) {
+    Entity entity = Entity("Tutorial Trigger " + id);
+
+    registry.tutorialTriggers.emplace(entity, id);
+
+    Motion& motion = registry.motions.emplace(entity);
+    motion.position = position;
+    motion.scale = size;
+
+    if (DRAW_TUTORIAL_TRIGGERS)
+    {
+        registry.colors.emplace(entity, 1.f, 0.f, 0.f);
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                                GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::INTERACTABLES});
+    }
 
     return entity;
 }

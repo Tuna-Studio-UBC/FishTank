@@ -21,4 +21,7 @@ const std::vector<Wave> WAVE_CONFIGS = {{{ENEMY_TYPE::GUARD}},
                                         {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN}},
                                         {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}}};
 
-const std::vector<Level> LEVEL_CONFIGS = {{{2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {500.f}, {0.f, 0.f}, {4}}}};
+const std::vector<Level> LEVEL_CONFIGS = {
+    {1, {}, {}, {}, {}},
+    {3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {500.f}, {0.f, 0.f}}
+};

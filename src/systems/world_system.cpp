@@ -162,6 +162,31 @@ void WorldSystem::start_wave(Progress &progress) {
     }
 }
 
+void WorldSystem::load_level_tutorial(Progress &progress) {
+    vec2 spawn_pos = {200.f, 1500.f};
+    Entity player = createPlayer(renderer, {250.f, 1750.f});
+    auto &player_motion = registry.motions.get(player);
+    player_motion.angle = -M_PI / 2;
+    auto &player_fc = registry.fireControl.get(player);
+    player_fc.ammo = 0;
+
+    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::FOLLOWER);
+    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::FOLLOWER);
+    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::FOLLOWER);
+
+    createBubbler(renderer, {625.f, 875.f});
+    createBubbler(renderer, {425.f, 400.f});
+
+    createMine(renderer, {450.f, 1150.f});
+    createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
+
+    createTutorialTrigger(vec2(200.f, 1125.f), vec2(100.f, 350.f), 1);
+    createTutorialTrigger(vec2(750.f,  875.f), vec2(400.f, 150.f), 2);
+    progress.remaining_enemies = 3;
+
+    camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
+}
+
 void WorldSystem::load_level(Progress &progress) {
     tilemap_system->init_spawn_points();
     auto config = LEVEL_CONFIGS[progress.level];
@@ -202,6 +227,26 @@ void WorldSystem::load_level(Progress &progress) {
     }*/ 
 }
 
+void WorldSystem::init_tutorial(RenderSystem* renderer_arg, CameraSystem* camera_arg, TileMapSystem* tilemap_arg)
+{
+    this->renderer = renderer_arg;
+    this->camera_system = camera_arg;
+    this->tilemap_system = tilemap_arg;
+
+    // Set up world level
+    tilemap_system->init();
+    tilemap_system->load_map(MapType::TUTORIAL_MAP);
+
+    auto e = Entity("Progress");
+    auto &progress = registry.progress.emplace(e);
+    load_level_tutorial(progress);
+
+    glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
+    glm::vec2 position = vec2(2.f, WINDOW_HEIGHT_PX - 24);
+    // createText("FPS: 0", position, 1.f, font_color);
+    createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
+}
+
 void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg) {
     this->renderer = renderer_arg;
     this->camera_system = camera_arg;
@@ -211,8 +256,18 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     tilemap_system->init();
     tilemap_system->load_map(MapType::TEST_MAP2);
 
-    auto e = Entity("Progress");
-    auto &progress = registry.progress.emplace(e);
+    // assert(registry.progress.size() == 0 && "Progress component should have been deleted prior to reinitialization!");
+
+    Progress *progress_p;
+    if (registry.progress.size() == 0)
+    {
+        auto e = Entity("Progress");
+        progress_p = &registry.progress.emplace(e);
+    } else {
+        progress_p = &registry.progress.components[0];
+    }
+    Progress &progress = *progress_p;
+
     load_level(progress);
     start_wave(progress);
 
@@ -244,20 +299,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     // ! FOR TESTING !
     glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
     createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
-
-    // walls
-    TileMap &tilemap = registry.tilemaps.components[0];
-    float arena_width = tilemap.width * TILE_SIZE_PX;
-    float arena_height = tilemap.height * TILE_SIZE_PX;
-    float wall_thickness = TILE_SIZE_PX;
-    // top
-    createWall(vec2(arena_width / 2.f, wall_thickness / 2.f), vec2(arena_width, wall_thickness));
-    // bottom
-    createWall(vec2(arena_width / 2.f, arena_height - wall_thickness / 2.f), vec2(arena_width, wall_thickness));
-    // left
-    createWall(vec2(wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
-    // right
-    createWall(vec2(arena_width - wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
 }
 
 // Update our game world
@@ -286,18 +327,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         progress.wave += 1;
 
         // ! FOR TESTING !
-        if (registry.text.components.size() > 1)
-            registry.text.components[1].text = "Wave: " + std::to_string(progress.wave);
+        if (registry.text.components.size() > 0)
+            registry.text.components[0].text = "Wave: " + std::to_string(progress.wave);
 
-        if (WAVE_CONFIGS.size() > progress.wave) {
-            if (progress.wave > LEVEL_CONFIGS[progress.level].last_wave) {
-                progress.level += 1;
-                load_level(progress);
-            }
+        if (WAVE_CONFIGS.size() > progress.wave && progress.wave < LEVEL_CONFIGS[progress.level].last_wave) {
             start_wave(progress);
         } else {
             progress.game_over = true;
-
+            progress.beat_level = true;
             Entity e = Entity("Overlay");
             registry.overlays.emplace(e);
             auto &motion = registry.motions.emplace(e);
@@ -485,9 +522,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         }
 
         if (key == GLFW_KEY_R) {
-            if (registry.progress.components[0].game_over) {
+            restart_game();
+            /*
+            auto &progress = registry.progress.components[0];
+            if (progress.game_over) {
                 restart_game();
             }
+            */
+        }
+
+        if (key == GLFW_KEY_ENTER) {
+            auto &progress = registry.progress.components[0];
+            if (progress.beat_level)
+                load_next_level();
         }
     }
 
@@ -521,5 +568,28 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 void WorldSystem::restart_game() {
     particle_system.clear_all_particles();
     registry.clear_all_components();
+    init_tutorial(renderer, camera_system, tilemap_system);
+}
+
+void WorldSystem::load_next_level() {
+    Progress progress = registry.progress.components[0];
+    progress.level++;
+
+    if (progress.level >= LEVEL_CONFIGS.size()) {
+        close_window();
+        return;
+    }
+
+    progress.beat_level = false;
+    progress.game_over = false;
+    progress.wave = 0;
+    int hp = registry.health.get(registry.players.entities[0]).hp;
+
+    particle_system.clear_all_particles();
+    registry.clear_all_components();
+    Entity e = Entity();
+    registry.progress.insert(e, progress);
     init(renderer, camera_system, tilemap_system);
+
+    registry.health.get(registry.players.entities[0]).hp = hp;
 }

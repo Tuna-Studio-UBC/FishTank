@@ -35,6 +35,8 @@ Entity createWall(const vec2 &position, const vec2 &scale = vec2(TILE_SIZE_PX));
 Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color = glm::vec3(0.f, 0.f, 0.f),
                   const glm::mat4 &trans = glm::mat4(1.f));
 
+Entity createTutorialTrigger(const vec2 position, const vec2 size, const int id);
+
 Entity createCamera(vec2 position);
 
 // Component can be: DamageMultiplier, SpeedMultiplier
