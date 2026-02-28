@@ -18,6 +18,7 @@ void CollisionSystem::step(float elapsed_ms) {
         handle_hazards(entity_a, entity_b);
         handle_actor_actor(entity_a, entity_b);
         handle_bubbler_collision(entity_a, entity_b, elapsed_ms);
+        handle_tutorial_collision(entity_a, entity_b);
     }
 
     // Clear all collisions for the current step
@@ -215,3 +216,13 @@ void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b,
         }
     }
 };
+
+void CollisionSystem::handle_tutorial_collision(Entity entity_a, Entity entity_b) { 
+    if (registry.players.has(entity_a) && registry.tutorialTriggers.has(entity_b))
+    {
+        // Stub function!!
+        TutorialTrigger &tt = registry.tutorialTriggers.get(entity_b);
+        spdlog::debug("Triggered tutorial {}", tt.id);
+        registry.remove_all_components_of(entity_b);
+    }
+}
