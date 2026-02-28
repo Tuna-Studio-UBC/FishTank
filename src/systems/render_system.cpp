@@ -224,6 +224,11 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     glUniform3fv(color_uloc, 1, value_ptr(color));
     gl_has_errors();
 
+    GLint tint_colour_uloc = glGetUniformLocation(program, "tintColour");
+    const vec3 tint_colour = registry.tints.has(entity) ? registry.tints.get(entity) : vec3(1);
+    glUniform3fv(tint_colour_uloc, 1, value_ptr(tint_colour));
+    gl_has_errors();
+
     // Get number of indices from index buffer, which has elements uint16_t
     GLint size = 0;
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
@@ -398,7 +403,7 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
 
     glBindVertexArray(particle_vao);
     gl_has_errors();
-    
+
     for (auto &[entity_id, rt] : particle_system.runtimes) {
         assert(rt.texture != TEXTURE_ASSET_ID::TEXTURE_COUNT);
 
@@ -449,7 +454,7 @@ void RenderSystem::drawParticles(const mat3 &projection, const mat3 &view) {
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instance_positions.size());
         gl_has_errors();
     }
-    
+
     glBindVertexArray(vao);
 }
 

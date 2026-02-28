@@ -289,6 +289,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
 
     Bouncy &bouncy = registry.bouncy.emplace(entity);
 
+    registry.tints.emplace(entity, attack_config.projectile_tint);
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::PROJECTILES});
 

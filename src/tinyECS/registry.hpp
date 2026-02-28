@@ -65,6 +65,7 @@ class ECSRegistry {
     ComponentContainer<Mesh *> meshPtrs;
     ComponentContainer<RenderRequest> renderRequests;
     ComponentContainer<vec3> colors;
+    ComponentContainer<vec3> tints;
     ComponentContainer<Animation> animations;
 
     // Map
@@ -136,6 +137,7 @@ class ECSRegistry {
         registry_list.push_back(&meshPtrs);
         registry_list.push_back(&renderRequests);
         registry_list.push_back(&colors);
+        registry_list.push_back(&tints);
         registry_list.push_back(&animations);
 
         // Map
