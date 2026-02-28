@@ -37,7 +37,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     sc.move_speed = config.move_speed;
     sc.turn_speed = config.turn_speed;
 
-    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
 
     Motion &motion = registry.motions.emplace(entity);
@@ -45,6 +46,44 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     motion.position = position;
     motion.angle = 0.f;
     motion.scale = vec2(80.0f, 80.0f);
+
+
+    MeshCollider fishMesh;
+    fishMesh.vertices = {
+        { -42.f,   0.f },   // tail tip (left)
+        { -20.f, -25.f },   // tail top
+        {  10.f, -18.f },   // mid top
+        {  40.f, -12.f },   // upper body
+        {  64.f,  -4.f },   // nose top
+        {  64.f,   4.f },   // nose bottom
+        {  40.f,  12.f },   // lower body
+        {  10.f,  18.f },   // mid bottom
+        { -20.f,  25.f }    // tail bottom
+    };
+
+    // compute authored bbox and set authoring_px from it
+    {
+        vec2 minV = fishMesh.vertices[0];
+        vec2 maxV = fishMesh.vertices[0];
+        for (const vec2& v : fishMesh.vertices) {
+            minV.x = std::min(minV.x, v.x);
+            minV.y = std::min(minV.y, v.y);
+            maxV.x = std::max(maxV.x, v.x);
+            maxV.y = std::max(maxV.y, v.y);
+        }
+        float authored_width = maxV.x - minV.x;
+        float authored_height = maxV.y - minV.y;
+        fishMesh.authoring_px = std::max(1.0f, std::max(authored_width, authored_height)); // fallback to 1 if degenerate
+
+        // center the collider geometry around its centroid so physics SAT uses same origin as renderer.
+        vec2 centroid = (minV + maxV) * 0.5f;
+        for (vec2& v : fishMesh.vertices)
+            v -= centroid;
+    }
+
+    registry.meshColliders.emplace(entity, std::move(fishMesh));
+
+    // keep fishMesh.authoring_px computed from authored vertices; do not overwrite it here.
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_FISH_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});

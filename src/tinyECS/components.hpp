@@ -207,6 +207,13 @@ struct Motion {
     float angular_velocity = 0; // Also in RADIANS / s
     vec2 velocity = {0, 0};     // px / s
     vec2 scale = {10, 10};      // px
+    // Last known non-colliding position (used as a robust fallback recovery)
+    vec2 last_safe_position = {0, 0};
+
+    // Contact caching to stabilize repeated small MTV corrections:
+    // last contact normal (world-space), and frames to keep it active
+    vec2 contact_normal = {0, 0};
+    int contact_cooldown_frames = 0;
 };
 
 // Stucture to store collision information
@@ -214,7 +221,10 @@ struct Collision {
     // Note, the first object is stored in the ECS container.entities
     Entity other; // the second object involved in the collision
 };
-
+struct MeshCollider {
+    std::vector<vec2> vertices;
+    float authoring_px = 128.0f; // 128 authoring pixel.
+};
 // Forward definition to avoid compilation issues, this is defined further down
 enum class TEXTURE_ASSET_ID;
 

@@ -3,10 +3,10 @@
 #include "world_init.hpp"
 #include <iostream>
 
-float MAX_SPEED_MULTIPLIER = 2;                 // Max speed = move speed * x
-float DECELERATION_MULTIPLIER = 4;              // Deceleration = move speed * x
-float QUICK_TURN_MULTIPLIER = 2;                // QT speed = turn speed * x
-float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4;     // How fast we lose rotation velocity
+float MAX_SPEED_MULTIPLIER = 2;             // Max speed = move speed * x
+float DECELERATION_MULTIPLIER = 4;          // Deceleration = move speed * x
+float QUICK_TURN_MULTIPLIER = 2;            // QT speed = turn speed * x
+float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4; // How fast we lose rotation velocity
 
 void debug_print_input_state(KeyboardInputState &keyboard_input) {
     std::cout << "Current:  ";
@@ -95,9 +95,11 @@ void PlayerInputSystem::step(float elapsed_ms) {
         if (turn_dir != 0.f) {
             motion.angular_velocity = turn_dir * sc.turn_speed;
         } else if (motion.angular_velocity > 0) {
-            motion.angular_velocity = std::max(0.f, motion.angular_velocity - sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
+            motion.angular_velocity =
+                std::max(0.f, motion.angular_velocity - sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
         } else if (motion.angular_velocity < 0) {
-            motion.angular_velocity = std::min(0.f, motion.angular_velocity + sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
+            motion.angular_velocity =
+                std::min(0.f, motion.angular_velocity + sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
         }
     }
 
