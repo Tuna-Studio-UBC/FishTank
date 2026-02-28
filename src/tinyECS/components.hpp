@@ -223,6 +223,7 @@ struct ParticleEmitter {
     vec2 offset = {0, 0}; // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
     int max_particles;
     TEXTURE_ASSET_ID texture;
+    float particle_scale = 10.f;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
     float particle_life_ms;  // Duration of each particle
@@ -392,10 +393,14 @@ enum class TEXTURE_ASSET_ID {
 
     TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
     TEXTURE_BUBBLER = TEXTURE_BUBBLE + 1,
-    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLER + 1,
 
-    TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
+    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLER + 1,
+    TEXTURE_FISH_SHEET = TEXTURE_BUBBLE_SHEET + 1,
+    TEXTURE_TURRET_SHEET = TEXTURE_FISH_SHEET + 1,
+
+    TEXTURE_COUNT = TEXTURE_TURRET_SHEET + 1
 };
+
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {

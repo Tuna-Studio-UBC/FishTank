@@ -56,12 +56,14 @@ class RenderSystem {
         get_path(FilePath::TILESET_IMAGES, "greybox.png"), get_path(FilePath::TILESET_IMAGES, "greybox2.png"),
 
         // Textures
-        get_path(FilePath::TEXTURES, "white_bubble.png"), get_path(FilePath::TEXTURES, "black.png"),
-        get_path(FilePath::TEXTURES, "win.png"), get_path(FilePath::TEXTURES, "lose.png"),
+        get_path(FilePath::TEXTURES, "white_bubble.png"), 
+        
+        get_path(FilePath::TEXTURES, "black.png"), get_path(FilePath::TEXTURES, "win.png"), get_path(FilePath::TEXTURES, "lose.png"),
+
         get_path(FilePath::TEXTURES, "bubble.png"), get_path(FilePath::TEXTURES, "bubbler.png"),
 
         // Sprite sheets
-        get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png")};
+        get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "fish_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "turret_sheet.png")};
 
     std::array<GLuint, effect_count> effects;
     // Make sure these paths remain in sync with the associated enumerators.
@@ -138,8 +140,12 @@ class RenderSystem {
     GLuint off_screen_render_buffer_depth;
 
     GLuint vao;
-    GLuint vbo;
-    unsigned int particle_buffer_capacity;
+    
+    // For instancing
+    GLuint particle_vao;
+    GLuint quad_vbo;
+    GLuint instance_vbo;
+    unsigned int instance_buffer_capacity = 1000;
 
     GLuint font_vao;
     GLuint font_vbo;

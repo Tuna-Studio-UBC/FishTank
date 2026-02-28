@@ -14,6 +14,7 @@
 #include "systems/camera_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/tilemap_system.hpp"
+#include "systems/audio_system.hpp"
 
 // Container for all our entities and game logic.
 // Individual rendering / updates are deferred to the update() methods.
@@ -82,4 +83,7 @@ class WorldSystem {
     // C++ random number generator
     std::default_random_engine rng;
     std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+    //audio
+    AudioSystem audio_system;
 };

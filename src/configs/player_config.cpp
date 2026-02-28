@@ -11,7 +11,7 @@ struct PlayerConfig {
     float fire_rate_cd_ms = 500.f;
 
     // Movement
-    float move_speed = 60;
+    float move_speed = 120;
     float turn_speed = 1.2 * M_PI;
 
     // Appearance

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <sstream>
-
+#include <unordered_set>
 #include "configs/wave_config.cpp"
 #include "systems/particle_system.hpp"
 #include "systems/physics_system.hpp"
@@ -26,6 +26,7 @@ WorldSystem::~WorldSystem() {
     // 	Mix_FreeChunk(invader_hit_sound);
     // if (tower_hit_sound != nullptr)
     // 	Mix_FreeChunk(tower_hit_sound);
+    audio_system.shutdown();
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -116,6 +117,10 @@ bool WorldSystem::start_and_load_sounds() {
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
         fprintf(stderr, "Failed to open audio device");
         return false;
+    }
+
+    if(!audio_system.load()) {
+        fprintf(stderr, "Failed to load SFX\n");
     }
 
     /*background_music = Mix_LoadMUS(get_path(FilePath::AUDIO, "music.wav").c_str());
@@ -350,8 +355,28 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             }
     }*/
 
+    vec2 listener_pos = vec2(0.f, 0.f);
+    if (registry.players.entities.size() > 0 && registry.motions.has(registry.players.entities[0])) {
+        listener_pos = registry.motions.get(registry.players.entities[0]).position;
+    }
+
     // Create bullet entities requested by enemies in AISystem
+    std::unordered_set<unsigned int> shot_played;
     for (BulletRequest req : registry.bullet_requests.components) {
+        if (registry.enemies.has(req.owner)) {
+
+            unsigned int oid = (unsigned int)req.owner;
+            if (shot_played.find(oid) == shot_played.end()) {
+                shot_played.insert(oid);
+                vec2 enemy_pos = req.position;
+                if (registry.motions.has(req.owner)) {
+                    enemy_pos = registry.motions.get(req.owner).position;
+                }
+
+                audio_system.play_enemy_shot(enemy_pos, listener_pos);
+            }
+        }
+
         createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
     }
     registry.bullet_requests.clear();
@@ -360,6 +385,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+    audio_system.update_hazard_warning(listener_pos, elapsed_ms_since_last_update);
+    
     return true;
 }
 
