@@ -337,6 +337,12 @@ struct TileSet {
           collisions(collisions) {}
 };
 
+struct Tint {
+    vec3 tint = {1.f, 1.f, 1.f};
+    float life_ms = -99.f; // Default -99 (infinite)
+    Tint(vec3 tint, float life_ms = -99.f) : tint(tint), life_ms(life_ms) {}
+};
+
 struct Text {
     std::string text = "";
     vec2 position = {0.f, 0.f};
