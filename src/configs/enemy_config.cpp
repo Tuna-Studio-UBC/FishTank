@@ -16,11 +16,9 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
     // Urchin
     {0.f, 0.f, 500.f, ATTACK_PATTERN::URCHIN},
 
-    // Follower
+    // Guard
     {50.f, M_PI / 2.f, 400.f, ATTACK_PATTERN::SINGLE},
 
-    // Swarm
-    {50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE},
-
-    // Patroller
-    {50.f, M_PI / 2.f, 0.f, ATTACK_PATTERN::SINGLE}};
+    // Homing
+    {50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE}
+};

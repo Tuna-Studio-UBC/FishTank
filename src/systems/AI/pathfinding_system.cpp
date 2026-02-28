@@ -1,6 +1,6 @@
 #include "pathfinding_system.hpp"
 #include <queue>
-#include "../tinyECS/registry.hpp"
+#include "../../tinyECS/registry.hpp"
 
 const ivec2 four_directions[4] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
@@ -16,20 +16,19 @@ int get_map_index(int width, int x, int y) {
     return x + (y * width); 
 }
 
-bool is_out_of_bounds(int width, int height, int x, int y) { return x < 0 || y < 0 || x >= width || y >= height; }
+bool is_out_of_bounds(ivec2 pos) { 
+    TileMap map = registry.tilemaps.components.back();
 
-static bool is_walkable(const TileMap &map, int x, int y) {
-    if (is_out_of_bounds((int)map.width, (int)map.height, x, y)) {
+    return pos.x < 0|| pos.y < 0|| pos.x >= (int)map.width || pos.y >= (int)map.height;
+}
+
+bool is_walkable(const TileMap &map, int x, int y) {
+    if (is_out_of_bounds(ivec2(x, y))) {
         return false;
     }
+
     int tile_id = map.tile_ids[x + y * map.width];
-
-    bool is_empty = (tile_id == 1);
-    if (!is_empty) {
-        return false;
-    }
-
-    return true;
+    return is_empty_tile(tile_id);
 }
 
 int h_cost(const ivec2 &a, const ivec2 &b) { 
@@ -107,95 +106,14 @@ std::vector<ivec2> prune_path(std::vector<ivec2> &path, const TileMap &map) {
     return pruned_path;
 }
 
-std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_world) {
-    const TileMap &map = registry.tilemaps.components[0];
+std::vector<vec2> path_finding(const vec2& start_world, const vec2& goal_world) {
+    const TileMap &map = registry.tilemaps.components.back();
 
     ivec2 start = world_to_tile(start_world);
     ivec2 goal = world_to_tile(goal_world);
 
-    if (is_out_of_bounds((int)map.width, (int)map.height, start.x, start.y) ||
-        is_out_of_bounds((int)map.width, (int)map.height, goal.x, goal.y)) {
-        return {};
-    }       
-    
-    const int width = map.width;
-    const int height = map.height;
-    const int total = width * height;
-
-    std::vector<bool> visited(total, false);
-    std::vector<int> parent(total, -1);
-
-    std::queue<ivec2> queue;
-
-    queue.push(start);
-    visited[get_map_index(width, start.x, start.y)] = true;
-
-    // algorithm loop
-    while (!queue.empty()) {
-        ivec2 current = queue.front();
-        queue.pop();
-
-        if (current.x == goal.x && current.y == goal.y)
-            break;
-
-        for (const auto &dir : four_directions) {
-            int neighbour_x = current.x + dir.x;
-            int neighbour_y = current.y + dir.y;
-
-            if (!is_walkable(map, neighbour_x, neighbour_y) && !(neighbour_x == goal.x && neighbour_y == goal.y))
-                continue;
-
-            int idx = get_map_index(width, neighbour_x, neighbour_y);
-
-            if (visited[idx])
-                continue;
-
-            visited[idx] = true;
-            parent[idx] = get_map_index(width, current.x, current.y);
-            queue.push({neighbour_x, neighbour_y});
-        }
-    }
-
-    // check if goal visited
-    int goal_index = get_map_index(width, goal.x, goal.y);
-    if (!visited[goal_index]) {
-        return {};
-    }
-
-    // reconstruct and convert tile path
-    std::vector<ivec2> tile_path;
-    int p = goal_index;
-
-    while (p != -1) {
-        int tx = p % width;
-        int ty = p / width;
-        tile_path.push_back({tx, ty});
-        p = parent[p];
-    }
-
-    tile_path = prune_path(tile_path, map);
-    std::reverse(tile_path.begin(), tile_path.end());
-
-    std::vector<vec2> world_path;
-    world_path.reserve(tile_path.size());
-
-    for (const auto &tile : tile_path) {
-        vec2 world_coord = tile_center_to_world(tile);
-        world_path.push_back(world_coord);
-    }
-        
-
-    return world_path;
-}
-
-std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world) {
-    const TileMap &map = registry.tilemaps.components[0];
-
-    ivec2 start = world_to_tile(start_world);
-    ivec2 goal = world_to_tile(goal_world);
-
-    if (is_out_of_bounds((int)map.width, (int)map.height, start.x, start.y) ||
-        is_out_of_bounds((int)map.width, (int)map.height, goal.x, goal.y)) {
+    if (is_out_of_bounds(start) ||
+        is_out_of_bounds(goal)) {
         return {};
     }
 

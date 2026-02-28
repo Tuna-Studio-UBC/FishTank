@@ -170,9 +170,9 @@ void WorldSystem::load_level_tutorial(Progress &progress) {
     auto &player_fc = registry.fireControl.get(player);
     player_fc.ammo = 0;
 
-    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::FOLLOWER);
-    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::FOLLOWER);
-    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::FOLLOWER);
+    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::GUARD);
 
     createBubbler(renderer, {625.f, 875.f});
     createBubbler(renderer, {425.f, 400.f});
@@ -215,6 +215,16 @@ void WorldSystem::load_level(Progress &progress) {
         pos = tilemap_system->get_random_position(SpawnTarget::DISTRACTION);
         createBell(renderer, pos, bell);
     }
+
+    // SECRET FOR M3 SHHHHHH
+    /*for (auto swarm : config.swarms) {
+        pos = get_random_position();
+        Entity leader = createLeader(renderer, pos);
+        for (int i = 1; i < swarm; i++) {
+            pos = get_random_position();
+            createFollower(renderer, pos, leader);
+        }
+    }*/ 
 }
 
 void WorldSystem::init_tutorial(RenderSystem* renderer_arg, CameraSystem* camera_arg, TileMapSystem* tilemap_arg)
@@ -344,19 +354,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         }
     }
 
-    /*if (registry.distracted.entities.size() > 0)
-    {
-            Entity evt_e = registry.distracted.entities[0];
-            Distracted& evt = registry.distracted.get(evt_e);
-            evt.remaining_ms -= elapsed_ms_since_last_update;
-
-            if (evt.remaining_ms <= 0.f)
-            {
-                    registry.remove_all_components_of(evt_e);
-                    spdlog::info("[Bell] {} expired", evt_e.name_id());
-            }
-    }*/
-
     vec2 listener_pos = vec2(0.f, 0.f);
     if (registry.players.entities.size() > 0 && registry.motions.has(registry.players.entities[0])) {
         listener_pos = registry.motions.get(registry.players.entities[0]).position;
@@ -460,13 +457,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_E) {
             if (registry.players.entities.size() == 0) {
-                spdlog::debug("[Bell] No player entity found");
                 return;
             }
 
             Entity player = registry.players.entities[0];
             if (!registry.motions.has(player)) {
-                spdlog::debug("[Bell] {} has no Motion", player.name_id());
                 return;
             }
 
@@ -487,7 +482,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             }
 
             if (best_dist2 > 9e29f) {
-                spdlog::debug("[Bell] No bell in the world");
                 return;
             }
 
@@ -497,8 +491,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             if (best_dist2 > radius2) {
                 float dist = sqrtf(best_dist2);
-                spdlog::debug("[Bell] {} too far to interact. dist={:.2f} (need <= {:.2f})", best_bell.name_id(), dist,
-                              radius);
                 return;
             }
 
@@ -511,18 +503,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             for (Entity enemy : registry.enemies.entities) {
                 Motion &enemy_motion = registry.motions.get(enemy);
-                if (!registry.distracted.has(enemy) &&
-                    entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
-                    if (registry.pursuit.has(enemy)) {
-                        registry.pursuit.remove(enemy);
-                    }
-                    registry.distracted.insert(enemy, {best_bell, bell.distraction_ms});
+                if (entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
+                    Sense &sense = registry.senses.get(enemy);
+                    sense.is_distracted = true;
+                    Distracted &distracted = registry.distracted.get(enemy);
+                    distracted.bell = best_bell;
+                    distracted.remaining_ms = bell.distraction_ms;
                 }
             }
 
             bell.cooldown_timer = bell.cooldown_ms;
 
-            spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
+            // spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
         }
 
         if (key == GLFW_KEY_F) {

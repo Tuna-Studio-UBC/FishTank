@@ -8,8 +8,8 @@
 #include <iostream>
 
 // internal
-#include "systems/ai_system.hpp"
 #include "systems/animation_system.hpp"
+#include "systems/ai/ai_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/death_system.hpp"

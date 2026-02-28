@@ -16,6 +16,8 @@ extern ECSRegistry registry;
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type);
+Entity createLeader(RenderSystem *renderer, vec2 position);
+Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader);
 
 Entity createTurret(RenderSystem *renderer, vec2 position);
 

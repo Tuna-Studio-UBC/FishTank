@@ -31,7 +31,7 @@ using namespace glm;
 //
 inline const std::string ROOT_DIR = std::string(PROJECT_SOURCE_DIR);
 
-enum FilePath { AUDIO, MAPS, MESHES, SHADERS, SPRITE_SHEETS, TEXTURES, TILESETS, TILESET_IMAGES };
+enum FilePath { AUDIO, MAPS, MESHES, SHADERS, SPRITE_SHEETS, TEXTURES, TILESETS, TILESET_IMAGES, DECISION_TREES };
 
 inline std::string get_path(FilePath path, const std::string &file_name) {
     std::string file = std::string(file_name);
@@ -52,6 +52,8 @@ inline std::string get_path(FilePath path, const std::string &file_name) {
         return ROOT_DIR + "/res/tilesets/" + file;
     case TILESET_IMAGES:
         return ROOT_DIR + "/res/tileset_images/" + file;
+    case DECISION_TREES:
+        return ROOT_DIR + "/res/decision_trees/" + file;
     default:
         return "/";
     }
@@ -127,3 +129,4 @@ bool entity_in_radius(vec2 dist, vec2 entity_scale, float radius);
 ivec2 world_to_tile(const vec2 &world_pos);
 
 vec2 tile_center_to_world(const ivec2 &tile);
+float get_random_float(float min, float max);

@@ -14,13 +14,14 @@ struct Level {
     std::vector<POWER_UP_TYPE> powerups;
     std::vector<float> bells;
     std::vector<float> bubblers; // TODO: Change type once bubblers are further developed
+    std::vector<int> swarms; // Secret for M3, leave it empty for now
 };
 
-const std::vector<Wave> WAVE_CONFIGS = {{{ENEMY_TYPE::FOLLOWER}},
-                                        {{ENEMY_TYPE::FOLLOWER, ENEMY_TYPE::URCHIN}},
-                                        {{ENEMY_TYPE::SWARM, ENEMY_TYPE::SWARM, ENEMY_TYPE::SWARM, ENEMY_TYPE::SWARM}}};
+const std::vector<Wave> WAVE_CONFIGS = {{{ENEMY_TYPE::GUARD}},
+                                        {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN}},
+                                        {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}}};
 
 const std::vector<Level> LEVEL_CONFIGS = {
     {1, {}, {}, {}, {}},
-    {3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}}
+    {3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {500.f}, {0.f, 0.f}}
 };
