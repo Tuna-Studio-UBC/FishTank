@@ -93,3 +93,7 @@ vec2 tile_center_to_world(const ivec2 &tile) {
     float wy = tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2);
     return vec2(wx, wy);
 }
+
+float get_random_float(float min, float max) {
+    return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+}

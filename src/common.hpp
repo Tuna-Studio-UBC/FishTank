@@ -111,3 +111,4 @@ bool entity_in_radius(vec2 dist, vec2 entity_scale, float radius);
 ivec2 world_to_tile(const vec2 &world_pos);
 
 vec2 tile_center_to_world(const ivec2 &tile);
+float get_random_float(float min, float max);

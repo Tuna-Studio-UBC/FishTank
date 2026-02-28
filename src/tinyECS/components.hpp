@@ -134,8 +134,6 @@ struct Wallet {
 };
 // Uses: Motion
 
-struct Patrolling {};
-
 struct Pursuit {
     std::vector<vec2> path;
     size_t curr_index = 0;
@@ -160,12 +158,13 @@ struct BulletRequest {
 };
 
 struct BezierPath {
-    vec2 p0;
-    vec2 p1;
-    vec2 p2;
-    vec2 p3;
+    vec2 p0 = vec2(- 1.f);
+    vec2 p1 = vec2(-1.f);
+    vec2 p2 = vec2(-1.f);
+    vec2 p3 = vec2(-1.f);
     float t = 0.f;
     float speed = 0.5f;
+    int curves_left = 6;
 };
 
 struct Boid {
@@ -173,16 +172,18 @@ struct Boid {
     float alignment_weight = 1.f;
     float cohesian_weight = 1.f;
     float separation_weight = 1.5f;
+    Entity leader;
 };
 
 struct Sense {
     bool detects_player = false;
     bool is_distracted = false;
+    bool is_patrolling = true;
     vec2 last_known_player_pos;
 };
 
 struct AI {
-    std::string tree_file; // Path to the scripted decision tree file
+    std::string tree_file;
     ScriptedTree tree;
     AIAction current_state = AIAction::IDLE;
 };

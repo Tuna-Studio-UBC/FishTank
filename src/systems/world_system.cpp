@@ -193,6 +193,15 @@ void WorldSystem::load_level(Progress &progress) {
         pos = get_random_position();
         createBell(renderer, pos, bell);
     }
+
+    /*for (auto swarm : config.swarms) {
+        pos = get_random_position();
+        Entity leader = createLeader(renderer, pos);
+        for (int i = 1; i < swarm; i++) {
+            pos = get_random_position();
+            createFollower(renderer, pos, leader);
+        }
+    }*/ 
 }
 
 void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg) {
@@ -303,19 +312,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
                 bell.cooldown_timer = 0.f;
         }
     }
-
-    /*if (registry.distracted.entities.size() > 0)
-    {
-            Entity evt_e = registry.distracted.entities[0];
-            Distracted& evt = registry.distracted.get(evt_e);
-            evt.remaining_ms -= elapsed_ms_since_last_update;
-
-            if (evt.remaining_ms <= 0.f)
-            {
-                    registry.remove_all_components_of(evt_e);
-                    spdlog::info("[Bell] {} expired", evt_e.name_id());
-            }
-    }*/
 
     // Create bullet entities requested by enemies in AISystem
     for (BulletRequest req : registry.bullet_requests.components) {

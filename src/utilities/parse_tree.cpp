@@ -3,12 +3,22 @@
 std::unordered_map<std::string, AIAction> action_map = {
     {"PURSUE", AIAction::PURSUE}, 
     {"IDLE", AIAction::IDLE}, 
-    {"DISTRACTED", AIAction::DISTRACTED}
+    {"DISTRACTED", AIAction::DISTRACTED}, 
+    {"PATROL", AIAction::PATROL}
 };
 
-AIAction str_to_ai_action(const std::string &str) {
+AIAction str_to_action(const std::string &str) {
     auto it = action_map.find(str);
     return it != action_map.end() ? it->second : AIAction::IDLE;
+}
+
+NodeType get_type(std::string token) {
+    if (token == "Condition") {
+        return NodeType::CONDITION;
+    } else if (token == "Random") {
+        return NodeType::RANDOM;
+    }
+    return NodeType::ACTION;
 }
 
 inline std::string trim(const std::string &s) {
@@ -21,7 +31,6 @@ inline std::string trim(const std::string &s) {
 
 ScriptedTree load_tree(const std::string &filename) {
     ScriptedTree tree;
-    spdlog::debug("parsing file {}", filename);
 
     const std::string base_path = DECISION_TREES;
     std::string full_path = base_path + filename;
@@ -40,7 +49,7 @@ ScriptedTree load_tree(const std::string &filename) {
         std::getline(ss, token, ',');
         node.id = std::stoi(trim(token));
         std::getline(ss, token, ',');
-        node.type = (trim(token) == "Condition") ? NodeType::CONDITION : NodeType::ACTION;
+        node.type = get_type(token);
         std::getline(ss, token, ',');
         node.condition_name = trim(token);
         std::getline(ss, token, ',');
@@ -49,21 +58,27 @@ ScriptedTree load_tree(const std::string &filename) {
         node.false_child = trim(token).empty() ? -1 : std::stoi(trim(token));
         std::getline(ss, token, ',');
         if (!trim(token).empty()) {
-            node.action = str_to_ai_action(trim(token));
+            node.action = str_to_action(trim(token));
+        }
+        std::getline(ss, token, ',');
+        if (!token.empty()) {
+            node.probability = std::stof(token);
         }
 
         tree.nodes[node.id] = node;
-        spdlog::debug("parsed node {}", node.id);
     }
 
     if (!tree.nodes.empty()) {
         tree.root_id = 1;
     }
 
-    for (auto &p : tree.nodes) {
-        spdlog::debug("Node {} type {} cond '{}' true_child {} false_child {}", p.first,
-                      (p.second.type == NodeType::CONDITION ? "CONDITION" : "ACTION"), p.second.condition_name,
-                      p.second.true_child, p.second.false_child);
-    }
+    // uncomment to print tree
+    /*for (auto &p : tree.nodes) {
+        spdlog::debug("Node {} type {} cond '{}' true_child {} false_child {} probability {}", p.first,
+                      (p.second.type == NodeType::CONDITION ? "CONDITION"
+                       : p.second.type == NodeType::ACTION  ? "ACTION"
+                                                            : "RANDOM"),
+                      p.second.condition_name, p.second.true_child, p.second.false_child, p.second.probability);
+    }*/ 
     return tree;
 }

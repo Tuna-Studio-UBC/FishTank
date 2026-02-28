@@ -1,12 +1,5 @@
 #include "ai_system.hpp"
 
-static vec2 direction_vector(vec2 v, vec2 fallback) {
-    float len = sqrtf(v.x * v.x + v.y * v.y);
-    if (len < 1e-5f)
-        return fallback;
-    return v / len;
-}
-
 AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
     if (tree.root_id == -1) {
         return AIAction::IDLE;
@@ -24,16 +17,25 @@ AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
             return node.action;
         }
 
-        bool cond_result = false;
-        if (node.condition_name == "sees_player") {
-            cond_result = registry.senses.get(e).detects_player;
-        } else if (node.condition_name == "is_distracted") {
-            cond_result = registry.senses.get(e).is_distracted;
-        } else {
-            spdlog::debug("Unknown condition: {}", node.condition_name);
+        bool result = false;
+        if (node.type == NodeType::CONDITION) {
+            Sense &sense = registry.senses.get(e);
+            if (node.condition_name == "sees_player") {
+                result = sense.detects_player;
+            } else if (node.condition_name == "is_distracted") {
+                result = sense.is_distracted;
+            } else if (node.condition_name == "is_patrolling") {
+                result = sense.is_patrolling;
+            } else {
+                spdlog::debug("Unknown condition: {}", node.condition_name);
+            }
+        }
+        if (node.type == NodeType::RANDOM) {
+            float random = get_random_float(0.f, 1.f);
+            result = (random < node.probability);
         }
 
-        current_id = cond_result ? node.true_child : node.false_child;
+        current_id = result ? node.true_child : node.false_child;
     }
 }
 
@@ -99,58 +101,6 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
     }
 }
 
-// COMMENTED OUT FOR NOW, unsure if we will keep patrolling yet
-// IF UNCOMMENT, requires refactoring
-/*void patrol(float elapsed_ms) {
-        float dt = elapsed_ms / 1000.f;
-        static std::mt19937 rng{ std::random_device{}() };
-        static std::uniform_real_distribution<float> angle_dist(0.f, 2.f * (float)M_PI);
-        static std::uniform_real_distribution<float> t01(0.f, 1.f);
-
-        for (Entity e : registry.enemies.entities)
-        {
-                if (!registry.motions.has(e) || !registry.patrols.has(e))
-                        continue;
-
-                Motion& m = registry.motions.get(e);
-                Patrol& p = registry.patrols.get(e);
-                p.time_to_change_ms -= elapsed_ms;
-
-                if (p.time_to_change_ms <= 0.f)
-                {
-                        float a = angle_dist(rng);
-                        p.dir = { cosf(a), sinf(a) };
-                        p.dir = direction_vector(p.dir, { 1.f, 0.f });
-
-                        float span = p.change_dir_max_ms - p.change_dir_min_ms;
-                        p.time_to_change_ms = p.change_dir_min_ms + t01(rng) * span;
-                }
-
-                m.velocity = p.dir * p.speed_px_s;
-                m.position += m.velocity * dt;
-
-                if (fabs(m.velocity.x) + fabs(m.velocity.y) > 1e-3f)
-                        m.angle = atan2f(m.velocity.y, m.velocity.x) * (180.f / (float)M_PI);
-
-                float min_x = 0.f + p.padding_px;
-                float max_x = WINDOW_WIDTH_PX - p.padding_px;
-                float min_y = 0.f + p.padding_px;
-                float max_y = WINDOW_HEIGHT_PX - p.padding_px;
-
-                bool bounced = false;
-
-                if (m.position.x < min_x) { m.position.x = min_x; p.dir.x *= -1.f; bounced = true; }
-                if (m.position.x > max_x) { m.position.x = max_x; p.dir.x *= -1.f; bounced = true; }
-                if (m.position.y < min_y) { m.position.y = min_y; p.dir.y *= -1.f; bounced = true; }
-                if (m.position.y > max_y) { m.position.y = max_y; p.dir.y *= -1.f; bounced = true; }
-
-                if (bounced)
-                {
-                        p.dir = direction_vector(p.dir, { 1.f, 0.f });
-                }
-        }
-}*/
-
 void AISystem::step(float elapsed_ms) {
     Entity player = registry.players.entities[0];
     vec2 player_pos = registry.motions.get(player).position;
@@ -164,6 +114,29 @@ void AISystem::step(float elapsed_ms) {
         ai.current_state = evaluate_tree(e, ai.tree);
 
         act(e, elapsed_ms, player_pos);
+    }
+}
+
+void run_patrol(Entity e, float elapsed_ms) {
+    registry.senses.get(e).is_patrolling = true;
+    if (!registry.beziers.has(e)) {
+        return;
+    }
+
+    Motion &motion = registry.motions.get(e);
+    update_leader(e, motion, elapsed_ms);
+    if (!registry.senses.get(e).is_patrolling) {
+        registry.beziers.get(e).curves_left = 6;
+    }
+
+    float dt = elapsed_ms / 1000.f;
+
+    for (Entity follower_e : registry.boids.entities) {
+        if (!registry.motions.has(follower_e) || registry.boids.get(follower_e).leader != e) {
+            continue;
+        }
+
+        update_follower(follower_e, e, elapsed_ms);
     }
 }
 
@@ -242,7 +215,12 @@ void AISystem::act(Entity e, float elapsed_ms, vec2 player_pos) {
     case AIAction::DISTRACTED:
         run_distracted(e, elapsed_ms, player_pos);
         break;
+
+    case AIAction::PATROL:
+        run_patrol(e, elapsed_ms);
+        break;
     }
+
 }
 
 void AISystem::handle_detection() {

@@ -1,12 +1,9 @@
 #pragma once
-
-#include <common.hpp>
-#include <tinyECS/registry.hpp>
 #include <cmath>
 #include <iostream>
 #include <random>
 #include <spdlog/spdlog.h>
-#include "pathfinding_system.hpp"
+#include "swarm_system.hpp"
 
 class AISystem {
   private:

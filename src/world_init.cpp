@@ -175,11 +175,64 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
 
     registry.dropsCrackers.emplace(entity);
 
-    if (type == ENEMY_TYPE::PATROLLER) {
-        registry.patrolling.emplace(entity);
-    }
-
     registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+    registry.renderRequests.insert(
+        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
+
+    return entity;
+}
+
+Entity createLeader(RenderSystem *renderer, vec2 position) {
+    auto entity = Entity("Enemy");
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    registry.beziers.emplace(entity);
+
+    auto &motion = registry.motions.emplace(entity);
+    motion.velocity = vec2(0.0f, 0.0f);
+    motion.position = position;
+    motion.angle = 0.f;
+    motion.scale = vec2(25.0f, 25.0f);
+
+    /* auto &speed = registry.speedControl.emplace(entity);
+    speed.move_speed = config.move_speed;
+    speed.turn_speed = config.turn_speed;*/
+
+    registry.senses.emplace(entity);
+    AI &ai = registry.ais.emplace(entity);
+    ai.tree_file = "leader_tree.txt";
+    ai.tree = load_tree(ai.tree_file);
+    ai.current_state = AIAction::IDLE;
+
+    registry.colors.emplace(entity, vec3(0.2f, 0.2f, 1.0f));
+    registry.renderRequests.insert(
+        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
+
+    return entity;
+}
+
+Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
+    auto entity = Entity("Enemy");
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    Boid &boid = registry.boids.emplace(entity);
+    boid.leader = leader;
+
+    auto &motion = registry.motions.emplace(entity);
+    motion.velocity = vec2(0.0f, 0.0f);
+    motion.position = position;
+    motion.angle = 0.f;
+    motion.scale = vec2(25.0f, 25.0f);
+
+    /* auto &speed = registry.speedControl.emplace(entity);
+    speed.move_speed = config.move_speed;
+    speed.turn_speed = config.turn_speed;*/
+
+    registry.colors.emplace(entity, vec3(0.2f, 0.2f, 1.0f));
     registry.renderRequests.insert(
         entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
 

@@ -16,10 +16,14 @@ int get_map_index(int width, int x, int y) {
     return x + (y * width); 
 }
 
-bool is_out_of_bounds(int width, int height, int x, int y) { return x < 0 || y < 0 || x >= width || y >= height; }
+bool is_out_of_bounds(ivec2 pos) { 
+    TileMap map = registry.tilemaps.components[0];
 
-static bool is_walkable(const TileMap &map, int x, int y) {
-    if (is_out_of_bounds((int)map.width, (int)map.height, x, y)) {
+    return pos.x < 0|| pos.y < 0|| pos.x >= (int)map.width || pos.y >= (int)map.height;
+}
+
+bool is_walkable(const TileMap &map, int x, int y) {
+    if (is_out_of_bounds(ivec2(x, y))) {
         return false;
     }
     int tile_id = map.tile_ids[x + y * map.width];
@@ -113,8 +117,8 @@ std::vector<vec2> path_finding_bfs(const vec2 &start_world, const vec2 &goal_wor
     ivec2 start = world_to_tile(start_world);
     ivec2 goal = world_to_tile(goal_world);
 
-    if (is_out_of_bounds((int)map.width, (int)map.height, start.x, start.y) ||
-        is_out_of_bounds((int)map.width, (int)map.height, goal.x, goal.y)) {
+    if (is_out_of_bounds(start) ||
+        is_out_of_bounds(goal)) {
         return {};
     }       
     
@@ -194,8 +198,8 @@ std::vector<vec2> path_finding_a(const vec2& start_world, const vec2& goal_world
     ivec2 start = world_to_tile(start_world);
     ivec2 goal = world_to_tile(goal_world);
 
-    if (is_out_of_bounds((int)map.width, (int)map.height, start.x, start.y) ||
-        is_out_of_bounds((int)map.width, (int)map.height, goal.x, goal.y)) {
+    if (is_out_of_bounds(start) ||
+        is_out_of_bounds(goal)) {
         return {};
     }
 

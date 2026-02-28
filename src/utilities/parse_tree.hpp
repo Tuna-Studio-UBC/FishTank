@@ -6,17 +6,18 @@
 #include <unordered_map>
 #include <spdlog/spdlog.h>
 
-enum class NodeType{CONDITION, ACTION };
+enum class NodeType{ CONDITION, ACTION, RANDOM };
 
-enum AIAction { IDLE, PURSUE, DISTRACTED };
+enum AIAction { IDLE, PURSUE, DISTRACTED, PATROL };
 
 struct TreeNode {
     int id;
     NodeType type;
-    std::string condition_name; // for Condition nodes
-    int true_child = -1;        // NodeID
-    int false_child = -1;       // NodeID
-    AIAction action;            // for Action nodes
+    std::string condition_name;
+    int true_child = -1;
+    int false_child = -1;
+    float probability = 0.f;
+    AIAction action;
 };
 
 struct ScriptedTree {

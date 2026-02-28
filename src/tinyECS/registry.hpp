@@ -35,13 +35,14 @@ class ECSRegistry {
     ComponentContainer<Target> target;
     ComponentContainer<Wallet> wallet;
     ComponentContainer<DropsCrackers> dropsCrackers;
-    ComponentContainer<Patrolling> patrolling;
     ComponentContainer<Pursuit> pursuit;
     ComponentContainer<Bouncy> bouncy;
     ComponentContainer<BulletRequest> bullet_requests;
     ComponentContainer<Distracted> distracted;
     ComponentContainer<Sense> senses;
     ComponentContainer<AI> ais;
+    ComponentContainer<BezierPath> beziers;
+    ComponentContainer<Boid> boids;
 
     // Pickups
     ComponentContainer<PickUp> pickUp;
@@ -102,13 +103,14 @@ class ECSRegistry {
         registry_list.push_back(&target);
         registry_list.push_back(&wallet);
         registry_list.push_back(&dropsCrackers);
-        registry_list.push_back(&patrolling);
         registry_list.push_back(&pursuit);
         registry_list.push_back(&bouncy);
         registry_list.push_back(&bullet_requests);
         registry_list.push_back(&distracted);
         registry_list.push_back(&senses);
         registry_list.push_back(&ais);
+        registry_list.push_back(&beziers);
+        registry_list.push_back(&boids);
 
         // Pickups
         registry_list.push_back(&pickUp);
