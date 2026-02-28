@@ -170,9 +170,9 @@ void WorldSystem::load_level_tutorial(Progress &progress) {
     auto &player_fc = registry.fireControl.get(player);
     player_fc.ammo = 0;
 
-    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::FOLLOWER);
-    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::FOLLOWER);
-    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::FOLLOWER);
+    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::GUARD);
 
     createBubbler(renderer, {625.f, 875.f});
     createBubbler(renderer, {425.f, 400.f});
