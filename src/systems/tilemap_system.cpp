@@ -46,6 +46,11 @@ void generate_collision(TileMap &tilemap, TileSet &tileset) {
     }
 }
 
+TileMapSystem::TileMapSystem() {
+    // seeding rng with random device
+    rng = std::default_random_engine(std::random_device()());
+}
+
 TileMapSystem::~TileMapSystem() {
     registry.tilemaps.clear();
     registry.tilesets.clear();
@@ -92,30 +97,41 @@ void TileMapSystem::init_tile_walls(TileMap *tilemap) {
     }
 }
 
-void TileMapSystem::init_free_tiles() {
-    free_tiles.clear();
+void TileMapSystem::init_spawn_points() {
+    spawn_tiles.clear();
     TileMap &tilemap = registry.tilemaps.get(current_map);
     TileSet &tileset = registry.tilesets.get(current_map);
 
     for (unsigned int y = 0; y < tilemap.height; y++) {
         for (unsigned int x = 0; x < tilemap.width; x++) {
-            int tile_id = tilemap.tile_ids[x + y * tilemap.width];
-
-            bool is_border = (y == 0 || y == tilemap.height - 1 || x == 0 || x == tilemap.width - 1);
-            bool is_empty = is_empty_tile(tile_id);
-
-            if (is_empty && !is_border) {
-                free_tiles.push_back({x, y});
-            }
+            int spawn_tile_id = tilemap.spawn_tile_ids[x + y * tilemap.width];
+            spawn_tiles.push_back(std::pair<SPAWN_TARGET, vec2>((SPAWN_TARGET)spawn_tile_id, {x, y}));
         }
     }
 }
 
-vec2 TileMapSystem::get_random_position() {
-    int idx = (int)(uniform_dist(rng) * free_tiles.size()) - 1;
-    vec2 tile = free_tiles[idx];
-    free_tiles[idx] = free_tiles.back();
-    free_tiles.pop_back();
+vec2 TileMapSystem::get_random_position(SPAWN_TARGET spawn_target) {
+    std::vector<int> spawnable_tiles;
+    for (int i = 0; i < spawn_tiles.size(); i++) {
+        auto spawn_tile = spawn_tiles[i];
+        if (spawn_tile.first != SpawnTarget::NONE && spawn_tile.first & spawn_target ||
+            spawn_tile.first == SpawnTarget::ANY) {
+            spawnable_tiles.push_back(i);
+        }
+    }
+
+    // No spawnable tiles, return invalid position
+    if (spawnable_tiles.empty())
+        return vec2(-1, -1);
+
+    int spawnable_idx = (uniform_dist(rng) * spawnable_tiles.size()) - 1;
+    int tile_idx = spawnable_tiles[spawnable_idx];
+    vec2 tile = spawn_tiles[tile_idx].second;
+    spawn_tiles[tile_idx] = spawn_tiles.back();
+    spawn_tiles.pop_back();
+
+    spdlog::debug("Spawning {} at tile: {} {}", spawn_target, tile.x, tile.y);
+
     return vec2(tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2), tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2));
 }
 

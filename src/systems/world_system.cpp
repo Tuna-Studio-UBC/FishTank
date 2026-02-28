@@ -7,7 +7,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <sstream>
-
+#include <unordered_set>
 #include "configs/wave_config.cpp"
 #include "systems/particle_system.hpp"
 #include "systems/physics_system.hpp"
@@ -26,6 +26,7 @@ WorldSystem::~WorldSystem() {
     // 	Mix_FreeChunk(invader_hit_sound);
     // if (tower_hit_sound != nullptr)
     // 	Mix_FreeChunk(tower_hit_sound);
+    audio_system.shutdown();
     Mix_CloseAudio();
 
     // Destroy all created components
@@ -118,6 +119,10 @@ bool WorldSystem::start_and_load_sounds() {
         return false;
     }
 
+    if(!audio_system.load()) {
+        fprintf(stderr, "Failed to load SFX\n");
+    }
+
     /*background_music = Mix_LoadMUS(get_path(FilePath::AUDIO, "music.wav").c_str());
     invader_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "invader_hit.wav").c_str());
     tower_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
@@ -136,20 +141,34 @@ bool WorldSystem::start_and_load_sounds() {
 void WorldSystem::start_wave(Progress &progress) {
     auto config = WAVE_CONFIGS[progress.wave];
     progress.remaining_enemies = config.enemies.size();
+    vec2 pos;
+
+    if (registry.players.entities.size() > 0) {
+        // // Teleport player to a random position each wave
+        // Entity player = registry.players.entities[0];
+        // registry.motions.get(player).position = tilemap_system->get_random_position(SpawnTarget::PLAYER);
+    } else {
+        // Create player entity
+        pos = tilemap_system->get_random_position(SpawnTarget::PLAYER);
+        Entity player = createPlayer(renderer, pos);
+
+        // Create camera
+        camera_system->init(tilemap_system->get_current_map());
+    }
 
     for (auto enemy : config.enemies) {
-        vec2 pos = tilemap_system->get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
         createEnemy(renderer, pos, enemy);
     }
 }
 
 void WorldSystem::load_level(Progress &progress) {
-    tilemap_system->init_free_tiles();
+    tilemap_system->init_spawn_points();
     auto config = LEVEL_CONFIGS[progress.level];
     vec2 pos;
 
     for (auto item : config.hazards) {
-        pos = tilemap_system->get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::HAZARD);
         if (item == HAZARD_TYPE::MINE) {
             createMine(renderer, pos);
         } else if (item == HAZARD_TYPE::ANEMONE) {
@@ -157,13 +176,18 @@ void WorldSystem::load_level(Progress &progress) {
         }
     }
 
+    for (auto bubbler : config.bubblers) {
+        pos = tilemap_system->get_random_position(SpawnTarget::AMMO);
+        createBubbler(renderer, pos);
+    }
+
     for (auto item : config.powerups) {
-        pos = tilemap_system->get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::POWERUP);
         createPowerUp(renderer, pos, item);
     }
 
     for (auto bell : config.bells) {
-        pos = tilemap_system->get_random_position();
+        pos = tilemap_system->get_random_position(SpawnTarget::DISTRACTION);
         createBell(renderer, pos, bell);
     }
 }
@@ -174,14 +198,8 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     this->tilemap_system = tilemap_arg;
 
     // Set up world level
-    tilemap_system->init(rng);
+    tilemap_system->init();
     tilemap_system->load_map(MapType::TEST_MAP2);
-
-    // Create player entity
-    Entity player = createPlayer(renderer, {WINDOW_WIDTH_PX / 2.0f, WINDOW_HEIGHT_PX / 2.0f});
-
-    // Create camera
-    camera_system->init(tilemap_system->get_current_map());
 
     auto e = Entity("Progress");
     auto &progress = registry.progress.emplace(e);
@@ -212,9 +230,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     //Commented out duo to compiler errors
     spdlog::info("Starting music...");
     Mix_PlayMusic(background_music, -1);*/
-
-    // ! FOR TESTING !
-    createBubbler(renderer, vec2(125.f));
 
     // ! FOR TESTING !
     glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
@@ -309,8 +324,28 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             }
     }*/
 
+    vec2 listener_pos = vec2(0.f, 0.f);
+    if (registry.players.entities.size() > 0 && registry.motions.has(registry.players.entities[0])) {
+        listener_pos = registry.motions.get(registry.players.entities[0]).position;
+    }
+
     // Create bullet entities requested by enemies in AISystem
+    std::unordered_set<unsigned int> shot_played;
     for (BulletRequest req : registry.bullet_requests.components) {
+        if (registry.enemies.has(req.owner)) {
+
+            unsigned int oid = (unsigned int)req.owner;
+            if (shot_played.find(oid) == shot_played.end()) {
+                shot_played.insert(oid);
+                vec2 enemy_pos = req.position;
+                if (registry.motions.has(req.owner)) {
+                    enemy_pos = registry.motions.get(req.owner).position;
+                }
+
+                audio_system.play_enemy_shot(enemy_pos, listener_pos);
+            }
+        }
+
         createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
     }
     registry.bullet_requests.clear();
@@ -319,6 +354,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+    audio_system.update_hazard_warning(listener_pos, elapsed_ms_since_last_update);
+    
     return true;
 }
 

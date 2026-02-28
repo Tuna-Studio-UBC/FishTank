@@ -52,6 +52,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
                 pe.particle_speed = 120;
                 pe.spawn_interval_ms = 50;
                 pe.standalone = true;
+                pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
                 Motion &pm = registry.motions.emplace(e);
                 pm.position = m.position;
 

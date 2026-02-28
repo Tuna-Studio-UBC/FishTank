@@ -44,12 +44,15 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     motion.velocity = vec2(0.0f, 0.0f);
     motion.position = position;
     motion.angle = 0.f;
-    motion.scale = vec2(50.0f, 50.0f);
+    motion.scale = vec2(80.0f, 80.0f);
 
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::ACTORS});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_FISH_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
-    registry.colors.emplace(entity, config.colour);
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 9;
+    an.frame_count = 9;
+    an.frame_time = 60;
 
     createTurret(renderer, position);
     return entity;
@@ -108,21 +111,21 @@ Entity createTurret(RenderSystem *renderer, vec2 position) {
     Entity entity = Entity("Turret");
 
     Turret &t = registry.turrets.emplace(entity);
-    t.barrel_length_px = 30.f;
-
-    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-    registry.meshPtrs.emplace(entity, &mesh);
+    t.barrel_length_px = 10.f;
 
     Motion &m = registry.motions.emplace(entity);
     m.position = position;
     m.velocity = {0.f, 0.f};
     m.angle = 0.f;
-    m.scale = {70.f, 18.f};
+    m.scale = {48.f, 24.f};
 
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BLACK, EFFECT_ASSET_ID::TEXTURED,
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_TURRET_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::TURRETS});
 
-    // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 5;
+    an.frame_count = 5;
+    an.frame_time = 240;
 
     return entity;
 }
@@ -195,7 +198,7 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
 }
 
 Entity createBubbler(RenderSystem *renderer, vec2 position) {
-    auto entity = Entity("Power Up");
+    auto entity = Entity("Bubbler");
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);

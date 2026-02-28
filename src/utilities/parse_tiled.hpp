@@ -8,6 +8,7 @@
 
 std::string parse_file(const std::string &path);
 
-TileMap parse_tilemap(const std::string &path);
+rapidjson::Value *get_layer(std::string layer_name, rapidjson::Document &map_dom);
 
+TileMap parse_tilemap(const std::string &path);
 TileSet parse_tileset(const std::string &path);

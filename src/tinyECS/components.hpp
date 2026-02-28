@@ -1,12 +1,14 @@
 #pragma once
+#include <array>
+#include <unordered_map>
+#include <vector>
+
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "configs/attack_pattern.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
-#include <array>
-#include <unordered_map>
-#include <vector>
+#include "configs/spawn_target_config.hpp"
 
 #pragma region Entity
 // =================================================================================
@@ -221,6 +223,7 @@ struct ParticleEmitter {
     vec2 offset = {0, 0}; // Offset of particles spawns w.r.t. to entity pos and rotation (x is forward)
     int max_particles;
     TEXTURE_ASSET_ID texture;
+    float particle_scale = 10.f;
     float particle_speed;    // Speed of particle in px / s
     float spawn_interval_ms; // Minimum ms between particle spawns
     float particle_life_ms;  // Duration of each particle
@@ -298,19 +301,24 @@ struct Mesh {
 
 #define GET_2D_POS(x, y, width) x + width *y
 
+#define MAX_TILES 4096 // 64x64
+
 struct TileMap {
-    std::array<unsigned short, 4096> tile_ids;
+    std::array<unsigned short, MAX_TILES> tile_ids;
+    std::array<SPAWN_TARGET, MAX_TILES> spawn_tile_ids;
     unsigned int width;
     unsigned int height;
     unsigned int x_offset = 0;
     unsigned int y_offset = 0;
 
-    TileMap(std::array<unsigned short, 4096> tile_ids, unsigned int width, unsigned int height,
-            unsigned int x_offset = 0, unsigned int y_offset = 0)
-        : tile_ids(tile_ids), width(width), height(height), x_offset(x_offset), y_offset(y_offset) {}
+    TileMap(std::array<unsigned short, MAX_TILES> tile_ids, std::array<unsigned int, MAX_TILES> spawn_tile_ids,
+            unsigned int width, unsigned int height, unsigned int x_offset = 0, unsigned int y_offset = 0)
+        : tile_ids(tile_ids), spawn_tile_ids(spawn_tile_ids), width(width), height(height), x_offset(x_offset),
+          y_offset(y_offset) {}
 
     TileMap(const TileMap &other) {
         this->tile_ids = other.tile_ids;
+        this->spawn_tile_ids = other.spawn_tile_ids;
         this->width = other.width;
         this->height = other.height;
         this->x_offset = other.x_offset;
@@ -384,10 +392,14 @@ enum class TEXTURE_ASSET_ID {
 
     TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
     TEXTURE_BUBBLER = TEXTURE_BUBBLE + 1,
-    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLER + 1,
 
-    TEXTURE_COUNT = TEXTURE_BUBBLE_SHEET + 1
+    TEXTURE_BUBBLE_SHEET = TEXTURE_BUBBLER + 1,
+    TEXTURE_FISH_SHEET = TEXTURE_BUBBLE_SHEET + 1,
+    TEXTURE_TURRET_SHEET = TEXTURE_FISH_SHEET + 1,
+
+    TEXTURE_COUNT = TEXTURE_TURRET_SHEET + 1
 };
+
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {

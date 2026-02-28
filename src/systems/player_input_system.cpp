@@ -4,7 +4,7 @@
 #include <iostream>
 
 float MAX_SPEED_MULTIPLIER = 2;                 // Max speed = move speed * x
-float DECELERATION_MULTIPLIER = 2;              // Deceleration = move speed * x
+float DECELERATION_MULTIPLIER = 4;              // Deceleration = move speed * x
 float QUICK_TURN_MULTIPLIER = 2;                // QT speed = turn speed * x
 float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4;     // How fast we lose rotation velocity
 
