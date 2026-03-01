@@ -454,6 +454,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
     }
 
+    if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
+        ps.current_actions[KeyboardActions::UpgradeDebug] = true;
+        spdlog::debug("Trying to upgrade player");
+    }
+
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_E) {
             if (registry.players.entities.size() == 0) {

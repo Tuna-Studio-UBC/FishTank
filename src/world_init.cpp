@@ -37,6 +37,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     sc.move_speed = config.move_speed;
     sc.turn_speed = config.turn_speed;
 
+    registry.upgrades.emplace(entity);
+
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);

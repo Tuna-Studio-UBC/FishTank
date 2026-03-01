@@ -9,6 +9,7 @@
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
+#include "configs/upgrade_config.hpp"
 #include <array>
 #include <unordered_map>
 #include <vector>
@@ -193,6 +194,14 @@ struct AI {
     AIAction current_state = AIAction::IDLE;
 };
 
+struct Upgrades {
+    UpgradeInstance upgrade_instances[UPGRADE_TYPE::UPGRADE_COUNT] = {
+        UpgradeInstance(ATTACK_UPGRADE_CONFIG), 
+        UpgradeInstance(MAX_AMMO_UPGRADE_CONFIG), 
+        UpgradeInstance(MAX_HP_UPGRADE_CONFIG)
+    };
+};
+
 #pragma endregion Behaviour
 
 #pragma region Pickups
@@ -292,7 +301,7 @@ struct ScreenState {
     float darken_screen_factor = -1;
 };
 
-enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, KeyboardActionsCount };
+enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, UpgradeDebug, KeyboardActionsCount };
 
 struct KeyboardInputState {
     bool current_actions[KeyboardActions::KeyboardActionsCount];

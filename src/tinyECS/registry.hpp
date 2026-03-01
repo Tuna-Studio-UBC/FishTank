@@ -43,6 +43,7 @@ class ECSRegistry {
     ComponentContainer<AI> ais;
     ComponentContainer<BezierPath> beziers;
     ComponentContainer<Boid> boids;
+    ComponentContainer<Upgrades> upgrades;
 
     // Pickups
     ComponentContainer<PickUp> pickUp;
@@ -119,6 +120,7 @@ class ECSRegistry {
         registry_list.push_back(&ais);
         registry_list.push_back(&beziers);
         registry_list.push_back(&boids);
+        registry_list.push_back(&upgrades);
 
         // Pickups
         registry_list.push_back(&pickUp);
