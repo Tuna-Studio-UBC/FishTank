@@ -15,57 +15,42 @@ void CollisionSystem::step(float elapsed_ms) {
 
         // narrow-phase check: if either has a mesh collider, run mesh-based test
         bool passNarrowPhase = true;
-        if (registry.meshColliders.has(entity_a) || registry.meshColliders.has(entity_b)) {
-            // identify shapes
-            bool aIsBullet = registry.bullet.has(entity_a);
-            bool bIsBullet = registry.bullet.has(entity_b);
-            if (aIsBullet && registry.meshColliders.has(entity_b)) {
-                Motion &mb = registry.motions.get(entity_b);
-                MeshCollider &mc = registry.meshColliders.get(entity_b);
-                Motion &mBullet = registry.motions.get(entity_a);
-                vec2 bullet_pos = mBullet.position;
-                float radius = std::max(get_bounding_box(mBullet).x, get_bounding_box(mBullet).y) / 2.f;
-                passNarrowPhase = circleIntersectsPolygon(bullet_pos, radius, mc.vertices, mb, mc.authoring_px);
-            } else if (bIsBullet && registry.meshColliders.has(entity_a)) {
-                Motion &ma = registry.motions.get(entity_a);
-                MeshCollider &mc = registry.meshColliders.get(entity_a);
-                Motion &mBullet = registry.motions.get(entity_b);
-                vec2 bullet_pos = mBullet.position;
-                float radius = std::max(get_bounding_box(mBullet).x, get_bounding_box(mBullet).y) / 2.f;
-                passNarrowPhase = circleIntersectsPolygon(bullet_pos, radius, mc.vertices, ma, mc.authoring_px);
-            } else if (registry.meshColliders.has(entity_a) && registry.wall.has(entity_b)) {
-                // mesh (A) vs wall (B) -> use SAT on world-space polygons (MTV presence = intersection)
-                MeshCollider &mc = registry.meshColliders.get(entity_a);
-                Motion &ma = registry.motions.get(entity_a);
-                Motion &mw = registry.motions.get(entity_b);
+        bool is_entity_a_mesh = registry.meshColliders.has(entity_a);
+        bool is_entity_b_mesh = registry.meshColliders.has(entity_b);
+        if (is_entity_a_mesh && is_entity_b_mesh) {
+            // mesh vs mesh
+            MeshCollider &mca = registry.meshColliders.get(entity_a);
+            MeshCollider &mcb = registry.meshColliders.get(entity_b);
+            Motion &motionA = registry.motions.get(entity_a);
+            Motion &motionB = registry.motions.get(entity_b);
+            auto polyA_world = transformPolygon(mca.vertices, motionA, mca.authoring_px);
+            auto polyB_world = transformPolygon(mcb.vertices, motionB, mcb.authoring_px);
+            vec2 tmpMtv;
+            passNarrowPhase = computePolygonMTV(polyA_world, polyB_world, tmpMtv);
+        } else if (is_entity_a_mesh || is_entity_b_mesh) {
+            Entity meshed_entity = is_entity_a_mesh ? entity_a : entity_b;
+            Entity non_meshed_entity = is_entity_a_mesh ? entity_b : entity_a;
 
-                auto polyA = transformPolygon(mc.vertices, ma, mc.authoring_px);
-                vec2 half = mw.scale / 2.f;
-                std::vector<vec2> aabbPoly = {mw.position + vec2{-half.x, -half.y}, mw.position + vec2{half.x, -half.y},
-                                              mw.position + vec2{half.x, half.y}, mw.position + vec2{-half.x, half.y}};
+            MeshCollider &mc = registry.meshColliders.get(meshed_entity);
+            Motion &motionM = registry.motions.get(meshed_entity);
+
+            // identify shapes
+            if (registry.bullet.has(non_meshed_entity)) {
+                // mesh vs bullet
+                Motion &mBullet = registry.motions.get(non_meshed_entity);
+                float radius = std::max(get_bounding_box(mBullet).x, get_bounding_box(mBullet).y) / 2.f;
+                passNarrowPhase =
+                    circleIntersectsPolygon(mBullet.position, radius, mc.vertices, motionM, mc.authoring_px);
+            } else if (registry.wall.has(non_meshed_entity)) {
+                // mesh vs wall -> use SAT on world-space polygons (MTV presence = intersection)
+                Motion &mWall = registry.motions.get(non_meshed_entity);
+                auto polyA = transformPolygon(mc.vertices, motionM, mc.authoring_px);
+                vec2 half = mWall.scale / 2.f;
+                std::vector<vec2> aabbPoly = {
+                    mWall.position + vec2{-half.x, -half.y}, mWall.position + vec2{half.x, -half.y},
+                    mWall.position + vec2{half.x, half.y}, mWall.position + vec2{-half.x, half.y}};
                 vec2 tmpMtv;
                 passNarrowPhase = computePolygonMTV(polyA, aabbPoly, tmpMtv);
-            } else if (registry.wall.has(entity_a) && registry.meshColliders.has(entity_b)) {
-                // wall (A) vs mesh (B)
-                MeshCollider &mc = registry.meshColliders.get(entity_b);
-                Motion &mb = registry.motions.get(entity_b);
-                Motion &mw = registry.motions.get(entity_a);
-
-                auto polyB = transformPolygon(mc.vertices, mb, mc.authoring_px);
-                vec2 half = mw.scale / 2.f;
-                std::vector<vec2> aabbPoly = {mw.position + vec2{-half.x, -half.y}, mw.position + vec2{half.x, -half.y},
-                                              mw.position + vec2{half.x, half.y}, mw.position + vec2{-half.x, half.y}};
-                vec2 tmpMtv;
-                passNarrowPhase = computePolygonMTV(polyB, aabbPoly, tmpMtv);
-            } else if (registry.meshColliders.has(entity_a) && registry.meshColliders.has(entity_b)) {
-                MeshCollider &mca = registry.meshColliders.get(entity_a);
-                MeshCollider &mcb = registry.meshColliders.get(entity_b);
-                Motion &motionA = registry.motions.get(entity_a);
-                Motion &motionB = registry.motions.get(entity_b);
-                auto polyA_world = transformPolygon(mca.vertices, motionA, mca.authoring_px);
-                auto polyB_world = transformPolygon(mcb.vertices, motionB, mcb.authoring_px);
-                vec2 tmpMtv;
-                passNarrowPhase = computePolygonMTV(polyA_world, polyB_world, tmpMtv);
             }
         }
 
@@ -100,7 +85,8 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         }
         // Bullet hit enemy
         else if (registry.enemies.has(other_entity)) {
-            if (bullet.owner != other_entity && registry.health.has(other_entity)) {
+            if (bullet.owner != other_entity && registry.health.has(other_entity) &&
+                !registry.enemies.has(bullet.owner)) { // Ignore between enemies
                 HealDamageSystem::add_damage(other_entity, bullet.damage);
 
                 // Temp use bullet collision as trigger
@@ -122,7 +108,10 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         }
         // Bullet hit bullet
         else if (registry.bullet.has(other_entity)) {
-            if (bullet.owner != registry.bullet.get(other_entity).owner) {
+            Entity other_bullet_owner = registry.bullet.get(other_entity).owner;
+            if (bullet.owner != other_bullet_owner &&
+                !(registry.enemies.has(bullet.owner) &&
+                  registry.enemies.has(other_bullet_owner))) { // Ignore between enemies
                 registry.remove_all_components_of(bullet_entity);
                 registry.remove_all_components_of(other_entity);
             }
@@ -251,17 +240,10 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
             float overlap_x = (wall_half_size.x + actor_half_size.x) - abs(seperation.x);
             float overlap_y = (wall_half_size.y + actor_half_size.y) - abs(seperation.y);
 
-            if (overlap_x < overlap_y) {
-                if (seperation.x > 0)
-                    actor_motion.position.x += overlap_x;
-                else
-                    actor_motion.position.x -= overlap_x;
-            } else {
-                if (seperation.y > 0)
-                    actor_motion.position.y += overlap_y;
-                else
-                    actor_motion.position.y -= overlap_y;
-            }
+            if (overlap_x < overlap_y)
+                actor_motion.position.x += (seperation.x > 0) ? overlap_x : -overlap_x;
+            else
+                actor_motion.position.y += (seperation.y > 0) ? overlap_y : -overlap_y;
             return;
         }
 
