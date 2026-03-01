@@ -11,7 +11,6 @@
 #include "configs/spawn_target_config.hpp"
 #include <array>
 #include <unordered_map>
-#include <vector>
 #include <utilities/parse_tree.hpp>
 
 #pragma region Entity
@@ -163,7 +162,7 @@ struct BulletRequest {
 };
 
 struct BezierPath {
-    vec2 p0 = vec2(- 1.f);
+    vec2 p0 = vec2(-1.f);
     vec2 p1 = vec2(-1.f);
     vec2 p2 = vec2(-1.f);
     vec2 p3 = vec2(-1.f);
@@ -307,18 +306,41 @@ struct MouseInputState {
     MouseActions current_action = MouseActionsCount;
 };
 
+// TODO: Move to config
+enum Tutorial { MOVEMENT = 1, HAZARDS, HEALING, AMMUNITION, COMBAT };
+
+struct TutorialStep {
+    Tutorial id;
+    int current_step = 1;
+    int total_steps; // TODO: Store event triggers instead
+    TutorialStep(Tutorial id, int total_steps) : id(id), total_steps(total_steps) {}
+};
+
+const std::vector<TutorialStep> TUTORIAL_STEPS = {
+    TutorialStep(Tutorial::MOVEMENT, 2),   TutorialStep(Tutorial::HAZARDS, 1), TutorialStep(Tutorial::HEALING, 1),
+    TutorialStep(Tutorial::AMMUNITION, 1), TutorialStep(Tutorial::COMBAT, 2),
+};
+
 struct Progress {
     int wave = 0;
     int level = 0;
     int remaining_enemies = -1;
-    bool game_over = false;
-    bool beat_level = false;
+
+    // Game state - Tutorial
+    bool is_tutorial = false;
+    bool is_tutorial_step_called = false;
+    Tutorial tutorial_step_id = Tutorial::MOVEMENT;
+    std::vector<TutorialStep> tutorial_steps;
+
+    // Game state - Main
+    bool is_paused = false;
+    bool is_game_over = false;
+    bool has_beat_level = false;
 };
 
 struct TutorialTrigger {
-    int id;
-
-    TutorialTrigger(int id) : id(id) {};
+    Tutorial id;
+    TutorialTrigger(Tutorial id) : id(id) {};
 };
 #pragma endregion Game State
 
@@ -456,7 +478,8 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_PROJECTILE = TEXTURE_GREYBOX_TILESET2 + 1,
 
     TEXTURE_BLACK = TEXTURE_PROJECTILE + 1,
-    TEXTURE_WIN_OVERLAY = TEXTURE_BLACK + 1,
+    TEXTURE_TUTORIAL_COMPLETE_OVERLAY = TEXTURE_BLACK + 1,
+    TEXTURE_WIN_OVERLAY = TEXTURE_TUTORIAL_COMPLETE_OVERLAY + 1,
     TEXTURE_LOSE_OVERLAY = TEXTURE_WIN_OVERLAY + 1,
 
     TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,

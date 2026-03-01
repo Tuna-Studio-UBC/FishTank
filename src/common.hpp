@@ -31,13 +31,26 @@ using namespace glm;
 //
 inline const std::string ROOT_DIR = std::string(PROJECT_SOURCE_DIR);
 
-enum FilePath { AUDIO, MAPS, MESHES, SHADERS, SPRITE_SHEETS, TEXTURES, TILESETS, TILESET_IMAGES, DECISION_TREES };
+enum FilePath {
+    AUDIO,
+    FONTS,
+    MAPS,
+    MESHES,
+    SHADERS,
+    SPRITE_SHEETS,
+    TEXTURES,
+    TILESETS,
+    TILESET_IMAGES,
+    DECISION_TREES
+};
 
 inline std::string get_path(FilePath path, const std::string &file_name) {
     std::string file = std::string(file_name);
     switch (path) {
     case AUDIO:
         return ROOT_DIR + "/res/audio/" + file;
+    case FONTS:
+        return ROOT_DIR + "/res/fonts/" + file;
     case MAPS:
         return ROOT_DIR + "/res/maps/" + file;
     case MESHES:
