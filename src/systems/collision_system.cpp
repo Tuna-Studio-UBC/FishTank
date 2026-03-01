@@ -1,8 +1,8 @@
 #include "collision_system.hpp"
-#include "mesh_collision.hpp"
-#include <spdlog/spdlog.h>
 #include "../world_init.hpp"
 #include "heal_damage_system.hpp"
+#include "mesh_collision.hpp"
+#include <spdlog/spdlog.h>
 
 vec2 get_bounding_box(const Motion &motion);
 
@@ -41,12 +41,8 @@ void CollisionSystem::step(float elapsed_ms) {
 
                 auto polyA = transformPolygon(mc.vertices, ma, mc.authoring_px);
                 vec2 half = mw.scale / 2.f;
-                std::vector<vec2> aabbPoly = {
-                    mw.position + vec2{-half.x, -half.y},
-                    mw.position + vec2{ half.x, -half.y},
-                    mw.position + vec2{ half.x,  half.y},
-                    mw.position + vec2{-half.x,  half.y}
-                };
+                std::vector<vec2> aabbPoly = {mw.position + vec2{-half.x, -half.y}, mw.position + vec2{half.x, -half.y},
+                                              mw.position + vec2{half.x, half.y}, mw.position + vec2{-half.x, half.y}};
                 vec2 tmpMtv;
                 passNarrowPhase = computePolygonMTV(polyA, aabbPoly, tmpMtv);
             } else if (registry.wall.has(entity_a) && registry.meshColliders.has(entity_b)) {
@@ -57,12 +53,8 @@ void CollisionSystem::step(float elapsed_ms) {
 
                 auto polyB = transformPolygon(mc.vertices, mb, mc.authoring_px);
                 vec2 half = mw.scale / 2.f;
-                std::vector<vec2> aabbPoly = {
-                    mw.position + vec2{-half.x, -half.y},
-                    mw.position + vec2{ half.x, -half.y},
-                    mw.position + vec2{ half.x,  half.y},
-                    mw.position + vec2{-half.x,  half.y}
-                };
+                std::vector<vec2> aabbPoly = {mw.position + vec2{-half.x, -half.y}, mw.position + vec2{half.x, -half.y},
+                                              mw.position + vec2{half.x, half.y}, mw.position + vec2{-half.x, half.y}};
                 vec2 tmpMtv;
                 passNarrowPhase = computePolygonMTV(polyB, aabbPoly, tmpMtv);
             } else if (registry.meshColliders.has(entity_a) && registry.meshColliders.has(entity_b)) {
@@ -269,7 +261,7 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
 
             // Build actor polygon in world-space
             if (registry.meshPtrs.has(entity_a)) {
-                Mesh* mesh = registry.meshPtrs.get(entity_a);
+                Mesh *mesh = registry.meshPtrs.get(entity_a);
                 float base = mesh->original_size.x; // or .y (use appropriate axis)
                 auto polyActorWorld = transformPolygon(mc.vertices, actor_motion, mc.authoring_px);
                 // Actor polygon bbox
@@ -284,11 +276,8 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
                 // Wall AABB world polygon
                 vec2 half = wall_motion.scale / 2.f;
                 std::vector<vec2> aabbPoly = {
-                    wall_motion.position + vec2{-half.x, -half.y},
-                    wall_motion.position + vec2{ half.x, -half.y},
-                    wall_motion.position + vec2{ half.x,  half.y},
-                    wall_motion.position + vec2{-half.x,  half.y}
-                };
+                    wall_motion.position + vec2{-half.x, -half.y}, wall_motion.position + vec2{half.x, -half.y},
+                    wall_motion.position + vec2{half.x, half.y}, wall_motion.position + vec2{-half.x, half.y}};
                 vec2 minW = aabbPoly[0], maxW = aabbPoly[0];
                 for (const vec2 &p : aabbPoly) {
                     minW.x = std::min(minW.x, p.x);
@@ -299,16 +288,17 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
 
                 // Log for diagnostics
                 /*spdlog::debug(
-                    "COLLISION DEBUG entity={} actor_scale=({}, {}) poly_min=({}, {}) poly_max=({}, {}) wall_min=({}, {}) wall_max=({}, {})",
-                    entity_a.id(), actor_motion.scale.x, actor_motion.scale.y, minP.x, minP.y, maxP.x, maxP.y, minW.x, minW.y,
-                    maxW.x, maxW.y);*/ 
+                    "COLLISION DEBUG entity={} actor_scale=({}, {}) poly_min=({}, {}) poly_max=({}, {}) wall_min=({},
+                   {}) wall_max=({}, {})", entity_a.id(), actor_motion.scale.x, actor_motion.scale.y, minP.x, minP.y,
+                   maxP.x, maxP.y, minW.x, minW.y, maxW.x, maxW.y);*/
 
                 // Compute MTV
                 vec2 mtv;
                 if (computePolygonMTV(polyActorWorld, aabbPoly, mtv)) {
                     // Collision detected — let PhysicsSystem handle motion resolution.
-                    spdlog::debug("CollisionSystem detected mesh-vs-wall for entity {} mtv=({}, {}); physics will resolve",
-                                  entity_a.id(), mtv.x, mtv.y);
+                    spdlog::debug(
+                        "CollisionSystem detected mesh-vs-wall for entity {} mtv=({}, {}); physics will resolve",
+                        entity_a.id(), mtv.x, mtv.y);
                     // Do NOT modify actor_motion.position or actor_motion.velocity here.
                 } else {
                     spdlog::debug("No MTV (no intersection) for entity {}", entity_a.id());
@@ -327,11 +317,8 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
                 // Wall AABB world polygon
                 vec2 half = wall_motion.scale / 2.f;
                 std::vector<vec2> aabbPoly = {
-                    wall_motion.position + vec2{-half.x, -half.y},
-                    wall_motion.position + vec2{ half.x, -half.y},
-                    wall_motion.position + vec2{ half.x,  half.y},
-                    wall_motion.position + vec2{-half.x,  half.y}
-                };
+                    wall_motion.position + vec2{-half.x, -half.y}, wall_motion.position + vec2{half.x, -half.y},
+                    wall_motion.position + vec2{half.x, half.y}, wall_motion.position + vec2{-half.x, half.y}};
                 vec2 minW = aabbPoly[0], maxW = aabbPoly[0];
                 for (const vec2 &p : aabbPoly) {
                     minW.x = std::min(minW.x, p.x);
@@ -342,16 +329,17 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
 
                 // log for diagnostics
                 /* spdlog::debug(
-                    "COLLISION DEBUG entity={} actor_scale=({}, {}) poly_min=({}, {}) poly_max=({}, {}) wall_min=({}, {}) wall_max=({}, {})",
-                    entity_a.id(), actor_motion.scale.x, actor_motion.scale.y, minP.x, minP.y, maxP.x, maxP.y, minW.x, minW.y,
-                    maxW.x, maxW.y);
+                    "COLLISION DEBUG entity={} actor_scale=({}, {}) poly_min=({}, {}) poly_max=({}, {}) wall_min=({},
+                   {}) wall_max=({}, {})", entity_a.id(), actor_motion.scale.x, actor_motion.scale.y, minP.x, minP.y,
+                   maxP.x, maxP.y, minW.x, minW.y, maxW.x, maxW.y);
                     */
                 // Compute MTV
                 vec2 mtv;
                 if (computePolygonMTV(polyActorWorld, aabbPoly, mtv)) {
                     // Collision detected — let PhysicsSystem handle motion resolution.
-                    spdlog::debug("CollisionSystem detected mesh-vs-wall for entity {} mtv=({}, {}); physics will resolve",
-                                  entity_a.id(), mtv.x, mtv.y);
+                    spdlog::debug(
+                        "CollisionSystem detected mesh-vs-wall for entity {} mtv=({}, {}); physics will resolve",
+                        entity_a.id(), mtv.x, mtv.y);
                     // Do NOT modify actor_motion.position or actor_motion.velocity here.
                 } else {
                     spdlog::debug("No MTV (no intersection) for entity {}", entity_a.id());
@@ -419,12 +407,16 @@ void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b,
     }
 };
 
-void CollisionSystem::handle_tutorial_collision(Entity entity_a, Entity entity_b) { 
-    if (registry.players.has(entity_a) && registry.tutorialTriggers.has(entity_b))
-    {
-        // Stub function!!
+void CollisionSystem::handle_tutorial_collision(Entity entity_a, Entity entity_b) {
+    if (registry.players.has(entity_a) && registry.tutorialTriggers.has(entity_b)) {
         TutorialTrigger &tt = registry.tutorialTriggers.get(entity_b);
-        spdlog::debug("Triggered tutorial {}", tt.id);
+
+        Progress &progress = registry.progress.components[0];
+        progress.is_paused = true;
+        progress.is_tutorial_step_called = true;
+        progress.tutorial_step_id = tt.id;
+
+        spdlog::debug("Triggered tutorial {}", (int)progress.tutorial_step_id);
         registry.remove_all_components_of(entity_b);
     }
 }

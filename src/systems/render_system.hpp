@@ -58,14 +58,11 @@ class RenderSystem {
 
         // Textures
         get_path(FilePath::TEXTURES, "white_bubble.png"),
-        get_path(FilePath::TEXTURES, "black.png"),
-        get_path(FilePath::TEXTURES, "win.png"),
-        get_path(FilePath::TEXTURES, "lose.png"),
-        get_path(FilePath::TEXTURES, "bubble.png"),
-        get_path(FilePath::TEXTURES, "bubbler.png"),
-        
-        // Effects
-        get_path(FilePath::TEXTURES, "smoke.png"),
+
+        get_path(FilePath::TEXTURES, "black.png"), get_path(FilePath::TEXTURES, "tutorial_complete.png"),
+        get_path(FilePath::TEXTURES, "win.png"), get_path(FilePath::TEXTURES, "lose.png"),
+
+        get_path(FilePath::TEXTURES, "bubble.png"), get_path(FilePath::TEXTURES, "bubbler.png"),
 
         // Sprite sheets
         get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"),

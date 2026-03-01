@@ -8,8 +8,8 @@
 #include <iostream>
 
 // internal
-#include "systems/animation_system.hpp"
 #include "systems/ai/ai_system.hpp"
+#include "systems/animation_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/death_system.hpp"
@@ -43,8 +43,6 @@ int main() {
     CameraSystem camera_system;
     AnimationSystem animation_system;
     TileMapSystem tilemap_system;
-
-    GameUI game_ui;
 
     // Configure spdlog
     spdlog::set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] [%l]%$ %v");
@@ -104,10 +102,13 @@ int main() {
         }
 
         // Draw GUIs
+        game_ui.draw_pause_menu();
         game_ui.draw_fps_counter(&world_system);
         game_ui.draw_healthbar();
         game_ui.draw_minimap();
         game_ui.draw_ammo();
+
+        tutorial_ui.draw_tutorial_step();
 
 // Debugging UI
 #ifdef ENABLE_DEBUG_UI
