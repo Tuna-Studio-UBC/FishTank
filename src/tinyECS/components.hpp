@@ -322,6 +322,20 @@ struct TutorialTrigger {
 };
 #pragma endregion Game State
 
+#pragma region Sound
+// =================================================================================
+// Sound Effect
+// =================================================================================
+enum class SOUND_EVENT {
+    PLAYER_SHOT,
+};
+
+struct SoundRequest {
+    SOUND_EVENT type;
+};
+
+#pragma endregion Sound
+
 #pragma region Rendering
 // =================================================================================
 // Rendering

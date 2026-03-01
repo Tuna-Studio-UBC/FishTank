@@ -65,6 +65,9 @@ class ECSRegistry {
     ComponentContainer<Progress> progress;
     ComponentContainer<TutorialTrigger> tutorialTriggers;
 
+    // Sound
+    ComponentContainer<SoundRequest> sound_requests;
+
     // Rendering
     ComponentContainer<Mesh *> meshPtrs;
     ComponentContainer<RenderRequest> renderRequests;
@@ -141,6 +144,9 @@ class ECSRegistry {
         registry_list.push_back(&progress);
         registry_list.push_back(&tutorialTriggers);
 
+        // Sound
+        registry_list.push_back(&sound_requests);
+        
         // Rendering
         registry_list.push_back(&meshPtrs);
         registry_list.push_back(&renderRequests);
