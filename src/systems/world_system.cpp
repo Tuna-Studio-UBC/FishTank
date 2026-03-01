@@ -123,6 +123,8 @@ bool WorldSystem::start_and_load_sounds() {
         fprintf(stderr, "Failed to load SFX\n");
     }
 
+    audio_system.play_bgm("bgm.wav", 45);
+
     /*background_music = Mix_LoadMUS(get_path(FilePath::AUDIO, "music.wav").c_str());
     invader_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "invader_hit.wav").c_str());
     tower_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
@@ -379,6 +381,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
     }
     registry.bullet_requests.clear();
+
+    for (auto &sr : registry.sound_requests.components) {
+        if (sr.type == SOUND_EVENT::PLAYER_SHOT) {
+            audio_system.play_player_shot_center(128);
+        }
+    }
+    registry.sound_requests.clear();
 
     // Remove debug info from the last step
     while (registry.debugComponents.entities.size() > 0)
