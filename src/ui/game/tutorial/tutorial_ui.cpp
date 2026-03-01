@@ -17,7 +17,7 @@ void TutorialUI::draw_tutorial_step() {
     ImGui::Begin("Tutorial", nullptr, window_flags);
 
     Tutorial part = progress.tutorial_step_id;
-    assert(part > 0 && part <= progress.tutorial_steps.size(), "Invalid tutorial step!");
+    assert((part > 0 && part <= progress.tutorial_steps.size()) && "Invalid tutorial step!");
     TutorialStep &tutorial = progress.tutorial_steps[part - 1];
 
     switch (part) {
