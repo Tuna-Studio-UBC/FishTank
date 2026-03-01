@@ -19,6 +19,7 @@ struct GameUI {
     void draw_ammo();
     void draw_respawn(WorldSystem *world_system);
     void draw_minimap();
+    void draw_pause_menu();
     inline void draw_demo() { ImGui::ShowDemoWindow(); }
 };
 

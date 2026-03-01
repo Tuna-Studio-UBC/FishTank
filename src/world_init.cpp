@@ -471,8 +471,6 @@ Entity createWall(const vec2 &position, const vec2 &scale) {
     return entity;
 }
 
-#define DRAW_TUTORIAL_TRIGGERS
-
 Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutorial id) {
     Entity entity = Entity("Tutorial Trigger " + id);
 
@@ -482,6 +480,7 @@ Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutoria
     motion.position = position;
     motion.scale = size;
 
+// #define DRAW_TUTORIAL_TRIGGERS
 #ifdef DRAW_TUTORIAL_TRIGGERS
     registry.colors.emplace(entity, 1.f, 0.f, 0.f);
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,

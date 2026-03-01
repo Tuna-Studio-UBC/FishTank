@@ -102,6 +102,7 @@ int main() {
         }
 
         // Draw GUIs
+        game_ui.draw_pause_menu();
         game_ui.draw_fps_counter(&world_system);
         game_ui.draw_healthbar();
         game_ui.draw_minimap();

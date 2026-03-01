@@ -257,9 +257,7 @@ void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera
     load_level_tutorial(progress);
 
     glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
-    glm::vec2 position = vec2(2.f, WINDOW_HEIGHT_PX - 24);
-    // createText("FPS: 0", position, 1.f, font_color);
-    createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
+    createText("Tutorial", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 }
 
 void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg) {
@@ -282,6 +280,7 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
         progress_p = &registry.progress.components[0];
     }
     Progress &progress = *progress_p;
+    progress.level = 1;
 
     load_level(progress);
     start_wave(progress);
@@ -330,10 +329,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     Progress &progress = registry.progress.components[0];
 
-    // Check if game is paused
-    if (progress.is_paused)
-        return false;
-
     // Check if game is over
     if (progress.is_game_over == true) {
         ScreenState &screen = registry.screenStates.components[0];
@@ -343,15 +338,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         return false;
     }
 
+    // Check if game is paused
+    if (progress.is_paused)
+        return false;
+
     if (progress.remaining_enemies == 0) {
         spdlog::info("Wave {} complete, starting next wave.", progress.wave);
         progress.wave += 1;
 
-        // ! FOR TESTING !
-        if (registry.text.components.size() > 0)
-            registry.text.components[0].text = "Wave: " + std::to_string(progress.wave);
-
         if (WAVE_CONFIGS.size() > progress.wave && progress.wave < LEVEL_CONFIGS[progress.level].last_wave) {
+            // TODO: Maybe change this to a GUI overlay
+            if (registry.text.components.size() > 0) {
+                if (!progress.is_tutorial)
+                    registry.text.components[0].text = "Wave: " + std::to_string(progress.wave);
+                else
+                    registry.text.components[0].text = "Tutorial";
+            }
             start_wave(progress);
         } else {
             progress.is_game_over = true;
@@ -544,13 +546,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
         if (key == GLFW_KEY_R) {
             auto &progress = registry.progress.components[0];
-            if (progress.is_tutorial) {
+            if (progress.is_game_over)
                 restart_game();
-            } else {
-                if (progress.is_game_over) {
-                    restart_game();
-                }
-            }
         }
 
         // TODO: Change progression behaviour in the future
@@ -570,23 +567,47 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                     spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
                 }
             } else {
-                if (progress.has_beat_level)
+                if (progress.has_beat_level && !progress.is_game_over || progress.is_tutorial && progress.is_game_over)
                     load_next_level();
             }
         }
 
+#pragma region DEBUG KEYS
+
+// #define ENABLE_LOAD_TUTORIAL
+// #define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
+
+#ifdef ENABLE_LOAD_TUTORIAL
+        if (key == GLFW_KEY_T) {
+            auto &progress = registry.progress.components[0];
+            progress.is_tutorial = true;
+            restart_game();
+        }
+#endif
+
+#ifdef ENABLE_SKIP_WAVE
+        if (key == GLFW_KEY_Q) {
+            auto &progress = registry.progress.components[0];
+            if (progress.is_tutorial) {
+                progress.is_tutorial = false;
+                progress.is_tutorial_step_called = false;
+                progress.has_beat_level = true;
+                load_next_level();
+            } else {
+                for (Entity e : registry.enemies.entities)
+                    registry.remove_all_components_of(e);
+
+                progress.remaining_enemies = 0;
+            }
+        }
+#endif
+
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
         if (key == GLFW_KEY_P) {
             auto &progress = registry.progress.components[0];
-
-            if (!progress.is_tutorial_step_called) {
+            if (!progress.is_tutorial_step_called)
                 progress.is_paused = !progress.is_paused;
-                if (progress.is_paused)
-                    spdlog::info("Game paused");
-                else
-                    spdlog::info("Game unpaused");
-            }
         }
 #endif
     }
@@ -595,6 +616,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     if (key == GLFW_KEY_L) {
         registry.list_all_components();
     }
+
+#pragma endregion DEBUG KEYS
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -619,9 +642,16 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 }
 
 void WorldSystem::restart_game() {
+    bool is_tutorial = registry.progress.components[0].is_tutorial;
+
     particle_system.clear_all_particles();
     registry.clear_all_components();
-    init_tutorial(renderer, camera_system, tilemap_system);
+
+    if (is_tutorial) {
+        init_tutorial(renderer, camera_system, tilemap_system);
+    } else {
+        init(renderer, camera_system, tilemap_system);
+    }
 }
 
 void WorldSystem::load_next_level() {
