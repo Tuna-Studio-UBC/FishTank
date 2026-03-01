@@ -61,6 +61,7 @@ class WorldSystem {
 
   private:
     void start_wave(Progress &progress);
+    void clear_level_objects();
     void load_level_tutorial(Progress &progress);
     void load_level(Progress &progress);
     void load_next_level();
@@ -77,6 +78,10 @@ class WorldSystem {
     TileMapSystem *tilemap_system;
     RenderSystem *renderer;
     CameraSystem *camera_system;
+
+    std::vector<std::vector<Entity> *> entities_to_clear = {&registry.enemies.entities, &registry.hazard.entities,
+                                                            &registry.bullet.entities,  &registry.pickUp.entities,
+                                                            &registry.bells.entities,   &registry.bubblers.entities};
 
     // grid
     std::vector<Entity> grid_lines;

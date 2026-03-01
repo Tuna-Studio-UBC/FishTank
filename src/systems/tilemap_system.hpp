@@ -9,9 +9,9 @@
 #include "tinyECS/components.hpp"
 
 const enum class MapType {
-    TEST_MAP = 0,
-    TEST_MAP2 = TEST_MAP + 1,
     TUTORIAL_MAP,
+    TEST_MAP,
+    TEST_MAP2,
 };
 
 class TileMapSystem {
@@ -30,7 +30,6 @@ class TileMapSystem {
     static Entity load_test_map2();
     static Entity load_tutorial_map();
 
-
   public:
     TileMapSystem();
     ~TileMapSystem();
@@ -39,6 +38,7 @@ class TileMapSystem {
     vec2 get_random_position(SPAWN_TARGET spawn_target);
     Entity get_current_map() const { return current_map; }
 
+    void clear_map();
     Entity load_map(MapType map_type = MapType::TEST_MAP);
 
     std::unordered_map<MapType, std::function<Entity()>> LOAD_MAP_FN = {};

@@ -131,7 +131,7 @@ void TutorialUI::draw_tutorial_hazards(TutorialStep tutorial) {
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "In the game you'll encounter some hazards, such as mines (black circles).";
+        text = "In the game you'll encounter some hazards, such as mines.";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
             ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
@@ -162,8 +162,7 @@ void TutorialUI::draw_tutorial_healing(TutorialStep tutorial) {
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text =
-            "You'll also encounter some healing orbs (green circles).\n\nJust swim over them to replenish your health!";
+        text = "You'll also encounter some healing orbs.\n\nJust swim over them to replenish your health!";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
         ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
@@ -193,7 +192,7 @@ void TutorialUI::draw_tutorial_ammo(TutorialStep tutorial) {
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "Bubblers (brown mounds) will replenish your ammo.\n\nSince you only have a limited amount of ammo, be "
+        text = "Bubblers will replenish your ammo.\n\nSince you only have a limited amount of ammo, be "
                "sure to recharge whenever possible!\n\nJust swim over them to recover some ammo!";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(

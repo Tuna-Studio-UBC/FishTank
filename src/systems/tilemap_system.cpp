@@ -35,26 +35,19 @@ void print_tileset(TileSet &tileset) {
 }
 #endif
 
-void generate_collision(TileMap &tilemap, TileSet &tileset) {
-    auto &tileset_collision_info = tileset.collisions;
-    for (int y = 1; y < tilemap.height - 1; y++) {
-        for (int x = 1; x < tilemap.width - 1; x++) {
-            if (tileset_collision_info[tilemap.tile_ids[GET_2D_POS(x, y, tilemap.width)] - 1]) {
-                createWall(vec2(x * TILE_SIZE_PX, y * TILE_SIZE_PX));
-            }
-        }
-    }
-}
+// void generate_collision(TileMap &tilemap, TileSet &tileset) {
+//     auto &tileset_collision_info = tileset.collisions;
+//     for (int y = 1; y < tilemap.height - 1; y++) {
+//         for (int x = 1; x < tilemap.width - 1; x++) {
+//             if (tileset_collision_info[tilemap.tile_ids[GET_2D_POS(x, y, tilemap.width)] - 1]) {
+//                 createWall(vec2(x * TILE_SIZE_PX, y * TILE_SIZE_PX));
+//             }
+//         }
+//     }
+// }
 
-TileMapSystem::TileMapSystem() {
-    // seeding rng with random device
-    rng = std::default_random_engine(std::random_device()());
-}
-
-TileMapSystem::~TileMapSystem() {
-    registry.tilemaps.clear();
-    registry.tilesets.clear();
-}
+TileMapSystem::TileMapSystem() { rng = std::default_random_engine(std::random_device()()); }
+TileMapSystem::~TileMapSystem() { clear_map(); }
 
 Entity TileMapSystem::init_tiles(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id,
                                  int layer) {
@@ -147,7 +140,17 @@ vec2 TileMapSystem::get_random_position(SPAWN_TARGET spawn_target) {
     return vec2(tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2), tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2));
 }
 
+void TileMapSystem::clear_map() {
+    for (auto entity : registry.tilemaps.entities)
+        registry.remove_all_components_of(entity);
+    for (auto entity : registry.tilesets.entities)
+        registry.remove_all_components_of(entity);
+    for (auto entity : registry.wall.entities)
+        registry.remove_all_components_of(entity);
+}
+
 Entity TileMapSystem::load_map(MapType map_type) {
+    clear_map();
     current_map = LOAD_MAP_FN[map_type]();
     spdlog::debug("Loaded tile map: {}", current_map.name());
     return current_map;
