@@ -438,9 +438,12 @@ Entity createMine(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = {40.f, 40.f};
 
-    registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_MINE_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 3;
+    an.frame_count = 3;
+    an.frame_time = 500;
 
     return entity;
 }
