@@ -39,6 +39,10 @@ Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutoria
 
 Entity createCamera(vec2 position);
 
+// These effects are temporary and standalone
+Entity createEffectSmoke(const vec2 position);
+Entity createEffectBubbles(const vec2 position);
+
 // Component can be: DamageMultiplier, SpeedMultiplier
 template <typename Component, typename... Args>
 Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&...args) {
