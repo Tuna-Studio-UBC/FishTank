@@ -40,12 +40,23 @@ Items relating directly to the player's view. (Entity interactions are in a sepa
 
 - Player can use `Left-Click` on their mouse to shoot a projectile. The projectile should travel in the direction of the cursor on screen. Player can shoot independently of their movement with the keyboard.
 
+### Menuing
+- Player can press `T` at any time to restart tutorial.
+- Player can press `Enter` to clear tutorial messages.
+- Player can press `R` once they've won or lost to reset the game to after the tutorial.
+
 ## Rendering
 
 ### General
 
 - Load game: All entities, including the player and walls are visible and rendered
-- Move player: The camera is centered on the player as the player moves. All rendered entities should be rendered accordingly, except for elements of the UI which are fixed to the screen.
+- Move player: The camera is centered on the player as the player moves, offset slightly by cursor position to help the player aim. 
+- All rendered entities should be rendered accordingly, except for elements of the UI which are fixed to the screen.
+- All players and enemies have unique sprites.
+
+### Animation
+
+- Player, Enemy, Hazard, Power-Up, and bubble sprites all have animation
 
 ## Entity Behaviour
 
@@ -59,20 +70,48 @@ Behaviours of various entity interactions, including collision, detection, and e
 ### Hazards & Power-ups
 
 - Drive over hazards: Hazards will decrease player health
-- Drive over power-up: Power-ups are printed in the terminal (M1)
+- Drive over power-up: Drive over a medkit in order to increase player health.
 
 ### Projectiles
 
-- Hit wall: Projectiles will bounce off walls in M1
-- Expiry: Projectiles should de-spawn after 5 seconds in M1 or after hitting a target
+- Hit wall: Projectiles will bounce off walls
+- Expiry: Projectiles should de-spawn after ten seconds for the player, or five seconds for the enemy, or after hitting a target
 - Hitting Self: Projectiles should not be able to hit the creator (E.g. Player bullets cannot hit player, will pass through)
+- Player can only fire projectiles if they have ammunition (shown in the bottom UI)
 
 ### Enemies
 
 - Player gets within detection distance: Enemy will begin shooting and chasing the player. Once it gets within a configurable range, it will stop approaching the player but will continue shooting.
-- Exit detection distance: Enemy stops moving and shooting in M1
+- Exit detection distance: Crab enemies will only detect the player when they are nearby, and will lose the player if they exit their detection distance. Fish enemies do not have a maximum detection distance, and always track and follow the player.
+- Pathfinding: Enemies should pathfind correctly around walls towards the player.
+
+### Mesh-Based Collision
+- Player has mesh-based collider that follows the rough contour of the fish.
 
 ## Bug List
+
+### [P4: Different coloured bullets for player vs enemy](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/62)
+
+I experienced a crash caused by an out of bounds vector lookup on [this line](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/blob/fceee345e95b222a5be10b11f4ecce6adc97295c/src/systems/player_input_system.cpp#L102) when resetting the game after winning. I think it's caused by the player being deleted on reset, so they don't exist here, and it crashes.
+
+Steps to reproduce:
+
+1. Play the game till you win (or lose)
+2. Press "R" to reset (spam the key right before game over)
+3. Crash occurs
+
+
+
+### [P3: Bullets self-collide when fired](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/53)
+
+When moving with a speed boost, the player's bullets sometimes hit themselves, and despawn.
+
+Steps to replicate:
+
+1. Pick up a speed boost item
+2. Go in a straight line
+3. Fire continuously in the direction you're going
+
 
 ### [P5: Urchin enemy projectiles not appearing #52](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/52)
 
