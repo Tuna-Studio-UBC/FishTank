@@ -44,7 +44,7 @@ void ParticleSystem::step(float elapsed_ms) {
             rt.texture = pe.texture;
             rt.standalone = pe.standalone;
             rt.particle_scale = pe.particle_scale;
-            spdlog::info("Created new particle emitter: {}", e.name_id());
+            // spdlog::info("Created new particle emitter: {}", e.name_id());
         }
     }
 
@@ -65,7 +65,7 @@ void ParticleSystem::step(float elapsed_ms) {
                 continue;
             }
             
-            spdlog::info("Destroyed orphaned standalone particle emitter: {}", e.name_id());
+            // spdlog::info("Destroyed orphaned standalone particle emitter: {}", e.name_id());
             it = runtimes.erase(it);
             continue;
         }
@@ -92,9 +92,9 @@ void ParticleSystem::step(float elapsed_ms) {
             
             if (pe.standalone) {
                 registry.remove_all_components_of(e);
-                spdlog::info("Destroyed standalone particle emitter: {}", e.name_id());
+                // spdlog::info("Destroyed standalone particle emitter: {}", e.name_id());
             } else {
-                spdlog::info("Destroyed connected particle emitter: {}", e.name_id());
+                // spdlog::info("Destroyed connected particle emitter: {}", e.name_id());
             }
             it = runtimes.erase(it);
             continue;

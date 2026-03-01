@@ -3,6 +3,7 @@
 #include "death_system.hpp"
 #include <spdlog/spdlog.h>
 #include <systems/world_system.hpp>
+#include "world_init.hpp"
 
 void DeathSystem::step(float elapsed_ms) {
     for (Entity e : registry.health.entities) {
@@ -40,6 +41,9 @@ void DeathSystem::step(float elapsed_ms) {
                         spdlog::info("{} collected {} crackers! Total: {}", player.name_id(), drops.cracker,
                                      wallet.crackers);
                     }
+
+                    Motion &m = registry.motions.get(e);
+                    createEffectSmoke(m.position);
 
                     registry.remove_all_components_of(e);
                     registry.progress.components[0].remaining_enemies -= 1;

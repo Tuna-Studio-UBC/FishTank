@@ -138,8 +138,13 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     registry.dropsCrackers.emplace(entity);
 
     registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::ACTORS});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+    
+    Animation &an = registry.animations.emplace(entity);
+    an.frame_count = 8;
+    an.columns = 8;
+    an.frame_time = 250;
 
     return entity;
 }
@@ -290,9 +295,18 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
 
     auto &config = POWER_UP_CONFIGS[(int)type];
 
-    registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    if (config.type == POWER_UP_TYPE::HEAL) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_HEALTH_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
+    } else {
+        registry.colors.emplace(entity, config.colour);
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                                GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    }
 
     registry.pickUp.emplace(entity);
     registry.powerUp.emplace(entity, type);
@@ -314,13 +328,13 @@ Entity createBubbler(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = {TILE_SIZE_PX, TILE_SIZE_PX};
 
-    // ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
-    // pe.life_ms = 1;
-    // pe.particle_life_ms = 400;
-    // pe.max_particles = 10;
-    // pe.particle_speed = 75;
-    // pe.spawn_interval_ms = 100;
-    // pe.position = motion.position;
+    ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
+    pe.particle_life_ms = 400;
+    pe.max_particles = 10;
+    pe.particle_speed = 75;
+    pe.spawn_interval_ms = 100;
+    pe.particle_scale = 10;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
@@ -423,9 +437,12 @@ Entity createMine(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = {40.f, 40.f};
 
-    registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_MINE_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 3;
+    an.frame_count = 3;
+    an.frame_time = 500;
 
     return entity;
 }
@@ -491,6 +508,42 @@ Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutoria
 }
 
 #pragma endregion StaticObjects
+
+#pragma region Effects
+
+Entity createEffectSmoke(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Smoke)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 20;
+    pe.particle_speed = 60;
+    pe.spawn_interval_ms = 30;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_SMOKE;
+    pe.particle_scale = 50;
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    return e;
+}
+
+Entity createEffectBubbles(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Bubble)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 1000;
+    pe.particle_speed = 120;
+    pe.spawn_interval_ms = 50;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+    pe.particle_scale = 10;
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    return e;
+}
+
+#pragma endregion Effects
 
 #pragma region ScreenOverlays
 
