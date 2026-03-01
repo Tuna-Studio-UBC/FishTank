@@ -8,6 +8,7 @@ void PathfindingSystem::init(TileMapSystem *system) {
 }
 
 const ivec2 four_directions[4] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+const ivec2 eight_directions[8] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
 struct Node {
     int x, y;
@@ -212,8 +213,43 @@ std::vector<vec2> PathfindingSystem::path_finding(const vec2& start_world, const
     std::vector<vec2> world_path;
     world_path.reserve(tile_path.size());
 
+    // add small buffer to prevent wall sticking
     for (const auto &t : tile_path) {
-        world_path.push_back(tile_center_to_world(t));
+        vec2 world_coord = tile_center_to_world(t);
+        float buffer = TILE_SIZE_PX * 0.25f;
+
+        vec2 offset = vec2(0.f);
+
+        if (!is_walkable(t.x + 1, t.y + 1)) {
+            offset.x -= buffer;
+            offset.y -= buffer;
+        }
+        if (!is_walkable(t.x + 1, t.y - 1)) {
+            offset.x -= buffer;
+            offset.y += buffer;
+        }
+        if (!is_walkable(t.x - 1, t.y + 1)) {
+            offset.x += buffer;
+            offset.y -= buffer;
+        }
+        if (!is_walkable(t.x - 1, t.y - 1)) {
+            offset.x += buffer;
+            offset.y += buffer;
+        }
+        if (!is_walkable(t.x + 1, t.y)) {
+            offset.x -= buffer;
+        }
+        if (!is_walkable(t.x - 1, t.y)) {
+            offset.x += buffer;
+        }
+        if (!is_walkable(t.x, t.y + 1)) {
+            offset.y -= buffer;
+        }
+        if (!is_walkable(t.x, t.y - 1)) {
+            offset.y += buffer;
+        }
+
+        world_path.push_back(world_coord + offset);
     }
         
 

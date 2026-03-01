@@ -154,7 +154,6 @@ void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
             pursuit.path = ps->path_finding(motion_i.position, target_pos);
             pursuit.curr_index = 0;
             pursuit.goal = world_to_tile(player_pos);
-            spdlog::debug("path size {}", pursuit.path.size());
         }
 
         if (pursuit.curr_index < pursuit.path.size() && pursuit.path.size() > 0) {
