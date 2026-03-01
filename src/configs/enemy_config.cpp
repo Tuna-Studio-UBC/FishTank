@@ -20,5 +20,5 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
     {50.f, M_PI / 2.f, 400.f, ATTACK_PATTERN::SINGLE},
 
     // Homing
-    {50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE}
+    {150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE}
 };
