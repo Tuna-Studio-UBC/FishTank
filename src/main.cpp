@@ -31,6 +31,7 @@ using Clock = std::chrono::high_resolution_clock;
 int main() {
     // global systems
     AISystem ai_system;
+    PathfindingSystem path_system;
     CollisionSystem collision_system;
     OverTimeEffectSystem ote_system;
     HealDamageSystem heal_damage_system;
@@ -66,6 +67,8 @@ int main() {
     renderer_system.init(window);
     world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system);
     camera_system.init(tilemap_system.get_current_map());
+    path_system.init(&tilemap_system);
+    ai_system.init(&path_system);
 
     // variable timestep loop
     auto t = Clock::now();
