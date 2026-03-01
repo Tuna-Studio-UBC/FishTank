@@ -530,6 +530,22 @@ Entity createEffectSmoke(const vec2 position) {
     return e;
 }
 
+Entity createEffectBubbles(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Bubble)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 1000;
+    pe.particle_speed = 120;
+    pe.spawn_interval_ms = 50;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+    pe.particle_scale = 10;
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    return e;
+}
+
 #pragma endregion Effects
 
 #pragma region ScreenOverlays
