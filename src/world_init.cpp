@@ -512,6 +512,26 @@ Entity createTutorialTrigger(const vec2 position, const vec2 size, const int id)
 
 #pragma endregion StaticObjects
 
+#pragma region Effects
+
+Entity createEffectSmoke(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Smoke)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 20;
+    pe.particle_speed = 60;
+    pe.spawn_interval_ms = 30;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_SMOKE;
+    pe.particle_scale = 50;
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    return e;
+}
+
+#pragma endregion Effects
+
 #pragma region ScreenOverlays
 
 Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans) {
