@@ -9,6 +9,8 @@ static int clamp_int(int v, int lo, int hi) { return std::max(lo, std::min(v, hi
 bool AudioSystem::load() {
     hazard_warn_loop = Mix_LoadWAV(get_path(AUDIO, "hazard_warn_loop.wav").c_str());
     enemy_shot = Mix_LoadWAV(get_path(AUDIO, "enemy_shot.wav").c_str());
+    Mix_VolumeChunk(enemy_shot, 96);
+    player_shot = Mix_LoadWAV(get_path(AUDIO, "player_shot.wav").c_str());
 
     if (!hazard_warn_loop || !enemy_shot) {
         spdlog::error("[Audio] Failed to load audio. Ensure files exist in res/audio/");
@@ -33,6 +35,14 @@ void AudioSystem::shutdown() {
     }
 
     hazard_warn_channel = -1;
+
+    if (player_shot) { 
+        Mix_FreeChunk(player_shot); player_shot = nullptr; 
+    }
+
+    if (bgm) { 
+        Mix_FreeMusic(bgm); bgm = nullptr; 
+    }
 }
 
 void AudioSystem::apply_spatial_to_channel(int channel, const vec2& source_pos, const vec2& listener_pos, float max_dist_px, float pan_dist_px, int base_volume) {
@@ -129,4 +139,30 @@ void AudioSystem::play_enemy_shot(const vec2& source_pos, const vec2& listener_p
         return;
 
     apply_spatial_to_channel(ch, source_pos, listener_pos, MAX_DIST, PAN_DIST, BASE_VOL);
+}
+
+void AudioSystem::play_player_shot_center(int volume) {
+    if (!player_shot) return;
+    int ch = Mix_PlayChannel(-1, player_shot, 0);
+    if (ch == -1) return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_bgm(const std::string& filename, int volume) {
+
+    if (bgm) {
+        Mix_FreeMusic(bgm);
+        bgm = nullptr;
+    }
+
+    bgm = Mix_LoadMUS(get_path(AUDIO, filename).c_str());
+
+    if (!bgm) {
+        printf("Failed to load BGM: %s\n", filename.c_str());
+        return;
+    }
+
+    Mix_VolumeMusic(volume);
+    Mix_PlayMusic(bgm, -1);
 }

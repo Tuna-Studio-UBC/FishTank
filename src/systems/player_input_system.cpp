@@ -54,6 +54,9 @@ void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &
     Entity player = registry.players.entities[0];
     createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
 
+    auto &sr = registry.sound_requests.emplace_with_duplicates(player);
+    sr.type = SOUND_EVENT::PLAYER_SHOT;
+
     fc.cooldown_timer = fc.cooldown_ms;
     fc.ammo -= ammo_cost;
 }
