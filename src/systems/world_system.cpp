@@ -164,6 +164,12 @@ void WorldSystem::start_wave(Progress &progress) {
     }
 }
 
+void WorldSystem::clear_level_objects() {
+    for (auto entity_list : entities_to_clear)
+        for (auto entity : *entity_list)
+            registry.remove_all_components_of(entity);
+}
+
 void WorldSystem::load_level_tutorial(Progress &progress) {
     progress.is_tutorial = true;
     progress.is_tutorial_step_called = false;
@@ -256,6 +262,7 @@ void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera
 
     auto e = Entity("Progress");
     auto &progress = registry.progress.emplace(e);
+    progress.level = -1;
     load_level_tutorial(progress);
 
     glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
@@ -267,25 +274,27 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     this->camera_system = camera_arg;
     this->tilemap_system = tilemap_arg;
 
-    // Set up world level
-    tilemap_system->init();
-    tilemap_system->load_map(MapType::TEST_MAP2);
-
-    // assert(registry.progress.size() == 0 && "Progress component should have been deleted prior to
-    // reinitialization!");
-
     Progress *progress_p;
     if (registry.progress.size() == 0) {
         auto e = Entity("Progress");
         progress_p = &registry.progress.emplace(e);
+        progress_p->level = 0;
     } else {
         progress_p = &registry.progress.components[0];
     }
     Progress &progress = *progress_p;
-    progress.level = 1;
+
+    // Set up world level
+    tilemap_system->init();
+    tilemap_system->load_map(LEVEL_CONFIGS[progress.level].map_type);
 
     load_level(progress);
     start_wave(progress);
+
+    // ! FOR TESTING !
+    glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
+    createText("Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1),
+               vec2(WINDOW_WIDTH_PX / 2 - 100, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 
     /* Uncomment to use old testing entities
     createBell(renderer, { 300.f, 400.f }, 80.f);
@@ -311,10 +320,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     //Commented out duo to compiler errors
     spdlog::info("Starting music...");
     Mix_PlayMusic(background_music, -1);*/
-
-    // ! FOR TESTING !
-    glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
-    createText("Wave: 0", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 }
 
 // Update our game world
@@ -345,21 +350,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         return false;
 
     if (progress.remaining_enemies == 0) {
-        spdlog::info("Wave {} complete, starting next wave.", progress.wave);
+        spdlog::info("Wave {} complete, starting next wave.", progress.wave + 1);
         progress.wave += 1;
 
-        if (WAVE_CONFIGS.size() > progress.wave && progress.wave < LEVEL_CONFIGS[progress.level].last_wave) {
-            // TODO: Maybe change this to a GUI overlay
-            if (registry.text.components.size() > 0) {
-                if (!progress.is_tutorial)
-                    registry.text.components[0].text = "Wave: " + std::to_string(progress.wave);
-                else
-                    registry.text.components[0].text = "Tutorial";
-            }
-            start_wave(progress);
-        } else {
+        if (progress.is_tutorial) {
+            if (registry.text.components.size() > 0)
+                registry.text.components[0].text = "Tutorial";
+
             progress.is_game_over = true;
             progress.has_beat_level = true;
+            progress.wave = 0;
+            progress.level = -1;
 
             // TODO: Also change this to a GUI overlay
             Entity e = Entity("Overlay");
@@ -368,13 +369,32 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             motion.position = registry.motions.get(registry.camera.entities[0]).position;
             motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
 
-            if (!progress.is_tutorial)
+            registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_TUTORIAL_COMPLETE_OVERLAY,
+                                               EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE,
+                                               RENDER_LAYER::OVERLAYS});
+        } else {
+            if (progress.wave == LEVEL_CONFIGS[progress.level].last_wave && progress.level < LEVEL_CONFIGS.size() - 1) {
+                load_next_level();
+            } else if (WAVE_CONFIGS.size() > progress.wave && progress.wave < LEVEL_CONFIGS[progress.level].last_wave) {
+                // TODO: Maybe change this to a GUI overlay
+                if (registry.text.components.size() > 0)
+                    registry.text.components[0].text =
+                        "Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1);
+                start_wave(progress);
+            } else {
+                progress.is_game_over = true;
+                progress.has_beat_level = true;
+
+                // TODO: Also change this to a GUI overlay
+                Entity e = Entity("Overlay");
+                registry.overlays.emplace(e);
+                auto &motion = registry.motions.emplace(e);
+                motion.position = registry.motions.get(registry.camera.entities[0]).position;
+                motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
+
                 registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
                                                    GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
-            else
-                registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_TUTORIAL_COMPLETE_OVERLAY,
-                                                   EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE,
-                                                   RENDER_LAYER::OVERLAYS});
+            }
         }
     }
 
@@ -563,7 +583,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
         if (key == GLFW_KEY_R) {
             auto &progress = registry.progress.components[0];
-            if (progress.is_game_over && !progress.is_tutorial)
+            if ((progress.is_game_over && !progress.is_tutorial) ||
+                (progress.is_tutorial && progress.is_game_over && !progress.has_beat_level))
                 restart_game();
         }
 
@@ -584,8 +605,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                     spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
                 }
             } else {
-                if (progress.has_beat_level && !progress.is_game_over || progress.is_tutorial && progress.is_game_over)
+                if (progress.is_tutorial && progress.is_game_over && progress.has_beat_level) {
+                    Health &health = registry.health.get(registry.players.entities[0]);
+                    health.hp = health.max_hp;
+                    FireControl &fc = registry.fireControl.get(registry.players.entities[0]);
+                    fc.ammo = fc.max_ammo;
+
                     load_next_level();
+                } else if (progress.has_beat_level && !progress.is_game_over) {
+                    load_next_level();
+                }
             }
         }
 
@@ -607,16 +636,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         if (key == GLFW_KEY_Q) {
             auto &progress = registry.progress.components[0];
             if (progress.is_tutorial) {
-                progress.is_tutorial = false;
                 progress.is_tutorial_step_called = false;
-                progress.has_beat_level = true;
-                load_next_level();
-            } else {
-                for (Entity e : registry.enemies.entities)
-                    registry.remove_all_components_of(e);
-
-                progress.remaining_enemies = 0;
+                progress.is_paused = false;
             }
+
+            for (Entity e : registry.enemies.entities)
+                registry.remove_all_components_of(e);
+            progress.remaining_enemies = 0;
+
+            Entity player = registry.players.entities[0];
+            Health &health = registry.health.get(player);
+            health.hp = health.max_hp;
+            FireControl &fc = registry.fireControl.get(player);
+            fc.ammo = fc.max_ammo;
         }
 #endif
 
@@ -673,6 +705,13 @@ void WorldSystem::restart_game() {
 
 void WorldSystem::load_next_level() {
     Progress progress = registry.progress.components[0];
+
+    progress.is_tutorial = false;
+    progress.is_tutorial_step_called = false;
+
+    progress.is_paused = false;
+    progress.has_beat_level = false;
+    progress.is_game_over = false;
     progress.level++;
 
     if (progress.level >= LEVEL_CONFIGS.size()) {
@@ -680,11 +719,8 @@ void WorldSystem::load_next_level() {
         return;
     }
 
-    progress.is_paused = false;
-    progress.has_beat_level = false;
-    progress.is_game_over = false;
-    progress.wave = 0;
     int hp = registry.health.get(registry.players.entities[0]).hp;
+    int ammo = registry.fireControl.get(registry.players.entities[0]).ammo;
 
     particle_system.clear_all_particles();
     registry.clear_all_components();
@@ -693,4 +729,5 @@ void WorldSystem::load_next_level() {
     init(renderer, camera_system, tilemap_system);
 
     registry.health.get(registry.players.entities[0]).hp = hp;
+    registry.fireControl.get(registry.players.entities[0]).ammo = ammo;
 }

@@ -114,7 +114,8 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     motion.angle = 0.f;
     motion.scale = vec2(50.0f, 50.0f);
 
-    registry.health.emplace(entity);
+    auto &health = registry.health.emplace(entity);
+    health = config.health;
 
     auto &fire = registry.fireControl.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;

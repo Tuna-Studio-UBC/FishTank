@@ -192,7 +192,7 @@ void TutorialUI::draw_tutorial_ammo(TutorialStep tutorial) {
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "Bubblers (brown mounds) will replenish your ammo.\n\nSince you only have a limited amount of ammo, be "
+        text = "Bubblers will replenish your ammo.\n\nSince you only have a limited amount of ammo, be "
                "sure to recharge whenever possible!\n\nJust swim over them to recover some ammo!";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
