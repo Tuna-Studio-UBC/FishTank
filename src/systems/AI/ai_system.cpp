@@ -1,5 +1,7 @@
 #include "ai_system.hpp"
 
+void AISystem::init(PathfindingSystem *system) { ps = system; }
+
 AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
     if (tree.root_id == -1) {
         return AIAction::IDLE;
@@ -117,7 +119,7 @@ void AISystem::step(float elapsed_ms) {
     }
 }
 
-void run_patrol(Entity e, float elapsed_ms) {
+void AISystem::run_patrol(Entity e, float elapsed_ms) {
     registry.senses.get(e).is_patrolling = true;
     if (!registry.beziers.has(e)) {
         return;
@@ -140,7 +142,7 @@ void run_patrol(Entity e, float elapsed_ms) {
     }
 }
 
-void run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
+void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     Motion &motion_i = registry.motions.get(e);
     vec2 target_pos = player_pos;
     float angle = 0;
@@ -149,9 +151,10 @@ void run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     if (registry.pursuit.has(e)) {
         Pursuit &pursuit = registry.pursuit.get(e);
         if (pursuit.goal != world_to_tile(player_pos) || pursuit.path.size() == 0) {
-            pursuit.path = path_finding(motion_i.position, target_pos);
+            pursuit.path = ps->path_finding(motion_i.position, target_pos);
             pursuit.curr_index = 0;
             pursuit.goal = world_to_tile(player_pos);
+            spdlog::debug("path size {}", pursuit.path.size());
         }
 
         if (pursuit.curr_index < pursuit.path.size() && pursuit.path.size() > 0) {
@@ -172,12 +175,12 @@ void run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     }
 
     // Firing logic
-    if (walkable_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos), registry.tilemaps.components.back())) {
+    if (ps->walkable_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos))) {
         fire_projectiles(e, elapsed_ms, angle);
     }
 }
 
-void run_distracted(Entity e, float elapsed_ms, vec2 player_pos) {
+void AISystem::run_distracted(Entity e, float elapsed_ms, vec2 player_pos) {
     if (!registry.distracted.has(e)) {
         return;
     }
@@ -194,7 +197,7 @@ void run_distracted(Entity e, float elapsed_ms, vec2 player_pos) {
     }
 }
 
-void run_idle(Entity e) { 
+void AISystem::run_idle(Entity e) { 
     Motion &motion = registry.motions.get(e);
     motion.velocity = vec2(0.f, 0.f);
 }

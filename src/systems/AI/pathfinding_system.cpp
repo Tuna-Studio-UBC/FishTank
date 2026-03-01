@@ -2,6 +2,11 @@
 #include <queue>
 #include "../../tinyECS/registry.hpp"
 
+void PathfindingSystem::init(TileMapSystem *system) { 
+    tms = system;
+    current_map = tms->get_current_map(); 
+}
+
 const ivec2 four_directions[4] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
 struct Node {
@@ -16,13 +21,19 @@ int get_map_index(int width, int x, int y) {
     return x + (y * width); 
 }
 
-bool is_out_of_bounds(ivec2 pos) { 
-    TileMap map = registry.tilemaps.components.back();
-
+bool PathfindingSystem::is_out_of_bounds(ivec2 pos) {
+    if (!registry.tilemaps.has(current_map)) {
+        current_map = tms->get_current_map();
+    }
+    TileMap &map = registry.tilemaps.get(current_map);
     return pos.x < 0|| pos.y < 0|| pos.x >= (int)map.width || pos.y >= (int)map.height;
 }
 
-bool is_walkable(const TileMap &map, int x, int y) {
+bool PathfindingSystem::is_walkable(int x, int y) {
+    if (!registry.tilemaps.has(current_map)) {
+        current_map = tms->get_current_map();
+    }
+    TileMap &map = registry.tilemaps.get(current_map);
     if (is_out_of_bounds(ivec2(x, y))) {
         return false;
     }
@@ -41,7 +52,7 @@ int h_cost(const ivec2 &a, const ivec2 &b) {
     return (14 * min_d) + (10 * (max_d - min_d));
 }
 
-bool walkable_bresenhams_line(ivec2 a, ivec2 b, const TileMap &map) { 
+bool PathfindingSystem::walkable_bresenhams_line(ivec2 a, ivec2 b) { 
     int x1 = a.x;
     int y1 = a.y;
     int x2 = b.x;
@@ -76,7 +87,7 @@ bool walkable_bresenhams_line(ivec2 a, ivec2 b, const TileMap &map) {
 
         // modify Bresenham's to check both tiles in a diagonal
         if (x1 != prev_x && y1 != prev_y) {
-            if (!is_walkable(map, prev_x, y1) || !is_walkable(map, x1, prev_y)) {
+            if (!is_walkable(prev_x, y1) || !is_walkable(x1, prev_y)) {
                 return false;
             }
         }
@@ -85,7 +96,7 @@ bool walkable_bresenhams_line(ivec2 a, ivec2 b, const TileMap &map) {
     return true;
 }
 
-std::vector<ivec2> prune_path(std::vector<ivec2> &path, const TileMap &map) { 
+std::vector<ivec2> PathfindingSystem::prune_path(std::vector<ivec2> &path) { 
     if (path.size() <= 2) {
         return path;
     }
@@ -96,7 +107,7 @@ std::vector<ivec2> prune_path(std::vector<ivec2> &path, const TileMap &map) {
     int curr = 0;
 
     for (int i = 2; i < path.size(); i++) {
-        if (!walkable_bresenhams_line(path[curr], path[i], map)) {
+        if (!walkable_bresenhams_line(path[curr], path[i])) {
             pruned_path.push_back(path[i - 1]);
             curr = i - 1;
         }
@@ -106,11 +117,14 @@ std::vector<ivec2> prune_path(std::vector<ivec2> &path, const TileMap &map) {
     return pruned_path;
 }
 
-std::vector<vec2> path_finding(const vec2& start_world, const vec2& goal_world) {
-    const TileMap &map = registry.tilemaps.components.back();
-
+std::vector<vec2> PathfindingSystem::path_finding(const vec2& start_world, const vec2& goal_world) {
     ivec2 start = world_to_tile(start_world);
     ivec2 goal = world_to_tile(goal_world);
+
+    if (!registry.tilemaps.has(current_map)) {
+        current_map = tms->get_current_map();
+    }
+    TileMap &map = registry.tilemaps.get(current_map);
 
     if (is_out_of_bounds(start) ||
         is_out_of_bounds(goal)) {
@@ -153,7 +167,7 @@ std::vector<vec2> path_finding(const vec2& start_world, const vec2& goal_world) 
             int neighbour_x = current.x + dir.x;
             int neighbour_y = current.y + dir.y;
 
-            if (!is_walkable(map, neighbour_x, neighbour_y)) {
+            if (!is_walkable(neighbour_x, neighbour_y)) {
                 continue;
             }
 
@@ -192,7 +206,7 @@ std::vector<vec2> path_finding(const vec2& start_world, const vec2& goal_world) 
         p = parent[p];
     }
 
-    tile_path = prune_path(tile_path, map);
+    tile_path = prune_path(tile_path);
     std::reverse(tile_path.begin(), tile_path.end());
 
     std::vector<vec2> world_path;
