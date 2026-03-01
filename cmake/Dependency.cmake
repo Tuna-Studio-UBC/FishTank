@@ -9,7 +9,7 @@ set(ENGINE_DEPENDENCIES_LOADED TRUE)
 
 # Package Verisons
 set(SPDLOG_VERSION v1.17.0)
-set(FREETYPE_VERSION 2141)
+set(FREETYPE_VERSION master)
 set(RMLUI_VERSION 6.2)
 set(IMGUI_VERSION v1.92.5)
 
@@ -35,7 +35,8 @@ FetchContent_MakeAvailable(spdlog)
 
 FetchContent_Declare(
   Freetype
-  URL "https://download.savannah.gnu.org/releases/freetype/ft${FREETYPE_VERSION}.zip"
+  GIT_REPOSITORY "https://github.com/freetype/freetype.git"
+  GIT_TAG "${FREETYPE_VERSION}"
 )
 FetchContent_MakeAvailable(Freetype)
 
