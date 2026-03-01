@@ -18,10 +18,10 @@ void generate_bezier(vec2 start_pos, vec2 forward_dir, BezierPath &curve) {
 
         projected = start_pos + normalize(rotated) * length;
 
-        if (!is_out_of_bounds(world_to_tile(projected))) {
+        /* if (!is_out_of_bounds(world_to_tile(projected))) {
             forward_dir = normalize(rotated);
             break;
-        }
+        }*/
     }
 
     vec2 right = vec2(-forward_dir.y, forward_dir.x);
