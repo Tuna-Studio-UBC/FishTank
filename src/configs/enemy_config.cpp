@@ -13,13 +13,13 @@ struct EnemyConfig {
 
 static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
     // Turret
-    {{50.f, 50.f}, 0.f, M_PI, 200.f, ATTACK_PATTERN::SINGLE},
+    {{50, 50}, 0.f, M_PI, 200.f, ATTACK_PATTERN::SINGLE},
 
     // Urchin
-    {{100.f, 100.f}, 0.f, 0.f, 500.f, ATTACK_PATTERN::URCHIN},
+    {{100, 100}, 0.f, 0.f, 500.f, ATTACK_PATTERN::URCHIN},
 
     // Guard
-    {{50.f, 50.f}, 50.f, M_PI / 2.f, 400.f, ATTACK_PATTERN::SINGLE},
+    {{50, 50}, 50.f, M_PI / 2.f, 400.f, ATTACK_PATTERN::SINGLE},
 
     // Homing
-    {{50.f, 50.f}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE}};
+    {{50, 50}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE}};
