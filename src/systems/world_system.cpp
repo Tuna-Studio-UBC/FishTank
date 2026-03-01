@@ -164,6 +164,12 @@ void WorldSystem::start_wave(Progress &progress) {
     }
 }
 
+void WorldSystem::clear_level_objects() {
+    for (auto entity_list : entities_to_clear)
+        for (auto entity : *entity_list)
+            registry.remove_all_components_of(entity);
+}
+
 void WorldSystem::load_level_tutorial(Progress &progress) {
     progress.is_tutorial = true;
     progress.is_tutorial_step_called = false;
@@ -563,7 +569,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
         if (key == GLFW_KEY_R) {
             auto &progress = registry.progress.components[0];
-            if (progress.is_game_over && !progress.is_tutorial)
+            if ((progress.is_game_over && !progress.is_tutorial) ||
+                (progress.is_tutorial && progress.is_game_over && !progress.has_beat_level))
                 restart_game();
         }
 
@@ -584,8 +591,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                     spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
                 }
             } else {
-                if (progress.has_beat_level && !progress.is_game_over || progress.is_tutorial && progress.is_game_over)
+                if (progress.is_tutorial && progress.is_game_over && progress.has_beat_level) {
+                    Health &health = registry.health.get(registry.players.entities[0]);
+                    health.hp = health.max_hp;
+                    FireControl &fc = registry.fireControl.get(registry.players.entities[0]);
+                    fc.ammo = fc.max_ammo;
+
                     load_next_level();
+                } else if (progress.has_beat_level && !progress.is_game_over) {
+                    load_next_level();
+                }
             }
         }
 
@@ -685,6 +700,7 @@ void WorldSystem::load_next_level() {
     progress.is_game_over = false;
     progress.wave = 0;
     int hp = registry.health.get(registry.players.entities[0]).hp;
+    int ammo = registry.fireControl.get(registry.players.entities[0]).ammo;
 
     particle_system.clear_all_particles();
     registry.clear_all_components();
@@ -693,4 +709,5 @@ void WorldSystem::load_next_level() {
     init(renderer, camera_system, tilemap_system);
 
     registry.health.get(registry.players.entities[0]).hp = hp;
+    registry.fireControl.get(registry.players.entities[0]).ammo = ammo;
 }

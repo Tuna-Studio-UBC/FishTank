@@ -19,6 +19,7 @@ void DeathSystem::step(float elapsed_ms) {
                 if (registry.players.has(e)) {
                     // TODO: Handle player death
                     registry.progress.components[0].is_game_over = true;
+                    registry.progress.components[0].has_beat_level = false;
                     Entity e = Entity("Overlay");
                     registry.overlays.emplace(e);
                     auto &motion = registry.motions.emplace(e);
