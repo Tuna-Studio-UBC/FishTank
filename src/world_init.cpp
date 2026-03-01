@@ -296,9 +296,18 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
 
     auto &config = POWER_UP_CONFIGS[(int)type];
 
-    registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    if (config.type == POWER_UP_TYPE::HEAL) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_HEALTH_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
+    } else {
+        registry.colors.emplace(entity, config.colour);
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                                GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    }
 
     registry.pickUp.emplace(entity);
     registry.powerUp.emplace(entity, type);
