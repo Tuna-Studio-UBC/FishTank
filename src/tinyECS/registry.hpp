@@ -57,7 +57,7 @@ class ECSRegistry {
     ComponentContainer<Motion> motions;
     ComponentContainer<Collision> collisions;
     ComponentContainer<ParticleEmitter> particleEmitters;
-
+    ComponentContainer<MeshCollider> meshColliders;
     // Game State
     ComponentContainer<ScreenState> screenStates;
     ComponentContainer<KeyboardInputState> keyboardInput;
