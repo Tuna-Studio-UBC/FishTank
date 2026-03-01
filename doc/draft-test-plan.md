@@ -41,22 +41,22 @@ Items relating directly to the player's view. (Entity interactions are in a sepa
 - Player can use `Left-Click` on their mouse to shoot a projectile. The projectile should travel in the direction of the cursor on screen. Player can shoot independently of their movement with the keyboard.
 
 ### Menuing
-- Player can press `T` at any time to restart tutorial.
-- Player can press `Enter` to clear tutorial messages.
-- Player can press `R` once they've won or lost to reset the game to after the tutorial.
+- **M2:** Player can press `T` at any time to restart tutorial.
+- **M2:** Player can press `Enter` to clear tutorial messages.
+- **M2:** Player can press `R` once they've won or lost to reset the game to after the tutorial.
 
 ## Rendering
 
 ### General
 
 - Load game: All entities, including the player and walls are visible and rendered
-- Move player: The camera is centered on the player as the player moves, offset slightly by cursor position to help the player aim. 
-- All rendered entities should be rendered accordingly, except for elements of the UI which are fixed to the screen.
-- All players and enemies have unique sprites.
+- **M2:** Move player: The camera is centered on the player as the player moves, offset slightly by cursor position to help the player aim. 
+- **M2:** All rendered entities should be rendered accordingly, except for elements of the UI which are fixed to the screen.
+- **M2:** All players and enemies have unique sprites.
 
 ### Animation
 
-- Player, Enemy, Hazard, Power-Up, and bubble sprites all have animation
+- **M2:** Player, Enemy, Hazard, Power-Up, and bubble sprites all have animation
 
 ## Entity Behaviour
 
@@ -70,27 +70,39 @@ Behaviours of various entity interactions, including collision, detection, and e
 ### Hazards & Power-ups
 
 - Drive over hazards: Hazards will decrease player health
-- Drive over power-up: Drive over a medkit in order to increase player health.
+- **M2:** Drive over power-up: Drive over a medkit in order to increase player health.
 
 ### Projectiles
 
 - Hit wall: Projectiles will bounce off walls
-- Expiry: Projectiles should de-spawn after ten seconds for the player, or five seconds for the enemy, or after hitting a target
-- Hitting Self: Projectiles should not be able to hit the creator (E.g. Player bullets cannot hit player, will pass through)
+- **M2:** Expiry: Projectiles should de-spawn after ten seconds for the player, or five seconds for the enemy, or after hitting a target
+- **M2:** Hitting Self: Projectiles should not be able to hit the creator (E.g. Player bullets cannot hit player, will pass through)
 - Player can only fire projectiles if they have ammunition (shown in the bottom UI)
 
 ### Enemies
 
 - Player gets within detection distance: Enemy will begin shooting and chasing the player. Once it gets within a configurable range, it will stop approaching the player but will continue shooting.
-- Exit detection distance: Crab enemies will only detect the player when they are nearby, and will lose the player if they exit their detection distance. Fish enemies do not have a maximum detection distance, and always track and follow the player.
-- Pathfinding: Enemies should pathfind correctly around walls towards the player.
+- **M2:** Exit detection distance: Crab enemies will only detect the player when they are nearby, and will lose the player if they exit their detection distance. Fish enemies do not have a maximum detection distance, and always track and follow the player.
+- **M2:** Pathfinding: Enemies should pathfind correctly around walls towards the player.
 
 ### Mesh-Based Collision
-- Player has mesh-based collider that follows the rough contour of the fish.
+- **M2:** Player has mesh-based collider that follows the rough contour of the fish.
 
 ## Bug List
 
-### [P4: Different coloured bullets for player vs enemy](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/62)
+### [P2: Lag Spike for Mesh-Based Collisions #96](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/96)
+
+Significant performance hit for mesh-based collisions. Will have to optimize the detections in the collisions/physics systems, and perform some pruning for far enough entities.
+
+Steps to Replicate:
+
+1. Toggle the FPS counter on
+2. Move the player against any collider (best to just rub against a wall)
+3. Observe drop in framerate
+
+**Unresolved as of M2**
+
+### [P1: Game Crash on Reset #68](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/62)
 
 I experienced a crash caused by an out of bounds vector lookup on [this line](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/blob/fceee345e95b222a5be10b11f4ecce6adc97295c/src/systems/player_input_system.cpp#L102) when resetting the game after winning. I think it's caused by the player being deleted on reset, so they don't exist here, and it crashes.
 
@@ -124,6 +136,14 @@ To test, move the player closer to the Urchin enemy, which should trigger the at
 Once again, entity IDs were incrementing far too quickly. The cause this time were the wall entities being initialized at every pass through the physics system.
 
 To test, fire a bullet and ensure each bullet only uses 1 new ID. The easiest way is to fire a volley of bullets and wait for them to expire. If the first bullet expiry is `Entity x has expired`, the next bullet should print `Entity x+1 has expired`.
+
+### [P2: Projectile Bounce Bug #45](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/45)
+
+If a projectile hits multiple walls simultaneously, sometimes it will reverse direction, rather than bounce.
+
+Steps to Replicate: Aim and shoot at a wall, right between two tiles in the tilemap. The aiming is a bit finnicky, so it may take a few tries.
+
+**Unresolved as of M2**
 
 ### [P3: Linear Interpolated Camera causes tiles to cull too early #44](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/44)
 
