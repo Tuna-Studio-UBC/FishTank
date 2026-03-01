@@ -358,13 +358,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         } else {
             progress.is_game_over = true;
             progress.has_beat_level = true;
+
+            // TODO: Also change this to a GUI overlay
             Entity e = Entity("Overlay");
             registry.overlays.emplace(e);
             auto &motion = registry.motions.emplace(e);
             motion.position = registry.motions.get(registry.camera.entities[0]).position;
             motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
-            registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
-                                               GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
+
+            if (!progress.is_tutorial)
+                registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
+                                                   GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
+            else
+                registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_TUTORIAL_COMPLETE_OVERLAY,
+                                                   EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE,
+                                                   RENDER_LAYER::OVERLAYS});
         }
     }
 
@@ -546,7 +554,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
         if (key == GLFW_KEY_R) {
             auto &progress = registry.progress.components[0];
-            if (progress.is_game_over)
+            if (progress.is_game_over && !progress.is_tutorial)
                 restart_game();
         }
 
@@ -574,7 +582,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 #pragma region DEBUG KEYS
 
-// #define ENABLE_LOAD_TUTORIAL
+#define ENABLE_LOAD_TUTORIAL
 // #define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
 
