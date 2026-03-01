@@ -146,6 +146,15 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 4;
         an.columns = 4;
         an.frame_time = 500;
+    } else if (type == ENEMY_TYPE::HOMING) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ISOPOD_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 125;
+        motion.scale = vec2(40.0f, 25.0f);
     } else {
         registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
