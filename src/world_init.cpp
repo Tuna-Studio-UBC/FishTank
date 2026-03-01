@@ -139,8 +139,13 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     registry.dropsCrackers.emplace(entity);
 
     registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::ACTORS});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+    
+    Animation &an = registry.animations.emplace(entity);
+    an.frame_count = 8;
+    an.columns = 8;
+    an.frame_time = 250;
 
     return entity;
 }
