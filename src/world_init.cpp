@@ -47,25 +47,24 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = vec2(80.0f, 80.0f);
 
-
     MeshCollider fishMesh;
     fishMesh.vertices = {
-        { -42.f,   0.f },   // tail tip (left)
-        { -20.f, -25.f },   // tail top
-        {  10.f, -18.f },   // mid top
-        {  40.f, -12.f },   // upper body
-        {  64.f,  -4.f },   // nose top
-        {  64.f,   4.f },   // nose bottom
-        {  40.f,  12.f },   // lower body
-        {  10.f,  18.f },   // mid bottom
-        { -20.f,  25.f }    // tail bottom
+        {-42.f, 0.f},   // tail tip (left)
+        {-20.f, -25.f}, // tail top
+        {10.f, -18.f},  // mid top
+        {40.f, -12.f},  // upper body
+        {64.f, -4.f},   // nose top
+        {64.f, 4.f},    // nose bottom
+        {40.f, 12.f},   // lower body
+        {10.f, 18.f},   // mid bottom
+        {-20.f, 25.f}   // tail bottom
     };
 
     // compute authored bbox and set authoring_px from it
     {
         vec2 minV = fishMesh.vertices[0];
         vec2 maxV = fishMesh.vertices[0];
-        for (const vec2& v : fishMesh.vertices) {
+        for (const vec2 &v : fishMesh.vertices) {
             minV.x = std::min(minV.x, v.x);
             minV.y = std::min(minV.y, v.y);
             maxV.x = std::max(maxV.x, v.x);
@@ -73,11 +72,12 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
         }
         float authored_width = maxV.x - minV.x;
         float authored_height = maxV.y - minV.y;
-        fishMesh.authoring_px = std::max(1.0f, std::max(authored_width, authored_height)); // fallback to 1 if degenerate
+        fishMesh.authoring_px =
+            std::max(1.0f, std::max(authored_width, authored_height)); // fallback to 1 if degenerate
 
         // center the collider geometry around its centroid so physics SAT uses same origin as renderer.
         vec2 centroid = (minV + maxV) * 0.5f;
-        for (vec2& v : fishMesh.vertices)
+        for (vec2 &v : fishMesh.vertices)
             v -= centroid;
     }
 
@@ -115,7 +115,6 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     motion.scale = vec2(50.0f, 50.0f);
 
     registry.health.emplace(entity);
-
 
     auto &fire = registry.fireControl.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
@@ -472,23 +471,22 @@ Entity createWall(const vec2 &position, const vec2 &scale) {
     return entity;
 }
 
-const bool DRAW_TUTORIAL_TRIGGERS = true;
+#define DRAW_TUTORIAL_TRIGGERS
 
-Entity createTutorialTrigger(const vec2 position, const vec2 size, const int id) {
+Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutorial id) {
     Entity entity = Entity("Tutorial Trigger " + id);
 
     registry.tutorialTriggers.emplace(entity, id);
 
-    Motion& motion = registry.motions.emplace(entity);
+    Motion &motion = registry.motions.emplace(entity);
     motion.position = position;
     motion.scale = size;
 
-    if (DRAW_TUTORIAL_TRIGGERS)
-    {
-        registry.colors.emplace(entity, 1.f, 0.f, 0.f);
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                                GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::INTERACTABLES});
-    }
+#ifdef DRAW_TUTORIAL_TRIGGERS
+    registry.colors.emplace(entity, 1.f, 0.f, 0.f);
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::INTERACTABLES});
+#endif
 
     return entity;
 }
