@@ -85,8 +85,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         }
         // Bullet hit enemy
         else if (registry.enemies.has(other_entity)) {
-            if (bullet.owner != other_entity && registry.health.has(other_entity) &&
-                !registry.enemies.has(bullet.owner)) { // Ignore between enemies
+            if (registry.players.has(bullet.owner)) { // Only player bullets damage enemies
                 HealDamageSystem::add_damage(other_entity, bullet.damage);
 
                 // Temp use bullet collision as trigger
@@ -96,16 +95,17 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
                 registry.remove_all_components_of(bullet_entity);
             }
         }
-        // Bullet hit bullet
-        else if (registry.bullet.has(other_entity)) {
-            Entity other_bullet_owner = registry.bullet.get(other_entity).owner;
-            if (bullet.owner != other_bullet_owner &&
-                !(registry.enemies.has(bullet.owner) &&
-                  registry.enemies.has(other_bullet_owner))) { // Ignore between enemies
-                registry.remove_all_components_of(bullet_entity);
-                registry.remove_all_components_of(other_entity);
-            }
-        }
+        // TODO: Enable if we don't like no-cancellations
+        // // Bullet hit bullet
+        // else if (registry.bullet.has(other_entity)) {
+        //     Entity other_bullet_owner = registry.bullet.get(other_entity).owner;
+        //     if (bullet.owner != other_bullet_owner &&
+        //         !(registry.enemies.has(bullet.owner) &&
+        //           registry.enemies.has(other_bullet_owner))) { // Ignore between enemies
+        //         registry.remove_all_components_of(bullet_entity);
+        //         registry.remove_all_components_of(other_entity);
+        //     }
+        // }
     }
 }
 
