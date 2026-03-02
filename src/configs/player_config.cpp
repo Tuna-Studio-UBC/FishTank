@@ -11,8 +11,8 @@ struct PlayerConfig {
     float fire_rate_cd_ms = 500.f;
 
     // Movement
-    float move_speed = 120;
-    float turn_speed = 1.2 * M_PI;
+    float move_speed = 100;
+    float turn_speed = 1.5 * M_PI;
 
     // Appearance
     vec3 colour = vec3(0.5f, 0.5f, 0.5f);
