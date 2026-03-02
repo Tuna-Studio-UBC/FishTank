@@ -103,7 +103,7 @@ const int PROJECTILE_SIZE_PX = 20;
 inline const bool is_empty_tile(int tile_id) { return (tile_id == 0 || tile_id == 1); }
 
 // player constants
-const int STARTING_AMMO = 30;
+const int STARTING_AMMO = 40;
 const int PROGRESS_PER_AMMO = 1000;
 
 // passive constants

@@ -26,6 +26,11 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
         // TODO: Add more power ups!!!
         switch (powerUp.type) {
         case POWER_UP_TYPE::HEAL:
+
+            // Skip if player is already at full health
+            if (registry.health.get(player).hp == registry.health.get(player).max_hp)
+                return;
+
             createOverTimeEffect<Heal>(player, config.duration_ms, config.duration_ms, config.amount);
             break;
         case POWER_UP_TYPE::SPEED_MULTIPLIER:

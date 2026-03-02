@@ -85,8 +85,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         }
         // Bullet hit enemy
         else if (registry.enemies.has(other_entity)) {
-            if (bullet.owner != other_entity && registry.health.has(other_entity) &&
-                !registry.enemies.has(bullet.owner)) { // Ignore between enemies
+            if (registry.players.has(bullet.owner)) { // Only player bullets damage enemies
                 HealDamageSystem::add_damage(other_entity, bullet.damage);
 
                 // Temp use bullet collision as trigger
