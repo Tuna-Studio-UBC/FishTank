@@ -131,7 +131,7 @@ void TutorialUI::draw_tutorial_hazards(TutorialStep tutorial) {
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "In the game you'll encounter some hazards, such as mines.";
+        text = "In the game you'll encounter some hazards, such as mines (blinking red obstacles).";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
             ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
@@ -162,7 +162,7 @@ void TutorialUI::draw_tutorial_healing(TutorialStep tutorial) {
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "You'll also encounter some healing orbs.\n\nJust swim over them to replenish your health!";
+        text = "You'll also encounter some health packs.\n\nJust swim over them to replenish your health!";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
         ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
