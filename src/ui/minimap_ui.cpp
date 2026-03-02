@@ -124,6 +124,17 @@ void GameUI::draw_minimap() {
         }
     }
 
+    // bubbler
+    for (Entity e : registry.bubblers.entities) {
+        if (!registry.motions.has(e))
+            continue;
+        const Motion &m = registry.motions.get(e);
+
+        ImVec2 c = world_to_minimap(m.position, map_min, map_size, world_w, world_h);
+        dl->AddCircleFilled(c, 4.2f, IM_COL32(212, 122, 80, 255));
+        dl->AddCircle(c, 4.2f, IM_COL32(255, 255, 255, 170), 0, 2.f);
+    }
+
     // enemy
     for (Entity e : registry.enemies.entities) {
         if (!registry.motions.has(e))
