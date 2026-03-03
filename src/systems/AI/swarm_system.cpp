@@ -14,7 +14,8 @@ void generate_bezier(vec2 start_pos, vec2 forward_dir, BezierPath &curve) {
         float sign = (i % 2 == 0) ? 1.f : -1.f;
         float angle = sign * angle_step * (i / 2);
 
-        vec2 rotated = vec2(base_dir.x * cos(angle) - base_dir.y * sin(angle), base_dir.x * sin(angle) + base_dir.y * cos(angle));
+        vec2 rotated =
+            vec2(base_dir.x * cos(angle) - base_dir.y * sin(angle), base_dir.x * sin(angle) + base_dir.y * cos(angle));
 
         projected = start_pos + normalize(rotated) * length;
 
@@ -47,14 +48,15 @@ void update_leader(Entity e, Motion &motion, float elapsed_ms) {
     if (curve.t >= 1.f) {
         curve.t = 0.f;
         curve.curves_left -= 1;
-    } 
+    }
     if (curve.curves_left == 0) {
         registry.senses.get(e).is_patrolling = false;
         return;
     }
     if (curve.t == 0.f) {
         generate_bezier(motion.position, direction_to_unit_vector(motion.angle), curve);
-        //spdlog::debug("generate new curve ({},{}) ({},{}) ({},{}) ({},{})", curve.p0.x, curve.p0.y, curve.p1.x, curve.p1.y, curve.p2.x, curve.p2.y, curve.p3.x, curve.p3.y);
+        // spdlog::debug("generate new curve ({},{}) ({},{}) ({},{}) ({},{})", curve.p0.x, curve.p0.y, curve.p1.x,
+        // curve.p1.y, curve.p2.x, curve.p2.y, curve.p3.x, curve.p3.y);
     }
 
     curve.t += curve.speed * (elapsed_ms / 1000.f);

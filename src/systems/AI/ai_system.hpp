@@ -1,9 +1,9 @@
 #pragma once
+#include "swarm_system.hpp"
 #include <cmath>
 #include <iostream>
 #include <random>
 #include <spdlog/spdlog.h>
-#include "swarm_system.hpp"
 
 class AISystem {
   private:
@@ -13,7 +13,7 @@ class AISystem {
     void run_idle(Entity e);
     void run_distracted(Entity e, float elapsed_ms, vec2 player_pos);
     void run_patrol(Entity e, float elapsed_ms);
-      
+
   public:
     void init(PathfindingSystem *system);
     void step(float elapsed_ms);

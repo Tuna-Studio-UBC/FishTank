@@ -1,8 +1,8 @@
 #pragma once
+#include "common.hpp"
+#include "systems/world/tilemap_system.hpp"
+#include "tinyECS/components.hpp"
 #include <vector>
-#include "../../common.hpp"
-#include "../../tinyECS/components.hpp"
-#include "../tilemap_system.hpp"
 
 class PathfindingSystem {
   private:

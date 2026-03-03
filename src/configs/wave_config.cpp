@@ -1,7 +1,7 @@
 #include "enemy_config.hpp"
 #include "hazard_config.hpp"
 #include "power_up_config.hpp"
-#include "systems/tilemap_system.hpp"
+#include "systems/world/tilemap_system.hpp"
 
 #include <vector>
 

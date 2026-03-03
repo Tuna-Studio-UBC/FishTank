@@ -41,7 +41,8 @@ AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
     }
 }
 
-float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 player_pos, float elapsed_ms, float stopping_dist) {
+float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 player_pos, float elapsed_ms,
+                   float stopping_dist) {
     vec2 position = motion.position;
     float angle = motion.angle;
 
@@ -170,7 +171,7 @@ void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
         }
 
         angle = adjust_angle(motion_i, registry.speedControl.get(e), target_pos, player_pos, elapsed_ms,
-                                   (TILE_SIZE_PX * 1.5));
+                             (TILE_SIZE_PX * 1.5));
     }
 
     // Firing logic
@@ -196,7 +197,7 @@ void AISystem::run_distracted(Entity e, float elapsed_ms, vec2 player_pos) {
     }
 }
 
-void AISystem::run_idle(Entity e) { 
+void AISystem::run_idle(Entity e) {
     Motion &motion = registry.motions.get(e);
     motion.velocity = vec2(0.f, 0.f);
 }
@@ -221,7 +222,6 @@ void AISystem::act(Entity e, float elapsed_ms, vec2 player_pos) {
         run_patrol(e, elapsed_ms);
         break;
     }
-
 }
 
 void AISystem::handle_detection() {

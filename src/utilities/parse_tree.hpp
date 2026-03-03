@@ -1,13 +1,13 @@
 #pragma once
-#include <sstream>
+#include "common.hpp"
 #include <fstream>
 #include <iostream>
+#include <spdlog/spdlog.h>
+#include <sstream>
 #include <string>
 #include <unordered_map>
-#include <spdlog/spdlog.h>
-#include "../common.hpp"
 
-enum class NodeType{ CONDITION, ACTION, RANDOM };
+enum class NodeType { CONDITION, ACTION, RANDOM };
 
 enum AIAction { IDLE, PURSUE, DISTRACTED, PATROL };
 
