@@ -31,13 +31,26 @@ using namespace glm;
 //
 inline const std::string ROOT_DIR = std::string(PROJECT_SOURCE_DIR);
 
-enum FilePath { AUDIO, MAPS, MESHES, SHADERS, SPRITE_SHEETS, TEXTURES, TILESETS, TILESET_IMAGES, DECISION_TREES };
+enum FilePath {
+    AUDIO,
+    FONTS,
+    MAPS,
+    MESHES,
+    SHADERS,
+    SPRITE_SHEETS,
+    TEXTURES,
+    TILESETS,
+    TILESET_IMAGES,
+    DECISION_TREES
+};
 
 inline std::string get_path(FilePath path, const std::string &file_name) {
     std::string file = std::string(file_name);
     switch (path) {
     case AUDIO:
         return ROOT_DIR + "/res/audio/" + file;
+    case FONTS:
+        return ROOT_DIR + "/res/fonts/" + file;
     case MAPS:
         return ROOT_DIR + "/res/maps/" + file;
     case MESHES:
@@ -90,7 +103,7 @@ const int PROJECTILE_SIZE_PX = 20;
 inline const bool is_empty_tile(int tile_id) { return (tile_id == 0 || tile_id == 1); }
 
 // player constants
-const int STARTING_AMMO = 30;
+const int STARTING_AMMO = 40;
 const int PROGRESS_PER_AMMO = 1000;
 
 // passive constants

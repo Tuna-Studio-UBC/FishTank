@@ -49,25 +49,24 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = vec2(80.0f, 80.0f);
 
-
     MeshCollider fishMesh;
     fishMesh.vertices = {
-        { -42.f,   0.f },   // tail tip (left)
-        { -20.f, -25.f },   // tail top
-        {  10.f, -18.f },   // mid top
-        {  40.f, -12.f },   // upper body
-        {  64.f,  -4.f },   // nose top
-        {  64.f,   4.f },   // nose bottom
-        {  40.f,  12.f },   // lower body
-        {  10.f,  18.f },   // mid bottom
-        { -20.f,  25.f }    // tail bottom
+        {-42.f, 0.f},   // tail tip (left)
+        {-20.f, -25.f}, // tail top
+        {10.f, -18.f},  // mid top
+        {40.f, -12.f},  // upper body
+        {64.f, -4.f},   // nose top
+        {64.f, 4.f},    // nose bottom
+        {40.f, 12.f},   // lower body
+        {10.f, 18.f},   // mid bottom
+        {-20.f, 25.f}   // tail bottom
     };
 
     // compute authored bbox and set authoring_px from it
     {
         vec2 minV = fishMesh.vertices[0];
         vec2 maxV = fishMesh.vertices[0];
-        for (const vec2& v : fishMesh.vertices) {
+        for (const vec2 &v : fishMesh.vertices) {
             minV.x = std::min(minV.x, v.x);
             minV.y = std::min(minV.y, v.y);
             maxV.x = std::max(maxV.x, v.x);
@@ -75,11 +74,12 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
         }
         float authored_width = maxV.x - minV.x;
         float authored_height = maxV.y - minV.y;
-        fishMesh.authoring_px = std::max(1.0f, std::max(authored_width, authored_height)); // fallback to 1 if degenerate
+        fishMesh.authoring_px =
+            std::max(1.0f, std::max(authored_width, authored_height)); // fallback to 1 if degenerate
 
         // center the collider geometry around its centroid so physics SAT uses same origin as renderer.
         vec2 centroid = (minV + maxV) * 0.5f;
-        for (vec2& v : fishMesh.vertices)
+        for (vec2 &v : fishMesh.vertices)
             v -= centroid;
     }
 
@@ -116,8 +116,8 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     motion.angle = 0.f;
     motion.scale = vec2(50.0f, 50.0f);
 
-    registry.health.emplace(entity);
-
+    auto &health = registry.health.emplace(entity);
+    health = config.health;
 
     auto &fire = registry.fireControl.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
@@ -140,9 +140,34 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
 
     registry.dropsCrackers.emplace(entity);
 
-    registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::ACTORS});
+    if (type == ENEMY_TYPE::URCHIN) {
+        registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_URCHIN_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 4;
+        an.columns = 4;
+        an.frame_time = 500;
+    } else if (type == ENEMY_TYPE::HOMING) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ISOPOD_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 125;
+        motion.scale = vec2(40.0f, 25.0f);
+    } else {
+        registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 250;
+    }
 
     return entity;
 }
@@ -293,9 +318,18 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
 
     auto &config = POWER_UP_CONFIGS[(int)type];
 
-    registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    if (config.type == POWER_UP_TYPE::HEAL) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_HEALTH_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
+    } else {
+        registry.colors.emplace(entity, config.colour);
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                                GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    }
 
     registry.pickUp.emplace(entity);
     registry.powerUp.emplace(entity, type);
@@ -317,13 +351,13 @@ Entity createBubbler(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = {TILE_SIZE_PX, TILE_SIZE_PX};
 
-    // ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
-    // pe.life_ms = 1;
-    // pe.particle_life_ms = 400;
-    // pe.max_particles = 10;
-    // pe.particle_speed = 75;
-    // pe.spawn_interval_ms = 100;
-    // pe.position = motion.position;
+    ParticleEmitter &pe = registry.particleEmitters.emplace(entity);
+    pe.particle_life_ms = 400;
+    pe.max_particles = 10;
+    pe.particle_speed = 75;
+    pe.spawn_interval_ms = 100;
+    pe.particle_scale = 10;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
@@ -426,9 +460,12 @@ Entity createMine(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = {40.f, 40.f};
 
-    registry.colors.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_MINE_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 3;
+    an.frame_count = 3;
+    an.frame_time = 500;
 
     return entity;
 }
@@ -474,28 +511,62 @@ Entity createWall(const vec2 &position, const vec2 &scale) {
     return entity;
 }
 
-const bool DRAW_TUTORIAL_TRIGGERS = true;
-
-Entity createTutorialTrigger(const vec2 position, const vec2 size, const int id) {
+Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutorial id) {
     Entity entity = Entity("Tutorial Trigger " + id);
 
     registry.tutorialTriggers.emplace(entity, id);
 
-    Motion& motion = registry.motions.emplace(entity);
+    Motion &motion = registry.motions.emplace(entity);
     motion.position = position;
     motion.scale = size;
 
-    if (DRAW_TUTORIAL_TRIGGERS)
-    {
-        registry.colors.emplace(entity, 1.f, 0.f, 0.f);
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                                GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::INTERACTABLES});
-    }
+// #define DRAW_TUTORIAL_TRIGGERS
+#ifdef DRAW_TUTORIAL_TRIGGERS
+    registry.colors.emplace(entity, 1.f, 0.f, 0.f);
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
+                                            GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::INTERACTABLES});
+#endif
 
     return entity;
 }
 
 #pragma endregion StaticObjects
+
+#pragma region Effects
+
+Entity createEffectSmoke(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Smoke)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 20;
+    pe.particle_speed = 60;
+    pe.spawn_interval_ms = 30;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_SMOKE;
+    pe.particle_scale = 50;
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    return e;
+}
+
+Entity createEffectBubbles(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Bubble)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 1000;
+    pe.particle_speed = 120;
+    pe.spawn_interval_ms = 50;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+    pe.particle_scale = 10;
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    return e;
+}
+
+#pragma endregion Effects
 
 #pragma region ScreenOverlays
 

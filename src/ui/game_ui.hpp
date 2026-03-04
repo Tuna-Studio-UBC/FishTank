@@ -11,11 +11,16 @@
 #include "tinyECS/tiny_ecs.hpp"
 #include "utils.hpp"
 
+#include "ui/game/tutorial/tutorial_ui.hpp"
+
 struct GameUI {
     void draw_fps_counter(WorldSystem *world_system);
     void draw_healthbar();
     void draw_ammo();
     void draw_respawn(WorldSystem *world_system);
     void draw_minimap();
+    void draw_pause_menu();
     inline void draw_demo() { ImGui::ShowDemoWindow(); }
 };
+
+static GameUI game_ui;

@@ -8,8 +8,8 @@
 #include <iostream>
 
 // internal
-#include "systems/animation_system.hpp"
 #include "systems/ai/ai_system.hpp"
+#include "systems/animation_system.hpp"
 #include "systems/camera_system.hpp"
 #include "systems/collision_system.hpp"
 #include "systems/death_system.hpp"
@@ -31,6 +31,7 @@ using Clock = std::chrono::high_resolution_clock;
 int main() {
     // global systems
     AISystem ai_system;
+    PathfindingSystem path_system;
     CollisionSystem collision_system;
     OverTimeEffectSystem ote_system;
     HealDamageSystem heal_damage_system;
@@ -43,8 +44,6 @@ int main() {
     CameraSystem camera_system;
     AnimationSystem animation_system;
     TileMapSystem tilemap_system;
-
-    GameUI game_ui;
 
     // Configure spdlog
     spdlog::set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] [%l]%$ %v");
@@ -68,6 +67,8 @@ int main() {
     renderer_system.init(window);
     world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system);
     camera_system.init(tilemap_system.get_current_map());
+    path_system.init(&tilemap_system);
+    ai_system.init(&path_system);
 
     // variable timestep loop
     auto t = Clock::now();
@@ -104,10 +105,13 @@ int main() {
         }
 
         // Draw GUIs
+        game_ui.draw_pause_menu();
         game_ui.draw_fps_counter(&world_system);
         game_ui.draw_healthbar();
         game_ui.draw_minimap();
         game_ui.draw_ammo();
+
+        tutorial_ui.draw_tutorial_step();
 
 // Debugging UI
 #ifdef ENABLE_DEBUG_UI

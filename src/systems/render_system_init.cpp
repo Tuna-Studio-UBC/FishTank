@@ -172,13 +172,9 @@ void RenderSystem::initializeParticles() {
     };
 
     QuadVertex quad[6] = {
-        {{-0.5f, -0.5f}, {0.f, 0.f}},
-        {{0.5f, -0.5f}, {1.f, 0.f}},
-        {{0.5f, 0.5f}, {1.f, 1.f}},
+        {{-0.5f, -0.5f}, {0.f, 0.f}}, {{0.5f, -0.5f}, {1.f, 0.f}}, {{0.5f, 0.5f}, {1.f, 1.f}},
 
-        {{-0.5f, -0.5f}, {0.f, 0.f}},
-        {{0.5f, 0.5f}, {1.f, 1.f}},
-        {{-0.5f, 0.5f}, {0.f, 1.f}},
+        {{-0.5f, -0.5f}, {0.f, 0.f}}, {{0.5f, 0.5f}, {1.f, 1.f}},  {{-0.5f, 0.5f}, {0.f, 1.f}},
     };
 
     glGenBuffers(1, &quad_vbo);
@@ -188,7 +184,7 @@ void RenderSystem::initializeParticles() {
     // 0 is quad position, 1 is quad texcoord (See vertex shader)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)0);
-    
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVertex), (void *)sizeof(vec2));
 
@@ -220,9 +216,13 @@ void RenderSystem::initializeGUI(GLFWwindow *window) {
 
     // Styling
     ImGui::StyleColorsDark();
+
+    // Fonts
     ImGuiStyle &style = ImGui::GetStyle();
     style.FontSizeBase = 16.0f;
     io.Fonts->AddFontDefault();
+    io.Fonts->AddFontFromFileTTF(get_path(FilePath::FONTS, "Kenney_Pixel_Square.ttf").c_str(), 80.0f);
+    io.Fonts->AddFontFromFileTTF(get_path(FilePath::FONTS, "Kenney_Pixel.ttf").c_str(), 30.0f);
 
     // Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);

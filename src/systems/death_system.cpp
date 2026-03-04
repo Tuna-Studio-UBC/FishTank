@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "death_system.hpp"
+#include "world_init.hpp"
 #include <spdlog/spdlog.h>
 #include <systems/world_system.hpp>
 
@@ -18,7 +19,8 @@ void DeathSystem::step(float elapsed_ms) {
 
                 if (registry.players.has(e)) {
                     // TODO: Handle player death
-                    registry.progress.components[0].game_over = true;
+                    registry.progress.components[0].is_game_over = true;
+                    registry.progress.components[0].has_beat_level = false;
                     Entity e = Entity("Overlay");
                     registry.overlays.emplace(e);
                     auto &motion = registry.motions.emplace(e);
@@ -40,6 +42,9 @@ void DeathSystem::step(float elapsed_ms) {
                         spdlog::info("{} collected {} crackers! Total: {}", player.name_id(), drops.cracker,
                                      wallet.crackers);
                     }
+
+                    Motion &m = registry.motions.get(e);
+                    createEffectSmoke(m.position);
 
                     registry.remove_all_components_of(e);
                     registry.progress.components[0].remaining_enemies -= 1;
