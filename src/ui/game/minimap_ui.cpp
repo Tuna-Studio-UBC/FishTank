@@ -74,7 +74,7 @@ void GameUI::draw_minimap() {
     dl->AddRect(map_min, map_max, IM_COL32(255, 255, 255, 90), 6.f, 0, 2.f);
 
     // wall
-    for (Entity e : registry.wall.entities) {
+    for (Entity e : registry.walls.entities) {
         if (!registry.motions.has(e))
             continue;
         const Motion &m = registry.motions.get(e);
@@ -85,12 +85,12 @@ void GameUI::draw_minimap() {
     }
 
     // hazard
-    for (Entity e : registry.hazard.entities) {
+    for (Entity e : registry.hazards.entities) {
         if (!registry.motions.has(e))
             continue;
         const Motion &m = registry.motions.get(e);
 
-        HAZARD_TYPE ht = registry.hazard.get(e).type;
+        HAZARD_TYPE ht = registry.hazards.get(e).type;
         ImU32 col = hazard_color(ht);
 
         ImVec2 c = world_to_minimap(m.position, map_min, map_size, world_w, world_h);
@@ -98,19 +98,19 @@ void GameUI::draw_minimap() {
     }
 
     // power-up
-    for (Entity e : registry.pickUp.entities) {
+    for (Entity e : registry.pickUps.entities) {
         if (!registry.motions.has(e))
             continue;
         const Motion &m = registry.motions.get(e);
 
         ImVec2 c = world_to_minimap(m.position, map_min, map_size, world_w, world_h);
 
-        if (!registry.powerUp.has(e)) {
+        if (!registry.powerUps.has(e)) {
             dl->AddCircleFilled(c, 3.0f, IM_COL32(120, 255, 120, 220));
             continue;
         }
 
-        POWER_UP_TYPE pt = registry.powerUp.get(e).type;
+        POWER_UP_TYPE pt = registry.powerUps.get(e).type;
         ImU32 col = powerup_color(pt);
 
         if (pt == POWER_UP_TYPE::SPEED_MULTIPLIER) {

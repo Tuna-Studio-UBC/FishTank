@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 void TutorialUI::draw_tutorial_step() {
-    Progress &progress = registry.progress.components[0];
+    Progress &progress = registry.progresses.components[0];
     if (!progress.is_tutorial_step_called)
         return;
 

@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 void PickUpSystem::step(float elapsed_ms) {
-    for (Entity e : registry.pickUp.entities) {
+    for (Entity e : registry.pickUps.entities) {
         Entity player = registry.players.entities[0];
         vec2 player_pos = registry.motions.get(player).position;
 
@@ -17,8 +17,8 @@ void PickUpSystem::step(float elapsed_ms) {
 }
 
 void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
-    if (registry.powerUp.has(pickUp)) {
-        PowerUp powerUp = registry.powerUp.get(pickUp);
+    if (registry.powerUps.has(pickUp)) {
+        PowerUp powerUp = registry.powerUps.get(pickUp);
         auto &config = POWER_UP_CONFIGS[(int)powerUp.type];
 
         spdlog::debug("Picked up {} of type: {}", pickUp.name_id(), (int)powerUp.type);
@@ -28,7 +28,7 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
         case POWER_UP_TYPE::HEAL:
 
             // Skip if player is already at full health
-            if (registry.health.get(player).hp == registry.health.get(player).max_hp)
+            if (registry.healths.get(player).hp == registry.healths.get(player).max_hp)
                 return;
 
             createOverTimeEffect<Heal>(player, config.duration_ms, config.duration_ms, config.amount);

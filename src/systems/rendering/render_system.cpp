@@ -48,7 +48,7 @@ void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, con
     RenderRequest &render_request = registry.renderRequests.get(entity);
     TileMap &tilemap = registry.tilemaps.get(entity);
     TileSet &tileset = registry.tilesets.get(entity);
-    vec2 &camera_pos = registry.motions.get(registry.camera.entities[0]).position;
+    vec2 &camera_pos = registry.motions.get(registry.cameras.entities[0]).position;
     // Only render the tiles that are on screen. Use camera pos and not player pos
     int min_x = max(((int)(camera_pos.x - (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) - 1, 0);
     int max_x = min(((int)(camera_pos.x + (WINDOW_WIDTH_PX / 2)) / TILE_SIZE_PX) + 1, (int)tilemap.width);
@@ -220,7 +220,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 
     // Getting uniform locations for glUniform* calls
     GLint color_uloc = glGetUniformLocation(program, "fcolor");
-    const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+    const vec3 color = registry.colours.has(entity) ? registry.colours.get(entity).colour : vec3(1);
     glUniform3fv(color_uloc, 1, value_ptr(color));
     gl_has_errors();
 
@@ -258,7 +258,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
 }
 
 void RenderSystem::drawText(Entity entity) {
-    Text &t = registry.text.get(entity);
+    Text &t = registry.texts.get(entity);
     std::string text = t.text;
     float x = t.position.x;
     float y = t.position.y;
@@ -518,7 +518,7 @@ void RenderSystem::draw() {
             drawTexturedMesh(entity, projection_2D, view_2D);
         } else if (registry.tilemaps.has(entity)) {
             drawTileMap(entity, projection_2D, view_2D);
-        } else if (registry.text.has(entity)) {
+        } else if (registry.texts.has(entity)) {
             drawText(entity);
         }
     }
@@ -560,7 +560,7 @@ mat3 RenderSystem::createProjectionMatrix() {
 }
 
 mat3 RenderSystem::createViewMatrix() {
-    Entity camera = registry.camera.entities[0];
+    Entity camera = registry.cameras.entities[0];
     Motion &m = registry.motions.get(camera);
 
     return {{1.f, 0.f, 0.f},

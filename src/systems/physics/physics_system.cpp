@@ -55,8 +55,8 @@ bool collision_AABB(const Motion &motion1, const Motion &motion2) {
 // otherwise fall back to the fast AABB test.
 bool collides_with_wall(Entity entity, const Motion &entity_motion) {
     // Loop through all wall entities
-    for (uint i = 0; i < registry.wall.entities.size(); i++) {
-        Entity wall_entity = registry.wall.entities[i];
+    for (uint i = 0; i < registry.walls.entities.size(); i++) {
+        Entity wall_entity = registry.walls.entities[i];
         if (!registry.motions.has(wall_entity))
             continue;
 
@@ -116,11 +116,11 @@ void PhysicsSystem::step(float elapsed_ms) {
 
         // TODO: Optimize this nested loop
         // Apply SpeedMultiplier power up
-        for (Entity &sm_entity : registry.speedMultiplier.entities) {
-            if (registry.target.has(sm_entity)) {
-                Target &t = registry.target.get(sm_entity);
+        for (Entity &sm_entity : registry.speedMultipliers.entities) {
+            if (registry.targets.has(sm_entity)) {
+                Target &t = registry.targets.get(sm_entity);
                 if (t.target == entity) {
-                    SpeedMultiplier &sm = registry.speedMultiplier.get(sm_entity);
+                    SpeedMultiplier &sm = registry.speedMultipliers.get(sm_entity);
                     velocity *= sm.multiplier;
                 }
             }
@@ -173,9 +173,9 @@ void PhysicsSystem::step(float elapsed_ms) {
                     auto polyWorld = transformPolygon(mc.vertices, motion, sprite_base);
 
                     std::vector<vec2> perWallMTVs;
-                    perWallMTVs.reserve(registry.wall.entities.size());
-                    for (uint wi = 0; wi < registry.wall.entities.size(); ++wi) {
-                        Entity wall_entity = registry.wall.entities[wi];
+                    perWallMTVs.reserve(registry.walls.entities.size());
+                    for (uint wi = 0; wi < registry.walls.entities.size(); ++wi) {
+                        Entity wall_entity = registry.walls.entities[wi];
                         if (!registry.motions.has(wall_entity))
                             continue;
                         Motion &wall_motion = registry.motions.get(wall_entity);
@@ -284,8 +284,8 @@ void PhysicsSystem::step(float elapsed_ms) {
 
                     // determine if player is actively pressing forward so we can preserve that channel
                     bool pressing_forward =
-                        registry.keyboardInput.has(entity) &&
-                        registry.keyboardInput.get(entity).current_actions[KeyboardActions::MoveForward];
+                        registry.keyboardInputs.has(entity) &&
+                        registry.keyboardInputs.get(entity).current_actions[KeyboardActions::MoveForward];
 
                     vec2 normal = normalize(combined);
                     // remove inward component only
@@ -395,8 +395,8 @@ void PhysicsSystem::step(float elapsed_ms) {
                         // preserve computed local velocity only if player is pressing forward; otherwise clear to avoid
                         // drift
                         bool pressing_forward_now =
-                            registry.keyboardInput.has(entity) &&
-                            registry.keyboardInput.get(entity).current_actions[KeyboardActions::MoveForward];
+                            registry.keyboardInputs.has(entity) &&
+                            registry.keyboardInputs.get(entity).current_actions[KeyboardActions::MoveForward];
                         if (pressing_forward_now) {
                             float use_x = std::abs(saved_computed_local_x) > std::abs(prev_local_forward)
                                               ? saved_computed_local_x
@@ -427,8 +427,8 @@ void PhysicsSystem::step(float elapsed_ms) {
                             // preserve computed local velocity only if player is pressing forward; otherwise clear to
                             // avoid drift
                             bool pressing_forward_now =
-                                registry.keyboardInput.has(entity) &&
-                                registry.keyboardInput.get(entity).current_actions[KeyboardActions::MoveForward];
+                                registry.keyboardInputs.has(entity) &&
+                                registry.keyboardInputs.get(entity).current_actions[KeyboardActions::MoveForward];
                             if (pressing_forward_now) {
                                 float use_x = std::abs(saved_computed_local_x) > std::abs(prev_local_forward)
                                                   ? saved_computed_local_x
@@ -443,8 +443,8 @@ void PhysicsSystem::step(float elapsed_ms) {
                             // continue.
                             motion.position = safe_pos;
                             bool pressing_forward_now =
-                                registry.keyboardInput.has(entity) &&
-                                registry.keyboardInput.get(entity).current_actions[KeyboardActions::MoveForward];
+                                registry.keyboardInputs.has(entity) &&
+                                registry.keyboardInputs.get(entity).current_actions[KeyboardActions::MoveForward];
                             if (pressing_forward_now) {
                                 motion.velocity.x = prev_local_forward;
                                 // keep motion.velocity.y as-is (do not zero)
@@ -526,8 +526,8 @@ void PhysicsSystem::step(float elapsed_ms) {
                 // decide whether to clear lateral tangential motion on exit.
                 // preserve the player's forward local channel so they can "drive by" the wall.
                 bool pressing_forward_exit =
-                    registry.keyboardInput.has(entity) &&
-                    registry.keyboardInput.get(entity).current_actions[KeyboardActions::MoveForward];
+                    registry.keyboardInputs.has(entity) &&
+                    registry.keyboardInputs.get(entity).current_actions[KeyboardActions::MoveForward];
 
                 const float RELEASE_TANGENT_THRESHOLD = 2.0f; // lower so meaningful tangential speed survives
                 // clear lateral/tangential motion on exit to avoid drift flipping when the wall ends.
@@ -546,8 +546,8 @@ void PhysicsSystem::step(float elapsed_ms) {
                 // final clamp to avoid micro-drift - only clamp when player not driving forward
                 const float MIN_VEL_TO_KEEP = 1.0f; // px/s - much smaller to avoid killing input-driven motion
                 bool pressing_forward_final =
-                    registry.keyboardInput.has(entity) &&
-                    registry.keyboardInput.get(entity).current_actions[KeyboardActions::MoveForward];
+                    registry.keyboardInputs.has(entity) &&
+                    registry.keyboardInputs.get(entity).current_actions[KeyboardActions::MoveForward];
                 // convert local->world to measure final magnitude
                 vec2 final_world = vec2(ca_exit * motion.velocity.x - sa_exit * motion.velocity.y,
                                         sa_exit * motion.velocity.x + ca_exit * motion.velocity.y);
@@ -568,8 +568,8 @@ void PhysicsSystem::step(float elapsed_ms) {
 
             // when the player is actively holding MoveForward allow very small speeds to accumulate
             // so the input can ramp the local velocity across frames. When not pressing, clamp micro-drift.
-            bool pressing_forward = registry.keyboardInput.has(entity) &&
-                                    registry.keyboardInput.get(entity).current_actions[KeyboardActions::MoveForward];
+            bool pressing_forward = registry.keyboardInputs.has(entity) &&
+                                    registry.keyboardInputs.get(entity).current_actions[KeyboardActions::MoveForward];
 
             const float GLOBAL_MIN_VEL_WHILE_IDLE = 6.0f;   // px/s - clamp when player not pressing forward
             const float GLOBAL_MIN_VEL_WHILE_MOVING = 0.5f; // px/s - allow accumulation while input held

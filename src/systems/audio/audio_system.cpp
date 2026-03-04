@@ -89,7 +89,7 @@ void AudioSystem::update_hazard_warning(const vec2 &listener_pos, float elapsed_
     Entity best;
     float best_d2 = 1e30f;
 
-    for (Entity h : registry.hazard.entities) {
+    for (Entity h : registry.hazards.entities) {
         if (!registry.motions.has(h))
             continue;
         vec2 hp = registry.motions.get(h).position;

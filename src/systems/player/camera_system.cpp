@@ -2,7 +2,7 @@
 #include "systems/world/world_init.hpp"
 
 void CameraSystem::step() {
-    auto &camera = registry.camera.entities[0];
+    auto &camera = registry.cameras.entities[0];
     vec2 &camera_pos = registry.motions.get(camera).position;
     auto camera_dest = get_camera_dest();
 
@@ -12,7 +12,7 @@ void CameraSystem::step() {
 vec2 CameraSystem::get_camera_dest() {
     auto &player = registry.players.entities[0];
     vec2 &player_pos = registry.motions.get(player).position;
-    vec2 &mouse_pos = registry.mouseInput.components[0].mouse_pos;
+    vec2 &mouse_pos = registry.mouseInputs.components[0].mouse_pos;
 
     if (mouse_pos == vec2(0))
         mouse_pos = player_pos;
@@ -45,7 +45,7 @@ void CameraSystem::set_camera_bounds() {
 void CameraSystem::init(Entity current_map) {
     this->current_map = current_map;
     set_camera_bounds();
-    if (registry.camera.entities.empty()) {
+    if (registry.cameras.entities.empty()) {
         if (registry.players.entities.size() > 0)
             createCamera(get_camera_dest());
         else

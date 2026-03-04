@@ -422,6 +422,11 @@ struct TileSet {
           collisions(collisions) {}
 };
 
+struct Colour {
+    vec3 colour = {1.f, 1.f, 1.f};
+    Colour(vec3 colour) : colour(colour) {}
+};
+
 struct Tint {
     vec3 tint = {1.f, 1.f, 1.f};
     float life_ms = -99.f; // Default -99 (infinite)

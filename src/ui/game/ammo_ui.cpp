@@ -21,8 +21,8 @@ void GameUI::draw_ammo() {
 
     Entity e = registry.players.entities[0];
 
-    if (registry.fireControl.has(e)) {
-        FireControl &fc = registry.fireControl.get(e);
+    if (registry.fireControls.has(e)) {
+        FireControl &fc = registry.fireControls.get(e);
         float ratio = (fc.ammo > 0) ? (float)fc.ammo / (float)fc.max_ammo : 0.f;
         ImVec2 rect_min_filled = ImVec2(pos.x + padding, pos.y + padding);
         ImVec2 rect_max_filled = ImVec2(pos.x + (size.x - padding) * ratio, pos.y + (size.y - padding));

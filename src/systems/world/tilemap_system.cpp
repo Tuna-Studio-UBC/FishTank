@@ -145,7 +145,7 @@ void TileMapSystem::clear_map() {
         registry.remove_all_components_of(entity);
     for (auto entity : registry.tilesets.entities)
         registry.remove_all_components_of(entity);
-    for (auto entity : registry.wall.entities)
+    for (auto entity : registry.walls.entities)
         registry.remove_all_components_of(entity);
 }
 

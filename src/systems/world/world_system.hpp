@@ -79,8 +79,8 @@ class WorldSystem {
     RenderSystem *renderer;
     CameraSystem *camera_system;
 
-    std::vector<std::vector<Entity> *> entities_to_clear = {&registry.enemies.entities, &registry.hazard.entities,
-                                                            &registry.bullet.entities,  &registry.pickUp.entities,
+    std::vector<std::vector<Entity> *> entities_to_clear = {&registry.enemies.entities, &registry.hazards.entities,
+                                                            &registry.bullets.entities, &registry.pickUps.entities,
                                                             &registry.bells.entities,   &registry.bubblers.entities};
 
     // grid

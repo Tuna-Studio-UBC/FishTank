@@ -19,21 +19,21 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     PlayerConfig config;
     registry.players.emplace(entity);
 
-    registry.keyboardInput.emplace(entity);
-    registry.mouseInput.emplace(entity);
+    registry.keyboardInputs.emplace(entity);
+    registry.mouseInputs.emplace(entity);
 
-    Wallet &w = registry.wallet.emplace(entity);
+    Wallet &w = registry.wallets.emplace(entity);
     w.crackers = config.crackers;
 
-    Health &h = registry.health.emplace(entity);
+    Health &h = registry.healths.emplace(entity);
     h.hp = config.hp;
     h.max_hp = config.max_hp;
 
-    FireControl &fc = registry.fireControl.emplace(entity);
+    FireControl &fc = registry.fireControls.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;
     fc.ammo = STARTING_AMMO;
 
-    SpeedControl &sc = registry.speedControl.emplace(entity);
+    SpeedControl &sc = registry.speedControls.emplace(entity);
     sc.move_speed = config.move_speed;
     sc.turn_speed = config.turn_speed;
 
@@ -114,14 +114,14 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     motion.angle = 0.f;
     motion.scale = vec2(50.0f, 50.0f);
 
-    auto &health = registry.health.emplace(entity);
+    auto &health = registry.healths.emplace(entity);
     health = config.health;
 
-    auto &fire = registry.fireControl.emplace(entity);
+    auto &fire = registry.fireControls.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
     fire.attack_pattern = config.attack_pattern;
 
-    auto &speed = registry.speedControl.emplace(entity);
+    auto &speed = registry.speedControls.emplace(entity);
     speed.move_speed = config.move_speed;
     speed.turn_speed = config.turn_speed;
 
@@ -132,14 +132,14 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     ai.current_state = AIAction::IDLE;
 
     if (type != ENEMY_TYPE::URCHIN) {
-        registry.pursuit.emplace(entity);
-        registry.distracted.emplace(entity);
+        registry.pursuits.emplace(entity);
+        registry.distracteds.emplace(entity);
     }
 
     registry.dropsCrackers.emplace(entity);
 
     if (type == ENEMY_TYPE::URCHIN) {
-        registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_URCHIN_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
@@ -157,7 +157,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_time = 125;
         motion.scale = vec2(40.0f, 25.0f);
     } else {
-        registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
@@ -194,7 +194,7 @@ Entity createLeader(RenderSystem *renderer, vec2 position) {
     ai.tree = load_tree(ai.tree_file);
     ai.current_state = AIAction::IDLE;
 
-    registry.colors.emplace(entity, vec3(0.2f, 0.2f, 1.0f));
+    registry.colours.emplace(entity, Colour(vec3(0.2f, 0.2f, 1.0f)));
     registry.renderRequests.insert(
         entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
 
@@ -220,7 +220,7 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
     speed.move_speed = config.move_speed;
     speed.turn_speed = config.turn_speed;*/
 
-    registry.colors.emplace(entity, vec3(0.2f, 0.2f, 1.0f));
+    registry.colours.emplace(entity, Colour(vec3(0.2f, 0.2f, 1.0f)));
     registry.renderRequests.insert(
         entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
 
@@ -230,7 +230,7 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
 Entity createCamera(vec2 position) {
     auto entity = Entity("Camera");
 
-    registry.camera.emplace(entity);
+    registry.cameras.emplace(entity);
     auto &motion = registry.motions.emplace(entity);
     motion.position = position;
     return entity;
@@ -271,7 +271,7 @@ Entity createTurret(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = vec2(45.0f, 45.0f);
 
-    registry.colors.emplace(entity, vec3(1.0f, 0.2f, 0.2f));
+    registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
 
     registry.renderRequests.insert(
         entity,
@@ -324,13 +324,13 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
         an.frame_count = 4;
         an.frame_time = 250;
     } else {
-        registry.colors.emplace(entity, config.colour);
+        registry.colours.emplace(entity, config.colour);
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
                                                 GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
     }
 
-    registry.pickUp.emplace(entity);
-    registry.powerUp.emplace(entity, type);
+    registry.pickUps.emplace(entity);
+    registry.powerUps.emplace(entity, type);
 
     return entity;
 }
@@ -386,7 +386,7 @@ Entity createBell(RenderSystem *renderer, vec2 position, float interact_radius_p
     motion.angle = 0.f;
     motion.scale = {30.f, 30.f};
 
-    registry.colors.emplace(entity, vec3(0.1f, 0.9f, 0.1f));
+    registry.colours.emplace(entity, Colour(vec3(0.1f, 0.9f, 0.1f)));
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
                                             GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
 
@@ -406,18 +406,18 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
     AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
 
     // Apply DamageMultiplier power up
-    for (Entity &dm_entity : registry.damageMultiplier.entities) {
-        if (registry.target.has(dm_entity)) {
-            Target &t = registry.target.get(dm_entity);
+    for (Entity &dm_entity : registry.damageMultipliers.entities) {
+        if (registry.targets.has(dm_entity)) {
+            Target &t = registry.targets.get(dm_entity);
             if (t.target == owner) {
-                DamageMultiplier &dm = registry.damageMultiplier.get(dm_entity);
+                DamageMultiplier &dm = registry.damageMultipliers.get(dm_entity);
                 attack_config.damage *= dm.multiplier;
             }
         }
     }
 
-    Bullet &bullet = registry.bullet.insert(entity, {attack_config.damage, owner});
-    registry.expiration.emplace(entity, attack_config.lifespan_ms);
+    Bullet &bullet = registry.bullets.insert(entity, {attack_config.damage, owner});
+    registry.expirations.emplace(entity, attack_config.lifespan_ms);
 
     Motion &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(attack_config.projectile_speed, 0.f);
@@ -425,7 +425,7 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
     motion.angle = angle;
     motion.scale = vec2(PROJECTILE_SIZE_PX);
 
-    Bouncy &bouncy = registry.bouncy.emplace(entity);
+    Bouncy &bouncy = registry.bouncies.emplace(entity);
 
     registry.tints.emplace(entity, attack_config.projectile_tint);
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
@@ -446,8 +446,8 @@ Entity createMine(RenderSystem *renderer, vec2 position) {
     auto entity = Entity("Mine");
 
     auto &config = HAZARD_CONFIGS[(int)HAZARD_TYPE::MINE];
-    registry.mine.emplace(entity);
-    registry.hazard.emplace(entity, HAZARD_TYPE::MINE);
+    registry.mines.emplace(entity);
+    registry.hazards.emplace(entity, HAZARD_TYPE::MINE);
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -472,8 +472,8 @@ Entity createAnemone(RenderSystem *renderer, vec2 position) {
     auto entity = Entity("Anemone");
 
     auto &config = HAZARD_CONFIGS[(int)HAZARD_TYPE::ANEMONE];
-    registry.anemone.emplace(entity);
-    registry.hazard.emplace(entity, HAZARD_TYPE::ANEMONE);
+    registry.anemones.emplace(entity);
+    registry.hazards.emplace(entity, HAZARD_TYPE::ANEMONE);
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -484,7 +484,7 @@ Entity createAnemone(RenderSystem *renderer, vec2 position) {
     motion.angle = 0.f;
     motion.scale = {40.f, 40.f};
 
-    registry.colors.emplace(entity, config.colour);
+    registry.colours.emplace(entity, config.colour);
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
                                             GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
 
@@ -504,7 +504,7 @@ Entity createWall(const vec2 &position, const vec2 &scale) {
     motion.velocity = vec2(0.f, 0.f);
     motion.angle = 0.f;
 
-    registry.wall.emplace(entity);
+    registry.walls.emplace(entity);
 
     return entity;
 }
@@ -520,7 +520,7 @@ Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutoria
 
 // #define DRAW_TUTORIAL_TRIGGERS
 #ifdef DRAW_TUTORIAL_TRIGGERS
-    registry.colors.emplace(entity, 1.f, 0.f, 0.f);
+    registry.colours.emplace(entity, Colour(vec3(1.f, 0.f, 0.f)));
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
                                             GEOMETRY_BUFFER_ID::DEBUG_LINE, RENDER_LAYER::INTERACTABLES});
 #endif
@@ -571,7 +571,7 @@ Entity createEffectBubbles(const vec2 position) {
 Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans) {
     auto entity = Entity("Text");
 
-    Text &t = registry.text.emplace(entity);
+    Text &t = registry.texts.emplace(entity);
     t.text = text;
     t.position = position;
     t.scale = scale;

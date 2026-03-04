@@ -35,13 +35,13 @@ void CollisionSystem::step(float elapsed_ms) {
             Motion &motionM = registry.motions.get(meshed_entity);
 
             // identify shapes
-            if (registry.bullet.has(non_meshed_entity)) {
+            if (registry.bullets.has(non_meshed_entity)) {
                 // mesh vs bullet
                 Motion &mBullet = registry.motions.get(non_meshed_entity);
                 float radius = std::max(get_bounding_box(mBullet).x, get_bounding_box(mBullet).y) / 2.f;
                 passNarrowPhase =
                     circleIntersectsPolygon(mBullet.position, radius, mc.vertices, motionM, mc.authoring_px);
-            } else if (registry.wall.has(non_meshed_entity)) {
+            } else if (registry.walls.has(non_meshed_entity)) {
                 // mesh vs wall -> use SAT on world-space polygons (MTV presence = intersection)
                 Motion &mWall = registry.motions.get(non_meshed_entity);
                 auto polyA = transformPolygon(mc.vertices, motionM, mc.authoring_px);
@@ -74,8 +74,8 @@ void CollisionSystem::step(float elapsed_ms) {
 bool CollisionSystem::is_actor(Entity entity) { return registry.players.has(entity) || registry.enemies.has(entity); }
 
 void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) {
-    if (registry.bullet.has(bullet_entity)) {
-        Bullet &bullet = registry.bullet.get(bullet_entity);
+    if (registry.bullets.has(bullet_entity)) {
+        Bullet &bullet = registry.bullets.get(bullet_entity);
         // Bullet hit player
         if (registry.players.has(other_entity)) {
             if (bullet.owner != other_entity) {
@@ -111,8 +111,8 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
 
 // TODO: Handle applying hazards FX
 void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) {
-    if (registry.hazard.has(hazard_entity)) {
-        Hazard &hazard = registry.hazard.get(hazard_entity);
+    if (registry.hazards.has(hazard_entity)) {
+        Hazard &hazard = registry.hazards.get(hazard_entity);
         auto &config = HAZARD_CONFIGS[(int)hazard.type];
 
         // Handle hazards against player
@@ -134,8 +134,8 @@ void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) 
 }
 
 void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
-    if (registry.bullet.has(entity_a) && registry.wall.has(entity_b)) {
-        if (registry.bouncy.has(entity_a)) {
+    if (registry.bullets.has(entity_a) && registry.walls.has(entity_b)) {
+        if (registry.bouncies.has(entity_a)) {
             Motion &bullet_motion = registry.motions.get(entity_a);
             Motion &wall_motion = registry.motions.get(entity_b);
 
@@ -216,7 +216,7 @@ void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
 }
 
 void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
-    if (is_actor(entity_a) && registry.wall.has(entity_b)) {
+    if (is_actor(entity_a) && registry.walls.has(entity_b)) {
         Motion &actor_motion = registry.motions.get(entity_a);
         Motion &wall_motion = registry.motions.get(entity_b);
 
@@ -375,8 +375,8 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
 
 void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b, float &elapsed_ms) {
     if (registry.players.has(entity_a) && registry.bubblers.has(entity_b)) {
-        if (registry.fireControl.has(entity_a)) {
-            FireControl &fc = registry.fireControl.get(entity_a);
+        if (registry.fireControls.has(entity_a)) {
+            FireControl &fc = registry.fireControls.get(entity_a);
             Bubbler &bubbler = registry.bubblers.get(entity_b);
 
             fc.refill_progress = fc.refill_progress + elapsed_ms * bubbler.ammo_per_second;
@@ -393,7 +393,7 @@ void CollisionSystem::handle_tutorial_collision(Entity entity_a, Entity entity_b
     if (registry.players.has(entity_a) && registry.tutorialTriggers.has(entity_b)) {
         TutorialTrigger &tt = registry.tutorialTriggers.get(entity_b);
 
-        Progress &progress = registry.progress.components[0];
+        Progress &progress = registry.progresses.components[0];
         progress.is_paused = true;
         progress.is_tutorial_step_called = true;
         progress.tutorial_step_id = tt.id;

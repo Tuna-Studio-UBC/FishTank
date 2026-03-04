@@ -10,12 +10,12 @@ void HealDamageSystem::step(float elapsed_ms) {
 }
 
 void HealDamageSystem::handle_damaging() {
-    for (Entity e : registry.damage.entities) {
-        if (registry.health.has(e)) {
-            Damage &d = registry.damage.get(e);
-            Health &h = registry.health.get(e);
+    for (Entity e : registry.damages.entities) {
+        if (registry.healths.has(e)) {
+            Damage &d = registry.damages.get(e);
+            Health &h = registry.healths.get(e);
             h.hp = std::max(h.hp - d.amount, 0);
-            registry.damage.remove(e);
+            registry.damages.remove(e);
 
             // Handle visual indicators
             if (!registry.tints.has(e)) {
@@ -32,12 +32,12 @@ void HealDamageSystem::handle_damaging() {
 }
 
 void HealDamageSystem::handle_healing() {
-    for (Entity e : registry.heal.entities) {
-        if (registry.health.has(e)) {
-            Heal &h = registry.heal.get(e);
-            Health &he = registry.health.get(e);
+    for (Entity e : registry.heals.entities) {
+        if (registry.healths.has(e)) {
+            Heal &h = registry.heals.get(e);
+            Health &he = registry.healths.get(e);
             he.hp = std::min(he.hp + h.amount, he.max_hp);
-            registry.heal.remove(e);
+            registry.heals.remove(e);
 
             // TODO: Handle visual indicators
             if (!registry.tints.has(e)) {
@@ -55,21 +55,21 @@ void HealDamageSystem::handle_healing() {
 
 // TODO: refactor to generic duplicate check if needed
 void HealDamageSystem::add_damage(Entity entity, int amount) {
-    if (!registry.damage.has(entity)) {
-        registry.damage.emplace(entity, amount);
+    if (!registry.damages.has(entity)) {
+        registry.damages.emplace(entity, amount);
     } else {
         spdlog::debug("DUPLICATE DAMAGE WAS CALLED");
-        Damage &d = registry.damage.get(entity);
+        Damage &d = registry.damages.get(entity);
         d.amount += amount;
     }
 }
 
 void HealDamageSystem::add_heal(Entity entity, int amount) {
-    if (!registry.heal.has(entity)) {
-        registry.heal.emplace(entity, amount);
+    if (!registry.heals.has(entity)) {
+        registry.heals.emplace(entity, amount);
     } else {
         spdlog::debug("DUPLICATE HEAL WAS CALLED");
-        Heal &h = registry.heal.get(entity);
+        Heal &h = registry.heals.get(entity);
         h.amount += amount;
     }
 }

@@ -22,8 +22,8 @@ void GameUI::draw_healthbar() {
 
     Entity e = registry.players.entities[0];
 
-    if (registry.health.has(e)) {
-        Health &h = registry.health.get(e);
+    if (registry.healths.has(e)) {
+        Health &h = registry.healths.get(e);
         float ratio = (h.max_hp > 0) ? (float)h.hp / (float)h.max_hp : 0.f;
         ImVec2 rect_min_filled = ImVec2(pos.x + padding, pos.y + padding);
         ImVec2 rect_max_filled = ImVec2(pos.x + (size.x - padding) * ratio, pos.y + (size.y - padding));

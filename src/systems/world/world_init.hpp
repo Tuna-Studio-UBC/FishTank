@@ -48,8 +48,8 @@ template <typename Component, typename... Args>
 Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&...args) {
     auto exp_entity = Entity("ExpirationEffect");
     registry.get<Component>().emplace(exp_entity, std::forward<Args>(args)...);
-    registry.expiration.emplace(exp_entity, lifespan_ms);
-    registry.target.emplace(exp_entity, target_entity);
+    registry.expirations.emplace(exp_entity, lifespan_ms);
+    registry.targets.emplace(exp_entity, target_entity);
     return exp_entity;
 }
 
@@ -58,7 +58,7 @@ template <typename Component, typename... Args>
 Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, Args &&...args) {
     auto ot_entity = Entity("OverTimeEffect");
     registry.get<Component>().emplace(ot_entity, std::forward<Args>(args)...);
-    registry.overTimeEffect.emplace(ot_entity, interval_ms, duration_ms);
-    registry.target.emplace(ot_entity, target_entity);
+    registry.overTimeEffects.emplace(ot_entity, interval_ms, duration_ms);
+    registry.targets.emplace(ot_entity, target_entity);
     return ot_entity;
 }

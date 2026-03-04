@@ -179,7 +179,7 @@ void WorldSystem::load_level_tutorial(Progress &progress) {
     Entity player = createPlayer(renderer, {250.f, 1750.f});
     auto &player_motion = registry.motions.get(player);
     player_motion.angle = -M_PI / 2;
-    auto &player_fc = registry.fireControl.get(player);
+    auto &player_fc = registry.fireControls.get(player);
     player_fc.ammo = 0;
 
     createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::GUARD);
@@ -189,7 +189,7 @@ void WorldSystem::load_level_tutorial(Progress &progress) {
 
     // Set enemy health to something low for tutorial
     for (Entity e : registry.enemies.entities) {
-        Health &h = registry.health.get(e);
+        Health &h = registry.healths.get(e);
         h.hp = 50;
         h.max_hp = 50;
     }
@@ -261,7 +261,7 @@ void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera
     tilemap_system->load_map(MapType::TUTORIAL_MAP);
 
     auto e = Entity("Progress");
-    auto &progress = registry.progress.emplace(e);
+    auto &progress = registry.progresses.emplace(e);
     progress.level = -1;
     load_level_tutorial(progress);
 
@@ -275,12 +275,12 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     this->tilemap_system = tilemap_arg;
 
     Progress *progress_p;
-    if (registry.progress.size() == 0) {
+    if (registry.progresses.size() == 0) {
         auto e = Entity("Progress");
-        progress_p = &registry.progress.emplace(e);
+        progress_p = &registry.progresses.emplace(e);
         progress_p->level = 0;
     } else {
-        progress_p = &registry.progress.components[0];
+        progress_p = &registry.progresses.components[0];
     }
     Progress &progress = *progress_p;
 
@@ -334,7 +334,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     fps_index = (fps_index + 1) % fps_avg.size();
     fps_avg[fps_index] = 1000.0f / elapsed_ms_since_last_update;
 
-    Progress &progress = registry.progress.components[0];
+    Progress &progress = registry.progresses.components[0];
 
     // Check if game is over
     if (progress.is_game_over == true) {
@@ -354,8 +354,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         progress.wave += 1;
 
         if (progress.is_tutorial) {
-            if (registry.text.components.size() > 0)
-                registry.text.components[0].text = "Tutorial";
+            if (registry.texts.components.size() > 0)
+                registry.texts.components[0].text = "Tutorial";
 
             progress.is_game_over = true;
             progress.has_beat_level = true;
@@ -366,7 +366,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             Entity e = Entity("Overlay");
             registry.overlays.emplace(e);
             auto &motion = registry.motions.emplace(e);
-            motion.position = registry.motions.get(registry.camera.entities[0]).position;
+            motion.position = registry.motions.get(registry.cameras.entities[0]).position;
             motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
 
             registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_TUTORIAL_COMPLETE_OVERLAY,
@@ -377,8 +377,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
                 load_next_level();
             } else if (WAVE_CONFIGS.size() > progress.wave && progress.wave < LEVEL_CONFIGS[progress.level].last_wave) {
                 // TODO: Maybe change this to a GUI overlay
-                if (registry.text.components.size() > 0)
-                    registry.text.components[0].text =
+                if (registry.texts.components.size() > 0)
+                    registry.texts.components[0].text =
                         "Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1);
                 start_wave(progress);
             } else {
@@ -389,7 +389,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
                 Entity e = Entity("Overlay");
                 registry.overlays.emplace(e);
                 auto &motion = registry.motions.emplace(e);
-                motion.position = registry.motions.get(registry.camera.entities[0]).position;
+                motion.position = registry.motions.get(registry.cameras.entities[0]).position;
                 motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
 
                 registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
@@ -450,8 +450,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 }
 
 void WorldSystem::handle_expiration(float elapsed_ms) {
-    for (Entity e : registry.expiration.entities) {
-        Expiration &exp = registry.expiration.get(e);
+    for (Entity e : registry.expirations.entities) {
+        Expiration &exp = registry.expirations.get(e);
         exp.lifespan_ms -= elapsed_ms;
 
         if (exp.lifespan_ms <= 0) {
@@ -491,9 +491,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
 
     // We should have 1 and only ever 1 player input component
-    assert(registry.keyboardInput.components.size() == 1);
+    assert(registry.keyboardInputs.components.size() == 1);
     Entity playerEntity = registry.players.entities[0];
-    KeyboardInputState &ps = registry.keyboardInput.get(playerEntity);
+    KeyboardInputState &ps = registry.keyboardInputs.get(playerEntity);
 
     bool key_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
 
@@ -566,7 +566,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 if (entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
                     Sense &sense = registry.senses.get(enemy);
                     sense.is_distracted = true;
-                    Distracted &distracted = registry.distracted.get(enemy);
+                    Distracted &distracted = registry.distracteds.get(enemy);
                     distracted.bell = best_bell;
                     distracted.remaining_ms = bell.distraction_ms;
                 }
@@ -582,7 +582,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         }
 
         if (key == GLFW_KEY_R) {
-            auto &progress = registry.progress.components[0];
+            auto &progress = registry.progresses.components[0];
             if ((progress.is_game_over && !progress.is_tutorial) ||
                 (progress.is_tutorial && progress.is_game_over && !progress.has_beat_level))
                 restart_game();
@@ -590,7 +590,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
         // TODO: Change progression behaviour in the future
         if (key == GLFW_KEY_ENTER) {
-            auto &progress = registry.progress.components[0];
+            auto &progress = registry.progresses.components[0];
 
             if (progress.is_tutorial && progress.is_tutorial_step_called &&
                 !(progress.tutorial_step_id > progress.tutorial_steps.size())) {
@@ -606,9 +606,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 }
             } else {
                 if (progress.is_tutorial && progress.is_game_over && progress.has_beat_level) {
-                    Health &health = registry.health.get(registry.players.entities[0]);
+                    Health &health = registry.healths.get(registry.players.entities[0]);
                     health.hp = health.max_hp;
-                    FireControl &fc = registry.fireControl.get(registry.players.entities[0]);
+                    FireControl &fc = registry.fireControls.get(registry.players.entities[0]);
                     fc.ammo = fc.max_ammo;
 
                     load_next_level();
@@ -626,7 +626,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 #ifdef ENABLE_LOAD_TUTORIAL
         if (key == GLFW_KEY_T) {
-            auto &progress = registry.progress.components[0];
+            auto &progress = registry.progresses.components[0];
             progress.is_tutorial = true;
             restart_game();
         }
@@ -634,7 +634,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 #ifdef ENABLE_SKIP_WAVE
         if (key == GLFW_KEY_Q) {
-            auto &progress = registry.progress.components[0];
+            auto &progress = registry.progresses.components[0];
             if (progress.is_tutorial) {
                 progress.is_tutorial_step_called = false;
                 progress.is_paused = false;
@@ -645,16 +645,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             progress.remaining_enemies = 0;
 
             Entity player = registry.players.entities[0];
-            Health &health = registry.health.get(player);
+            Health &health = registry.healths.get(player);
             health.hp = health.max_hp;
-            FireControl &fc = registry.fireControl.get(player);
+            FireControl &fc = registry.fireControls.get(player);
             fc.ammo = fc.max_ammo;
         }
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
         if (key == GLFW_KEY_P) {
-            auto &progress = registry.progress.components[0];
+            auto &progress = registry.progresses.components[0];
             if (!progress.is_tutorial_step_called)
                 progress.is_paused = !progress.is_paused;
         }
@@ -671,13 +671,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
     Entity e = registry.players.entities[0];
-    MouseInputState &mi = registry.mouseInput.get(e);
+    MouseInputState &mi = registry.mouseInputs.get(e);
     mi.mouse_pos = mouse_position;
 }
 
 void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
     Entity e = registry.players.entities[0];
-    MouseInputState &mi = registry.mouseInput.get(e);
+    MouseInputState &mi = registry.mouseInputs.get(e);
 
     ImGuiIO &io = ImGui::GetIO();
     if (action == GLFW_PRESS && !io.WantCaptureMouse) // Ignore if ImGui is focused
@@ -691,7 +691,7 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 }
 
 void WorldSystem::restart_game() {
-    bool is_tutorial = registry.progress.components[0].is_tutorial;
+    bool is_tutorial = registry.progresses.components[0].is_tutorial;
 
     particle_system.clear_all_particles();
     registry.clear_all_components();
@@ -704,7 +704,7 @@ void WorldSystem::restart_game() {
 }
 
 void WorldSystem::load_next_level() {
-    Progress progress = registry.progress.components[0];
+    Progress progress = registry.progresses.components[0];
 
     progress.is_tutorial = false;
     progress.is_tutorial_step_called = false;
@@ -719,15 +719,15 @@ void WorldSystem::load_next_level() {
         return;
     }
 
-    int hp = registry.health.get(registry.players.entities[0]).hp;
-    int ammo = registry.fireControl.get(registry.players.entities[0]).ammo;
+    int hp = registry.healths.get(registry.players.entities[0]).hp;
+    int ammo = registry.fireControls.get(registry.players.entities[0]).ammo;
 
     particle_system.clear_all_particles();
     registry.clear_all_components();
     Entity e = Entity();
-    registry.progress.insert(e, progress);
+    registry.progresses.insert(e, progress);
     init(renderer, camera_system, tilemap_system);
 
-    registry.health.get(registry.players.entities[0]).hp = hp;
-    registry.fireControl.get(registry.players.entities[0]).ammo = ammo;
+    registry.healths.get(registry.players.entities[0]).hp = hp;
+    registry.fireControls.get(registry.players.entities[0]).ammo = ammo;
 }

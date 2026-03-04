@@ -63,22 +63,22 @@ void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &
 
 void PlayerInputSystem::step(float elapsed_ms) {
     // We should have 1 and only ever 1 player input component
-    assert(registry.keyboardInput.components.size() == 1);
-    assert(registry.mouseInput.components.size() == 1);
+    assert(registry.keyboardInputs.components.size() == 1);
+    assert(registry.mouseInputs.components.size() == 1);
     Entity playerEntity = registry.players.entities[0];
-    KeyboardInputState &keyboard_input = registry.keyboardInput.get(playerEntity);
-    MouseInputState &mouse_input = registry.mouseInput.get(playerEntity);
+    KeyboardInputState &keyboard_input = registry.keyboardInputs.get(playerEntity);
+    MouseInputState &mouse_input = registry.mouseInputs.get(playerEntity);
     Motion &motion = registry.motions.get(playerEntity);
-    SpeedControl &sc = registry.speedControl.get(playerEntity);
+    SpeedControl &sc = registry.speedControls.get(playerEntity);
 
     float dt = elapsed_ms / 1000.0f;
-    bool quick_turn_active = (registry.playerQuickTurn.size() != 0);
+    bool quick_turn_active = (registry.playerQuickTurns.size() != 0);
     float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f / QUICK_TURN_MULTIPLIER;
 
     // Process Turn Input
     if (key_pressed(KeyboardActions::QuickTurn, keyboard_input) && !quick_turn_active) {
         Entity e = Entity("PlayerQuickTurn");
-        PlayerQuickTurn &qt = registry.playerQuickTurn.emplace(e);
+        PlayerQuickTurn &qt = registry.playerQuickTurns.emplace(e);
         motion.angular_velocity = 0;
         if (keyboard_input.most_recent_turn == KeyboardActions::TurnLeft) {
             qt.direction = -1;
@@ -108,8 +108,8 @@ void PlayerInputSystem::step(float elapsed_ms) {
 
     // Process Quick Turn
     if (quick_turn_active) {
-        assert(registry.playerQuickTurn.size() == 1);
-        PlayerQuickTurn &qt = registry.playerQuickTurn.components[0];
+        assert(registry.playerQuickTurns.size() == 1);
+        PlayerQuickTurn &qt = registry.playerQuickTurns.components[0];
         qt.duration_ms -= elapsed_ms;
 
         float relevant_ms = elapsed_ms;
@@ -121,7 +121,7 @@ void PlayerInputSystem::step(float elapsed_ms) {
         motion.angle = std::fmod(motion.angle + quick_turn_amount, 2 * M_PI);
 
         if (qt.duration_ms <= 0) {
-            for (Entity &e : registry.playerQuickTurn.entities) {
+            for (Entity &e : registry.playerQuickTurns.entities) {
                 registry.remove_all_components_of(e);
             }
         }
@@ -134,12 +134,12 @@ void PlayerInputSystem::step(float elapsed_ms) {
         motion.velocity.x = std::max(0.f, motion.velocity.x - (DECELERATION_MULTIPLIER * sc.move_speed) * dt);
     }
 
-    FireControl &fc = registry.fireControl.get(playerEntity);
+    FireControl &fc = registry.fireControls.get(playerEntity);
     fc.cooldown_timer = std::max(0.f, fc.cooldown_timer - elapsed_ms);
 
     // ===== Turret aim =====
     vec2 player_pos = motion.position;
-    vec2 &camera_pos = registry.motions.get(registry.camera.entities[0]).position;
+    vec2 &camera_pos = registry.motions.get(registry.cameras.entities[0]).position;
     vec2 mouse_relative_pos =
         mouse_input.mouse_pos + camera_pos - player_pos - vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
     float aim_angle = atan2(mouse_relative_pos.y, mouse_relative_pos.x);

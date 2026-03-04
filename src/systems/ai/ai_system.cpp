@@ -82,7 +82,7 @@ float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 pl
 }
 
 void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
-    FireControl &fire = registry.fireControl.get(enemy);
+    FireControl &fire = registry.fireControls.get(enemy);
     fire.cooldown_timer += elapsed_ms;
     vec2 position = registry.motions.get(enemy).position;
 
@@ -149,8 +149,8 @@ void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     float angle = 0;
 
     // Pathfinding
-    if (registry.pursuit.has(e)) {
-        Pursuit &pursuit = registry.pursuit.get(e);
+    if (registry.pursuits.has(e)) {
+        Pursuit &pursuit = registry.pursuits.get(e);
         if (pursuit.goal != world_to_tile(player_pos) || pursuit.path.size() == 0) {
             pursuit.path = ps->path_finding(motion_i.position, target_pos);
             pursuit.curr_index = 0;
@@ -170,7 +170,7 @@ void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
             target_pos = next_pos;
         }
 
-        angle = adjust_angle(motion_i, registry.speedControl.get(e), target_pos, player_pos, elapsed_ms,
+        angle = adjust_angle(motion_i, registry.speedControls.get(e), target_pos, player_pos, elapsed_ms,
                              (TILE_SIZE_PX * 1.5));
     }
 
@@ -181,17 +181,17 @@ void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
 }
 
 void AISystem::run_distracted(Entity e, float elapsed_ms, vec2 player_pos) {
-    if (!registry.distracted.has(e)) {
+    if (!registry.distracteds.has(e)) {
         return;
     }
-    Distracted &distracted = registry.distracted.get(e);
+    Distracted &distracted = registry.distracteds.get(e);
     distracted.remaining_ms -= elapsed_ms;
     float distracted_remaining = distracted.remaining_ms;
 
     if (distracted.remaining_ms > 0) {
         Motion &motion_i = registry.motions.get(e);
         vec2 bell_pos = registry.motions.get(distracted.bell).position;
-        adjust_angle(motion_i, registry.speedControl.get(e), bell_pos, player_pos, elapsed_ms, 50.f);
+        adjust_angle(motion_i, registry.speedControls.get(e), bell_pos, player_pos, elapsed_ms, 50.f);
     } else {
         registry.senses.get(e).is_distracted = false;
     }
@@ -241,8 +241,8 @@ void AISystem::handle_detection() {
 
             if (sense_i.detects_player) {
                 sense_i.last_known_player_pos = player_pos;
-                if (registry.pursuit.has(enemy_i)) {
-                    registry.pursuit.get(enemy_i).goal = player_pos;
+                if (registry.pursuits.has(enemy_i)) {
+                    registry.pursuits.get(enemy_i).goal = player_pos;
                 }
 
                 // spdlog::debug("{} detected {}", enemy_i.name_id(), player.name_id());

@@ -4,7 +4,7 @@
 #include <sstream>
 
 void GameUI::draw_pause_menu() {
-    Progress &progress = registry.progress.components[0];
+    Progress &progress = registry.progresses.components[0];
     if (!progress.is_paused || progress.is_tutorial_step_called)
         return;
 
