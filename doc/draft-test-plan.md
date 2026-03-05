@@ -1,29 +1,6 @@
 # FishTank! Test Plan
 
-**Last Updated:** Feb 8, 2026
-
-## Table of Contents
-
-- [FishTank! Test Plan](#fishtank-test-plan)
-  - [Table of Contents](#table-of-contents)
-  - [Player Experience](#player-experience)
-    - [Movement](#movement)
-    - [Shooting](#shooting)
-  - [Rendering](#rendering)
-    - [General](#general)
-  - [Entity Behaviour](#entity-behaviour)
-    - [Walls](#walls)
-    - [Hazards \& Power-ups](#hazards--power-ups)
-    - [Projectiles](#projectiles)
-    - [Enemies](#enemies)
-  - [Bug List](#bug-list)
-    - [P5: Urchin enemy projectiles not appearing #52](#p5-urchin-enemy-projectiles-not-appearing-52)
-    - [P4: New ID increment issue (Too many IDs used) #47](#p4-new-id-increment-issue-too-many-ids-used-47)
-    - [P3: Linear Interpolated Camera causes tiles to cull too early #44](#p3-linear-interpolated-camera-causes-tiles-to-cull-too-early-44)
-    - [P3: TileMap Texture Bleeding #39](#p3-tilemap-texture-bleeding-39)
-    - [P2: Tileset tiles are renderering incorrect IDs #30](#p2-tileset-tiles-are-renderering-incorrect-ids-30)
-    - [P4: ID increment issue (Too many IDs used) #27](#p4-id-increment-issue-too-many-ids-used-27)
-    - [P3: Bullet Targeting is Incorrect #16](#p3-bullet-targeting-is-incorrect-16)
+**Last Updated:** Mar 01, 2026
 
 ## Player Experience
 

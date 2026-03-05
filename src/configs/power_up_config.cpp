@@ -1,5 +1,5 @@
 #include "power_up_config.hpp"
-#include "../common.hpp"
+#include "common.hpp"
 
 struct PowerUpConfig {
     POWER_UP_TYPE type;

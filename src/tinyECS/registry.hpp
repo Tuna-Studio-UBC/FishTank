@@ -11,34 +11,34 @@ class ECSRegistry {
   public:
     // Entity
     ComponentContainer<Player> players;
+    ComponentContainer<Camera> cameras;
     ComponentContainer<Enemy> enemies;
     ComponentContainer<Turret> turrets;
-    ComponentContainer<Wall> wall;
+    ComponentContainer<Wall> walls;
 
     // Hazards
-    ComponentContainer<Hazard> hazard;
-    ComponentContainer<Bullet> bullet;
-    ComponentContainer<Mine> mine;
-    ComponentContainer<Camera> camera;
-    ComponentContainer<Anemone> anemone;
+    ComponentContainer<Hazard> hazards;
+    ComponentContainer<Bullet> bullets;
+    ComponentContainer<Mine> mines;
+    ComponentContainer<Anemone> anemones;
     ComponentContainer<Bell> bells;
 
     // Behaviour
-    ComponentContainer<Health> health;
-    ComponentContainer<Dead> dead;
-    ComponentContainer<Damage> damage;
-    ComponentContainer<Expiration> expiration;
-    ComponentContainer<OverTimeEffect> overTimeEffect;
-    ComponentContainer<FireControl> fireControl;
-    ComponentContainer<SpeedControl> speedControl;
-    ComponentContainer<PlayerQuickTurn> playerQuickTurn;
-    ComponentContainer<Target> target;
-    ComponentContainer<Wallet> wallet;
+    ComponentContainer<Health> healths;
+    ComponentContainer<Dead> deads;
+    ComponentContainer<Damage> damages;
+    ComponentContainer<FireControl> fireControls;
+    ComponentContainer<SpeedControl> speedControls;
+    ComponentContainer<PlayerQuickTurn> playerQuickTurns;
+    ComponentContainer<Expiration> expirations;
+    ComponentContainer<OverTimeEffect> overTimeEffects;
+    ComponentContainer<Target> targets;
+    ComponentContainer<Wallet> wallets;
     ComponentContainer<DropsCrackers> dropsCrackers;
-    ComponentContainer<Pursuit> pursuit;
-    ComponentContainer<Bouncy> bouncy;
+    ComponentContainer<Pursuit> pursuits;
+    ComponentContainer<Bouncy> bouncies;
     ComponentContainer<BulletRequest> bullet_requests;
-    ComponentContainer<Distracted> distracted;
+    ComponentContainer<Distracted> distracteds;
     ComponentContainer<Sense> senses;
     ComponentContainer<AI> ais;
     ComponentContainer<BezierPath> beziers;
@@ -46,12 +46,12 @@ class ECSRegistry {
     ComponentContainer<Upgrades> upgrades;
 
     // Pickups
-    ComponentContainer<PickUp> pickUp;
+    ComponentContainer<PickUp> pickUps;
 
-    ComponentContainer<PowerUp> powerUp;
-    ComponentContainer<Heal> heal;
-    ComponentContainer<SpeedMultiplier> speedMultiplier;
-    ComponentContainer<DamageMultiplier> damageMultiplier;
+    ComponentContainer<PowerUp> powerUps;
+    ComponentContainer<Heal> heals;
+    ComponentContainer<SpeedMultiplier> speedMultipliers;
+    ComponentContainer<DamageMultiplier> damageMultipliers;
     ComponentContainer<Bubbler> bubblers;
 
     // Physics
@@ -61,9 +61,9 @@ class ECSRegistry {
     ComponentContainer<MeshCollider> meshColliders;
     // Game State
     ComponentContainer<ScreenState> screenStates;
-    ComponentContainer<KeyboardInputState> keyboardInput;
-    ComponentContainer<MouseInputState> mouseInput;
-    ComponentContainer<Progress> progress;
+    ComponentContainer<KeyboardInputState> keyboardInputs;
+    ComponentContainer<MouseInputState> mouseInputs;
+    ComponentContainer<Progress> progresses;
     ComponentContainer<TutorialTrigger> tutorialTriggers;
 
     // Sound
@@ -72,7 +72,7 @@ class ECSRegistry {
     // Rendering
     ComponentContainer<Mesh *> meshPtrs;
     ComponentContainer<RenderRequest> renderRequests;
-    ComponentContainer<vec3> colors;
+    ComponentContainer<Colour> colours;
     ComponentContainer<Tint> tints;
     ComponentContainer<Animation> animations;
 
@@ -81,7 +81,7 @@ class ECSRegistry {
     ComponentContainer<TileMap> tilemaps;
 
     // UI
-    ComponentContainer<Text> text;
+    ComponentContainer<Text> texts;
     ComponentContainer<Overlay> overlays;
 
     // Debug
@@ -93,32 +93,32 @@ class ECSRegistry {
         registry_list.push_back(&players);
         registry_list.push_back(&enemies);
         registry_list.push_back(&turrets);
-        registry_list.push_back(&wall);
+        registry_list.push_back(&walls);
 
         // Hazards
-        registry_list.push_back(&hazard);
-        registry_list.push_back(&bullet);
-        registry_list.push_back(&mine);
-        registry_list.push_back(&camera);
-        registry_list.push_back(&anemone);
+        registry_list.push_back(&hazards);
+        registry_list.push_back(&bullets);
+        registry_list.push_back(&mines);
+        registry_list.push_back(&cameras);
+        registry_list.push_back(&anemones);
         registry_list.push_back(&bells);
 
         // Behaviour
-        registry_list.push_back(&health);
-        registry_list.push_back(&dead);
-        registry_list.push_back(&damage);
-        registry_list.push_back(&expiration);
-        registry_list.push_back(&overTimeEffect);
-        registry_list.push_back(&fireControl);
-        registry_list.push_back(&speedControl);
-        registry_list.push_back(&playerQuickTurn);
-        registry_list.push_back(&target);
-        registry_list.push_back(&wallet);
+        registry_list.push_back(&healths);
+        registry_list.push_back(&deads);
+        registry_list.push_back(&damages);
+        registry_list.push_back(&expirations);
+        registry_list.push_back(&overTimeEffects);
+        registry_list.push_back(&fireControls);
+        registry_list.push_back(&speedControls);
+        registry_list.push_back(&playerQuickTurns);
+        registry_list.push_back(&targets);
+        registry_list.push_back(&wallets);
         registry_list.push_back(&dropsCrackers);
-        registry_list.push_back(&pursuit);
-        registry_list.push_back(&bouncy);
+        registry_list.push_back(&pursuits);
+        registry_list.push_back(&bouncies);
         registry_list.push_back(&bullet_requests);
-        registry_list.push_back(&distracted);
+        registry_list.push_back(&distracteds);
         registry_list.push_back(&senses);
         registry_list.push_back(&ais);
         registry_list.push_back(&beziers);
@@ -126,12 +126,12 @@ class ECSRegistry {
         registry_list.push_back(&upgrades);
 
         // Pickups
-        registry_list.push_back(&pickUp);
+        registry_list.push_back(&pickUps);
 
-        registry_list.push_back(&powerUp);
-        registry_list.push_back(&heal);
-        registry_list.push_back(&speedMultiplier);
-        registry_list.push_back(&damageMultiplier);
+        registry_list.push_back(&powerUps);
+        registry_list.push_back(&heals);
+        registry_list.push_back(&speedMultipliers);
+        registry_list.push_back(&damageMultipliers);
         registry_list.push_back(&bubblers);
 
         // Physics
@@ -141,18 +141,18 @@ class ECSRegistry {
 
         // Game State
         registry_list.push_back(&screenStates);
-        registry_list.push_back(&keyboardInput);
-        registry_list.push_back(&mouseInput);
-        registry_list.push_back(&progress);
+        registry_list.push_back(&keyboardInputs);
+        registry_list.push_back(&mouseInputs);
+        registry_list.push_back(&progresses);
         registry_list.push_back(&tutorialTriggers);
 
         // Sound
         registry_list.push_back(&sound_requests);
-        
+
         // Rendering
         registry_list.push_back(&meshPtrs);
         registry_list.push_back(&renderRequests);
-        registry_list.push_back(&colors);
+        registry_list.push_back(&colours);
         registry_list.push_back(&tints);
         registry_list.push_back(&animations);
 
@@ -161,7 +161,7 @@ class ECSRegistry {
         registry_list.push_back(&tilemaps);
 
         // UI
-        registry_list.push_back(&text);
+        registry_list.push_back(&texts);
         registry_list.push_back(&overlays);
 
         // Debug
@@ -193,10 +193,10 @@ class ECSRegistry {
     }
 
     template <typename Component> ComponentContainer<Component> &get();
-    template <> ComponentContainer<Damage> &get<Damage>() { return damage; }
-    template <> ComponentContainer<Heal> &get<Heal>() { return heal; }
-    template <> ComponentContainer<SpeedMultiplier> &get<SpeedMultiplier>() { return speedMultiplier; }
-    template <> ComponentContainer<DamageMultiplier> &get<DamageMultiplier>() { return damageMultiplier; }
+    template <> ComponentContainer<Damage> &get<Damage>() { return damages; }
+    template <> ComponentContainer<Heal> &get<Heal>() { return heals; }
+    template <> ComponentContainer<SpeedMultiplier> &get<SpeedMultiplier>() { return speedMultipliers; }
+    template <> ComponentContainer<DamageMultiplier> &get<DamageMultiplier>() { return damageMultipliers; }
 };
 
 extern ECSRegistry registry;
