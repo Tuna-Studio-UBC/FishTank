@@ -1,6 +1,6 @@
 #include "enemy_config.hpp"
-#include "../common.hpp"
 #include "attack_pattern.hpp"
+#include "common.hpp"
 #include "tinyECS/components.hpp"
 
 struct EnemyConfig {

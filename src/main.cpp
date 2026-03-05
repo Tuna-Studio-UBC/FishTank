@@ -9,21 +9,23 @@
 
 // internal
 #include "systems/ai/ai_system.hpp"
-#include "systems/animation_system.hpp"
-#include "systems/camera_system.hpp"
-#include "systems/collision_system.hpp"
-#include "systems/death_system.hpp"
-#include "systems/heal_damage_system.hpp"
-#include "systems/ote_system.hpp"
-#include "systems/particle_system.hpp"
-#include "systems/physics_system.hpp"
-#include "systems/pick_up_system.hpp"
-#include "systems/player_input_system.hpp"
-#include "systems/render_system.hpp"
-#include "systems/tilemap_system.hpp"
-#include "systems/world_system.hpp"
+#include "systems/health/death_system.hpp"
+#include "systems/health/heal_damage_system.hpp"
+#include "systems/physics/collision_system.hpp"
+#include "systems/physics/physics_system.hpp"
+#include "systems/player/camera_system.hpp"
+#include "systems/player/pick_up_system.hpp"
+#include "systems/player/player_input_system.hpp"
+#include "systems/rendering/animation_system.hpp"
+#include "systems/rendering/particle_system.hpp"
+#include "systems/rendering/render_system.hpp"
+#include "systems/timed/ote_system.hpp"
+#include "systems/world/tilemap_system.hpp"
+#include "systems/world/world_system.hpp"
 
-#include "ui/game_ui.hpp"
+#include "ui/debug/debug_ui.hpp"
+#include "ui/game/game_ui.hpp"
+#include "ui/tutorial/tutorial_ui.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -106,17 +108,18 @@ int main() {
 
         // Draw GUIs
         game_ui.draw_pause_menu();
-        game_ui.draw_fps_counter(&world_system);
         game_ui.draw_healthbar();
         game_ui.draw_minimap();
         game_ui.draw_ammo();
 
         tutorial_ui.draw_tutorial_step();
 
-// Debugging UI
+        // Debugging UI
+        debug_ui.draw_fps_counter(&world_system);
+
 #ifdef ENABLE_DEBUG_UI
-        game_ui.draw_demo();
-        game_ui.draw_respawn(&world_system);
+        debug_ui.draw_demo();
+        debug_ui.draw_respawn(&world_system);
 #endif
 
         // Render

@@ -1,5 +1,5 @@
 #include "hazard_config.hpp"
-#include "../common.hpp"
+#include "common.hpp"
 
 struct HazardConfig {
     HAZARD_TYPE type;
