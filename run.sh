@@ -24,6 +24,8 @@ elif [[ "$1" == "run" ]]; then
         cmake --build build
     elif [[ $1 =~ ^-(-?build|b)$ ]]; then
         cmake --build build
+    elif [[ $1 =~ ^-(-?tracy|t)$ ]]; then
+        ./build/_deps/tracy-build/profiler/tracy-profiler &
     fi
 
     # Visual Studio puts the exe in the build's respective Configuration directory
