@@ -50,11 +50,23 @@ target_include_directories(freetype PUBLIC ${FREETYPE_INCLUDE_DIRS})
 # RmlUi
 # ============================================================
 
-FetchContent_Declare(
-  rmlui
-  URL "https://github.com/mikke89/RmlUi/archive/${RMLUI_VERSION}.zip"
-)
-FetchContent_MakeAvailable(rmlui)
+# FetchContent_Declare(
+#   RmlUi
+#   URL "https://github.com/mikke89/RmlUi/archive/${RMLUI_VERSION}.zip"
+# )
+# FetchContent_MakeAvailable(RmlUi)
+
+# set(RMLUI_BACKEND_PATH ${RmlUi_SOURCE_DIR}/Backends)
+# add_library(rmlui_backend_GLFW_GL3 INTERFACE)
+# # target_sources(rmlui_backend_GLFW_GL3 INTERFACE
+# #   ${RMLUI_BACKEND_PATH}/RmlUi_Platform_GLFW.cpp
+# #   ${RMLUI_BACKEND_PATH}/RmlUi_Renderer_GL3.cpp
+# # )
+# target_include_directories(rmlui_backend_GLFW_GL3 INTERFACE ${RMLUI_BACKEND_PATH})
+# target_compile_definitions(rmlui_backend_GLFW_GL3 INTERFACE
+#   RMLUI_NUM_MSAA_SAMPLES=2
+#   RMLUI_GL3_CUSTOM_LOADER=<gl3w.h>
+# )
 
 # ============================================================
 # Dear ImGui
@@ -90,7 +102,8 @@ function(link_engine_dependencies target)
   target_link_libraries(${target} PUBLIC
     spdlog::spdlog
     freetype
-    rmlui
+    # rmlui
+    # rmlui_backend_GLFW_GL3
     imgui
   )
 
