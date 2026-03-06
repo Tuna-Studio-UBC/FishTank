@@ -31,7 +31,7 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
             if (registry.healths.get(player).hp == registry.healths.get(player).max_hp)
                 return;
 
-            createOverTimeEffect<Heal>(player, config.duration_ms, config.duration_ms, config.amount);
+            createOverTimeEffect<Heal>(player, config.duration_ms, config.interval_ms, true, config.amount);
             break;
         case POWER_UP_TYPE::SPEED_MULTIPLIER:
             createExpirationEffect<SpeedMultiplier>(player, config.duration_ms, config.amount);

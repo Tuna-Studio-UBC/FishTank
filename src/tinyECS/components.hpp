@@ -27,7 +27,12 @@ struct Enemy {
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
+struct Boss {
+    float detection_radius;
+};
+
 struct Bullet {
+    ATTACK_EFFECT attack_effect;
     int damage;
     Entity owner; // track who fired to prevent self hit
 };
@@ -86,7 +91,11 @@ struct Dead {};
 
 struct Damage {
     int amount;
-    Damage(int amount) { this->amount = amount; };
+    vec3 tint;
+    Damage(int amount, vec3 tint = {1.f, 0.25f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 // Optional: OverTimeEffect
 
@@ -99,9 +108,10 @@ struct OverTimeEffect {
     float interval_ms = 1000;      // ms
     float duration_time_ms = 3000; // ms
     float elapsed_time_ms = 0;     // ms
-    OverTimeEffect(float interval_ms, float duration_time_ms) {
+    OverTimeEffect(float interval_ms, float duration_time_ms, float elapsed_time_ms = 0) {
         this->interval_ms = interval_ms;
         this->duration_time_ms = duration_time_ms;
+        this->elapsed_time_ms = elapsed_time_ms;
     };
 };
 
@@ -208,7 +218,11 @@ struct PowerUp {
 
 struct Heal {
     int amount;
-    Heal(int amount) { this->amount = amount; };
+    vec3 tint;
+    Heal(int amount, vec3 tint = {0.25f, 1.f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 
 struct Bubbler {

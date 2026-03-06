@@ -19,10 +19,10 @@ void HealDamageSystem::handle_damaging() {
 
             // Handle visual indicators
             if (!registry.tints.has(e)) {
-                registry.tints.emplace(e, Tint(damage_tint, tint_duration_ms));
+                registry.tints.emplace(e, Tint(d.tint, tint_duration_ms));
             } else {
                 Tint &tint = registry.tints.get(e);
-                tint.tint = damage_tint;
+                tint.tint = d.tint;
                 tint.life_ms = tint_duration_ms;
             }
 
@@ -41,10 +41,10 @@ void HealDamageSystem::handle_healing() {
 
             // TODO: Handle visual indicators
             if (!registry.tints.has(e)) {
-                registry.tints.emplace(e, Tint(heal_tint, tint_duration_ms));
+                registry.tints.emplace(e, Tint(h.tint, tint_duration_ms));
             } else {
                 Tint &tint = registry.tints.get(e);
-                tint.tint = heal_tint;
+                tint.tint = h.tint;
                 tint.life_ms = tint_duration_ms;
             }
 
@@ -54,9 +54,9 @@ void HealDamageSystem::handle_healing() {
 }
 
 // TODO: refactor to generic duplicate check if needed
-void HealDamageSystem::add_damage(Entity entity, int amount) {
+void HealDamageSystem::add_damage(Entity entity, int amount, vec3 tint) {
     if (!registry.damages.has(entity)) {
-        registry.damages.emplace(entity, amount);
+        registry.damages.emplace(entity, amount, tint);
     } else {
         spdlog::debug("DUPLICATE DAMAGE WAS CALLED");
         Damage &d = registry.damages.get(entity);
@@ -64,9 +64,9 @@ void HealDamageSystem::add_damage(Entity entity, int amount) {
     }
 }
 
-void HealDamageSystem::add_heal(Entity entity, int amount) {
+void HealDamageSystem::add_heal(Entity entity, int amount, vec3 tint) {
     if (!registry.heals.has(entity)) {
-        registry.heals.emplace(entity, amount);
+        registry.heals.emplace(entity, amount, tint);
     } else {
         spdlog::debug("DUPLICATE HEAL WAS CALLED");
         Heal &h = registry.heals.get(entity);

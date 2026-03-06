@@ -300,10 +300,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     createBell(renderer, { 300.f, 400.f }, 80.f);
     createBell(renderer, { 700.f, 200.f }, 80.f);
 
-    // ! FOR TESTING ! NEED TO FIX COLOUR INDICATORS (maybe set an init colour)
-    // createOverTimeEffect<Damage>(player, 1000.f, 5000.f, 10);
-    // createOverTimeEffect<Heal>(player, 1000.f, 5000.f, 10);
-
     ENEMY_TYPE type = ENEMY_TYPE::URCHIN; // TESTING: change this out to test types
     Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
 
@@ -621,7 +617,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #pragma region DEBUG KEYS
 
 #define ENABLE_LOAD_TUTORIAL
-// #define ENABLE_SKIP_WAVE
+#define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
 
 #ifdef ENABLE_LOAD_TUTORIAL
