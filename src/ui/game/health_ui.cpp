@@ -1,5 +1,7 @@
 #include "game_ui.hpp"
 
+#include "systems/player/camera_system.hpp"
+
 void GameUI::draw_healthbar() {
     float bar_width = 300;
     float bar_height = 10;
@@ -36,4 +38,47 @@ void GameUI::draw_healthbar() {
 
     ImGui::End();
     ImGui::PopStyleColor();
+}
+
+void GameUI::draw_enemy_healthbars() {
+    float bar_width = 80;
+    float bar_height = 8;
+    float padding = 2;
+    float top_margin = 20;
+    ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0.f, 0.f), ImGuiCond_Always);
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                                    ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+                                    ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse |
+                                    ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
+
+    ImGui::Begin("Enemy Healthbars", nullptr, window_flags);
+
+    ImGuiIO &io = ImGui::GetIO();
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+    ImU32 colour_start = ImGui::ColorConvertFloat4ToU32(ImVec4(1.f, 0.f, 0.f, 1.f));
+    ImU32 colour_end = ImGui::ColorConvertFloat4ToU32(ImVec4(0.f, 1.f, 0.f, 1.f));
+
+    for (Entity e : registry.enemies.entities) {
+        Motion &m = registry.motions.get(e);
+        vec2 screen_pos = CameraSystem::get_screen_pos(m.position);
+        if (screen_pos.x < 0 || screen_pos.x > WINDOW_WIDTH_PX || screen_pos.y < 0 || screen_pos.y > WINDOW_HEIGHT_PX)
+            continue;
+
+        Health &h = registry.healths.get(e);
+        float ratio = (h.max_hp > 0) ? (float)h.hp / (float)h.max_hp : 0.f;
+
+        ImVec2 rect_min_filled =
+            ImVec2(screen_pos.x - bar_width / 2 + padding, screen_pos.y - bar_height + padding - top_margin);
+        ImVec2 rect_max_filled =
+            ImVec2(rect_min_filled.x + bar_width * ratio - padding, rect_min_filled.y + bar_height - padding);
+        ImU32 colour = colour_lerp(colour_start, colour_end, ratio);
+        draw_list->AddRectFilled(rect_min_filled, rect_max_filled, colour);
+
+        ImGui::TextColored(
+            ImVec4(1.f, 1.f, 1.f, 1.f),
+            std::string(e.name() + ": " + std::to_string(h.hp) + "/" + std::to_string(h.max_hp)).c_str());
+    }
+
+    ImGui::End();
 }

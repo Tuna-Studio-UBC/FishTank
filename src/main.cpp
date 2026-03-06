@@ -109,6 +109,7 @@ int main() {
         // Draw GUIs
         game_ui.draw_pause_menu();
         game_ui.draw_healthbar();
+        game_ui.draw_enemy_healthbars();
         game_ui.draw_minimap();
         game_ui.draw_ammo();
 
