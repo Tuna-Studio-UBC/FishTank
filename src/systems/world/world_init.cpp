@@ -402,10 +402,11 @@ Entity createBell(RenderSystem *renderer, vec2 position, float interact_radius_p
 // Hazards
 // =================================================================================
 
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner) {
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner, int damage_bonus) {
     auto entity = Entity("Projectile");
 
     AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
+    attack_config.damage += damage_bonus;
 
     // Apply DamageMultiplier power up
     for (Entity &dm_entity : registry.damageMultipliers.entities) {

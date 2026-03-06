@@ -18,6 +18,4 @@ class PlayerInputSystem {
     int get_player_ammo_cost();
 
     void try_fire_projectile(Motion &player_motion, FireControl &fc, const float &aim_angle);
-
-    void try_upgrade_player(UPGRADE_TYPE upgrade);
 };

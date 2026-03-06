@@ -111,6 +111,7 @@ int main() {
         game_ui.draw_healthbar();
         game_ui.draw_minimap();
         game_ui.draw_ammo();
+        game_ui.draw_upgrade_menu();
 
         tutorial_ui.draw_tutorial_step();
 

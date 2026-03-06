@@ -112,6 +112,7 @@ struct FireControl {
     ATTACK_PATTERN attack_pattern;
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
+    int damage_bonus = 0;
     float refill_progress = 0.f;
 };
 
@@ -135,7 +136,7 @@ struct DropsCrackers {
 };
 
 struct Wallet {
-    int crackers = 0;
+    unsigned int crackers = 0;
 };
 // Uses: Motion
 
@@ -300,7 +301,7 @@ struct ScreenState {
     float darken_screen_factor = -1;
 };
 
-enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, UpgradeDebug, KeyboardActionsCount };
+enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, KeyboardActionsCount };
 
 struct KeyboardInputState {
     bool current_actions[KeyboardActions::KeyboardActionsCount];
@@ -338,6 +339,7 @@ struct Progress {
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;
+    bool is_upgrade_menu_called = false;
     Tutorial tutorial_step_id = Tutorial::MOVEMENT;
     std::vector<TutorialStep> tutorial_steps;
 

@@ -12,6 +12,9 @@
 #include <sstream>
 #include <unordered_set>
 
+// DEBUG: DELETE ME
+#include "ui/game/game_ui.hpp"
+
 // create the world
 WorldSystem::WorldSystem() {
     // seeding rng with random device
@@ -514,10 +517,17 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
     }
 
-    if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
-        ps.current_actions[KeyboardActions::UpgradeDebug] = true;
-        spdlog::debug("Trying to upgrade player");
-    }
+#define DEBUG_UPGRADE_INPUTS
+#ifdef DEBUG_UPGRADE_INPUTS
+    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+        try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+
+    if (key == GLFW_KEY_X && action == GLFW_PRESS)
+        try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
+
+    if (key == GLFW_KEY_C && action == GLFW_PRESS)
+        try_upgrade_player(UPGRADE_TYPE::ATTACK);
+#endif
 
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_E) {
@@ -626,7 +636,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #pragma region DEBUG KEYS
 
 #define ENABLE_LOAD_TUTORIAL
-// #define ENABLE_SKIP_WAVE
+#define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
 
 #ifdef ENABLE_LOAD_TUTORIAL
@@ -662,6 +672,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             auto &progress = registry.progresses.components[0];
             if (!progress.is_tutorial_step_called)
                 progress.is_paused = !progress.is_paused;
+
+            if (progress.is_upgrade_menu_called)
+                progress.is_upgrade_menu_called = false;
         }
 #endif
     }
@@ -713,8 +726,6 @@ void WorldSystem::load_next_level() {
 
     progress.is_tutorial = false;
     progress.is_tutorial_step_called = false;
-
-    progress.is_paused = false;
     progress.has_beat_level = false;
     progress.is_game_over = false;
     progress.level++;
@@ -723,6 +734,9 @@ void WorldSystem::load_next_level() {
         close_window();
         return;
     }
+
+    progress.is_upgrade_menu_called = LEVEL_CONFIGS[progress.level].upgrade_screen_before;
+    progress.is_paused = progress.is_upgrade_menu_called;
 
     int hp = registry.healths.get(registry.players.entities[0]).hp;
     int ammo = registry.fireControls.get(registry.players.entities[0]).ammo;

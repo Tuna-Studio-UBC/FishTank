@@ -13,6 +13,7 @@ const unsigned int MAX_UPGRADES = 3;
 struct UpgradeConfig {
     unsigned int max_levels;
     int bonus[MAX_UPGRADES];
+    int cost[MAX_UPGRADES];
 };
 
 struct UpgradeInstance {
@@ -22,6 +23,6 @@ struct UpgradeInstance {
     UpgradeInstance(const UpgradeConfig config) : config(config) {};
 };
 
-const UpgradeConfig ATTACK_UPGRADE_CONFIG = {3, {0, 5, 10}};
-const UpgradeConfig MAX_AMMO_UPGRADE_CONFIG = {3, {0, 10, 20}};
-const UpgradeConfig MAX_HP_UPGRADE_CONFIG = {3, {0, 25, 50}};
+const UpgradeConfig ATTACK_UPGRADE_CONFIG = {3, {0, 5, 5}, {0, 0, 0}};
+const UpgradeConfig MAX_AMMO_UPGRADE_CONFIG = {3, {0, 10, 10}, {0, 0, 0}};
+const UpgradeConfig MAX_HP_UPGRADE_CONFIG = {3, {0, 20, 30}, {0, 0, 0}};

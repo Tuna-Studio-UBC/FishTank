@@ -52,7 +52,7 @@ void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &
     vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
 
     Entity player = registry.players.entities[0];
-    createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
+    createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
 
     auto &sr = registry.sound_requests.emplace_with_duplicates(player);
     sr.type = SOUND_EVENT::PLAYER_SHOT;
@@ -155,43 +155,8 @@ void PlayerInputSystem::step(float elapsed_ms) {
         try_fire_projectile(motion, fc, aim_angle);
     }
 
-    if (keyboard_input.current_actions[KeyboardActions::UpgradeDebug])
-    {
-        try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
-        keyboard_input.current_actions[KeyboardActions::UpgradeDebug] = false;
-    }
-
     // Shift action over
     std::copy(std::begin(keyboard_input.current_actions), std::end(keyboard_input.current_actions),
               std::begin(keyboard_input.previous_actions));
 
-}
-
-void upgrade_max_ammo(Entity &player, UpgradeInstance& upgrade_instance) 
-{ 
-    if (registry.fireControl.has(player)) {
-        FireControl &fc = registry.fireControl.get(player);
-        fc.max_ammo = STARTING_AMMO + upgrade_instance.config.bonus[upgrade_instance.level];
-    }
-}
-
-void PlayerInputSystem::try_upgrade_player(UPGRADE_TYPE type) {
-    if (registry.players.entities.size() > 0) {
-        Entity &player = registry.players.entities[0];
-        if (registry.upgrades.has(player)) {
-            UpgradeInstance &upgrade_instance = registry.upgrades.get(player).upgrade_instances[type];
-            unsigned int &curr_level = upgrade_instance.level;
-            if (curr_level < upgrade_instance.config.max_levels - 1)
-            {
-                curr_level++;
-                switch (type)
-                {   
-                    case UPGRADE_TYPE::MAX_AMMO:
-                        upgrade_max_ammo(player, upgrade_instance);
-                        break;
-                }
-            }
-
-        }
-    }
 }
