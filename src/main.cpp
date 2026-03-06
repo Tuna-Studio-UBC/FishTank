@@ -2,6 +2,7 @@
 #include <gl3w.h>
 
 #include <spdlog/spdlog.h>
+#include <tracy/Tracy.hpp>
 
 // stdlib
 #include <chrono>
@@ -76,12 +77,18 @@ int main() {
     auto t = Clock::now();
     while (!world_system.is_over()) {
         // Prepare new GUI frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        { 
+            ZoneScopedN("EXT: IMGUI Prep Frame");
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+        }
 
         // processes system messages, if this wasn't present the window would become unresponsive
-        glfwPollEvents();
+        {
+            ZoneScopedN("EXT: GLFW Poll Events");
+            glfwPollEvents();
+        }
 
         // calculate elapsed times in milliseconds from the previous iteration
         auto now = Clock::now();
@@ -91,31 +98,31 @@ int main() {
         // CK: be mindful of the order of your systems and rearrange this list only if necessary
 
         if (world_system.step(elapsed_ms)) {
-            ote_system.step(elapsed_ms);
-            heal_damage_system.step(elapsed_ms);
-            death_system.step(elapsed_ms);
-            pick_up_system.step(elapsed_ms);
-            ai_system.handle_detection();
-            ai_system.step(elapsed_ms);
-            physics_system.step(elapsed_ms);
-            player_input_system.step(elapsed_ms);
-            world_system.handle_expiration(elapsed_ms);
-            particle_system.step(elapsed_ms);
-            animation_system.step(elapsed_ms);
-            collision_system.step(elapsed_ms);
-            camera_system.step();
+            { ZoneScopedN("SYS: OTE"); ote_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: HealDamage"); heal_damage_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: Death"); death_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: PickUp"); pick_up_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: AI Detection"); ai_system.handle_detection(); }
+            { ZoneScopedN("SYS: AI Step"); ai_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: Physics"); physics_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: PlayerInput"); player_input_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: Expiration"); world_system.handle_expiration(elapsed_ms); }
+            { ZoneScopedN("SYS: Particles"); particle_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: Animation"); animation_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: Collision"); collision_system.step(elapsed_ms); }
+            { ZoneScopedN("SYS: Camera"); camera_system.step(); }
         }
 
         // Draw GUIs
-        game_ui.draw_pause_menu();
-        game_ui.draw_healthbar();
-        game_ui.draw_minimap();
-        game_ui.draw_ammo();
-
-        tutorial_ui.draw_tutorial_step();
-
+        { ZoneScopedN("RENDER: Pause"); game_ui.draw_pause_menu(); }
+        { ZoneScopedN("RENDER: Health"); game_ui.draw_healthbar(); }
+        { ZoneScopedN("RENDER: Minimap"); game_ui.draw_minimap(); }
+        { ZoneScopedN("RENDER: Ammo"); game_ui.draw_ammo(); }
+        
+        { ZoneScopedN("RENDER: Tutorial"); tutorial_ui.draw_tutorial_step(); }
+        
         // Debugging UI
-        debug_ui.draw_fps_counter(&world_system);
+        { ZoneScopedN("RENDER: FPS"); debug_ui.draw_fps_counter(&world_system); }
 
 #ifdef ENABLE_DEBUG_UI
         debug_ui.draw_demo();
@@ -123,11 +130,11 @@ int main() {
 #endif
 
         // Render
-        renderer_system.draw();
-        renderer_system.renderGUI();
-
+        { ZoneScopedN("RENDER: Main Draw Call"); renderer_system.draw(); }
+        { ZoneScopedN("RENDER: Main GUI Call"); renderer_system.renderGUI(); }
+        
         // flicker-free display with a double buffer
-        glfwSwapBuffers(window);
+        { ZoneScopedN("RENDER: SwapBuffer"); glfwSwapBuffers(window); }
         gl_has_errors();
     }
 
