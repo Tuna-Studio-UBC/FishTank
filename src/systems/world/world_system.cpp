@@ -254,6 +254,34 @@ void WorldSystem::load_level(Progress &progress) {
     }*/
 }
 
+void WorldSystem::try_progress_tutorial() {
+    auto &progress = registry.progresses.components[0];
+
+    if (!progress.is_tutorial)
+        return;
+
+    if (progress.is_tutorial_step_called && !(progress.tutorial_step_id > progress.tutorial_steps.size())) {
+        // Progress to next step
+        TutorialStep &step = progress.tutorial_steps[progress.tutorial_step_id - 1];
+
+        if (step.current_step >= step.total_steps) {
+            progress.is_paused = false;
+            progress.is_tutorial_step_called = false;
+        } else {
+            step.current_step++;
+            spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
+        }
+    } else if (progress.is_game_over && progress.has_beat_level) {
+        // Load into main game
+        Health &health = registry.healths.get(registry.players.entities[0]);
+        health.hp = health.max_hp;
+        FireControl &fc = registry.fireControls.get(registry.players.entities[0]);
+        fc.ammo = fc.max_ammo;
+
+        load_next_level();
+    }
+}
+
 void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
                                 UpgradeSystem *upgrade_system) {
     this->renderer = renderer_arg;
@@ -599,31 +627,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         // TODO: Change progression behaviour in the future
         if (key == GLFW_KEY_ENTER) {
             auto &progress = registry.progresses.components[0];
-
-            if (progress.is_tutorial && progress.is_tutorial_step_called &&
-                !(progress.tutorial_step_id > progress.tutorial_steps.size())) {
-                TutorialStep &step = progress.tutorial_steps[progress.tutorial_step_id - 1];
-
-                // Progress to next step
-                if (step.current_step >= step.total_steps) {
-                    progress.is_paused = false;
-                    progress.is_tutorial_step_called = false;
-                } else {
-                    step.current_step++;
-                    spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
-                }
-            } else {
-                if (progress.is_tutorial && progress.is_game_over && progress.has_beat_level) {
-                    Health &health = registry.healths.get(registry.players.entities[0]);
-                    health.hp = health.max_hp;
-                    FireControl &fc = registry.fireControls.get(registry.players.entities[0]);
-                    fc.ammo = fc.max_ammo;
-
-                    load_next_level();
-                } else if (progress.has_beat_level && !progress.is_game_over) {
-                    load_next_level();
-                }
-            }
+            try_progress_tutorial();
+            if (!progress.is_tutorial && progress.has_beat_level && !progress.is_game_over)
+                load_next_level();
         }
 
 #pragma region DEBUG KEYS
@@ -708,6 +714,7 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT) {
             mi.current_action = MouseActions::LeftClick;
+            try_progress_tutorial();
         }
     } else {
         mi.current_action = MouseActions::MouseActionsCount;
