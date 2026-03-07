@@ -1,4 +1,5 @@
 #define GL3W_IMPLEMENTATION
+#define TracyLine TracyConcat(__LINE__, U) // Fix for MSVC
 #include <gl3w.h>
 
 #include <spdlog/spdlog.h>
