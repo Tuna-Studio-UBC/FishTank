@@ -8,7 +8,8 @@ enum class ATTACK_PATTERN {
     RAPID = SINGLE + 1,
     TOXIC = RAPID + 1,
     MACHINE_GUN = TOXIC + 1,
-    URCHIN = MACHINE_GUN + 1,
+    SHOTGUN = MACHINE_GUN + 1,
+    URCHIN = SHOTGUN + 1,
     ATTACK_COUNT = URCHIN + 1
 };
 const int attack_count = (int)ATTACK_PATTERN::ATTACK_COUNT;

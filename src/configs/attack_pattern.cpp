@@ -28,5 +28,8 @@ static const AttackConfig ATTACK_CONFIGS[attack_count] = {
     // Machine gun
     {ATTACK_EFFECT::NORMAL, 1, 3000.f, BASE_PROJECTILE_SPEED * 3, 200.f, Tint({1.f, 1.f, 0.f}), 15.f},
 
+    // Shotgun
+    {ATTACK_EFFECT::NORMAL, 5, 2000.f, BASE_PROJECTILE_SPEED * 2, 3000.f, Tint({0.f, 1.f, 1.f})},
+
     // Urchin
     {ATTACK_EFFECT::NORMAL, 10, 10000.f, BASE_PROJECTILE_SPEED * 0.75, 4000.f, Tint({1.f, 0.f, 1.f})}};

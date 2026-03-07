@@ -97,6 +97,16 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 4.f;
             }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::SHOTGUN) {
+            float incAngle = -2 * M_PI / 12.f;
+            for (int i = 0; i < 5; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = angle + incAngle;
+                req.owner = enemy;
+                incAngle += M_PI / 12.f;
+            }
         } else {
             registry.bullet_requests.insert(enemy, {fire.attack_pattern, position, angle, enemy});
         }
