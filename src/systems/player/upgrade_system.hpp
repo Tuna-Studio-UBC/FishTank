@@ -4,12 +4,12 @@
 #include "tinyECS/registry.hpp"
 
 class UpgradeSystem {
-public:
+  public:
     void try_upgrade_player(UPGRADE_TYPE type);
     void close_upgrade_menu();
     bool can_afford_upgrade(const UPGRADE_TYPE type);
 
-private:
+  private:
     void upgrade_max_ammo(Entity &player, UpgradeInstance &upgrade_instance);
     void upgrade_max_hp(Entity &player, UpgradeInstance &upgrade_instance);
     void upgrade_attack(Entity &player, UpgradeInstance &upgrade_instance);

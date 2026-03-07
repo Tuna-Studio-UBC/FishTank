@@ -1,12 +1,7 @@
 #pragma once
 #include "common.hpp"
 
-enum UPGRADE_TYPE {
-    ATTACK,
-    MAX_AMMO,
-    MAX_HP,
-    UPGRADE_COUNT
-};
+enum UPGRADE_TYPE { ATTACK, MAX_AMMO, MAX_HP, UPGRADE_COUNT };
 
 const unsigned int MAX_UPGRADES = 3;
 

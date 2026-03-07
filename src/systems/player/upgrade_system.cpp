@@ -30,35 +30,34 @@ void UpgradeSystem::try_upgrade_player(const UPGRADE_TYPE type) {
                 curr_level++;
                 num_crackers -= upgrade_instance.config.cost[curr_level];
                 switch (type) {
-                    case UPGRADE_TYPE::MAX_AMMO:
-                        upgrade_max_ammo(player, upgrade_instance);
-                        break;
-                    case UPGRADE_TYPE::MAX_HP:
-                        upgrade_max_hp(player, upgrade_instance);
-                        break;
-                    case UPGRADE_TYPE::ATTACK:
-                        upgrade_attack(player, upgrade_instance);
-                        break;
+                case UPGRADE_TYPE::MAX_AMMO:
+                    upgrade_max_ammo(player, upgrade_instance);
+                    break;
+                case UPGRADE_TYPE::MAX_HP:
+                    upgrade_max_hp(player, upgrade_instance);
+                    break;
+                case UPGRADE_TYPE::ATTACK:
+                    upgrade_attack(player, upgrade_instance);
+                    break;
                 }
             }
         }
     }
 }
 
-
 void UpgradeSystem::upgrade_max_ammo(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.fireControls.has(player)) {
         FireControl &fc = registry.fireControls.get(player);
         fc.max_ammo += upgrade_instance.config.bonus[upgrade_instance.level];
-        fc.ammo     += upgrade_instance.config.bonus[upgrade_instance.level];
+        fc.ammo += upgrade_instance.config.bonus[upgrade_instance.level];
     }
 }
 
 void UpgradeSystem::upgrade_max_hp(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.healths.has(player)) {
-        Health& health = registry.healths.get(player);
+        Health &health = registry.healths.get(player);
         health.max_hp += upgrade_instance.config.bonus[upgrade_instance.level];
-        health.hp     += upgrade_instance.config.bonus[upgrade_instance.level];
+        health.hp += upgrade_instance.config.bonus[upgrade_instance.level];
     }
 }
 

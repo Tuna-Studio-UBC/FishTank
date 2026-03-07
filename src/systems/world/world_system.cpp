@@ -309,7 +309,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     this->tilemap_system = tilemap_arg;
     this->upgrade_system = upgrade_system;
 
-
     Progress *progress_p;
     if (registry.progresses.size() == 0) {
         auto e = Entity("Progress");

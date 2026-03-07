@@ -13,9 +13,9 @@
 
 #include "systems/audio/audio_system.hpp"
 #include "systems/player/camera_system.hpp"
+#include "systems/player/upgrade_system.hpp" // TODO: Remove me!
 #include "systems/rendering/render_system.hpp"
 #include "systems/world/tilemap_system.hpp"
-#include "systems/player/upgrade_system.hpp" // TODO: Remove me!
 
 // Container for all our entities and game logic.
 // Individual rendering / updates are deferred to the update() methods.
@@ -37,7 +37,8 @@ class WorldSystem {
     // starts the game
     void init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
                        UpgradeSystem *upgrade_system);
-    void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system, UpgradeSystem* upgrade_system);
+    void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system,
+              UpgradeSystem *upgrade_system);
 
     // releases all associated resources
     ~WorldSystem();

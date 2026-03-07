@@ -195,11 +195,9 @@ struct AI {
 };
 
 struct Upgrades {
-    UpgradeInstance upgrade_instances[UPGRADE_TYPE::UPGRADE_COUNT] = {
-        UpgradeInstance(ATTACK_UPGRADE_CONFIG), 
-        UpgradeInstance(MAX_AMMO_UPGRADE_CONFIG), 
-        UpgradeInstance(MAX_HP_UPGRADE_CONFIG)
-    };
+    UpgradeInstance upgrade_instances[UPGRADE_TYPE::UPGRADE_COUNT] = {UpgradeInstance(ATTACK_UPGRADE_CONFIG),
+                                                                      UpgradeInstance(MAX_AMMO_UPGRADE_CONFIG),
+                                                                      UpgradeInstance(MAX_HP_UPGRADE_CONFIG)};
 };
 
 #pragma endregion Behaviour

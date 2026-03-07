@@ -158,5 +158,4 @@ void PlayerInputSystem::step(float elapsed_ms) {
     // Shift action over
     std::copy(std::begin(keyboard_input.current_actions), std::end(keyboard_input.current_actions),
               std::begin(keyboard_input.previous_actions));
-
 }
