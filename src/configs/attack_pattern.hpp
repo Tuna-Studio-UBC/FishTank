@@ -2,6 +2,11 @@
 
 #include "common.hpp"
 
+#pragma region Patterns
+// =================================================================================
+// Patterns
+// =================================================================================
+
 enum class ATTACK_PATTERN {
     PLAYER = 0,
     SINGLE = PLAYER + 1,
@@ -13,6 +18,13 @@ enum class ATTACK_PATTERN {
     ATTACK_COUNT = URCHIN + 1
 };
 const int attack_count = (int)ATTACK_PATTERN::ATTACK_COUNT;
+
+#pragma endregion Patterns
+
+#pragma region Effects
+// =================================================================================
+// Effects
+// =================================================================================
 
 enum class ATTACK_EFFECT { NORMAL = 0, TOXIC = NORMAL + 1, ATTACK_EFFECT_COUNT = TOXIC + 1 };
 const int attack_effect_count = (int)ATTACK_EFFECT::ATTACK_EFFECT_COUNT;
@@ -30,3 +42,5 @@ static const AttackEffectConfig ATTACK_EFFECT_CONFIGS[attack_effect_count] = {
     // Toxic
     {400.f, 1600.f, {0.25f, 0.25f, 1.f}},
 };
+
+#pragma endregion Effects
