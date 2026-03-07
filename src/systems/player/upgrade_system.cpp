@@ -1,6 +1,6 @@
-#include "game_ui.hpp"
+#include "upgrade_system.hpp"
 
-bool can_afford_upgrade(const UPGRADE_TYPE type) {
+bool UpgradeSystem::can_afford_upgrade(const UPGRADE_TYPE type) {
     if (registry.players.entities.size() > 0) {
         Entity &player = registry.players.entities[0];
         if (registry.upgrades.has(player) && registry.wallets.has(player)) {
@@ -16,7 +16,7 @@ bool can_afford_upgrade(const UPGRADE_TYPE type) {
     return false;
 }
 
-void try_upgrade_player(const UPGRADE_TYPE type) {
+void UpgradeSystem::try_upgrade_player(const UPGRADE_TYPE type) {
     if (!can_afford_upgrade(type))
         return;
     if (registry.players.entities.size() > 0) {
@@ -46,7 +46,7 @@ void try_upgrade_player(const UPGRADE_TYPE type) {
 }
 
 
-void upgrade_max_ammo(Entity &player, UpgradeInstance &upgrade_instance) {
+void UpgradeSystem::upgrade_max_ammo(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.fireControls.has(player)) {
         FireControl &fc = registry.fireControls.get(player);
         fc.max_ammo += upgrade_instance.config.bonus[upgrade_instance.level];
@@ -54,7 +54,7 @@ void upgrade_max_ammo(Entity &player, UpgradeInstance &upgrade_instance) {
     }
 }
 
-void upgrade_max_hp(Entity &player, UpgradeInstance &upgrade_instance) {
+void UpgradeSystem::upgrade_max_hp(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.healths.has(player)) {
         Health& health = registry.healths.get(player);
         health.max_hp += upgrade_instance.config.bonus[upgrade_instance.level];
@@ -62,9 +62,15 @@ void upgrade_max_hp(Entity &player, UpgradeInstance &upgrade_instance) {
     }
 }
 
-void upgrade_attack(Entity &player, UpgradeInstance &upgrade_instance) {
+void UpgradeSystem::upgrade_attack(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.fireControls.has(player)) {
         FireControl &fc = registry.fireControls.get(player);
         fc.damage_bonus += upgrade_instance.config.bonus[upgrade_instance.level];
     }
+}
+
+void UpgradeSystem::close_upgrade_menu() {
+    auto &progress = registry.progresses.components[0];
+    progress.is_paused = false;
+    progress.is_upgrade_menu_called = false;
 }

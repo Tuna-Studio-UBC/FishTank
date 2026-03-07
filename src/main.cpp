@@ -46,6 +46,7 @@ int main() {
     CameraSystem camera_system;
     AnimationSystem animation_system;
     TileMapSystem tilemap_system;
+    UpgradeSystem upgrade_system;
 
     // Configure spdlog
     spdlog::set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] [%l]%$ %v");
@@ -67,7 +68,7 @@ int main() {
 
     // initialize the main systems
     renderer_system.init(window);
-    world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system);
+    world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);

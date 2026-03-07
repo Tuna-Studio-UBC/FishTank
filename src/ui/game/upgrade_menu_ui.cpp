@@ -35,7 +35,7 @@ void GameUI::draw_upgrade_menu() {
     ImGui::PopFont();
 
     ImGui::PushFont(io.Fonts->Fonts[2]);
-    text = "Press Enter to Close";
+    text = "Press 'P' to Close";
     text_size = ImGui::CalcTextSize(text);
     ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
@@ -43,10 +43,4 @@ void GameUI::draw_upgrade_menu() {
 
     ImGui::End();
     ImGui::PopStyleColor();
-}
-
-void close_upgrade_menu() {
-    auto &progress = registry.progresses.components[0];
-    progress.is_paused = false;
-    progress.is_upgrade_menu_called = false;
 }

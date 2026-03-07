@@ -15,6 +15,7 @@
 #include "systems/player/camera_system.hpp"
 #include "systems/rendering/render_system.hpp"
 #include "systems/world/tilemap_system.hpp"
+#include "systems/player/upgrade_system.hpp" // TODO: Remove me!
 
 // Container for all our entities and game logic.
 // Individual rendering / updates are deferred to the update() methods.
@@ -34,8 +35,9 @@ class WorldSystem {
     void restart_game();
 
     // starts the game
-    void init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg);
-    void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system);
+    void init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
+                       UpgradeSystem *upgrade_system);
+    void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system, UpgradeSystem* upgrade_system);
 
     // releases all associated resources
     ~WorldSystem();
@@ -78,6 +80,7 @@ class WorldSystem {
     TileMapSystem *tilemap_system;
     RenderSystem *renderer;
     CameraSystem *camera_system;
+    UpgradeSystem *upgrade_system;
 
     std::vector<std::vector<Entity> *> entities_to_clear = {&registry.enemies.entities, &registry.hazards.entities,
                                                             &registry.bullets.entities, &registry.pickUps.entities,
