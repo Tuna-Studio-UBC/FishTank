@@ -77,12 +77,17 @@ void GameUI::draw_enemy_healthbars() {
             screen_pos.y > WINDOW_HEIGHT_PX + margin)
             continue;
 
-        ImVec2 rect_min_filled =
+        ImVec2 rect_min =
             ImVec2(screen_pos.x - bar_width / 2 + padding, screen_pos.y - bar_height + padding - bar_offset_y);
-        ImVec2 rect_max_filled =
-            ImVec2(rect_min_filled.x + bar_width * ratio - padding, rect_min_filled.y + bar_height - padding);
+        ImVec2 rect_max = ImVec2(rect_min.x + bar_width - padding, rect_min.y + bar_height - padding);
+        draw_list->AddRectFilled(rect_min, rect_max, IM_COL32(50, 50, 50, 150));
+
+        ImVec2 health_rect_min =
+            ImVec2(screen_pos.x - bar_width / 2 + padding, screen_pos.y - bar_height + padding - bar_offset_y);
+        ImVec2 health_rect_max =
+            ImVec2(health_rect_min.x + bar_width * ratio - padding, health_rect_min.y + bar_height - padding);
         ImU32 colour = colour_lerp(colour_start, colour_end, ratio);
-        draw_list->AddRectFilled(rect_min_filled, rect_max_filled, colour);
+        draw_list->AddRectFilled(health_rect_min, health_rect_max, colour);
     }
 
     ImGui::PopFont();
