@@ -98,12 +98,12 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 }
 
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
-    auto entity = Entity("Enemy");
+    auto &config = ENEMY_CONFIGS[(int)type];
+
+    auto entity = Entity(config.name);
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
-
-    auto &config = ENEMY_CONFIGS[(int)type];
 
     auto &enemy = registry.enemies.emplace(entity);
     enemy.detection_radius = config.detection_radius;
