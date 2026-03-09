@@ -11,8 +11,8 @@ set(ENGINE_DEPENDENCIES_LOADED TRUE)
 set(SPDLOG_VERSION v1.17.0)
 set(FREETYPE_VERSION master)
 set(RMLUI_VERSION 6.2)
-set(IMGUI_VERSION v1.92.5)
-set(TRACY_VERSION v0.11.1)
+set(IMGUI_VERSION v1.92.5-docking)
+set(TRACY_VERSION v0.13.1)
 
 # Generic Options
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -87,6 +87,11 @@ target_include_directories(imgui PUBLIC
 # Tracy
 # ============================================================
 
+set(TRACY_ENABLE  ON)
+set(TRACY_ON_DEMAND ON)
+set(TRACY_GUI_GLEW ON)
+set(TRACY_BUILD_PROFILER OFF)
+
 FetchContent_Declare(
   tracy
   GIT_REPOSITORY https://github.com/wolfpld/tracy.git
@@ -104,16 +109,6 @@ target_include_directories(tracy PUBLIC
 )
 
 target_compile_definitions(tracy PUBLIC TRACY_ENABLE)
-
-# ============================================================
-# Tracy Profiler
-# ============================================================
-
-option(TRACY_ENABLE_PROFILER "Build Tracy profiler UI" ON)
-
-if(TRACY_ENABLE_PROFILER)
-  add_subdirectory(${tracy_SOURCE_DIR}/profiler ${tracy_BINARY_DIR}/profiler)
-endif()
 
 # ============================================================
 # Helper function to link everything
