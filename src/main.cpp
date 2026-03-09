@@ -123,6 +123,8 @@ int main() {
         debug_ui.draw_respawn(&world_system);
 #endif
 
+        game_ui.draw_cursor();
+
         // Render
         renderer_system.draw();
         renderer_system.renderGUI();

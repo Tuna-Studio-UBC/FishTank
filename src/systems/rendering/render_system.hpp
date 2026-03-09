@@ -61,6 +61,9 @@ class RenderSystem {
         get_path(FilePath::TEXTURES, "lose.png"), get_path(FilePath::TEXTURES, "bubble.png"),
         get_path(FilePath::TEXTURES, "bubbler.png"),
 
+        // Cursors
+        get_path(FilePath::TEXTURES, "cursor.png"),
+
         // Effects
         get_path(FilePath::TEXTURES, "smoke.png"),
 
