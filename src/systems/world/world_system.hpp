@@ -65,6 +65,7 @@ class WorldSystem {
     void load_level_tutorial(Progress &progress);
     void load_level(Progress &progress);
     void load_next_level();
+    void try_progress_tutorial();
 
     // input callback functions
     void on_key(int key, int, int action, int mod);

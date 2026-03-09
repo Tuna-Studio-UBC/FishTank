@@ -115,13 +115,13 @@ int main() {
         }
 
         // Draw GUIs
-        { ZoneScopedN("RENDER: Pause"); game_ui.draw_pause_menu(); }
+        { ZoneScopedN("RENDER: Health"); game_ui.draw_enemy_healthbars(); }
         { ZoneScopedN("RENDER: Health"); game_ui.draw_healthbar(); }
         { ZoneScopedN("RENDER: Minimap"); game_ui.draw_minimap(); }
         { ZoneScopedN("RENDER: Ammo"); game_ui.draw_ammo(); }
+        { ZoneScopedN("RENDER: Pause"); game_ui.draw_pause_menu(); }
         
         { ZoneScopedN("RENDER: Tutorial"); tutorial_ui.draw_tutorial_step(); }
-        
         // Debugging UI
         { ZoneScopedN("RENDER: FPS"); debug_ui.draw_fps_counter(&world_system); }
 
