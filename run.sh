@@ -25,7 +25,11 @@ elif [[ "$1" == "run" ]]; then
     elif [[ $1 =~ ^-(-?build|b)$ ]]; then
         cmake --build build
     elif [[ $1 =~ ^-(-?tracy|t)$ ]]; then
-        ./build/_deps/tracy-build/profiler/tracy-profiler &
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            ./profiler/tracy-profiler &
+        elif [[ "$OSTYPE" == "msys"* ]]; then
+            ./profiler/tracy-profiler.exe &
+        fi
     fi
 
     # Visual Studio puts the exe in the build's respective Configuration directory
