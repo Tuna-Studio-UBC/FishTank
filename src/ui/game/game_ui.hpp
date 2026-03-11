@@ -12,6 +12,7 @@
 
 struct GameUI {
     void draw_healthbar();
+    void draw_enemy_healthbars();
     void draw_ammo();
     void draw_minimap();
     void draw_pause_menu();

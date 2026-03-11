@@ -23,6 +23,14 @@ vec2 CameraSystem::get_camera_dest() {
     return glm::clamp(offset + player_pos, min_pos, max_pos);
 }
 
+vec2 CameraSystem::get_screen_pos(vec2 world_pos) {
+    assert(registry.cameras.entities.size() > 0);
+    Entity &camera_entity = registry.cameras.entities[0];
+    Motion &cam_pos = registry.motions.get(camera_entity);
+    vec2 screen_pos = world_pos - cam_pos.position + vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX / 2);
+    return screen_pos;
+}
+
 void CameraSystem::set_camera_bounds() {
     assert(registry.tilemaps.has(current_map));
     TileMap &tilemap = registry.tilemaps.get(current_map);
