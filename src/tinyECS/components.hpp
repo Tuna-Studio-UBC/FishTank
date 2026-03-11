@@ -9,6 +9,7 @@
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
+#include "configs/upgrade_config.hpp"
 #include <array>
 #include <unordered_map>
 #include <utilities/parse_tree.hpp>
@@ -111,6 +112,7 @@ struct FireControl {
     ATTACK_PATTERN attack_pattern;
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
+    int damage_bonus = 0;
     float refill_progress = 0.f;
 };
 
@@ -134,7 +136,7 @@ struct DropsCrackers {
 };
 
 struct Wallet {
-    int crackers = 0;
+    unsigned int crackers = 0;
 };
 // Uses: Motion
 
@@ -190,6 +192,12 @@ struct AI {
     std::string tree_file;
     ScriptedTree tree;
     AIAction current_state = AIAction::IDLE;
+};
+
+struct Upgrades {
+    UpgradeInstance upgrade_instances[UPGRADE_TYPE::UPGRADE_COUNT] = {UpgradeInstance(ATTACK_UPGRADE_CONFIG),
+                                                                      UpgradeInstance(MAX_AMMO_UPGRADE_CONFIG),
+                                                                      UpgradeInstance(MAX_HP_UPGRADE_CONFIG)};
 };
 
 #pragma endregion Behaviour
@@ -329,6 +337,7 @@ struct Progress {
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;
+    bool is_upgrade_menu_called = false;
     Tutorial tutorial_step_id = Tutorial::MOVEMENT;
     std::vector<TutorialStep> tutorial_steps;
 
