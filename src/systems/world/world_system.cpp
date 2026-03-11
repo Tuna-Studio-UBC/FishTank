@@ -12,6 +12,9 @@
 #include <sstream>
 #include <unordered_set>
 
+// DEBUG: DELETE ME
+#include "ui/game/game_ui.hpp"
+
 // create the world
 WorldSystem::WorldSystem() {
     // seeding rng with random device
@@ -279,10 +282,12 @@ void WorldSystem::try_progress_tutorial() {
     }
 }
 
-void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg) {
+void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
+                                UpgradeSystem *upgrade_system) {
     this->renderer = renderer_arg;
     this->camera_system = camera_arg;
     this->tilemap_system = tilemap_arg;
+    this->upgrade_system = upgrade_system;
 
     // Set up world level
     tilemap_system->init();
@@ -297,10 +302,12 @@ void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera
     createText("Tutorial", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 }
 
-void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg) {
+void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
+                       UpgradeSystem *upgrade_system) {
     this->renderer = renderer_arg;
     this->camera_system = camera_arg;
     this->tilemap_system = tilemap_arg;
+    this->upgrade_system = upgrade_system;
 
     Progress *progress_p;
     if (registry.progresses.size() == 0) {
@@ -626,9 +633,22 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 #pragma region DEBUG KEYS
 
-#define ENABLE_LOAD_TUTORIAL
+// #define ENABLE_LOAD_TUTORIAL
 // #define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
+#define DEBUG_UPGRADE_INPUTS
+
+#ifdef DEBUG_UPGRADE_INPUTS
+        if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+            upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+
+        if (key == GLFW_KEY_X && action == GLFW_PRESS)
+            upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
+
+        if (key == GLFW_KEY_C && action == GLFW_PRESS)
+            upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+#endif
+#undef DEBUG_UPGRADE_INPUTS
 
 #ifdef ENABLE_LOAD_TUTORIAL
         if (key == GLFW_KEY_T) {
@@ -663,6 +683,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             auto &progress = registry.progresses.components[0];
             if (!progress.is_tutorial_step_called)
                 progress.is_paused = !progress.is_paused;
+
+            if (progress.is_upgrade_menu_called)
+                progress.is_upgrade_menu_called = false;
         }
 #endif
     }
@@ -704,9 +727,9 @@ void WorldSystem::restart_game() {
     registry.clear_all_components();
 
     if (is_tutorial) {
-        init_tutorial(renderer, camera_system, tilemap_system);
+        init_tutorial(renderer, camera_system, tilemap_system, upgrade_system);
     } else {
-        init(renderer, camera_system, tilemap_system);
+        init(renderer, camera_system, tilemap_system, upgrade_system);
     }
 }
 
@@ -715,8 +738,6 @@ void WorldSystem::load_next_level() {
 
     progress.is_tutorial = false;
     progress.is_tutorial_step_called = false;
-
-    progress.is_paused = false;
     progress.has_beat_level = false;
     progress.is_game_over = false;
     progress.level++;
@@ -726,6 +747,9 @@ void WorldSystem::load_next_level() {
         return;
     }
 
+    progress.is_upgrade_menu_called = LEVEL_CONFIGS[progress.level].upgrade_screen_before;
+    progress.is_paused = progress.is_upgrade_menu_called;
+
     int hp = registry.healths.get(registry.players.entities[0]).hp;
     int ammo = registry.fireControls.get(registry.players.entities[0]).ammo;
 
@@ -733,7 +757,7 @@ void WorldSystem::load_next_level() {
     registry.clear_all_components();
     Entity e = Entity();
     registry.progresses.insert(e, progress);
-    init(renderer, camera_system, tilemap_system);
+    init(renderer, camera_system, tilemap_system, upgrade_system);
 
     registry.healths.get(registry.players.entities[0]).hp = hp;
     registry.fireControls.get(registry.players.entities[0]).ammo = ammo;

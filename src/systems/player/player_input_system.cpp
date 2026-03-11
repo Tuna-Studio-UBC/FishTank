@@ -52,7 +52,7 @@ void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &
     vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
 
     Entity player = registry.players.entities[0];
-    createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player);
+    createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
 
     auto &sr = registry.sound_requests.emplace_with_duplicates(player);
     sr.type = SOUND_EVENT::PLAYER_SHOT;

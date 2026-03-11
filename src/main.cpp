@@ -48,6 +48,7 @@ int main() {
     CameraSystem camera_system;
     AnimationSystem animation_system;
     TileMapSystem tilemap_system;
+    UpgradeSystem upgrade_system;
 
     // Configure spdlog
     spdlog::set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] [%l]%$ %v");
@@ -69,7 +70,7 @@ int main() {
 
     // initialize the main systems
     renderer_system.init(window);
-    world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system);
+    world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);
@@ -119,9 +120,11 @@ int main() {
         { ZoneScopedN("RENDER: Health"); game_ui.draw_healthbar(); }
         { ZoneScopedN("RENDER: Minimap"); game_ui.draw_minimap(); }
         { ZoneScopedN("RENDER: Ammo"); game_ui.draw_ammo(); }
+        { ZoneScopedN("RENDER: Upgrade"); game_ui.draw_upgrade_menu(); }
         { ZoneScopedN("RENDER: Pause"); game_ui.draw_pause_menu(); }
         
         { ZoneScopedN("RENDER: Tutorial"); tutorial_ui.draw_tutorial_step(); }
+        
         // Debugging UI
         { ZoneScopedN("RENDER: FPS"); debug_ui.draw_fps_counter(&world_system); }
 
