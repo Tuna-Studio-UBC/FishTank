@@ -9,7 +9,7 @@ bool UpgradeSystem::can_afford_upgrade(const UPGRADE_TYPE type) {
             unsigned int &num_crackers = registry.wallets.get(player).crackers;
 
             if (curr_level < upgrade_instance.config.max_levels - 1) {
-                return upgrade_instance.config.cost[curr_level + 1] >= num_crackers;
+                return upgrade_instance.config.cost[curr_level + 1] <= num_crackers;
             }
         }
     }
