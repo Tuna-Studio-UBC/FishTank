@@ -101,7 +101,6 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     auto &config = ENEMY_CONFIGS[(int)type];
-
     auto entity = Entity(config.name);
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
@@ -158,6 +157,21 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.columns = 8;
         an.frame_time = 125;
         motion.scale = vec2(40.0f, 25.0f);
+    } else if (type == ENEMY_TYPE::MOTHER) {
+        ai.tree_file = "leader_tree.txt";
+        ai.tree = load_tree(ai.tree_file);
+        ai.current_state = AIAction::PATROL;
+        
+        registry.beziers.emplace(entity);
+        registry.leaders.emplace(entity);
+
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 250;
     } else {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
@@ -172,39 +186,12 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     return entity;
 }
 
-Entity createLeader(RenderSystem *renderer, vec2 position) {
-    auto entity = Entity("Enemy");
-
-    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
-    registry.meshPtrs.emplace(entity, &mesh);
-
-    registry.beziers.emplace(entity);
-
-    auto &motion = registry.motions.emplace(entity);
-    motion.velocity = vec2(0.0f, 0.0f);
-    motion.position = position;
-    motion.angle = 0.f;
-    motion.scale = vec2(25.0f, 25.0f);
-
-    /* auto &speed = registry.speedControl.emplace(entity);
-    speed.move_speed = config.move_speed;
-    speed.turn_speed = config.turn_speed;*/
-
-    registry.senses.emplace(entity);
-    AI &ai = registry.ais.emplace(entity);
-    ai.tree_file = "leader_tree.txt";
-    ai.tree = load_tree(ai.tree_file);
-    ai.current_state = AIAction::IDLE;
-
-    registry.colours.emplace(entity, Colour(vec3(0.2f, 0.2f, 1.0f)));
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
-
-    return entity;
-}
-
 Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
-    auto entity = Entity("Enemy");
+    auto &config = ENEMY_CONFIGS[(int)ENEMY_TYPE::CHILD];
+    auto entity = Entity(config.name);
+
+    auto &enemy = registry.enemies.emplace(entity);
+    enemy.detection_radius = config.detection_radius;
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -212,19 +199,41 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
     Boid &boid = registry.boids.emplace(entity);
     boid.leader = leader;
 
+    registry.leaders.get(leader).followers += 1;
+
+    registry.senses.emplace(entity);
+    AI &ai = registry.ais.emplace(entity);
+    ai.tree_file = "follower_tree.txt";
+    ai.tree = load_tree(ai.tree_file);
+    ai.current_state = AIAction::IDLE;
+
+    auto &health = registry.healths.emplace(entity);
+    health = config.health;
+
+    auto &fire = registry.fireControls.emplace(entity);
+    fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
+    fire.cooldown_timer = get_random_float(5.f, fire.cooldown_ms);
+    fire.attack_pattern = config.attack_pattern;
+
+    auto &speed = registry.speedControls.emplace(entity);
+    speed.move_speed = config.move_speed;
+    speed.turn_speed = config.turn_speed;
+
+    registry.pursuits.emplace(entity);
+
     auto &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(0.0f, 0.0f);
     motion.position = position;
     motion.angle = 0.f;
     motion.scale = vec2(25.0f, 25.0f);
 
-    /* auto &speed = registry.speedControl.emplace(entity);
-    speed.move_speed = config.move_speed;
-    speed.turn_speed = config.turn_speed;*/
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
-    registry.colours.emplace(entity, Colour(vec3(0.2f, 0.2f, 1.0f)));
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
+    Animation &an = registry.animations.emplace(entity);
+    an.frame_count = 8;
+    an.columns = 8;
+    an.frame_time = 250;
 
     return entity;
 }

@@ -23,4 +23,9 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
     {"Crab", {50, 50}, 50.f, M_PI / 2.f, 600.f, ATTACK_PATTERN::SINGLE},
 
     // Homing
-    {"Isopod", {30, 30}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::RAPID}};
+    {"Isopod", {30, 30}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::RAPID},
+
+    // Swarm
+    {"Mother", {50, 50}, 50.f, M_PI / 2.f, 600.f, ATTACK_PATTERN::SINGLE},
+
+    {"Child", {30, 30}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::HAVOC}};
