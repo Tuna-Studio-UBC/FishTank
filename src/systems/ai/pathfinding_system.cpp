@@ -273,10 +273,7 @@ void PathfindingSystem::update_leader(Entity e, Motion &motion, float elapsed_ms
     }
 
     Bezier &b = registry.beziers.get(e);
-
-    // advance along the curve
     b.t += b.speed * (elapsed_ms / 1000.f);
-
     if (b.t >= 1.f) {
         b.t = 0.f;
         b.current_segment = (b.current_segment + 1) % map.patrol_loop.size();
@@ -284,7 +281,7 @@ void PathfindingSystem::update_leader(Entity e, Motion &motion, float elapsed_ms
 
     BezierPath &seg = map.patrol_loop[b.current_segment];
 
-    // evaluate spline
+    // prevent flashing back to start of previous segment
     float lookahead = b.t + 0.01f;
     BezierPath *look_seg = &seg;
 
@@ -298,8 +295,10 @@ void PathfindingSystem::update_leader(Entity e, Motion &motion, float elapsed_ms
     vec2 p2 = evaluate_cubic_bezier(*look_seg, lookahead);
     vec2 dir = normalize(p2 - target);
 
+    // control movement instead of physics for smoother pathing
     motion.position = target;
     motion.angle = atan2(dir.y, dir.x);
+    // for follower calculations
     b.velocity = (p2 - p1) / 0.01f;
 }
 #pragma endregion Bezier
@@ -310,22 +309,20 @@ void PathfindingSystem::update_leader(Entity e, Motion &motion, float elapsed_ms
 
 vec2 PathfindingSystem::compute_alignment(Entity e, std::vector<Entity> &flock) {
     Motion &motion = registry.motions.get(e);
-
     vec2 avg(0.f);
     int count = 0;
 
     for (Entity other : flock) {
         Motion &om = registry.motions.get(other);
-
         avg += om.velocity;
         count++;
     }
 
-    if (count == 0)
+    if (count == 0) {
         return vec2(0);
+    }
 
     avg /= (float)count;
-
     return (avg - motion.velocity) * 0.05f;
 }
 
@@ -338,7 +335,6 @@ vec2 PathfindingSystem::compute_cohesion(Entity e, std::vector<Entity> &flock) {
 
     for (Entity other : flock) {
         Motion &om = registry.motions.get(other);
-
         if (length(om.position - motion.position) < self.perception_radius) {
             center += om.position;
             count++;
@@ -350,7 +346,6 @@ vec2 PathfindingSystem::compute_cohesion(Entity e, std::vector<Entity> &flock) {
     }
 
     center = center / (float)count;
-
     return (center - motion.position) * 0.005f;
 }
 
@@ -359,30 +354,25 @@ vec2 PathfindingSystem::compute_separation(Entity e, std::vector<Entity> &flock)
 
     float separation_radius = TILE_SIZE_PX/2;
     float separation_strength = 80.f;
-
     vec2 force = vec2(0.f);
     int count = 0;
 
     for (Entity other : flock) {
         Motion &om = registry.motions.get(other);
-
         vec2 diff = motion.position - om.position;
         float dist = length(diff);
 
         if (dist > 0.f && dist < separation_radius) {
             vec2 dir = normalize(diff);
-
-            // stronger push when very close
             float weight = (separation_radius - dist) / separation_radius;
-
             force += dir * weight;
             count++;
         }
     }
 
-    if (count > 0)
+    if (count > 0) {
         force /= (float)count;
-
+    }
     return force * separation_strength;
 }
 
@@ -391,7 +381,6 @@ vec2 PathfindingSystem::compute_follow_force(Entity follower, Entity leader) {
     Motion &lm = registry.motions.get(leader);
 
     vec2 leader_dir = normalize(registry.beziers.get(leader).velocity);
-
     vec2 target = lm.position - leader_dir * (TILE_SIZE_PX * 1.5f);
 
     return (target - fm.position) * 0.01f;
@@ -402,17 +391,13 @@ vec2 PathfindingSystem::avoid_walls(Entity e) {
     TileMap &map = registry.tilemaps.get(current_map);
 
     vec2 force = vec2(0.f);
-
     float avoid_radius = TILE_SIZE_PX * 1.5f;
     float avoid_factor = 60.f;
-
     ivec2 tile = world_to_tile(motion.position);
 
     for (int dx = -1; dx <= 1; dx++) {
         for (int dy = -1; dy <= 1; dy++) {
-
             ivec2 check_tile = tile + ivec2(dx, dy);
-
             if (check_tile.x < 0 || check_tile.y < 0 || check_tile.x >= map.width || check_tile.y >= map.height) {
                 continue;
             }
@@ -424,13 +409,11 @@ vec2 PathfindingSystem::avoid_walls(Entity e) {
 
             vec2 wall_center = tile_center_to_world(check_tile);
             vec2 diff = motion.position - wall_center;
-
             float dist = length(diff);
 
             if (dist < avoid_radius && dist > 0.f) {
                 vec2 push = normalize(diff);
                 float strength = (avoid_radius - dist) / avoid_radius;
-
                 force += push * strength * avoid_factor;
             }
         }
@@ -475,9 +458,11 @@ void PathfindingSystem::update_follower(Entity follower, Entity leader, float el
         flock.push_back(bird);
     }
 
+    // keep track of steering separate from motion
     boid.velocity += compute_boid_force(follower, flock, leader) + avoid_walls(follower) + compute_follow_force(follower, leader);
     boid.velocity = limit_speed(boid.velocity);
 
+    // convert steering to incorporate velocity + angle movement in physics
     fm.angle = atan2(boid.velocity.y, boid.velocity.x);
     fm.velocity = vec2(length(boid.velocity), 0.f);
 }
