@@ -70,8 +70,7 @@ int main() {
 
     // initialize the main systems
     renderer_system.init(window);
-    //world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
-    world_system.init(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
+    world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);
