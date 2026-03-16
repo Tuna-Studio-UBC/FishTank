@@ -223,6 +223,7 @@ void RenderSystem::initializeGUI(GLFWwindow *window) {
     io.Fonts->AddFontDefault();
     io.Fonts->AddFontFromFileTTF(get_path(FilePath::FONTS, "Kenney_Pixel_Square.ttf").c_str(), 80.0f);
     io.Fonts->AddFontFromFileTTF(get_path(FilePath::FONTS, "Kenney_Pixel.ttf").c_str(), 30.0f);
+    io.Fonts->AddFontFromFileTTF(get_path(FilePath::FONTS, "Kenney_Pixel.ttf").c_str(), 24.0f);
 
     // Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);

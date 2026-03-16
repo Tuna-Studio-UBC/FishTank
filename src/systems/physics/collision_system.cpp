@@ -6,6 +6,9 @@
 
 #include <spdlog/spdlog.h>
 
+// Toggle for mesh collider, 0 = on.
+static int MESH_COLLISION_MODE = 1; // set to any other value to turn it off and us AABB
+
 vec2 get_bounding_box(const Motion &motion);
 
 // Compute collisions between entities
@@ -17,8 +20,9 @@ void CollisionSystem::step(float elapsed_ms) {
 
         // narrow-phase check: if either has a mesh collider, run mesh-based test
         bool passNarrowPhase = true;
-        bool is_entity_a_mesh = registry.meshColliders.has(entity_a);
-        bool is_entity_b_mesh = registry.meshColliders.has(entity_b);
+        bool mesh_enabled = (MESH_COLLISION_MODE == 0);
+        bool is_entity_a_mesh = mesh_enabled && registry.meshColliders.has(entity_a);
+        bool is_entity_b_mesh = mesh_enabled && registry.meshColliders.has(entity_b);
         if (is_entity_a_mesh && is_entity_b_mesh) {
             // mesh vs mesh
             MeshCollider &mca = registry.meshColliders.get(entity_a);
@@ -254,7 +258,7 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
         }
 
         // If the actor has a MeshCollider (player), use SAT-MTV to compute minimal push
-        if (registry.meshColliders.has(entity_a) && registry.players.has(entity_a)) {
+        if (MESH_COLLISION_MODE == 0 && registry.meshColliders.has(entity_a) && registry.players.has(entity_a)) {
             MeshCollider &mc = registry.meshColliders.get(entity_a);
 
             // Build actor polygon in world-space

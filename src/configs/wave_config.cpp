@@ -17,6 +17,7 @@ struct Level {
     std::vector<float> bells;
     std::vector<float> bubblers; // TODO: Change type once bubblers are further developed
     std::vector<int> swarms;     // Secret for M3, leave it empty for now
+    bool upgrade_screen_before = false;
 };
 
 const std::vector<Wave> WAVE_CONFIGS = {
@@ -31,7 +32,7 @@ const std::vector<Wave> WAVE_CONFIGS = {
 
 const std::vector<Level> LEVEL_CONFIGS = {
     // Level 1
-    {2, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, {}},
+    {2, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, {}, true},
 
     // Level 2
     {5, MapType::TEST_MAP2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, {}}};

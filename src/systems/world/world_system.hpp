@@ -13,6 +13,7 @@
 
 #include "systems/audio/audio_system.hpp"
 #include "systems/player/camera_system.hpp"
+#include "systems/player/upgrade_system.hpp" // TODO: Remove me!
 #include "systems/rendering/render_system.hpp"
 #include "systems/world/tilemap_system.hpp"
 
@@ -34,8 +35,10 @@ class WorldSystem {
     void restart_game();
 
     // starts the game
-    void init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg);
-    void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system);
+    void init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
+                       UpgradeSystem *upgrade_system);
+    void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system,
+              UpgradeSystem *upgrade_system);
 
     // releases all associated resources
     ~WorldSystem();
@@ -65,6 +68,7 @@ class WorldSystem {
     void load_level_tutorial(Progress &progress);
     void load_level(Progress &progress);
     void load_next_level();
+    void try_progress_tutorial();
 
     // input callback functions
     void on_key(int key, int, int action, int mod);
@@ -78,6 +82,7 @@ class WorldSystem {
     TileMapSystem *tilemap_system;
     RenderSystem *renderer;
     CameraSystem *camera_system;
+    UpgradeSystem *upgrade_system;
 
     std::vector<std::vector<Entity> *> entities_to_clear = {&registry.enemies.entities, &registry.hazards.entities,
                                                             &registry.bullets.entities, &registry.pickUps.entities,

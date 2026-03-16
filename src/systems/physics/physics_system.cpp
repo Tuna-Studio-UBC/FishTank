@@ -8,6 +8,8 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 
+// Toggle for mesh collider, 0 = on.
+static int MESH_COLLISION_MODE = 1; // set to any other value to turn it off and us AABB
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion &motion) {
     // abs is to avoid negative scale due to the facing direction.
@@ -152,7 +154,7 @@ void PhysicsSystem::step(float elapsed_ms) {
             bool substepHadPenetration = false;
 
             // mesh-collider actors (players) use SAT vs wall AABBs but resolved per-substep.
-            if (registry.meshColliders.has(entity) && registry.players.has(entity)) {
+            if (registry.meshColliders.has(entity) && registry.players.has(entity) && MESH_COLLISION_MODE == 0) {
                 MeshCollider &mc = registry.meshColliders.get(entity);
                 float sprite_base = mc.authoring_px > 0.f ? mc.authoring_px : 128.0f;
 
