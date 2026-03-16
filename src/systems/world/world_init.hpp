@@ -23,7 +23,7 @@ Entity createTurret(RenderSystem *renderer, vec2 position);
 
 Entity createBell(RenderSystem *renderer, vec2 position, float interact_radius_px);
 
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner);
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner, int damage_bonus = 0);
 Entity createMine(RenderSystem *renderer, vec2 position);
 Entity createAnemone(RenderSystem *renderer, vec2 position);
 
