@@ -2,6 +2,7 @@
 
 #include "death_system.hpp"
 #include "systems/world/world_init.hpp"
+#include <random>
 #include <spdlog/spdlog.h>
 #include <systems/world/world_system.hpp>
 
@@ -33,8 +34,12 @@ void DeathSystem::step(float elapsed_ms) {
                     // TODO: Handle enemy death
 
                     // Drop crackers
-                    if (registry.dropsCrackers.has(e)) {
+                    if (registry.dropsCrackers.has(e) && !registry.players.entities.empty()) {
+                        static std::mt19937 rng(std::random_device{}());
+                        static std::uniform_int_distribution<int> cracker_dist(1, 3);
+
                         DropsCrackers &drops = registry.dropsCrackers.get(e);
+                        drops.cracker = cracker_dist(rng);
                         Entity player = registry.players.entities[0];
                         Wallet &wallet = registry.wallets.get(player);
                         wallet.crackers += drops.cracker;
