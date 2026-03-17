@@ -334,7 +334,7 @@ void PhysicsSystem::step(float elapsed_ms) {
                     }
 
                     // cap translation per iteration
-                    const float MAX_TRANSLATE = 50.f;
+                    const float MAX_TRANSLATE = std::max<float>(1.0f, length(stepMove) * MAX_TRANSLATE_FACTOR + 1.0f);
                     if (combined_len > MAX_TRANSLATE)
                         combined = (combined / combined_len) * MAX_TRANSLATE;
 
