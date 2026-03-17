@@ -1,0 +1,2 @@
+# NodeID,Type,ConditionName,TrueChildID,FalseChildID,Action,Probability
+1,Action, , , ,IDLE,

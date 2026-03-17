@@ -30,6 +30,8 @@ class TileMapSystem {
     static Entity load_test_map2();
     static Entity load_tutorial_map();
 
+    static std::vector<BezierPath> generate_loop(const TileMap &map);
+
   public:
     TileMapSystem();
     ~TileMapSystem();

@@ -1,5 +1,2 @@
 # NodeID,Type,ConditionName,TrueChildID,FalseChildID,Action,Probability
-1,Condition,is_patrolling,2,3,
-2,Action, , , ,PATROL,
-3,Random, ,2,4,,0.05
-4,Action, , , ,IDLE,
+1,Action, , , ,PATROL,
