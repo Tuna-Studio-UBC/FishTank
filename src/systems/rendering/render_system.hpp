@@ -129,6 +129,7 @@ class RenderSystem {
     void drawTileMap(const Entity &e, const mat3 &projection, const mat3 &view);
     void drawParticles(const mat3 &projection, const mat3 &view);
     void drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view);
+    void drawDebugGrid(const mat3 &projection, const mat3 &view);
 
     // On-screen rendering
     void drawToScreen();

@@ -6,23 +6,25 @@
 static float projectMin(const std::vector<float> &projs) { return *std::min_element(projs.begin(), projs.end()); }
 static float projectMax(const std::vector<float> &projs) { return *std::max_element(projs.begin(), projs.end()); }
 
-// Single implementation: transform polygon authored in pixel-space into world-space.
-// sprite_base_px has a default in the header (128.0f) so callers may pass two args.
-std::vector<vec2> transformPolygon(const std::vector<vec2> &poly, const Motion &m, float sprite_base_px) {
-    std::vector<vec2> out;
-    out.reserve(poly.size());
+// Output-reference overload: reuses existing buffer to avoid heap allocation on every call.
+void transformPolygon(const std::vector<vec2> &poly, const Motion &m, float sprite_base_px, std::vector<vec2> &out) {
+    out.resize(poly.size());
     float ca = cos(m.angle);
     float sa = sin(m.angle);
 
     // Convert motion.scale (which is in pixels) to a model-space scale factor using provided base
     vec2 modelScale = {m.scale.x / sprite_base_px, m.scale.y / sprite_base_px};
-
-    for (const vec2 &v : poly) {
-        // Scale local (pixel authored) vertex into model-space, then rotate and translate
-        vec2 s = {v.x * modelScale.x, v.y * modelScale.y};
+    for (size_t i = 0; i < poly.size(); ++i) {
+        vec2 s = {poly[i].x * modelScale.x, poly[i].y * modelScale.y};
         vec2 r = {ca * s.x - sa * s.y, sa * s.x + ca * s.y};
-        out.push_back(r + m.position);
+        out[i] = r + m.position;
     }
+}
+
+// value-returning overload (convenience; delegates to the buffer version).
+std::vector<vec2> transformPolygon(const std::vector<vec2> &poly, const Motion &m, float sprite_base_px) {
+    std::vector<vec2> out;
+    transformPolygon(poly, m, sprite_base_px, out);
     return out;
 }
 
@@ -148,45 +150,63 @@ bool aabbIntersectsPolygon(const Motion &aabb_motion, const std::vector<vec2> &p
     }
     return true; // no separating axis -> intersection
 }
-bool computePolygonMTV(const std::vector<vec2> &polyA_world, const std::vector<vec2> &polyB_world, vec2 &out_mtv) {
-    // Collect axes (normals) from edges of both polygons
-    std::vector<vec2> axes;
-    polygonAxes(polyA_world, axes);
-    polygonAxes(polyB_world, axes);
-
+// zero-allocation SAT MTV: works directly on pointer+count, no heap vectors allocated.
+bool computePolygonMTV(const vec2 *polyA, size_t countA, const vec2 *polyB, size_t countB, vec2 &out_mtv) {
     float minOverlap = FLT_MAX;
     vec2 smallestAxis = {0.f, 0.f};
 
     // Compute polygon centers for direction disambiguation
-    auto computeCenter = [](const std::vector<vec2> &poly) {
-        vec2 c = {0.f, 0.f};
-        for (const vec2 &p : poly)
-            c += p;
-        return c / (float)poly.size();
-    };
-    vec2 centerA = computeCenter(polyA_world);
-    vec2 centerB = computeCenter(polyB_world);
+    vec2 centerA = {0.f, 0.f};
+    for (size_t i = 0; i < countA; ++i) centerA += polyA[i];
+    centerA /= (float)countA;
+    vec2 centerB = {0.f, 0.f};
+    for (size_t i = 0; i < countB; ++i) centerB += polyB[i];
+    centerB /= (float)countB;
 
-    for (const vec2 &axis : axes) {
-        // project both polygons onto axis
-        std::vector<float> projA, projB;
-        projectOntoAxis(polyA_world, axis, projA);
-        projectOntoAxis(polyB_world, axis, projB);
-        float minA = projectMin(projA), maxA = projectMax(projA);
-        float minB = projectMin(projB), maxB = projectMax(projB);
-
+    // Lambda: project both polygons onto axis, check overlap, track minimum.
+    // returns false if a separating axis is found.
+    auto testAxis = [&](const vec2 &axis) -> bool {
+        float minA = FLT_MAX, maxA = -FLT_MAX;
+        for (size_t i = 0; i < countA; ++i) {
+            float d = dot(polyA[i], axis);
+            if (d < minA) minA = d;
+            if (d > maxA) maxA = d;
+        }
+        float minB = FLT_MAX, maxB = -FLT_MAX;
+        for (size_t i = 0; i < countB; ++i) {
+            float d = dot(polyB[i], axis);
+            if (d < minB) minB = d;
+            if (d > maxB) maxB = d;
+        }
         // check for gap
         if (maxA < minB || maxB < minA) {
             // no intersection on this axis -> separating axis found
             return false;
         }
-
         // compute overlap on axis
         float overlap = std::min(maxA, maxB) - std::max(minA, minB);
         if (overlap < minOverlap) {
             minOverlap = overlap;
             smallestAxis = axis;
         }
+        return true;
+    };
+
+    // Test edge normals from polyA
+    for (size_t i = 0; i < countA; ++i) {
+        vec2 edge = polyA[(i + 1) % countA] - polyA[i];
+        vec2 normal = {-edge.y, edge.x};
+        float len = length(normal);
+        if (len < 1e-10f) continue;
+        if (!testAxis(normal / len)) return false;
+    }
+    // Test edge normals from polyB
+    for (size_t i = 0; i < countB; ++i) {
+        vec2 edge = polyB[(i + 1) % countB] - polyB[i];
+        vec2 normal = {-edge.y, edge.x};
+        float len = length(normal);
+        if (len < 1e-10f) continue;
+        if (!testAxis(normal / len)) return false;
     }
 
     if (minOverlap == FLT_MAX)
@@ -199,4 +219,9 @@ bool computePolygonMTV(const std::vector<vec2> &polyA_world, const std::vector<v
 
     out_mtv = smallestAxis * minOverlap;
     return true;
+}
+
+// vector overload delegates to the pointer-based version (no extra allocations).
+bool computePolygonMTV(const std::vector<vec2> &polyA_world, const std::vector<vec2> &polyB_world, vec2 &out_mtv) {
+    return computePolygonMTV(polyA_world.data(), polyA_world.size(), polyB_world.data(), polyB_world.size(), out_mtv);
 }

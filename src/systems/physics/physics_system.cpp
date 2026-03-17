@@ -6,10 +6,67 @@
 #include <cfloat>
 #include <cmath>
 #include <iostream>
+#include <unordered_map>
+#include <unordered_set>
 #include <spdlog/spdlog.h>
 
 // Toggle for mesh collider, 0 = on.
-static int MESH_COLLISION_MODE = 1; // set to any other value to turn it off and us AABB
+static int MESH_COLLISION_MODE = 0; // set to any other value to turn it off and us AABB
+
+// Spatial grid — used for wall lookups AND broad-phase
+struct SpatialGrid {
+    float cell_size = 100.f;
+    std::unordered_map<int64_t, std::vector<uint>> cells;
+
+    static int64_t cell_key(int cx, int cy) { return ((int64_t)cx << 32) | (uint32_t)cy; }
+
+    void clear() { cells.clear(); }
+
+    void insert(uint index, vec2 pos, vec2 half_size) {
+        int minCX = (int)std::floor((pos.x - half_size.x) / cell_size);
+        int maxCX = (int)std::floor((pos.x + half_size.x) / cell_size);
+        int minCY = (int)std::floor((pos.y - half_size.y) / cell_size);
+        int maxCY = (int)std::floor((pos.y + half_size.y) / cell_size);
+        for (int cx = minCX; cx <= maxCX; cx++)
+            for (int cy = minCY; cy <= maxCY; cy++)
+                cells[cell_key(cx, cy)].push_back(index);
+    }
+
+    void query(vec2 pos, vec2 half_size, std::vector<uint> &out) const {
+        out.clear();
+        int minCX = (int)std::floor((pos.x - half_size.x) / cell_size);
+        int maxCX = (int)std::floor((pos.x + half_size.x) / cell_size);
+        int minCY = (int)std::floor((pos.y - half_size.y) / cell_size);
+        int maxCY = (int)std::floor((pos.y + half_size.y) / cell_size);
+        for (int cx = minCX; cx <= maxCX; cx++)
+            for (int cy = minCY; cy <= maxCY; cy++) {
+                auto it = cells.find(cell_key(cx, cy));
+                if (it != cells.end())
+                    for (uint idx : it->second)
+                        out.push_back(idx);
+            }
+        std::sort(out.begin(), out.end());
+        out.erase(std::unique(out.begin(), out.end()), out.end());
+    }
+};
+
+// persistent grids (avoid re-allocating the hash map each frame)
+static SpatialGrid s_wallGrid;
+static SpatialGrid s_broadPhaseGrid;
+// reusable query buffer (avoids heap allocs per call)
+static std::vector<uint> s_nearbyBuf;
+
+// pre-computed wall AABB polygons (rebuilt once per frame; avoids per-test vector allocation)
+struct WallAABB { vec2 verts[4]; };
+static std::vector<WallAABB> s_wallAABBs;
+
+// reusable buffers for the resolve loop (avoids per-iteration heap allocation)
+static std::vector<vec2> s_resolvePolyWorld;
+static std::vector<uint> s_resolveNearbyWalls;
+static std::vector<vec2> s_resolvePerWallMTVs;
+// reusable buffer for collides_with_wall polygon transform
+static std::vector<vec2> s_cwwPolyWorld;
+
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion &motion) {
     // abs is to avoid negative scale due to the facing direction.
@@ -56,37 +113,35 @@ bool collision_AABB(const Motion &motion1, const Motion &motion2) {
 // collides with wall: if the entity has a MeshCollider use polygon vs AABB SAT test,
 // otherwise fall back to the fast AABB test.
 bool collides_with_wall(Entity entity, const Motion &entity_motion) {
-    // Loop through all wall entities
-    for (uint i = 0; i < registry.walls.entities.size(); i++) {
-        Entity wall_entity = registry.walls.entities[i];
+    // If this moving entity has a mesh collider, do a narrow-phase polygon vs AABB test
+    bool has_mesh = (MESH_COLLISION_MODE == 0) && registry.meshColliders.has(entity);
+    if (has_mesh) {
+        MeshCollider &mc = registry.meshColliders.get(entity);
+        // Use the MeshCollider's stored authoring_px so transforms match collision system
+        float sprite_base = mc.authoring_px > 0.f ? mc.authoring_px : 128.0f;
+        // build polygon in world-space using same math as collision system
+        transformPolygon(mc.vertices, entity_motion, sprite_base, s_cwwPolyWorld);
+    }
+
+    // Query spatial grid for nearby walls instead of scanning ALL walls
+    vec2 half = get_bounding_box(entity_motion) / 2.f;
+    s_wallGrid.query(entity_motion.position, half, s_nearbyBuf);
+
+    for (uint wi : s_nearbyBuf) {
+        Entity wall_entity = registry.walls.entities[wi];
         if (!registry.motions.has(wall_entity))
             continue;
 
-        Motion &wall_motion = registry.motions.get(wall_entity);
-
-        // If this moving entity has a mesh collider, do a narrow-phase polygon vs AABB test
-        if (registry.meshColliders.has(entity)) {
-            MeshCollider &mc = registry.meshColliders.get(entity);
-
-            // Use the MeshCollider's stored authoring_px so transforms match collision system
-            float sprite_base = mc.authoring_px > 0.f ? mc.authoring_px : 128.0f;
-
-            // build polygon in world-space using same math as collision system
-            auto polyWorld = transformPolygon(mc.vertices, entity_motion, sprite_base);
-
-            // build wall AABB polygon
-            vec2 half = wall_motion.scale / 2.f;
-            std::vector<vec2> aabbPoly = {
-                wall_motion.position + vec2{-half.x, -half.y}, wall_motion.position + vec2{half.x, -half.y},
-                wall_motion.position + vec2{half.x, half.y}, wall_motion.position + vec2{-half.x, half.y}};
-
+        if (has_mesh) {
             // use the exact SAT MTV test (presence of MTV => intersection)
             vec2 tmpMtv;
-            if (computePolygonMTV(polyWorld, aabbPoly, tmpMtv)) {
+            if (computePolygonMTV(s_cwwPolyWorld.data(), s_cwwPolyWorld.size(),
+                                  s_wallAABBs[wi].verts, 4, tmpMtv)) {
                 return true;
             }
         } else {
             // fallback fast-box test
+            Motion &wall_motion = registry.motions.get(wall_entity);
             if (collision_AABB(entity_motion, wall_motion)) {
                 return true;
             }
@@ -97,6 +152,24 @@ bool collides_with_wall(Entity entity, const Motion &entity_motion) {
 }
 
 void PhysicsSystem::step(float elapsed_ms) {
+    // Build wall spatial grid once per frame (walls are static)
+    s_wallGrid.clear();
+    s_wallGrid.cell_size = 100.f; // about 2 tiles
+    s_wallAABBs.resize(registry.walls.entities.size());
+    for (uint i = 0; i < registry.walls.entities.size(); i++) {
+        Entity we = registry.walls.entities[i];
+        if (!registry.motions.has(we))
+            continue;
+        Motion &wm = registry.motions.get(we);
+        vec2 half = wm.scale / 2.f;
+        s_wallGrid.insert(i, wm.position, half);
+        // Pre-compute wall AABB polygon (avoids rebuilding per SAT test)
+        s_wallAABBs[i].verts[0] = wm.position + vec2{-half.x, -half.y};
+        s_wallAABBs[i].verts[1] = wm.position + vec2{ half.x, -half.y};
+        s_wallAABBs[i].verts[2] = wm.position + vec2{ half.x,  half.y};
+        s_wallAABBs[i].verts[3] = wm.position + vec2{-half.x,  half.y};
+    }
+
     // Move each entity that has motion
     auto &motion_registry = registry.motions;
     for (uint i = 0; i < motion_registry.components.size(); i++) // changed so i can use index to get entity, sorry
@@ -172,31 +245,27 @@ void PhysicsSystem::step(float elapsed_ms) {
                 float saved_computed_local_y = 0.f;
 
                 for (int iter = 0; iter < MAX_RESOLVE_ITER; ++iter) {
-                    auto polyWorld = transformPolygon(mc.vertices, motion, sprite_base);
+                    transformPolygon(mc.vertices, motion, sprite_base, s_resolvePolyWorld);
 
-                    std::vector<vec2> perWallMTVs;
-                    perWallMTVs.reserve(registry.walls.entities.size());
-                    for (uint wi = 0; wi < registry.walls.entities.size(); ++wi) {
+                    // use spatial grid instead of looping all walls
+                    vec2 entityHalf = get_bounding_box(motion) / 2.f;
+                    s_wallGrid.query(motion.position, entityHalf, s_resolveNearbyWalls);
+
+                    s_resolvePerWallMTVs.clear();
+                    for (uint wi : s_resolveNearbyWalls) {
                         Entity wall_entity = registry.walls.entities[wi];
                         if (!registry.motions.has(wall_entity))
                             continue;
-                        Motion &wall_motion = registry.motions.get(wall_entity);
-
-                        // build the wall AABB polygon in world space
-                        vec2 halfW = wall_motion.scale * 0.5f;
-                        std::vector<vec2> aabbPoly = {wall_motion.position + vec2{-halfW.x, -halfW.y},
-                                                      wall_motion.position + vec2{halfW.x, -halfW.y},
-                                                      wall_motion.position + vec2{halfW.x, halfW.y},
-                                                      wall_motion.position + vec2{-halfW.x, halfW.y}};
 
                         // use the exact SAT MTV test (presence of MTV => intersection)
                         vec2 tmpMtv;
-                        if (computePolygonMTV(polyWorld, aabbPoly, tmpMtv)) {
-                            perWallMTVs.push_back(tmpMtv);
+                        if (computePolygonMTV(s_resolvePolyWorld.data(), s_resolvePolyWorld.size(),
+                                              s_wallAABBs[wi].verts, 4, tmpMtv)) {
+                            s_resolvePerWallMTVs.push_back(tmpMtv);
                         }
                     } // walls loop
 
-                    if (perWallMTVs.empty())
+                    if (s_resolvePerWallMTVs.empty())
                         break; // nothing to resolve
 
                     // ff there's only one wall, use its MTV. For multiple walls compute a
@@ -204,12 +273,12 @@ void PhysicsSystem::step(float elapsed_ms) {
                     // displacement along that averaged normal by the largest overlap. This
                     // tends to produce a diagonal correction at corners that clears both.
                     vec2 combined = {0.f, 0.f};
-                    if (perWallMTVs.size() == 1) {
-                        combined = perWallMTVs[0];
+                    if (s_resolvePerWallMTVs.size() == 1) {
+                        combined = s_resolvePerWallMTVs[0];
                     } else {
                         float max_overlap = 0.f;
                         vec2 weighted = {0.f, 0.f};
-                        for (const vec2 &m : perWallMTVs) {
+                        for (const vec2 &m : s_resolvePerWallMTVs) {
                             float l = length(m);
                             if (l <= 0.f)
                                 continue;
@@ -227,15 +296,15 @@ void PhysicsSystem::step(float elapsed_ms) {
                         } else {
                             // fallback: use mean MTV (shouldn't really happen tbh)
                             vec2 sum = {0.f, 0.f};
-                            for (const vec2 &m : perWallMTVs)
+                            for (const vec2 &m : s_resolvePerWallMTVs)
                                 sum += m;
-                            combined = sum / float(perWallMTVs.size());
+                            combined = sum / float(s_resolvePerWallMTVs.size());
                         }
                     }
                     float combined_len = length(combined);
 
                     spdlog::debug("PHYS_MTV entity={} iter={} combined=({}, {}) len={} perWalls={}", entity.id(), iter,
-                                  combined.x, combined.y, combined_len, perWallMTVs.size());
+                                  combined.x, combined.y, combined_len, s_resolvePerWallMTVs.size());
 
                     // pushes the player further into geometry causing permanent stick.
                     {
@@ -265,7 +334,7 @@ void PhysicsSystem::step(float elapsed_ms) {
                     }
 
                     // cap translation per iteration
-                    const float MAX_TRANSLATE = std::max<float>(1.0f, length(stepMove) * MAX_TRANSLATE_FACTOR + 1.0f);
+                    const float MAX_TRANSLATE = 50.f;
                     if (combined_len > MAX_TRANSLATE)
                         combined = (combined / combined_len) * MAX_TRANSLATE;
 
@@ -383,7 +452,7 @@ void PhysicsSystem::step(float elapsed_ms) {
                     tmpSlide.position = candidatePos;
                     bool slide_ok = !collides_with_wall(entity, tmpSlide);
 
-                    spdlog::debug("PHYS_FALLBACK entity={} safe=({}, {}) escape=({}, {}) cand=({}, {}) slide_ok={} "
+                                       spdlog::debug("PHYS_FALLBACK entity={} safe=({}, {}) escape=({}, {}) cand=({}, {}) slide_ok={} "
                                   "saved_vel=({}, {}) prev_forward={}",
                                   entity.id(), safe_pos.x, safe_pos.y, escape_normal.x, escape_normal.y, candidatePos.x,
                                   candidatePos.y, slide_ok, saved_computed_local_x, saved_computed_local_y,
@@ -524,7 +593,6 @@ void PhysicsSystem::step(float elapsed_ms) {
                 spdlog::debug("PHYS_EXIT entity={} prev_contact=({}, {}) world_vel=({}, {}) vt={} local_vel=({}, {})",
                               entity.id(), prev_contact.x, prev_contact.y, world_vel.x, world_vel.y, vt,
                               motion.velocity.x, motion.velocity.y);
-
                 // decide whether to clear lateral tangential motion on exit.
                 // preserve the player's forward local channel so they can "drive by" the wall.
                 bool pressing_forward_exit =
@@ -603,20 +671,51 @@ void PhysicsSystem::step(float elapsed_ms) {
     }
     */
     // check for collisions between all moving entities
+    // Broad-phase: spatial grid replaces O(n^2)
     ComponentContainer<Motion> &motion_container = registry.motions;
-    for (uint i = 0; i < motion_container.components.size(); i++) {
-        Motion &motion_i = motion_container.components[i];
-        Entity entity_i = motion_container.entities[i];
 
-        // note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-        for (uint j = i + 1; j < motion_container.components.size(); j++) {
-            Motion &motion_j = motion_container.components[j];
-            if (collision_AABB(motion_i, motion_j)) {
-                Entity entity_j = motion_container.entities[j];
-                // Create a collisions event
-                registry.collisions.insert(entity_i, {entity_j}, false);
-                registry.collisions.insert(entity_j, {entity_i}, false);
+    s_broadPhaseGrid.clear();
+    s_broadPhaseGrid.cell_size = 100.f;
+    for (uint i = 0; i < motion_container.components.size(); i++) {
+        Motion &m = motion_container.components[i];
+        vec2 half = get_bounding_box(m) / 2.f;
+        s_broadPhaseGrid.insert(i, m.position, half);
+    }
+
+    // Check pairs within each cell, dedup with a hash set
+    std::unordered_set<uint64_t> checked_pairs;
+    for (auto &[key, indices] : s_broadPhaseGrid.cells) {
+        for (size_t a = 0; a < indices.size(); a++) {
+            for (size_t b = a + 1; b < indices.size(); b++) {
+                uint i_idx = std::min(indices[a], indices[b]);
+                uint j_idx = std::max(indices[a], indices[b]);
+                uint64_t pair_key = ((uint64_t)i_idx << 32) | j_idx;
+                if (!checked_pairs.insert(pair_key).second)
+                    continue; // already checked
+
+                Motion &motion_i = motion_container.components[i_idx];
+                Motion &motion_j = motion_container.components[j_idx];
+                if (collision_AABB(motion_i, motion_j)) {
+                    Entity entity_i = motion_container.entities[i_idx];
+                    Entity entity_j = motion_container.entities[j_idx];
+                    registry.collisions.insert(entity_i, {entity_j}, false);
+                    registry.collisions.insert(entity_j, {entity_i}, false);
+                }
             }
         }
     }
 }
+
+// debug grid accessors
+std::vector<PhysicsSystem::GridCell> PhysicsSystem::getOccupiedWallCells() {
+    std::vector<GridCell> result;
+    result.reserve(s_wallGrid.cells.size());
+    for (auto &[key, indices] : s_wallGrid.cells) {
+        int cx = (int)(key >> 32);
+        int cy = (int)(uint32_t)key;
+        result.push_back({cx, cy, (uint)indices.size()});
+    }
+    return result;
+}
+
+float PhysicsSystem::getWallGridCellSize() { return s_wallGrid.cell_size; }
