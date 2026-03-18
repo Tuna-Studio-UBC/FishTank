@@ -28,8 +28,13 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     w.crackers = config.crackers;
 
     Health &h = registry.healths.emplace(entity);
+#ifdef GOD_MODE
+    h.hp = 1000;
+    h.max_hp = 1000;
+#else
     h.hp = config.hp;
     h.max_hp = config.max_hp;
+#endif
 
     FireControl &fc = registry.fireControls.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;

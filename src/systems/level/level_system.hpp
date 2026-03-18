@@ -14,7 +14,7 @@ class LevelSystem
 {
 
 public:
-    void step(const float& elapsed_ms);
+    void step(const float &elapsed_ms);
 
     LevelSystem(TileMapSystem *tilemap_system, RenderSystem *renderer, 
         CameraSystem *camera_system, WorldSystem *ws) : 
@@ -32,6 +32,10 @@ private:
     int wave = -1;
     int level = -1;
 
+    float advance_timer = 0.f;
+    bool triggered_load_wave = false;
+    bool triggered_load_level = false;
+
     TileMapSystem *tilemap_system;
     CameraSystem *camera_system;
     RenderSystem *renderer;
@@ -39,6 +43,7 @@ private:
 
     void trigger_load_next_wave();
     void trigger_load_next_level();
+    void trigger_win(Progress &progress);
 
     void load_level(int level);
     void load_wave(int wave);
@@ -49,5 +54,5 @@ private:
 
     bool should_advance();
 
-
+    void handle_timer(const float &elapsed_ms);
 };

@@ -24,21 +24,41 @@ void LevelSystem::step(const float &elapsed_ms) {
             } else if (wave < WAVE_CONFIGS.size() - 1 && wave < LEVEL_CONFIGS[level].last_wave) {
                 trigger_load_next_wave();
             } else {
-                progress.is_game_over = true;
-                progress.has_beat_level = true;
-
-                // TODO: Also change this to a GUI overlay
-                Entity e = Entity("Overlay");
-                registry.overlays.emplace(e);
-                auto &motion = registry.motions.emplace(e);
-                motion.position = registry.motions.get(registry.cameras.entities[0]).position;
-                motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
-
-                registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
-                                                   GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
+                trigger_win(progress);
             }
         }
     }
+    
+    handle_timer(elapsed_ms);
+}
+
+void LevelSystem::handle_timer(const float &elapsed_ms) {
+    advance_timer = max(0.f, advance_timer - elapsed_ms);
+
+    if (advance_timer == 0.f) {
+        if (triggered_load_level) {
+            load_next_level();
+        } else if (triggered_load_wave) {
+            triggered_load_wave = false;
+            load_next_wave();
+        }
+    }
+}
+
+void LevelSystem::trigger_win(Progress& progress)
+{
+    progress.is_game_over = true;
+    progress.has_beat_level = true;
+
+    // TODO: Also change this to a GUI overlay
+    Entity e = Entity("Overlay");
+    registry.overlays.emplace(e);
+    auto &motion = registry.motions.emplace(e);
+    motion.position = registry.motions.get(registry.cameras.entities[0]).position;
+    motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
+
+    registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
+                                       GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
 }
 
 void LevelSystem::load_wave(int wave) {
@@ -204,26 +224,28 @@ void LevelSystem::restart_game()
 }
 
 bool LevelSystem::should_advance() { 
-    return registry.enemies.size() == 0; 
+    return advance_timer == 0.f && registry.enemies.size() == 0; 
 }
 
 void LevelSystem::load_next_level() {
+    triggered_load_level = false;
     level++;
     load_level(level);
     trigger_load_next_wave();
 }
 
 void LevelSystem::load_next_wave() {
+    triggered_load_wave = false;
     wave++;
     load_wave(wave);
 }
 
-void LevelSystem::trigger_load_next_level() {
-    // TODO: Start timer to delay spawn
-    load_next_level();
+void LevelSystem::trigger_load_next_level() { 
+    triggered_load_level = true; 
+    advance_timer = 2000.f;
 }
 
-void LevelSystem::trigger_load_next_wave() {
-    // TODO: Start timer to delay spawn
-    load_next_wave();
+void LevelSystem::trigger_load_next_wave() { 
+    triggered_load_wave = true;
+    advance_timer = 2000.f;
 }
