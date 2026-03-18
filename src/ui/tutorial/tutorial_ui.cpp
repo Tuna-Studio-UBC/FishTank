@@ -36,6 +36,9 @@ void TutorialUI::draw_tutorial_step() {
     case Tutorial::COMBAT:
         draw_tutorial_combat(tutorial);
         break;
+    case Tutorial::UPGRADE_SYSTEM:
+        draw_tutorial_upgrade_system(tutorial);
+        break;
     }
 
     ImGuiIO &io = ImGui::GetIO();
@@ -236,7 +239,44 @@ void TutorialUI::draw_tutorial_combat(TutorialStep tutorial) {
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
             ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
         ImGui::PopFont();
     }
+}
+
+void TutorialUI::draw_tutorial_upgrade_system(TutorialStep tutorial) {
+    (void)tutorial;
+    ImGuiIO &io = ImGui::GetIO();
+
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+    ImVec2 pos = ImGui::GetWindowPos();
+    ImVec2 size = ImGui::GetWindowSize();
+
+    ImVec2 rect_min_filled = ImVec2(pos.x, pos.y);
+    ImVec2 rect_max_filled = ImVec2(rect_min_filled.x + size.x, rect_min_filled.y + size.y);
+    draw_list->AddRectFilled(rect_min_filled, rect_max_filled, IM_COL32(10, 10, 10, 180), 0.f, 0.f);
+
+    ImGui::PushFont(io.Fonts->Fonts[1]);
+    const char *text = "UPGRADE SYSTEM";
+    ImVec2 text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - 190.f));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
+    ImGui::PopFont();
+
+    ImGui::PushFont(io.Fonts->Fonts[2]);
+    text = "After each level, you'll get an upgrade screen.";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - 40.f));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
+
+    text = "Defeat enemies to earn crackers, then spend them on Attack, Max Ammo, or Max HP.";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 + 30.f));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
+
+    text = "Your tutorial upgrades won't carry into Level 1.";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 + 100.f));
+    ImGui::TextColored(ImVec4(0.75f, 0.95f, 0.75f, 1.f), "%s", text);
+    ImGui::PopFont();
 }

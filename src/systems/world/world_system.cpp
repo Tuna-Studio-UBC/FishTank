@@ -266,8 +266,14 @@ void WorldSystem::try_progress_tutorial() {
         TutorialStep &step = progress.tutorial_steps[progress.tutorial_step_id - 1];
 
         if (step.current_step >= step.total_steps) {
-            progress.is_paused = false;
-            progress.is_tutorial_step_called = false;
+            if (step.id == Tutorial::COMBAT) {
+                progress.tutorial_step_id = Tutorial::UPGRADE_SYSTEM;
+                progress.is_paused = true;
+                progress.is_tutorial_step_called = true;
+            } else {
+                progress.is_paused = false;
+                progress.is_tutorial_step_called = false;
+            }
         } else {
             step.current_step++;
             spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
@@ -628,7 +634,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         if (key == GLFW_KEY_ENTER) {
             auto &progress = registry.progresses.components[0];
             try_progress_tutorial();
-            if (!progress.is_tutorial && progress.has_beat_level && !progress.is_game_over)
+            if (!progress.is_upgrade_menu_called && !progress.is_tutorial && progress.has_beat_level && !progress.is_game_over)
                 load_next_level();
         }
 
@@ -640,14 +646,28 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #define DEBUG_UPGRADE_INPUTS
 
 #ifdef DEBUG_UPGRADE_INPUTS
-        if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-            upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+        {
+            auto &progress = registry.progresses.components[0];
+            if (progress.is_upgrade_menu_called && action == GLFW_PRESS) {
+                if (key == GLFW_KEY_1)
+                    upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
 
-        if (key == GLFW_KEY_X && action == GLFW_PRESS)
-            upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
+                if (key == GLFW_KEY_2)
+                    upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
 
-        if (key == GLFW_KEY_C && action == GLFW_PRESS)
-            upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+                if (key == GLFW_KEY_3)
+                    upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+            }
+
+            if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+                upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+
+            if (key == GLFW_KEY_X && action == GLFW_PRESS)
+                upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
+
+            if (key == GLFW_KEY_C && action == GLFW_PRESS)
+                upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+        }
 #endif
 #undef DEBUG_UPGRADE_INPUTS
 
@@ -680,13 +700,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
-        if (key == GLFW_KEY_P) {
+        if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             auto &progress = registry.progresses.components[0];
-            if (!progress.is_tutorial_step_called)
+            if (progress.is_upgrade_menu_called) {
+                upgrade_system->close_upgrade_menu();
+            } else if (!progress.is_tutorial_step_called) {
                 progress.is_paused = !progress.is_paused;
-
-            if (progress.is_upgrade_menu_called)
-                progress.is_upgrade_menu_called = false;
+            }
         }
 #endif
     }
@@ -736,6 +756,7 @@ void WorldSystem::restart_game() {
 
 void WorldSystem::load_next_level() {
     Progress progress = registry.progresses.components[0];
+    const bool was_tutorial = progress.is_tutorial;
 
     progress.is_tutorial = false;
     progress.is_tutorial_step_called = false;
@@ -748,11 +769,14 @@ void WorldSystem::load_next_level() {
         return;
     }
 
-    progress.is_upgrade_menu_called = LEVEL_CONFIGS[progress.level].upgrade_screen_before;
-    progress.is_paused = progress.is_upgrade_menu_called;
+    progress.is_upgrade_menu_called = true;
+    progress.is_paused = true;
 
-    int hp = registry.healths.get(registry.players.entities[0]).hp;
-    int ammo = registry.fireControls.get(registry.players.entities[0]).ammo;
+    Entity current_player = registry.players.entities[0];
+    const Health previous_health = registry.healths.get(current_player);
+    const FireControl previous_fire_control = registry.fireControls.get(current_player);
+    const Wallet previous_wallet = registry.wallets.get(current_player);
+    const Upgrades previous_upgrades = registry.upgrades.get(current_player);
 
     particle_system.clear_all_particles();
     registry.clear_all_components();
@@ -760,6 +784,11 @@ void WorldSystem::load_next_level() {
     registry.progresses.insert(e, progress);
     init(renderer, camera_system, tilemap_system, upgrade_system);
 
-    registry.healths.get(registry.players.entities[0]).hp = hp;
-    registry.fireControls.get(registry.players.entities[0]).ammo = ammo;
+    Entity next_player = registry.players.entities[0];
+    if (!was_tutorial) {
+        registry.healths.get(next_player) = previous_health;
+        registry.fireControls.get(next_player) = previous_fire_control;
+        registry.wallets.get(next_player) = previous_wallet;
+        registry.upgrades.get(next_player) = previous_upgrades;
+    }
 }
