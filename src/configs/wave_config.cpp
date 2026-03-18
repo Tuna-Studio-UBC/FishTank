@@ -32,7 +32,7 @@ const std::vector<Wave> WAVE_CONFIGS = {
     {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}},
 
     // Level 3: Boss
-    {{ENEMY_TYPE::GUARD}, {BOSS_TYPE::KING_CRABBY}}};
+    {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}, {BOSS_TYPE::KING_CRABBY}}};
 
 const std::vector<Level> LEVEL_CONFIGS = {
     // Level 1
@@ -42,4 +42,9 @@ const std::vector<Level> LEVEL_CONFIGS = {
     {6, MapType::TEST_MAP2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}},
 
     // Level 3
-    {7, MapType::TEST_MAP, {HAZARD_TYPE::ANEMONE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}}};
+    {7,
+     MapType::TEST_MAP,
+     {HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
+     {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::DAMAGE_MULTIPLIER},
+     {},
+     {0.f, 0.f, 0.f}}};

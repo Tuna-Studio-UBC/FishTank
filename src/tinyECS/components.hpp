@@ -6,6 +6,7 @@
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "configs/attack_pattern.hpp"
+#include "configs/enemy_config.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
@@ -28,7 +29,12 @@ struct Enemy {
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
-struct Boss {};
+struct Boss {
+    BOSS_TYPE type;
+    int curr_attack_pattern_index = 0;
+    float elapsed_time_ms = 0.f;
+    float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
+};
 
 struct Bullet {
     ATTACK_EFFECT attack_effect;
@@ -532,8 +538,9 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_MINE_SHEET = TEXTURE_HEALTH_SHEET + 1,
     TEXTURE_URCHIN_SHEET = TEXTURE_MINE_SHEET + 1,
     TEXTURE_ISOPOD_SHEET = TEXTURE_URCHIN_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_ISOPOD_SHEET + 1,
 
-    TEXTURE_COUNT = TEXTURE_ISOPOD_SHEET + 1
+    TEXTURE_COUNT = TEXTURE_KING_CRABBY_SHEET + 1
 };
 
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

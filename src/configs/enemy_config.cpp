@@ -42,6 +42,7 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
 // Bosses
 // =================================================================================
 
+// TODO: Add rate of attack pattern switching
 struct BossConfig {
     std::string name;
     Health health;
@@ -53,13 +54,28 @@ struct BossConfig {
 
 static const BossConfig BOSS_CONFIGS[boss_count] = {
     // Sharky
-    {"Sharky", {500, 500}, 0.f, M_PI, 1000.f, {ATTACK_PATTERN::SHARKY1}},
+    {"Sharky",
+     {150, 150},
+     50.f,
+     M_PI,
+     (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
+     {ATTACK_PATTERN::SHARKY_NORMAL}},
 
     // King Crabby
-    {"King Crabby", {2000, 2000}, 0.f, M_PI, 1000.f, {ATTACK_PATTERN::KING_CRABBY1}},
+    {"King Crabby",
+     {500, 500},
+     100.f,
+     M_PI,
+     (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
+     {ATTACK_PATTERN::KING_CRABBY_NORMAL, ATTACK_PATTERN::KING_CRABBY_TOXIC, ATTACK_PATTERN::KING_CRABBY_RAPID}},
 
     // EEEEL
-    {"EEEEL", {1000, 1000}, 0.f, M_PI, 1000.f, {ATTACK_PATTERN::EEEEL1}},
+    {"EEEEL",
+     {250, 250},
+     100.f,
+     M_PI,
+     (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
+     {ATTACK_PATTERN::EEEEL_NORMAL}},
 };
 
 #pragma endregion Bosses
