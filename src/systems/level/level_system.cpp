@@ -39,7 +39,6 @@ void LevelSystem::handle_timer(const float &elapsed_ms) {
         if (triggered_load_level) {
             load_next_level();
         } else if (triggered_load_wave) {
-            triggered_load_wave = false;
             load_next_wave();
         }
     }
@@ -130,10 +129,17 @@ void LevelSystem::load_level(int level) {
     progress.is_paused = progress.is_upgrade_menu_called;
 
     bool player_exists = registry.players.size() > 0;
-    int hp, ammo = 10;
+
+    // Persist upgrades
+    int hp, max_hp, ammo, max_ammo, damage = 10;
     if (player_exists) {
-        hp = registry.healths.get(registry.players.entities[0]).hp;
-        ammo = registry.fireControls.get(registry.players.entities[0]).ammo;
+        auto &health = registry.healths.get(registry.players.entities[0]);
+        auto &fc = registry.fireControls.get(registry.players.entities[0]);
+        hp = health.hp;
+        max_hp = health.max_hp;
+        ammo = fc.ammo;
+        max_ammo = fc.max_ammo;
+        damage = fc.damage_bonus;
     }
 
     particle_system.clear_all_particles();
@@ -154,8 +160,13 @@ void LevelSystem::load_level(int level) {
     camera_system->init(tilemap_system->get_current_map());
 
     if (player_exists) {
-        registry.healths.get(registry.players.entities[0]).hp = hp;
-        registry.fireControls.get(registry.players.entities[0]).ammo = ammo;
+        auto &health = registry.healths.get(registry.players.entities[0]);
+        auto &fc = registry.fireControls.get(registry.players.entities[0]);
+        health.hp = hp;
+        health.max_hp = max_hp;
+        fc.ammo = ammo;
+        fc.max_ammo = max_ammo;
+        fc.damage_bonus = damage;
     }
 }
 
@@ -240,8 +251,8 @@ void LevelSystem::load_next_wave() {
     load_wave(wave);
 }
 
-void LevelSystem::trigger_load_next_level() { 
-    triggered_load_level = true; 
+void LevelSystem::trigger_load_next_level() {
+    triggered_load_level = true;
     advance_timer = 2000.f;
 }
 
