@@ -16,6 +16,8 @@ class CameraSystem {
 
     void set_camera_bounds();
 
+    static vec2 get_screen_pos(vec2 world_pos);
+
   private:
     vec2 get_camera_dest();
 

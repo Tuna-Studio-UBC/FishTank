@@ -40,7 +40,7 @@ void TutorialUI::draw_tutorial_step() {
 
     ImGuiIO &io = ImGui::GetIO();
     ImGui::PushFont(io.Fonts->Fonts[2]);
-    const char *text = "Press ENTER to continue...";
+    const char *text = "Press ENTER or CLICK to continue...";
     ImVec2 text_size = ImGui::CalcTextSize(text);
     ImVec2 padding = ImVec2(20.f, 20.f);
     ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX - text_size.x - padding.x, WINDOW_HEIGHT_PX - text_size.y - padding.y));

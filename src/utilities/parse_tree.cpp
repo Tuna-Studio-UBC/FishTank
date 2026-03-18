@@ -1,11 +1,9 @@
 #include "parse_tree.hpp"
 
-std::unordered_map<std::string, AIAction> action_map = {
-    {"PURSUE", AIAction::PURSUE}, 
-    {"IDLE", AIAction::IDLE}, 
-    {"DISTRACTED", AIAction::DISTRACTED}, 
-    {"PATROL", AIAction::PATROL}
-};
+std::unordered_map<std::string, AIAction> action_map = {{"PURSUE", AIAction::PURSUE},
+                                                        {"IDLE", AIAction::IDLE},
+                                                        {"DISTRACTED", AIAction::DISTRACTED},
+                                                        {"PATROL", AIAction::PATROL}};
 
 AIAction str_to_action(const std::string &str) {
     auto it = action_map.find(str);
@@ -32,7 +30,8 @@ inline std::string trim(const std::string &s) {
 ScriptedTree load_tree(const std::string &filename) {
     ScriptedTree tree;
 
-    std::string full_path = get_path(FilePath::DECISION_TREES, filename);;
+    std::string full_path = get_path(FilePath::DECISION_TREES, filename);
+    ;
 
     std::ifstream file(full_path);
     std::string line;
@@ -78,6 +77,6 @@ ScriptedTree load_tree(const std::string &filename) {
                        : p.second.type == NodeType::ACTION  ? "ACTION"
                                                             : "RANDOM"),
                       p.second.condition_name, p.second.true_child, p.second.false_child, p.second.probability);
-    }*/ 
+    }*/
     return tree;
 }

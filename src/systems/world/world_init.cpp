@@ -37,6 +37,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     sc.move_speed = config.move_speed;
     sc.turn_speed = config.turn_speed;
 
+    registry.upgrades.emplace(entity);
+
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -98,12 +100,12 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 }
 
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
-    auto entity = Entity("Enemy");
+    auto &config = ENEMY_CONFIGS[(int)type];
+
+    auto entity = Entity(config.name);
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
-
-    auto &config = ENEMY_CONFIGS[(int)type];
 
     auto &enemy = registry.enemies.emplace(entity);
     enemy.detection_radius = config.detection_radius;
@@ -400,10 +402,11 @@ Entity createBell(RenderSystem *renderer, vec2 position, float interact_radius_p
 // Hazards
 // =================================================================================
 
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner) {
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner, int damage_bonus) {
     auto entity = Entity("Projectile");
 
     AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
+    attack_config.damage += damage_bonus;
 
     // Apply DamageMultiplier power up
     for (Entity &dm_entity : registry.damageMultipliers.entities) {

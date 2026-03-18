@@ -42,4 +42,4 @@ namespace std {
 template <> struct hash<Entity> {
     std::size_t operator()(const Entity &e) const noexcept { return std::hash<unsigned int>{}(e.id()); }
 };
-}
+} // namespace std
