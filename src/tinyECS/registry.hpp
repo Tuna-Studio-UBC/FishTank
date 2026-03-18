@@ -12,6 +12,7 @@ class ECSRegistry {
     // Entity
     ComponentContainer<Player> players;
     ComponentContainer<Camera> cameras;
+    ComponentContainer<Boss> bosses;
     ComponentContainer<Enemy> enemies;
     ComponentContainer<Turret> turrets;
     ComponentContainer<Wall> walls;
@@ -92,6 +93,7 @@ class ECSRegistry {
     ECSRegistry() {
         // Entity
         registry_list.push_back(&players);
+        registry_list.push_back(&bosses);
         registry_list.push_back(&enemies);
         registry_list.push_back(&turrets);
         registry_list.push_back(&walls);

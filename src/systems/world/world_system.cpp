@@ -143,6 +143,50 @@ bool WorldSystem::start_and_load_sounds() {
     return true;
 }
 
+// TODO ALEC: Port to level system
+void WorldSystem::start_wave(Progress &progress) {
+    auto config = WAVE_CONFIGS[progress.wave];
+    progress.remaining_enemies = config.enemies.size() + config.bosses.size();
+    vec2 pos;
+
+    if (registry.players.entities.size() > 0) {
+        // // Teleport player to a random position each wave
+        // Entity player = registry.players.entities[0];
+        // registry.motions.get(player).position = tilemap_system->get_random_position(SpawnTarget::PLAYER);
+    } else {
+        // Create player entity
+        pos = tilemap_system->get_random_position(SpawnTarget::PLAYER);
+        Entity player = createPlayer(renderer, pos);
+
+        // Create camera
+        camera_system->init(tilemap_system->get_current_map());
+    }
+
+    // Spawn bosses
+    for (auto boss : config.bosses) {
+        // TODO: Replace w/ just BOSS
+        pos = tilemap_system->get_random_position(SpawnTarget::BOSS | SpawnTarget::ENEMY);
+        createBoss(renderer, pos, boss);
+    }
+
+    // Spawn enemies
+    for (auto enemy : config.enemies) {
+        if (enemy == ENEMY_TYPE::MOTHER) {
+            if (registry.tilemaps.has(tilemap_system->get_current_map())) {
+                BezierPath &path = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop[0];
+                Entity leader = createEnemy(renderer, path.p0, enemy);
+                for (int i = 1; i < 7; i++) {
+                    createFollower(renderer, path.p0 + vec2(TILE_SIZE_PX * i, 0.f), leader);
+                    progress.remaining_enemies += 1;
+                }
+            }
+        } else {
+            pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
+            createEnemy(renderer, pos, enemy);
+        }
+    }
+}
+
 void WorldSystem::clear_level_objects() {
     for (auto entity_list : entities_to_clear)
         for (auto entity : *entity_list)
@@ -160,8 +204,14 @@ void WorldSystem::try_progress_tutorial() {
         TutorialStep &step = progress.tutorial_steps[progress.tutorial_step_id - 1];
 
         if (step.current_step >= step.total_steps) {
-            progress.is_paused = false;
-            progress.is_tutorial_step_called = false;
+            if (step.id == Tutorial::COMBAT) {
+                progress.tutorial_step_id = Tutorial::UPGRADE_SYSTEM;
+                progress.is_paused = true;
+                progress.is_tutorial_step_called = true;
+            } else {
+                progress.is_paused = false;
+                progress.is_tutorial_step_called = false;
+            }
         } else {
             step.current_step++;
             spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
@@ -459,20 +509,34 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 #pragma region DEBUG KEYS
 
-// #define ENABLE_LOAD_TUTORIAL
-// #define ENABLE_SKIP_WAVE
+#define ENABLE_LOAD_TUTORIAL
+#define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
 #define DEBUG_UPGRADE_INPUTS
 
 #ifdef DEBUG_UPGRADE_INPUTS
-        if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-            upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+        {
+            auto &progress = registry.progresses.components[0];
+            if (progress.is_upgrade_menu_called && action == GLFW_PRESS) {
+                if (key == GLFW_KEY_1)
+                    upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
 
-        if (key == GLFW_KEY_X && action == GLFW_PRESS)
-            upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
+                if (key == GLFW_KEY_2)
+                    upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
 
-        if (key == GLFW_KEY_C && action == GLFW_PRESS)
-            upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+                if (key == GLFW_KEY_3)
+                    upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+            }
+
+            if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+                upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
+
+            if (key == GLFW_KEY_X && action == GLFW_PRESS)
+                upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
+
+            if (key == GLFW_KEY_C && action == GLFW_PRESS)
+                upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+        }
 #endif
 #undef DEBUG_UPGRADE_INPUTS
 
@@ -505,13 +569,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
-        if (key == GLFW_KEY_P) {
+        if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             auto &progress = registry.progresses.components[0];
-            if (!progress.is_tutorial_step_called)
+            if (progress.is_upgrade_menu_called) {
+                upgrade_system->close_upgrade_menu();
+            } else if (!progress.is_tutorial_step_called) {
                 progress.is_paused = !progress.is_paused;
-
-            if (progress.is_upgrade_menu_called)
-                progress.is_upgrade_menu_called = false;
+            }
         }
 #endif
     }
@@ -549,4 +613,59 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
 void WorldSystem::trigger_restart()
 { 
     registry.progresses.components[0].trigger_restart = true;
+}
+
+
+void WorldSystem::restart_game() {
+    bool is_tutorial = registry.progresses.components[0].is_tutorial;
+
+    particle_system.clear_all_particles();
+    registry.clear_all_components();
+
+    if (is_tutorial) {
+        init_tutorial(renderer, camera_system, tilemap_system, upgrade_system);
+    } else {
+        init(renderer, camera_system, tilemap_system, upgrade_system);
+    }
+}
+
+
+// TODO ALEC: Fix upgrades being carried over
+void WorldSystem::load_next_level() {
+    Progress progress = registry.progresses.components[0];
+    const bool was_tutorial = progress.is_tutorial;
+
+    progress.is_tutorial = false;
+    progress.is_tutorial_step_called = false;
+    progress.has_beat_level = false;
+    progress.is_game_over = false;
+    progress.level++;
+
+    if (progress.level >= LEVEL_CONFIGS.size()) {
+        close_window();
+        return;
+    }
+
+    progress.is_upgrade_menu_called = true;
+    progress.is_paused = true;
+
+    Entity current_player = registry.players.entities[0];
+    const Health previous_health = registry.healths.get(current_player);
+    const FireControl previous_fire_control = registry.fireControls.get(current_player);
+    const Wallet previous_wallet = registry.wallets.get(current_player);
+    const Upgrades previous_upgrades = registry.upgrades.get(current_player);
+
+    particle_system.clear_all_particles();
+    registry.clear_all_components();
+    Entity e = Entity();
+    registry.progresses.insert(e, progress);
+    init(renderer, camera_system, tilemap_system, upgrade_system);
+
+    Entity next_player = registry.players.entities[0];
+    if (!was_tutorial) {
+        registry.healths.get(next_player) = previous_health;
+        registry.fireControls.get(next_player) = previous_fire_control;
+        registry.wallets.get(next_player) = previous_wallet;
+        registry.upgrades.get(next_player) = previous_upgrades;
+    }
 }

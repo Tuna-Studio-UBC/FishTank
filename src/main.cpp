@@ -77,6 +77,7 @@ int main() {
     renderer_system.init(window);
     world_system.init(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
     level_system.load_tutorial();
+    game_ui.set_upgrade_system(&upgrade_system);
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);
@@ -169,9 +170,7 @@ int main() {
         {
             ZoneScopedN("RENDER: Health");
             game_ui.draw_enemy_healthbars();
-        }
-        {
-            ZoneScopedN("RENDER: Health");
+            game_ui.draw_boss_healthbars();
             game_ui.draw_healthbar();
         }
         {

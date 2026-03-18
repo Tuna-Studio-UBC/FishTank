@@ -15,6 +15,7 @@ extern ECSRegistry registry;
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 
+Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type);
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type);
 Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader);
 
@@ -54,10 +55,14 @@ Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&..
 
 // Component can be: Damage, Heal
 template <typename Component, typename... Args>
-Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, Args &&...args) {
+Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, bool immediate_apply = true,
+                            Args &&...args) {
     auto ot_entity = Entity("OverTimeEffect");
     registry.get<Component>().emplace(ot_entity, std::forward<Args>(args)...);
-    registry.overTimeEffects.emplace(ot_entity, interval_ms, duration_ms);
+    if (immediate_apply)
+        registry.overTimeEffects.emplace(ot_entity, interval_ms, duration_ms, interval_ms - 1);
+    else
+        registry.overTimeEffects.emplace(ot_entity, interval_ms, duration_ms);
     registry.targets.emplace(ot_entity, target_entity);
     return ot_entity;
 }

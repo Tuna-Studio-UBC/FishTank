@@ -31,14 +31,14 @@ void GameUI::draw_pause_menu() {
     const char *text = "GAME PAUSED";
     ImVec2 text_size = ImGui::CalcTextSize(text);
     ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 150.f));
-    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
     ImGui::PopFont();
 
     ImGui::PushFont(io.Fonts->Fonts[2]);
     text = "Press 'P' to resume.";
     text_size = ImGui::CalcTextSize(text);
     ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
-    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
     ImGui::PopFont();
 
     ImGui::End();

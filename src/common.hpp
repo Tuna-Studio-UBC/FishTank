@@ -33,6 +33,7 @@ inline const std::string ROOT_DIR = std::string(PROJECT_SOURCE_DIR);
 
 enum FilePath {
     AUDIO,
+    DECISION_TREES,
     FONTS,
     MAPS,
     MESHES,
@@ -41,7 +42,8 @@ enum FilePath {
     TEXTURES,
     TILESETS,
     TILESET_IMAGES,
-    DECISION_TREES
+    UI_DOCUMENTS,
+    UI_STYLES
 };
 
 inline std::string get_path(FilePath path, const std::string &file_name) {
@@ -49,6 +51,8 @@ inline std::string get_path(FilePath path, const std::string &file_name) {
     switch (path) {
     case AUDIO:
         return ROOT_DIR + "/res/audio/" + file;
+    case DECISION_TREES:
+        return ROOT_DIR + "/res/decision_trees/" + file;
     case FONTS:
         return ROOT_DIR + "/res/fonts/" + file;
     case MAPS:
@@ -65,8 +69,10 @@ inline std::string get_path(FilePath path, const std::string &file_name) {
         return ROOT_DIR + "/res/tilesets/" + file;
     case TILESET_IMAGES:
         return ROOT_DIR + "/res/tileset_images/" + file;
-    case DECISION_TREES:
-        return ROOT_DIR + "/res/decision_trees/" + file;
+    case UI_DOCUMENTS:
+        return ROOT_DIR + "/res/ui/documents/" + file;
+    case UI_STYLES:
+        return ROOT_DIR + "/res/ui/styles/" + file;
     default:
         return "/";
     }
