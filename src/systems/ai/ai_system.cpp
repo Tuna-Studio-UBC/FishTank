@@ -127,10 +127,7 @@ void AISystem::run_patrol(Entity e, float elapsed_ms) {
     }
 
     Motion &motion = registry.motions.get(e);
-    update_leader(e, motion, elapsed_ms);
-    if (!registry.senses.get(e).is_patrolling) {
-        registry.beziers.get(e).curves_left = 6;
-    }
+    ps->update_leader(e, motion, elapsed_ms);
 
     float dt = elapsed_ms / 1000.f;
 
@@ -138,8 +135,9 @@ void AISystem::run_patrol(Entity e, float elapsed_ms) {
         if (!registry.motions.has(follower_e) || registry.boids.get(follower_e).leader != e) {
             continue;
         }
-
-        update_follower(follower_e, e, elapsed_ms);
+        
+        ps->update_follower(follower_e, e, elapsed_ms);
+        fire_projectiles(follower_e, elapsed_ms, registry.motions.get(follower_e).angle + M_PI/2);
     }
 }
 
@@ -198,6 +196,9 @@ void AISystem::run_distracted(Entity e, float elapsed_ms, vec2 player_pos) {
 }
 
 void AISystem::run_idle(Entity e) {
+    if (registry.boids.has(e)) {
+        return;
+    }
     Motion &motion = registry.motions.get(e);
     motion.velocity = vec2(0.f, 0.f);
 }

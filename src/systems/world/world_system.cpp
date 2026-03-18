@@ -162,8 +162,19 @@ void WorldSystem::start_wave(Progress &progress) {
     }
 
     for (auto enemy : config.enemies) {
-        pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
-        createEnemy(renderer, pos, enemy);
+        if (enemy == ENEMY_TYPE::MOTHER) {
+            if (registry.tilemaps.has(tilemap_system->get_current_map())) {
+                BezierPath &path = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop[0];
+                Entity leader = createEnemy(renderer, path.p0, enemy);
+                for (int i = 1; i < 7; i++) {
+                    createFollower(renderer, path.p0 + vec2(TILE_SIZE_PX * i, 0.f), leader);
+                    progress.remaining_enemies += 1;
+                }
+            }
+        } else {
+            pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
+            createEnemy(renderer, pos, enemy);
+        }
     }
 }
 
@@ -242,16 +253,6 @@ void WorldSystem::load_level(Progress &progress) {
         pos = tilemap_system->get_random_position(SpawnTarget::DISTRACTION);
         createBell(renderer, pos, bell);
     }
-
-    // SECRET FOR M3 SHHHHHH
-    /*for (auto swarm : config.swarms) {
-        pos = get_random_position();
-        Entity leader = createLeader(renderer, pos);
-        for (int i = 1; i < swarm; i++) {
-            pos = get_random_position();
-            createFollower(renderer, pos, leader);
-        }
-    }*/
 }
 
 void WorldSystem::try_progress_tutorial() {

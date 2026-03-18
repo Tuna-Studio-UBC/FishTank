@@ -5,6 +5,7 @@ enum class ATTACK_PATTERN {
     SINGLE = PLAYER + 1,
     RAPID = SINGLE + 1,
     URCHIN = RAPID + 1,
-    ATTACK_COUNT = URCHIN + 1
+    HAVOC = URCHIN + 1,
+    ATTACK_COUNT = HAVOC + 1
 };
 const int attack_count = (int)ATTACK_PATTERN::ATTACK_COUNT;
