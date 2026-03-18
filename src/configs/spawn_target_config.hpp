@@ -12,4 +12,5 @@ const enum SpawnTarget : SPAWN_TARGET {
     AMMO = 16,
     POWERUP = 32,
     DISTRACTION = 64,
+    BOSS = 128
 };

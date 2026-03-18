@@ -15,6 +15,7 @@ struct GameUI {
     void set_upgrade_system(UpgradeSystem *upgrade_system);
     void draw_healthbar();
     void draw_enemy_healthbars();
+    void draw_boss_healthbars();
     void draw_ammo();
     void draw_minimap();
     void draw_pause_menu();

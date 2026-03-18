@@ -6,6 +6,7 @@
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "configs/attack_pattern.hpp"
+#include "configs/enemy_config.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
@@ -28,7 +29,15 @@ struct Enemy {
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
+struct Boss {
+    BOSS_TYPE type;
+    int curr_attack_pattern_index = 0;
+    float elapsed_time_ms = 0.f;
+    float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
+};
+
 struct Bullet {
+    ATTACK_EFFECT attack_effect;
     int damage;
     Entity owner; // track who fired to prevent self hit
 };
@@ -87,7 +96,11 @@ struct Dead {};
 
 struct Damage {
     int amount;
-    Damage(int amount) { this->amount = amount; };
+    vec3 tint;
+    Damage(int amount, vec3 tint = {1.f, 0.25f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 // Optional: OverTimeEffect
 
@@ -100,9 +113,10 @@ struct OverTimeEffect {
     float interval_ms = 1000;      // ms
     float duration_time_ms = 3000; // ms
     float elapsed_time_ms = 0;     // ms
-    OverTimeEffect(float interval_ms, float duration_time_ms) {
+    OverTimeEffect(float interval_ms, float duration_time_ms, float elapsed_time_ms = 0) {
         this->interval_ms = interval_ms;
         this->duration_time_ms = duration_time_ms;
+        this->elapsed_time_ms = elapsed_time_ms;
     };
 };
 
@@ -218,7 +232,11 @@ struct PowerUp {
 
 struct Heal {
     int amount;
-    Heal(int amount) { this->amount = amount; };
+    vec3 tint;
+    Heal(int amount, vec3 tint = {0.25f, 1.f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 
 struct Bubbler {
@@ -521,8 +539,9 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_MINE_SHEET = TEXTURE_HEALTH_SHEET + 1,
     TEXTURE_URCHIN_SHEET = TEXTURE_MINE_SHEET + 1,
     TEXTURE_ISOPOD_SHEET = TEXTURE_URCHIN_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_ISOPOD_SHEET + 1,
 
-    TEXTURE_COUNT = TEXTURE_ISOPOD_SHEET + 1
+    TEXTURE_COUNT = TEXTURE_KING_CRABBY_SHEET + 1
 };
 
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

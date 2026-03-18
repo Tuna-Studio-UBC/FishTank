@@ -145,7 +145,7 @@ bool WorldSystem::start_and_load_sounds() {
 
 void WorldSystem::start_wave(Progress &progress) {
     auto config = WAVE_CONFIGS[progress.wave];
-    progress.remaining_enemies = config.enemies.size();
+    progress.remaining_enemies = config.enemies.size() + config.bosses.size();
     vec2 pos;
 
     if (registry.players.entities.size() > 0) {
@@ -161,6 +161,14 @@ void WorldSystem::start_wave(Progress &progress) {
         camera_system->init(tilemap_system->get_current_map());
     }
 
+    // Spawn bosses
+    for (auto boss : config.bosses) {
+        // TODO: Replace w/ just BOSS
+        pos = tilemap_system->get_random_position(SpawnTarget::BOSS | SpawnTarget::ENEMY);
+        createBoss(renderer, pos, boss);
+    }
+
+    // Spawn enemies
     for (auto enemy : config.enemies) {
         if (enemy == ENEMY_TYPE::MOTHER) {
             if (registry.tilemaps.has(tilemap_system->get_current_map())) {
@@ -333,35 +341,10 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     load_level(progress);
     start_wave(progress);
 
-    // ! FOR TESTING !
+    // TODO: Replace w/ GUI overlay
     glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
     createText("Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1),
                vec2(WINDOW_WIDTH_PX / 2 - 100, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
-
-    /* Uncomment to use old testing entities
-    createBell(renderer, { 300.f, 400.f }, 80.f);
-    createBell(renderer, { 700.f, 200.f }, 80.f);
-
-    // ! FOR TESTING ! NEED TO FIX COLOUR INDICATORS (maybe set an init colour)
-    // createOverTimeEffect<Damage>(player, 1000.f, 5000.f, 10);
-    // createOverTimeEffect<Heal>(player, 1000.f, 5000.f, 10);
-
-    ENEMY_TYPE type = ENEMY_TYPE::URCHIN; // TESTING: change this out to test types
-    Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
-
-    // ! FOR TESTING !
-    createPowerUp(renderer, {500.f, 500.f}, POWER_UP_TYPE::HEAL);
-    createPowerUp(renderer, {700.f, 500.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
-    createPowerUp(renderer, {600.f, 500.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
-
-    // ! FOR TESTING !
-    createMine(renderer, {500.f, 400.f});
-    createAnemone(renderer, {500.f, 600.f});
-
-    // start playing background music indefinitely
-    //Commented out duo to compiler errors
-    spdlog::info("Starting music...");
-    Mix_PlayMusic(background_music, -1);*/
 }
 
 // Update our game world
@@ -640,8 +623,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 #pragma region DEBUG KEYS
 
-// #define ENABLE_LOAD_TUTORIAL
-// #define ENABLE_SKIP_WAVE
+#define ENABLE_LOAD_TUTORIAL
+#define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
 #define DEBUG_UPGRADE_INPUTS
 

@@ -159,9 +159,7 @@ int main() {
         {
             ZoneScopedN("RENDER: Health");
             game_ui.draw_enemy_healthbars();
-        }
-        {
-            ZoneScopedN("RENDER: Health");
+            game_ui.draw_boss_healthbars();
             game_ui.draw_healthbar();
         }
         {

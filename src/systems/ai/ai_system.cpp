@@ -1,5 +1,8 @@
 #include "ai_system.hpp"
 
+#include "configs/attack_pattern.cpp"
+#include "configs/enemy_config.cpp"
+
 void AISystem::init(PathfindingSystem *system) { ps = system; }
 
 AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
@@ -97,6 +100,26 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 4.f;
             }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::SHOTGUN) {
+            float incAngle = -2 * M_PI / 12.f;
+            for (int i = 0; i < 5; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = angle + incAngle;
+                req.owner = enemy;
+                incAngle += M_PI / 12.f;
+            }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_NORMAL) {
+            float incAngle = -1 * M_PI / 6.f;
+            for (int i = 0; i < 3; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = angle + incAngle;
+                req.owner = enemy;
+                incAngle += M_PI / 6.f;
+            }
         } else {
             registry.bullet_requests.insert(enemy, {fire.attack_pattern, position, angle, enemy});
         }
@@ -118,6 +141,48 @@ void AISystem::step(float elapsed_ms) {
 
         act(e, elapsed_ms, player_pos);
     }
+
+    // TODO: Change switch attack patterns to use state machine
+    for (Entity e : registry.bosses.entities) {
+        FireControl &fc = registry.fireControls.get(e);
+        Boss &boss = registry.bosses.get(e);
+        auto config = BOSS_CONFIGS[(int)boss.type];
+        boss.elapsed_time_ms += elapsed_ms;
+
+        // if (boss.elapsed_time_ms >= boss.time_to_next_pattern_ms) {
+        //     boss.elapsed_time_ms = 0.f;
+        //     int next_ap = (boss.curr_attack_pattern_index + 1) % config.attack_patterns.size();
+        //     boss.curr_attack_pattern_index = next_ap;
+        //     fc.attack_pattern = config.attack_patterns[next_ap];
+        //     fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
+        //     spdlog::info("Boss {} switching to attack pattern {}", e.name(), next_ap);
+        // }
+
+        if (boss.type == BOSS_TYPE::KING_CRABBY) {
+            Health &health = registry.healths.get(e);
+            if (health.hp <= health.max_hp * 0.33f) {
+                // Rapid
+                int next_ap = 2;
+                boss.curr_attack_pattern_index = next_ap;
+                fc.attack_pattern = config.attack_patterns[next_ap];
+                fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
+
+                SpeedControl &sc = registry.speedControls.get(e);
+                sc.move_speed = config.move_speed * 2.f;
+                sc.turn_speed = config.turn_speed * 2.f;
+            } else if (health.hp <= health.max_hp * 0.67f) {
+                // Toxic
+                int next_ap = 1;
+                boss.curr_attack_pattern_index = next_ap;
+                fc.attack_pattern = config.attack_patterns[next_ap];
+                fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
+
+                SpeedControl &sc = registry.speedControls.get(e);
+                sc.move_speed = config.move_speed * 1.5f;
+                sc.turn_speed = config.turn_speed * 1.5f;
+            }
+        }
+    }
 }
 
 void AISystem::run_patrol(Entity e, float elapsed_ms) {
@@ -135,9 +200,9 @@ void AISystem::run_patrol(Entity e, float elapsed_ms) {
         if (!registry.motions.has(follower_e) || registry.boids.get(follower_e).leader != e) {
             continue;
         }
-        
+
         ps->update_follower(follower_e, e, elapsed_ms);
-        fire_projectiles(follower_e, elapsed_ms, registry.motions.get(follower_e).angle + M_PI/2);
+        fire_projectiles(follower_e, elapsed_ms, registry.motions.get(follower_e).angle + M_PI / 2);
     }
 }
 

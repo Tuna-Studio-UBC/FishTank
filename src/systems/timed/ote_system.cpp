@@ -39,8 +39,8 @@ void OverTimeEffectSystem::handle_heal(Entity e, Entity target_entity) {
     }
 
     if (!registry.heals.has(target_entity)) {
-        int amount = registry.heals.get(e).amount;
-        HealDamageSystem::add_heal(target_entity, amount);
+        Heal &h = registry.heals.get(e);
+        HealDamageSystem::add_heal(target_entity, h.amount, h.tint);
     }
 }
 
@@ -52,7 +52,7 @@ void OverTimeEffectSystem::handle_damage(Entity e, Entity target_entity) {
     }
 
     if (!registry.damages.has(target_entity)) {
-        int amount = registry.damages.get(e).amount;
-        HealDamageSystem::add_damage(target_entity, amount);
+        Damage &d = registry.damages.get(e);
+        HealDamageSystem::add_damage(target_entity, d.amount, d.tint);
     }
 }
