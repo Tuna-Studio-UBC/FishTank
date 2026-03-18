@@ -8,6 +8,7 @@
 #include "systems/rendering/particle_system.hpp"
 #include "systems/rendering/render_system.hpp"
 #include "tinyECS/registry.hpp"
+#include "systems/physics/physics_system.hpp"
 
 void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, const GLuint program) {
     Transform transform;
@@ -525,6 +526,11 @@ void RenderSystem::draw() {
 
     drawParticles(projection_2D, view_2D);
 
+    // Debug: draw spatial grid overlay when debug mode is active
+    if (debugging.in_debug_mode) {
+        drawDebugGrid(projection_2D, view_2D);
+    }
+
     // draw framebuffer to screen
     drawToScreen();
 
@@ -566,4 +572,79 @@ mat3 RenderSystem::createViewMatrix() {
     return {{1.f, 0.f, 0.f},
             {0.f, 1.f, 0.f},
             {-(m.position.x - WINDOW_WIDTH_PX / 2.f), -(m.position.y - WINDOW_HEIGHT_PX / 2.f), 1.f}};
+}
+
+void RenderSystem::drawDebugGrid(const mat3 &projection, const mat3 &view) {
+    float cs = PhysicsSystem::getWallGridCellSize();
+    auto cells = PhysicsSystem::getOccupiedWallCells();
+    if (cells.empty())
+        return;
+
+    // Camera culling bounds (only draw visible cells)
+    vec2 cam_pos = registry.motions.get(registry.cameras.entities[0]).position;
+    float half_w = WINDOW_WIDTH_PX / 2.f + cs;
+    float half_h = WINDOW_HEIGHT_PX / 2.f + cs;
+
+    // Build line vertices for occupied cells (position only, color is a uniform)
+    std::vector<vec3> verts;
+    verts.reserve(cells.size() * 8); // 4 edges × 2 verts
+
+    for (auto &cell : cells) {
+        float x0 = cell.cx * cs;
+        float y0 = cell.cy * cs;
+        float x1 = x0 + cs;
+        float y1 = y0 + cs;
+
+        // Frustum cull: skip cells far from camera
+        float cx = (x0 + x1) * 0.5f;
+        float cy = (y0 + y1) * 0.5f;
+        if (std::abs(cx - cam_pos.x) > half_w || std::abs(cy - cam_pos.y) > half_h)
+            continue;
+
+        // 4 line segments (8 vertices)
+        verts.push_back({x0, y0, 0}); verts.push_back({x1, y0, 0});
+        verts.push_back({x1, y0, 0}); verts.push_back({x1, y1, 0});
+        verts.push_back({x1, y1, 0}); verts.push_back({x0, y1, 0});
+        verts.push_back({x0, y1, 0}); verts.push_back({x0, y0, 0});
+    }
+
+    if (verts.empty())
+        return;
+
+    // Use coloured shader (in_position only, flat color uniform)
+    const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::COLOURED];
+    glUseProgram(program);
+
+    // Upload line positions to a temporary VBO
+    GLuint tmp_vbo;
+    glGenBuffers(1, &tmp_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, tmp_vbo);
+    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(vec3), verts.data(), GL_STREAM_DRAW);
+
+    GLint in_position_loc = glGetAttribLocation(program, "in_position");
+    glEnableVertexAttribArray(in_position_loc);
+    glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
+
+    // Identity transform (vertices are already in world-space)
+    Transform identity;
+    GLuint transform_loc = glGetUniformLocation(program, "transform");
+    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, value_ptr(identity.mat));
+
+    GLuint projection_loc = glGetUniformLocation(program, "projection");
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
+
+    GLuint view_loc = glGetUniformLocation(program, "view");
+    glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
+
+    // Green lines for occupied cells
+    GLint color_loc = glGetUniformLocation(program, "color");
+    glUniform3f(color_loc, 0.f, 1.f, 0.3f);
+
+    glLineWidth(1.f);
+    glDrawArrays(GL_LINES, 0, (GLsizei)verts.size());
+
+    // Cleanup
+    glDisableVertexAttribArray(in_position_loc);
+    glDeleteBuffers(1, &tmp_vbo);
+    gl_has_errors();
 }

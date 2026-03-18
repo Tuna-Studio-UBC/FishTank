@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 
 // Toggle for mesh collider, 0 = on.
-static int MESH_COLLISION_MODE = 1; // set to any other value to turn it off and us AABB
+static int MESH_COLLISION_MODE = 0; // set to any other value to turn it off and use AABB
 
 vec2 get_bounding_box(const Motion &motion);
 

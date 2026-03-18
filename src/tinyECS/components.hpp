@@ -292,7 +292,7 @@ struct ParticleEmitter {
 
 // Data structure for toggling debug mode
 struct Debug {
-    bool in_debug_mode = 0;
+    bool in_debug_mode = 0; // if 1 render spatial grid
     bool in_freeze_mode = 0;
 };
 extern Debug debugging;
