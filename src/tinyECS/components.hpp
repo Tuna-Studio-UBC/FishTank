@@ -332,10 +332,7 @@ const std::vector<TutorialStep> TUTORIAL_STEPS = {
 };
 
 struct Progress {
-    int wave = 0;
-    int level = 0;
-    int remaining_enemies = -1;
-
+    bool trigger_restart = false;
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;

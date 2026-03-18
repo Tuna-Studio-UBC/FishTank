@@ -64,7 +64,7 @@ void DeathSystem::step(float elapsed_ms) {
                     createEffectSmoke(m.position);
 
                     registry.remove_all_components_of(e);
-                    registry.progresses.components[0].remaining_enemies -= 1;
+                    // registry.progresses.components[0].remaining_enemies -= 1;
                 }
             }
         }

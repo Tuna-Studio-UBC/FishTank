@@ -5,7 +5,7 @@
 
 void GameUI::draw_pause_menu() {
     Progress &progress = registry.progresses.components[0];
-    if (!progress.is_paused || progress.is_tutorial_step_called)
+    if (!progress.is_paused || progress.is_tutorial_step_called || progress.is_upgrade_menu_called)
         return;
 
     ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX));

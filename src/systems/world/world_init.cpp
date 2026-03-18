@@ -8,6 +8,8 @@
 #include <set>
 
 #pragma region Actors
+
+#define GOD_MODE
 // =================================================================================
 // Actors
 // =================================================================================
@@ -32,6 +34,9 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     FireControl &fc = registry.fireControls.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;
     fc.ammo = STARTING_AMMO;
+#ifdef GOD_MODE
+    fc.damage_bonus = 100;
+#endif
 
     SpeedControl &sc = registry.speedControls.emplace(entity);
     sc.move_speed = config.move_speed;
