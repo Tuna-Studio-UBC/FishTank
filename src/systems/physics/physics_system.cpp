@@ -303,9 +303,10 @@ void PhysicsSystem::step(float elapsed_ms) {
                     }
                     float combined_len = length(combined);
 
-                    spdlog::debug("PHYS_MTV entity={} iter={} combined=({}, {}) len={} perWalls={}", entity.id(), iter,
+                    /* spdlog::debug("PHYS_MTV entity={} iter={} combined=({}, {}) len={} perWalls={}", entity.id(),
+                                       iter,
                                   combined.x, combined.y, combined_len, s_resolvePerWallMTVs.size());
-
+                    */
                     // pushes the player further into geometry causing permanent stick.
                     {
                         Motion tmpTest = motion;
@@ -452,11 +453,12 @@ void PhysicsSystem::step(float elapsed_ms) {
                     tmpSlide.position = candidatePos;
                     bool slide_ok = !collides_with_wall(entity, tmpSlide);
 
-                                       spdlog::debug("PHYS_FALLBACK entity={} safe=({}, {}) escape=({}, {}) cand=({}, {}) slide_ok={} "
+                                       /* spdlog::debug(
+                        "PHYS_FALLBACK entity={} safe=({}, {}) escape=({}, {}) cand=({}, {}) slide_ok={} "
                                   "saved_vel=({}, {}) prev_forward={}",
                                   entity.id(), safe_pos.x, safe_pos.y, escape_normal.x, escape_normal.y, candidatePos.x,
                                   candidatePos.y, slide_ok, saved_computed_local_x, saved_computed_local_y,
-                                  prev_local_forward);
+                                  prev_local_forward);*/
 
                     if (slide_ok) {
                         // slide succeeded: commit slide position and preserve computed local velocity
@@ -488,8 +490,10 @@ void PhysicsSystem::step(float elapsed_ms) {
                         tmpNudge.position = nudgePos;
                         bool nudge_ok = !collides_with_wall(entity, tmpNudge);
 
-                        spdlog::debug("PHYS_NUDGE entity={} nudgePos=({}, {}) nudge_ok={}", entity.id(), nudgePos.x,
+                        /* spdlog::debug("PHYS_NUDGE entity={} nudgePos=({}, {}) nudge_ok={}", entity.id(),
+                                           nudgePos.x,
                                       nudgePos.y, nudge_ok);
+                        */
 
                         if (nudge_ok) {
                             motion.position = nudgePos;
@@ -590,9 +594,10 @@ void PhysicsSystem::step(float elapsed_ms) {
                 vec2 tangent = normalize(vec2(-prev_contact.y, prev_contact.x));
                 float vt = dot(world_vel, tangent);
 
-                spdlog::debug("PHYS_EXIT entity={} prev_contact=({}, {}) world_vel=({}, {}) vt={} local_vel=({}, {})",
+                /* spdlog::debug(
+                    "PHYS_EXIT entity={} prev_contact=({}, {}) world_vel=({}, {}) vt={} local_vel=({}, {})",
                               entity.id(), prev_contact.x, prev_contact.y, world_vel.x, world_vel.y, vt,
-                              motion.velocity.x, motion.velocity.y);
+                              motion.velocity.x, motion.velocity.y);*/
                 // decide whether to clear lateral tangential motion on exit.
                 // preserve the player's forward local channel so they can "drive by" the wall.
                 bool pressing_forward_exit =
