@@ -8,7 +8,10 @@
 // =================================================================================
 
 enum class ATTACK_PATTERN {
+    // Player
     PLAYER = 0,
+
+    // Enemies
     SINGLE = PLAYER + 1,
     RAPID = SINGLE + 1,
     TOXIC = RAPID + 1,
@@ -16,7 +19,15 @@ enum class ATTACK_PATTERN {
     SHOTGUN = MACHINE_GUN + 1,
     URCHIN = SHOTGUN + 1,
     HAVOC = URCHIN + 1,
-    ATTACK_COUNT = HAVOC + 1
+
+    // Bosses
+    SHARKY1 = HAVOC + 1,
+
+    KING_CRABBY1 = SHARKY1 + 1,
+
+    EEEEL1 = KING_CRABBY1 + 1,
+
+    ATTACK_COUNT = EEEEL1 + 1
 };
 const int attack_count = (int)ATTACK_PATTERN::ATTACK_COUNT;
 

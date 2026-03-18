@@ -7,6 +7,7 @@
 
 struct Wave {
     std::vector<ENEMY_TYPE> enemies;
+    std::vector<BOSS_TYPE> bosses;
 };
 
 struct Level {
@@ -28,11 +29,17 @@ const std::vector<Wave> WAVE_CONFIGS = {
     // Level 2
     {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING}},
     {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}},
-    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}}};
+    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}},
+
+    // Level 3: Boss
+    {{ENEMY_TYPE::GUARD}, {BOSS_TYPE::KING_CRABBY}}};
 
 const std::vector<Level> LEVEL_CONFIGS = {
     // Level 1
     {3, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, true},
 
     // Level 2
-    {6, MapType::TEST_MAP2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}}};
+    {6, MapType::TEST_MAP2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}},
+
+    // Level 3
+    {7, MapType::TEST_MAP, {HAZARD_TYPE::ANEMONE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}}};

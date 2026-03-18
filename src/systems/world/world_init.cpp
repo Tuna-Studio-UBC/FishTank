@@ -99,6 +99,57 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     return entity;
 }
 
+Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
+    auto &config = BOSS_CONFIGS[(int)type];
+    auto entity = Entity(config.name);
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+    auto &enemy = registry.enemies.emplace(entity);
+    enemy.detection_radius = config.detection_radius;
+
+    auto &boss = registry.bosses.emplace(entity);
+
+    auto &motion = registry.motions.emplace(entity);
+    motion.velocity = vec2(0.0f, 0.0f);
+    motion.position = position;
+    motion.angle = 0.f;
+    motion.scale = vec2(100.0f, 100.0f);
+
+    auto &health = registry.healths.emplace(entity);
+    health = config.health;
+
+    auto &fire = registry.fireControls.emplace(entity);
+    fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_patterns[0]].cooldown_ms;
+    fire.attack_pattern = config.attack_patterns[0];
+
+    auto &speed = registry.speedControls.emplace(entity);
+    speed.move_speed = config.move_speed;
+    speed.turn_speed = config.turn_speed;
+
+    registry.senses.emplace(entity);
+    AI &ai = registry.ais.emplace(entity);
+    ai.tree_file = "enemy_tree.txt";
+    ai.tree = load_tree(ai.tree_file);
+    ai.current_state = AIAction::IDLE;
+
+    registry.pursuits.emplace(entity);
+    registry.dropsCrackers.emplace(entity);
+
+    // TODO: REPLACE PLACEHOLDERS
+    registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+    Animation &an = registry.animations.emplace(entity);
+    an.frame_count = 8;
+    an.columns = 8;
+    an.frame_time = 250;
+
+    return entity;
+}
+
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     auto &config = ENEMY_CONFIGS[(int)type];
     auto entity = Entity(config.name);

@@ -28,9 +28,7 @@ struct Enemy {
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
-struct Boss {
-    float detection_radius;
-};
+struct Boss {};
 
 struct Bullet {
     ATTACK_EFFECT attack_effect;

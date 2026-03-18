@@ -15,6 +15,7 @@ extern ECSRegistry registry;
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 
+Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type);
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type);
 Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader);
 
