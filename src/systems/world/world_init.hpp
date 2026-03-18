@@ -61,3 +61,5 @@ Entity createOverTimeEffect(Entity target_entity, float interval_ms, float durat
     registry.targets.emplace(ot_entity, target_entity);
     return ot_entity;
 }
+
+Entity createCompletionText(std::string message);

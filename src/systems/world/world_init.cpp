@@ -606,4 +606,10 @@ Entity createText(std::string text, vec2 position, float scale, const glm::vec3 
     return entity;
 }
 
+Entity createCompletionText(std::string message) { 
+    Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 250), 5.f, vec3(1.f), glm::mat4(1.f));
+    registry.expirations.emplace(e, 1000.f);
+    return e;
+}
+
 #pragma endregion ScreenOverlays

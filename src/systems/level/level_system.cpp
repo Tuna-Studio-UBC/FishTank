@@ -254,9 +254,15 @@ void LevelSystem::load_next_wave() {
 void LevelSystem::trigger_load_next_level() {
     triggered_load_level = true;
     advance_timer = 2000.f;
+    if (level == -1) {
+        createCompletionText("TUTORIAL COMPLETE!!");
+    } else {
+        createCompletionText("LEVEL " + std::to_string(level + 1) + " COMPLETE!!");
+    }
 }
 
 void LevelSystem::trigger_load_next_wave() { 
+    createCompletionText("LOADING WAVE: " + std::to_string(wave + 1));
     triggered_load_wave = true;
     advance_timer = 2000.f;
 }
