@@ -9,7 +9,7 @@
 #include "systems/rendering/render_system.hpp"
 #include "tinyECS/registry.hpp"
 
-void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, const GLuint program) {
+void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, const GLsizei& num_indices, const GLuint program) {
     Transform transform;
     transform.translate((TILE_SIZE_PX * tile_pos) + (TILE_SIZE_PX / 2));
     transform.scale(vec2(TILE_SIZE_PX));
@@ -28,20 +28,15 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
         vec2((tile_id % tileset_width) / (float)tileset_width, (tile_id / tileset_width) / (float)tileset_height);
     GLint atlas_offset_uloc = glGetUniformLocation(program, "atlas_offset");
     glUniform2fv(atlas_offset_uloc, 1, value_ptr(atlas_offset));
-    gl_has_errors();
+    //gl_has_errors();
 
     GLuint transform_loc = glGetUniformLocation(program, "transform");
     glUniformMatrix3fv(transform_loc, 1, GL_FALSE, value_ptr(transform.mat));
-    gl_has_errors();
-
-    // Get number of indices from index buffer, which has elements uint16_t
-    GLint size = 0;
-    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-    gl_has_errors();
-    GLsizei num_indices = size / sizeof(uint16_t);
+    //gl_has_errors();
+    
     // Drawing of num_indices/3 triangles specified in the index buffer
     glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-    gl_has_errors();
+    //gl_has_errors();
 }
 
 void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, const mat3 &view) {
@@ -57,7 +52,7 @@ void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, con
 
     const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
     glUseProgram(program);
-    gl_has_errors();
+    //gl_has_errors();
 
     assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
     const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
@@ -66,50 +61,56 @@ void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, con
     // Setting vertex and index buffers
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    gl_has_errors();
+    //gl_has_errors();
 
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
     GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
-    gl_has_errors();
+    //gl_has_errors();
     assert(in_texcoord_loc >= 0);
 
     glEnableVertexAttribArray(in_position_loc);
     glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *)0);
-    gl_has_errors();
+    //gl_has_errors();
 
     glEnableVertexAttribArray(in_texcoord_loc);
     glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *)sizeof(vec3));
 
     // Enabling and binding texture to slot 0
     glActiveTexture(GL_TEXTURE0);
-    gl_has_errors();
+    //gl_has_errors();
 
     GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
 
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    gl_has_errors();
+    //gl_has_errors();
 
     // Getting uniform locations for glUniform* calls
     GLint color_uloc = glGetUniformLocation(program, "fcolor");
     const vec3 color = vec3(1);
     glUniform3fv(color_uloc, 1, value_ptr(color));
-    gl_has_errors();
+    //gl_has_errors();
 
     GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
     glUniform2fv(tileset_size_uloc, 1, value_ptr(tileset.dimensions));
-    gl_has_errors();
+    //gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(program, "projection");
     glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
-    gl_has_errors();
+    //gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(program, "view");
     glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
-    gl_has_errors();
+    //gl_has_errors();
 
     GLuint tile_size_loc = glGetUniformLocation(program, "tile_size");
     glUniform1f(tile_size_loc, tileset.tile_width_px);
-    gl_has_errors();
+    //gl_has_errors();
+
+    // Get number of indices from index buffer, which has elements uint16_t
+    GLint size = 0;
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    // gl_has_errors();
+    GLsizei num_indices = size / sizeof(uint16_t);
 
     // https://learnopengl.com/Getting-started/Textures
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -119,7 +120,7 @@ void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, con
 
     for (int y = min_y; y < max_y; y++)
         for (int x = min_x; x < max_x; x++)
-            draw_tile(tileset, tilemap, ivec2(x, y), program);
+            draw_tile(tileset, tilemap, ivec2(x, y), num_indices, program);
 }
 
 void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const mat3 &view) {
