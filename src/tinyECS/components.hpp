@@ -6,6 +6,7 @@
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "configs/attack_pattern.hpp"
+#include "configs/enemy_config.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
@@ -155,14 +156,6 @@ struct Distracted {
     float remaining_ms;
 };
 
-// used in AISystem to request projectile creation in WorldSystem
-struct BulletRequest {
-    ATTACK_PATTERN attack_pattern;
-    vec2 position;
-    float angle;
-    Entity owner;
-};
-
 struct Bezier {
     int current_segment = 0;
     float t = 0.f;
@@ -203,6 +196,28 @@ struct Upgrades {
 };
 
 #pragma endregion Behaviour
+
+#pragma region Requests
+// =================================================================================
+// Requests
+// =================================================================================
+
+// used in AISystem to request projectile creation in WorldSystem
+struct BulletRequest {
+    ATTACK_PATTERN attack_pattern;
+    vec2 position;
+    float angle;
+    Entity owner;
+};
+
+// used to delay spawn and time SpawnEffect
+struct SpawnRequest {
+    vec2 position;
+    float timer_ms = 2000.f;
+    ENEMY_TYPE type;
+};
+
+#pragma endregion Requests
 
 #pragma region Pickups
 // =================================================================================

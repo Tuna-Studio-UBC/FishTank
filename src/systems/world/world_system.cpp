@@ -164,17 +164,32 @@ void WorldSystem::start_wave(Progress &progress) {
     for (auto enemy : config.enemies) {
         if (enemy == ENEMY_TYPE::MOTHER) {
             if (registry.tilemaps.has(tilemap_system->get_current_map())) {
+                Entity sp_e = Entity();
+                BezierPath &path = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop[0];
+                pos = path.p0;
+            }
+        } else {
+            pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
+        }
+
+        Entity sp_e = Entity();
+        registry.spawnRequests.insert(sp_e, {pos, 2000.f, enemy});
+        createEffectSpawn(pos);
+        
+        /*if (enemy == ENEMY_TYPE::MOTHER) {
+            if (registry.tilemaps.has(tilemap_system->get_current_map())) {
                 BezierPath &path = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop[0];
                 Entity leader = createEnemy(renderer, path.p0, enemy);
                 for (int i = 1; i < 7; i++) {
                     createFollower(renderer, path.p0 + vec2(TILE_SIZE_PX * i, 0.f), leader);
+                    createEffectBubbles(path.p0);
                     progress.remaining_enemies += 1;
                 }
             }
         } else {
             pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
             createEnemy(renderer, pos, enemy);
-        }
+        }*/ 
     }
 }
 
@@ -468,6 +483,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
     }
     registry.bullet_requests.clear();
+
+    for (Entity e : registry.spawnRequests.entities) {
+        SpawnRequest &req = registry.spawnRequests.get(e);
+        req.timer_ms -= elapsed_ms_since_last_update;
+        if (req.timer_ms <= 0) {
+            Entity enemy = createEnemy(renderer, req.position, req.type);
+            if (req.type == ENEMY_TYPE::MOTHER) {
+                for (int i = 1; i < 7; i++) {
+                    createFollower(renderer, req.position + vec2(TILE_SIZE_PX * i, 0.f), enemy);
+                    progress.remaining_enemies += 1;
+                }
+            } 
+
+            registry.remove_all_components_of(e);
+        }
+    }
 
     for (auto &sr : registry.sound_requests.components) {
         if (sr.type == SOUND_EVENT::PLAYER_SHOT) {

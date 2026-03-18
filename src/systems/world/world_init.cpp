@@ -576,6 +576,32 @@ Entity createEffectBubbles(const vec2 position) {
     return e;
 }
 
+Entity createEffectSpawn(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Spawn)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 1500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 80;
+    pe.particle_speed = 80;
+    pe.spawn_interval_ms = 20;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+    pe.particle_scale = 20;
+
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    pm.scale = vec2(TILE_SIZE_PX * 1.5);
+
+    registry.renderRequests.emplace(e,
+                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_BUBBLE,
+                                        EFFECT_ASSET_ID::TEXTURED, 
+                                        GEOMETRY_BUFFER_ID::SPRITE,
+                                        RENDER_LAYER::BACKGROUND
+                                    });
+    registry.tints.emplace(e, vec3(1.f, 0.2f, 0.2f));
+    return e;
+}
+
 #pragma endregion Effects
 
 #pragma region ScreenOverlays

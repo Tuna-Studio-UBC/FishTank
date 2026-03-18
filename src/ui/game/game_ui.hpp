@@ -20,4 +20,5 @@ struct GameUI {
     void draw_cursor();
 };
 
-static GameUI game_ui;
+// prevent linker error
+extern GameUI game_ui;
