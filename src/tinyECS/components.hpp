@@ -173,21 +173,23 @@ struct BulletRequest {
     Entity owner;
 };
 
-struct BezierPath {
-    vec2 p0 = vec2(-1.f);
-    vec2 p1 = vec2(-1.f);
-    vec2 p2 = vec2(-1.f);
-    vec2 p3 = vec2(-1.f);
+struct Bezier {
+    int current_segment = 0;
     float t = 0.f;
-    float speed = 0.5f;
-    int curves_left = 6;
+    float speed = 0.15f;
+    vec2 velocity;
+};
+
+struct Leader {
+    int followers = 0;
 };
 
 struct Boid {
     float perception_radius = 100.f;
     float alignment_weight = 1.f;
-    float cohesian_weight = 1.f;
+    float cohesian_weight = 0.9f;
     float separation_weight = 1.5f;
+    vec2 velocity;
     Entity leader;
 };
 
@@ -411,6 +413,13 @@ struct Mesh {
 
 #define MAX_TILES 4096 // 64x64
 
+struct BezierPath {
+    vec2 p0;
+    vec2 p1;
+    vec2 p2;
+    vec2 p3;
+};
+
 struct TileMap {
     std::array<unsigned short, MAX_TILES> tile_ids;
     std::array<SPAWN_TARGET, MAX_TILES> spawn_tile_ids;
@@ -418,6 +427,8 @@ struct TileMap {
     unsigned int height;
     unsigned int x_offset = 0;
     unsigned int y_offset = 0;
+
+    std::vector<BezierPath> patrol_loop;
 
     TileMap(std::array<unsigned short, MAX_TILES> tile_ids, std::array<unsigned int, MAX_TILES> spawn_tile_ids,
             unsigned int width, unsigned int height, unsigned int x_offset = 0, unsigned int y_offset = 0)
@@ -511,7 +522,9 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
     TEXTURE_BUBBLER = TEXTURE_BUBBLE + 1,
 
-    TEXTURE_SMOKE = TEXTURE_BUBBLER + 1,
+    TEXTURE_CURSOR = TEXTURE_BUBBLER + 1,
+
+    TEXTURE_SMOKE = TEXTURE_CURSOR + 1,
 
     TEXTURE_BUBBLE_SHEET = TEXTURE_SMOKE + 1,
     TEXTURE_FISH_SHEET = TEXTURE_BUBBLE_SHEET + 1,
@@ -526,6 +539,7 @@ enum class TEXTURE_ASSET_ID {
 };
 
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
+const int last_tileset_id = (int)TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2;
 
 enum class EFFECT_ASSET_ID {
     COLOURED = 0,

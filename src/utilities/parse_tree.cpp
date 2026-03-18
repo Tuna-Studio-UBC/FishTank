@@ -71,7 +71,7 @@ ScriptedTree load_tree(const std::string &filename) {
     }
 
     // uncomment to print tree
-    /*for (auto &p : tree.nodes) {
+    /* for (auto &p : tree.nodes) {
         spdlog::debug("Node {} type {} cond '{}' true_child {} false_child {} probability {}", p.first,
                       (p.second.type == NodeType::CONDITION ? "CONDITION"
                        : p.second.type == NodeType::ACTION  ? "ACTION"
