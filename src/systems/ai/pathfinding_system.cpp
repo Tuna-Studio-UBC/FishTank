@@ -72,8 +72,8 @@ bool PathfindingSystem::walkable_bresenhams_line(ivec2 a, ivec2 b) {
         }
 
         int e2 = 2 * err;
-        //int prev_x = x1;
-        //int prev_y = y1;
+        // int prev_x = x1;
+        // int prev_y = y1;
         if (e2 > -dy) {
             err -= dy;
             x1 += sx;
@@ -352,7 +352,7 @@ vec2 PathfindingSystem::compute_cohesion(Entity e, std::vector<Entity> &flock) {
 vec2 PathfindingSystem::compute_separation(Entity e, std::vector<Entity> &flock) {
     Motion &motion = registry.motions.get(e);
 
-    float separation_radius = TILE_SIZE_PX/2;
+    float separation_radius = TILE_SIZE_PX / 2;
     float separation_strength = 80.f;
     vec2 force = vec2(0.f);
     int count = 0;
@@ -459,7 +459,8 @@ void PathfindingSystem::update_follower(Entity follower, Entity leader, float el
     }
 
     // keep track of steering separate from motion
-    boid.velocity += compute_boid_force(follower, flock, leader) + avoid_walls(follower) + compute_follow_force(follower, leader);
+    boid.velocity +=
+        compute_boid_force(follower, flock, leader) + avoid_walls(follower) + compute_follow_force(follower, leader);
     boid.velocity = limit_speed(boid.velocity);
 
     // convert steering to incorporate velocity + angle movement in physics

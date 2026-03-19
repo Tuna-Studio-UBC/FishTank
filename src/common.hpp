@@ -26,6 +26,9 @@ using namespace glm;
 // Get defintion of PROJECT_SOURCE_DIR from:
 #include "../ext/project_path.hpp"
 
+// DEBUG GOD MODE
+// #define GOD_MODE
+
 //
 // Define directories
 //

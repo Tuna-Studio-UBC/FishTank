@@ -7,9 +7,8 @@ namespace {
 const char *UPGRADE_NAMES[UPGRADE_TYPE::UPGRADE_COUNT] = {"Attack", "Max Ammo", "Max HP"};
 const char *UPGRADE_DESCRIPTIONS[UPGRADE_TYPE::UPGRADE_COUNT] = {"Increase damage", "Carry more ammo",
                                                                  "Raise max health"};
-const ImVec4 UPGRADE_COLOURS[UPGRADE_TYPE::UPGRADE_COUNT] = {ImVec4(0.84f, 0.35f, 0.24f, 1.f),
-                                                             ImVec4(0.20f, 0.53f, 0.88f, 1.f),
-                                                             ImVec4(0.22f, 0.70f, 0.38f, 1.f)};
+const ImVec4 UPGRADE_COLOURS[UPGRADE_TYPE::UPGRADE_COUNT] = {
+    ImVec4(0.84f, 0.35f, 0.24f, 1.f), ImVec4(0.20f, 0.53f, 0.88f, 1.f), ImVec4(0.22f, 0.70f, 0.38f, 1.f)};
 
 std::string get_upgrade_bonus_label(UPGRADE_TYPE type) {
     switch (type) {
@@ -43,7 +42,8 @@ void draw_upgrade_card(UpgradeSystem *upgrade_system, Entity player, UPGRADE_TYP
     const bool show_needed_text = !is_maxed && !can_afford && upgrade.config.cost[next_level] > (int)wallet.crackers;
 
     ImGui::PushID((int)type);
-    ImGui::BeginChild("upgrade_card", card_size, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::BeginChild("upgrade_card", card_size, true,
+                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
     ImDrawList *draw_list = ImGui::GetWindowDrawList();
     const ImVec2 min = ImGui::GetWindowPos();
@@ -108,9 +108,7 @@ void draw_upgrade_card(UpgradeSystem *upgrade_system, Entity player, UPGRADE_TYP
 }
 } // namespace
 
-void GameUI::set_upgrade_system(UpgradeSystem *upgrade_system) {
-    this->upgrade_system = upgrade_system;
-}
+void GameUI::set_upgrade_system(UpgradeSystem *upgrade_system) { this->upgrade_system = upgrade_system; }
 
 void GameUI::draw_upgrade_menu() {
     Progress &progress = registry.progresses.components[0];

@@ -2,11 +2,11 @@
 
 #include "death_system.hpp"
 #include "systems/world/world_init.hpp"
+#include <configs/attack_pattern.cpp>
+#include <configs/enemy_config.cpp>
 #include <random>
 #include <spdlog/spdlog.h>
 #include <systems/world/world_system.hpp>
-#include <configs/enemy_config.cpp>
-#include <configs/attack_pattern.cpp>
 
 void DeathSystem::step(float elapsed_ms) {
     for (Entity e : registry.healths.entities) {
@@ -69,7 +69,7 @@ void DeathSystem::step(float elapsed_ms) {
                     createEffectSmoke(m.position);
 
                     registry.remove_all_components_of(e);
-                    registry.progresses.components[0].remaining_enemies -= 1;
+                    // registry.progresses.components[0].remaining_enemies -= 1;
                 }
             }
         }
@@ -95,5 +95,4 @@ void DeathSystem::changeEnemyType(Entity enemy, ENEMY_TYPE type) {
     ai.tree_file = "enemy_tree.txt";
     ai.tree = load_tree(ai.tree_file);
     ai.current_state = AIAction::PURSUE;
-
 }

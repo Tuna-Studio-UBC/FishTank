@@ -8,6 +8,7 @@
 #include <set>
 
 #pragma region Actors
+
 // =================================================================================
 // Actors
 // =================================================================================
@@ -26,12 +27,20 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     w.crackers = config.crackers;
 
     Health &h = registry.healths.emplace(entity);
+#ifdef GOD_MODE
+    h.hp = 1000;
+    h.max_hp = 1000;
+#else
     h.hp = config.hp;
     h.max_hp = config.max_hp;
+#endif
 
     FireControl &fc = registry.fireControls.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;
     fc.ammo = STARTING_AMMO;
+#ifdef GOD_MODE
+    fc.damage_bonus = 100;
+#endif
 
     SpeedControl &sc = registry.speedControls.emplace(entity);
     sc.move_speed = config.move_speed;
@@ -653,7 +662,8 @@ Entity createEffectBubbles(const vec2 position) {
 
 #pragma region ScreenOverlays
 
-Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans) {
+Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans,
+                  bool centered) {
     auto entity = Entity("Text");
 
     Text &t = registry.texts.emplace(entity);
@@ -662,11 +672,19 @@ Entity createText(std::string text, vec2 position, float scale, const glm::vec3 
     t.scale = scale;
     t.color = color;
     t.trans = trans;
+    t.centered = centered;
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::FONT,
                                             GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::OVERLAYS});
 
     return entity;
+}
+
+Entity createCompletionText(std::string message) {
+    Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f),
+                          glm::mat4(1.f), true);
+    registry.expirations.emplace(e, 2000.f);
+    return e;
 }
 
 #pragma endregion ScreenOverlays

@@ -13,6 +13,7 @@
 #include "systems/ai/ai_system.hpp"
 #include "systems/health/death_system.hpp"
 #include "systems/health/heal_damage_system.hpp"
+#include "systems/level/level_system.hpp"
 #include "systems/physics/collision_system.hpp"
 #include "systems/physics/physics_system.hpp"
 #include "systems/player/camera_system.hpp"
@@ -49,6 +50,7 @@ int main() {
     AnimationSystem animation_system;
     TileMapSystem tilemap_system;
     UpgradeSystem upgrade_system;
+    LevelSystem level_system(&tilemap_system, &renderer_system, &camera_system, &world_system);
 
     // Configure spdlog
     spdlog::set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] [%l]%$ %v");
@@ -68,9 +70,13 @@ int main() {
         spdlog::error("Failed to start or load sounds.");
     }
 
+    // initialize game state (done outside of systems)
+    registry.progresses.emplace(Entity("Progress"));
+
     // initialize the main systems
     renderer_system.init(window);
-    world_system.init_tutorial(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
+    world_system.init(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
+    level_system.load_tutorial();
     game_ui.set_upgrade_system(&upgrade_system);
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
@@ -153,6 +159,11 @@ int main() {
                 ZoneScopedN("SYS: Camera");
                 camera_system.step();
             }
+        }
+        // Handle level loading and resetting
+        {
+            ZoneScopedN("SYS: Level");
+            level_system.step(elapsed_ms);
         }
 
         // Draw GUIs
