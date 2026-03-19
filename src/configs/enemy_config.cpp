@@ -55,15 +55,15 @@ struct BossConfig {
 static const BossConfig BOSS_CONFIGS[boss_count] = {
     // Sharky
     {"Sharky",
-     {150, 150},
-     50.f,
-     M_PI,
+     {250, 250},
+     150.f,
+     M_PI * 1.5f,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
-     {ATTACK_PATTERN::SHARKY_NORMAL}},
+     {ATTACK_PATTERN::SHARKY_NORMAL, ATTACK_PATTERN::SHARKY_WAVES}},
 
     // King Crabby
     {"King Crabby",
-     {500, 500},
+     {1000, 1000},
      100.f,
      M_PI,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
@@ -71,7 +71,7 @@ static const BossConfig BOSS_CONFIGS[boss_count] = {
 
     // EEEEL
     {"EEEEL",
-     {250, 250},
+     {500, 500},
      100.f,
      M_PI,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),

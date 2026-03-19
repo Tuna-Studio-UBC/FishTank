@@ -42,7 +42,10 @@ static const AttackConfig ATTACK_CONFIGS[attack_count] = {
     /* --------------------------------- BOSSES --------------------------------- */
 
     // Sharky
-    {ATTACK_EFFECT::NORMAL, 10, 5000.f, BASE_PROJECTILE_SPEED * 2.5, 2000.f},
+    {ATTACK_EFFECT::NORMAL, 5, 3000.f, BASE_PROJECTILE_SPEED * 2, 100.f, Tint({0.2f, 0.9f, 1.f}),
+     PROJECTILE_SIZE_PX * 0.75f},
+    {ATTACK_EFFECT::NORMAL, 2, 5000.f, BASE_PROJECTILE_SPEED * 2, 100.f, Tint({0.2f, 0.9f, 1.f}),
+     PROJECTILE_SIZE_PX * 0.75f},
 
     // King Crabby
     {ATTACK_EFFECT::NORMAL, 10, 5000.f, BASE_PROJECTILE_SPEED, 1000.f, Tint({1.f, 0.5f, 0.8f})},

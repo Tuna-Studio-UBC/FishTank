@@ -7,7 +7,7 @@
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
 
-// Growth over time
+// Handle expiring effects
 class ExpirationSystem {
   public:
     void step(float elapsed_ms);

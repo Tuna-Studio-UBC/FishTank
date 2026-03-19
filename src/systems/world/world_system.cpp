@@ -502,6 +502,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
+        // TODO: Change pause key to ESC
         if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             auto &progress = registry.progresses.components[0];
             if (progress.is_upgrade_menu_called) {
