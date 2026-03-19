@@ -24,9 +24,9 @@ const int enemy_count = (int)ENEMY_TYPE::ENEMY_COUNT;
 // =================================================================================
 
 enum class BOSS_TYPE {
-    SHARKY = 0,               // TODO
-    KING_CRABBY = SHARKY + 1, // TODO
-    EEEEL = KING_CRABBY + 1,  // TODO
+    SHARKY = 0, // TODO
+    KING_CRABBY = SHARKY + 1,
+    EEEEL = KING_CRABBY + 1, // TODO
     BOSS_COUNT = EEEEL + 1
 };
 const int boss_count = (int)BOSS_TYPE::BOSS_COUNT;

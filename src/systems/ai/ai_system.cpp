@@ -110,7 +110,9 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 12.f;
             }
-        } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_NORMAL) {
+        } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_NORMAL ||
+                   fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC ||
+                   fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_GROW) {
             float incAngle = -1 * M_PI / 6.f;
             for (int i = 0; i < 3; i++) {
                 auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
@@ -142,7 +144,10 @@ void AISystem::step(float elapsed_ms) {
         act(e, elapsed_ms, player_pos);
     }
 
-    // TODO: Change switch attack patterns to use state machine
+    handle_bosses(elapsed_ms);
+}
+
+void AISystem::handle_bosses(float elapsed_ms) {
     for (Entity e : registry.bosses.entities) {
         FireControl &fc = registry.fireControls.get(e);
         Boss &boss = registry.bosses.get(e);
@@ -157,12 +162,16 @@ void AISystem::step(float elapsed_ms) {
         //     fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
         //     spdlog::info("Boss {} switching to attack pattern {}", e.name(), next_ap);
         // }
-
-        if (boss.type == BOSS_TYPE::KING_CRABBY) {
+        if (boss.type == BOSS_TYPE::SHARKY) {
+            // TODO
+        } else if (boss.type == BOSS_TYPE::KING_CRABBY) {
             Health &health = registry.healths.get(e);
-            if (health.hp <= health.max_hp * 0.33f) {
-                // Rapid
+
+            // Phase transitions
+            if (health.hp <= health.max_hp * 0.33f && boss.curr_phase < 3) {
+                // Phase 3: Toxic Burst
                 int next_ap = 2;
+                boss.curr_phase = 3;
                 boss.curr_attack_pattern_index = next_ap;
                 fc.attack_pattern = config.attack_patterns[next_ap];
                 fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
@@ -170,9 +179,10 @@ void AISystem::step(float elapsed_ms) {
                 SpeedControl &sc = registry.speedControls.get(e);
                 sc.move_speed = config.move_speed * 2.f;
                 sc.turn_speed = config.turn_speed * 2.f;
-            } else if (health.hp <= health.max_hp * 0.67f) {
-                // Toxic
+            } else if (health.hp <= health.max_hp * 0.67f && boss.curr_phase < 2) {
+                // Phase 2: Toxic
                 int next_ap = 1;
+                boss.curr_phase = 2;
                 boss.curr_attack_pattern_index = next_ap;
                 fc.attack_pattern = config.attack_patterns[next_ap];
                 fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
@@ -180,7 +190,28 @@ void AISystem::step(float elapsed_ms) {
                 SpeedControl &sc = registry.speedControls.get(e);
                 sc.move_speed = config.move_speed * 1.5f;
                 sc.turn_speed = config.turn_speed * 1.5f;
+            } else {
+                // Phase 1: Burst
             }
+
+            // Conditional changes
+            if (boss.curr_phase == 3) {
+                // Regenerate health
+                if (health.hp <= health.max_hp * 0.5f)
+                    health.hp += 0.05f * elapsed_ms;
+
+                // Grow projectiles
+                for (Entity be : registry.bullets.entities) {
+                    Bullet &bullet = registry.bullets.get(be);
+                    if (bullet.owner == e && !registry.growths.has(be)) {
+                        Growth &growth = registry.growths.emplace(be);
+                        growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 2.f;
+                        growth.rate_ps = 10.f;
+                    }
+                }
+            }
+        } else if (boss.type == BOSS_TYPE::EEEEL) {
+            // TODO
         }
     }
 }

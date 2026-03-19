@@ -44,9 +44,6 @@ class WorldSystem {
     // steps the game ahead by ms milliseconds
     bool step(float elapsed_ms);
 
-    // check for expired entities and remove them
-    void handle_expiration(float elapsed_ms);
-
     void respawn_player();
 
     float get_fps() const {

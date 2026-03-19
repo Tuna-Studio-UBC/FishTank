@@ -58,6 +58,7 @@ class ECSRegistry {
 
     // Physics
     ComponentContainer<Motion> motions;
+    ComponentContainer<Growth> growths;
     ComponentContainer<Collision> collisions;
     ComponentContainer<ParticleEmitter> particleEmitters;
     ComponentContainer<MeshCollider> meshColliders;
@@ -140,6 +141,7 @@ class ECSRegistry {
 
         // Physics
         registry_list.push_back(&motions);
+        registry_list.push_back(&growths);
         registry_list.push_back(&collisions);
         registry_list.push_back(&particleEmitters);
 

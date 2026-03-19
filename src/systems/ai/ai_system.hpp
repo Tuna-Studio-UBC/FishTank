@@ -18,5 +18,6 @@ class AISystem {
   public:
     void init(PathfindingSystem *system);
     void step(float elapsed_ms);
+    void handle_bosses(float elapsed_ms);
     void handle_detection();
 };

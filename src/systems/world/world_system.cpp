@@ -316,29 +316,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     return true;
 }
 
-void WorldSystem::handle_expiration(float elapsed_ms) {
-    for (Entity e : registry.expirations.entities) {
-        Expiration &exp = registry.expirations.get(e);
-        exp.lifespan_ms -= elapsed_ms;
-
-        if (exp.lifespan_ms <= 0) {
-            spdlog::debug("{} has expired", e.name_id());
-            registry.remove_all_components_of(e);
-        }
-    }
-
-    for (Entity e : registry.tints.entities) {
-        Tint &tint = registry.tints.get(e);
-
-        if (tint.life_ms == -99.f)
-            continue;
-
-        tint.life_ms -= elapsed_ms;
-        if (tint.life_ms <= 0)
-            registry.tints.remove(e);
-    }
-}
-
 void WorldSystem::respawn_player() {
     Entity &player = registry.players.entities[0];
     registry.remove_all_components_of(player);
