@@ -17,6 +17,7 @@ struct TutorialUI {
     void draw_tutorial_healing(TutorialStep tutorial);
     void draw_tutorial_ammo(TutorialStep tutorial);
     void draw_tutorial_combat(TutorialStep tutorial);
+    void draw_tutorial_upgrade_system(TutorialStep tutorial);
 };
 
 static TutorialUI tutorial_ui;

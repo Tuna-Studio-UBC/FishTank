@@ -2,10 +2,11 @@
 
 #include "death_system.hpp"
 #include "systems/world/world_init.hpp"
+#include <configs/attack_pattern.cpp>
+#include <configs/enemy_config.cpp>
+#include <random>
 #include <spdlog/spdlog.h>
 #include <systems/world/world_system.hpp>
-#include <configs/enemy_config.cpp>
-#include <configs/attack_pattern.cpp>
 
 void DeathSystem::step(float elapsed_ms) {
     for (Entity e : registry.healths.entities) {
@@ -50,8 +51,12 @@ void DeathSystem::step(float elapsed_ms) {
                     }
 
                     // Drop crackers
-                    if (registry.dropsCrackers.has(e)) {
+                    if (registry.dropsCrackers.has(e) && !registry.players.entities.empty()) {
+                        static std::mt19937 rng(std::random_device{}());
+                        static std::uniform_int_distribution<int> cracker_dist(1, 3);
+
                         DropsCrackers &drops = registry.dropsCrackers.get(e);
+                        drops.cracker = cracker_dist(rng);
                         Entity player = registry.players.entities[0];
                         Wallet &wallet = registry.wallets.get(player);
                         wallet.crackers += drops.cracker;
@@ -64,7 +69,7 @@ void DeathSystem::step(float elapsed_ms) {
                     createEffectSmoke(m.position);
 
                     registry.remove_all_components_of(e);
-                    registry.progresses.components[0].remaining_enemies -= 1;
+                    // registry.progresses.components[0].remaining_enemies -= 1;
                 }
             }
         }
@@ -90,5 +95,4 @@ void DeathSystem::changeEnemyType(Entity enemy, ENEMY_TYPE type) {
     ai.tree_file = "enemy_tree.txt";
     ai.tree = load_tree(ai.tree_file);
     ai.current_state = AIAction::PURSUE;
-
 }

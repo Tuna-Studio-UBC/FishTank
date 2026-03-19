@@ -29,7 +29,15 @@ struct Enemy {
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
+struct Boss {
+    BOSS_TYPE type;
+    int curr_attack_pattern_index = 0;
+    float elapsed_time_ms = 0.f;
+    float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
+};
+
 struct Bullet {
+    ATTACK_EFFECT attack_effect;
     int damage;
     Entity owner; // track who fired to prevent self hit
 };
@@ -88,7 +96,11 @@ struct Dead {};
 
 struct Damage {
     int amount;
-    Damage(int amount) { this->amount = amount; };
+    vec3 tint;
+    Damage(int amount, vec3 tint = {1.f, 0.25f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 // Optional: OverTimeEffect
 
@@ -101,9 +113,10 @@ struct OverTimeEffect {
     float interval_ms = 1000;      // ms
     float duration_time_ms = 3000; // ms
     float elapsed_time_ms = 0;     // ms
-    OverTimeEffect(float interval_ms, float duration_time_ms) {
+    OverTimeEffect(float interval_ms, float duration_time_ms, float elapsed_time_ms = 0) {
         this->interval_ms = interval_ms;
         this->duration_time_ms = duration_time_ms;
+        this->elapsed_time_ms = elapsed_time_ms;
     };
 };
 
@@ -233,7 +246,11 @@ struct PowerUp {
 
 struct Heal {
     int amount;
-    Heal(int amount) { this->amount = amount; };
+    vec3 tint;
+    Heal(int amount, vec3 tint = {0.25f, 1.f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 
 struct Bubbler {
@@ -307,7 +324,7 @@ struct ParticleEmitter {
 
 // Data structure for toggling debug mode
 struct Debug {
-    bool in_debug_mode = 0;
+    bool in_debug_mode = 0; // if 1 render spatial grid
     bool in_freeze_mode = 0;
 };
 extern Debug debugging;
@@ -332,7 +349,7 @@ struct MouseInputState {
 };
 
 // TODO: Move to config
-enum Tutorial { MOVEMENT = 1, HAZARDS, HEALING, AMMUNITION, COMBAT };
+enum Tutorial { MOVEMENT = 1, HAZARDS, HEALING, AMMUNITION, COMBAT, UPGRADE_SYSTEM };
 
 struct TutorialStep {
     Tutorial id;
@@ -342,15 +359,14 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 2),   TutorialStep(Tutorial::HAZARDS, 1), TutorialStep(Tutorial::HEALING, 1),
-    TutorialStep(Tutorial::AMMUNITION, 1), TutorialStep(Tutorial::COMBAT, 2),
+    TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::HAZARDS, 1),
+    TutorialStep(Tutorial::HEALING, 1),  TutorialStep(Tutorial::AMMUNITION, 1),
+    TutorialStep(Tutorial::COMBAT, 2),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
 };
 
 struct Progress {
-    int wave = 0;
-    int level = 0;
-    int remaining_enemies = -1;
-
+    bool trigger_restart = false;
+    bool trigger_skip_wave = false;
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;
@@ -474,6 +490,7 @@ struct Text {
     float scale = 1.f;
     vec3 color = {0.f, 0.f, 0.f};
     glm::mat4 trans = glm::mat4(1.f);
+    bool centered = false;
 };
 
 struct Overlay {};
@@ -535,8 +552,9 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_MINE_SHEET = TEXTURE_HEALTH_SHEET + 1,
     TEXTURE_URCHIN_SHEET = TEXTURE_MINE_SHEET + 1,
     TEXTURE_ISOPOD_SHEET = TEXTURE_URCHIN_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_ISOPOD_SHEET + 1,
 
-    TEXTURE_COUNT = TEXTURE_ISOPOD_SHEET + 1
+    TEXTURE_COUNT = TEXTURE_KING_CRABBY_SHEET + 1
 };
 
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

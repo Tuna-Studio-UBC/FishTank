@@ -8,6 +8,7 @@
 #include <set>
 
 #pragma region Actors
+
 // =================================================================================
 // Actors
 // =================================================================================
@@ -26,12 +27,20 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     w.crackers = config.crackers;
 
     Health &h = registry.healths.emplace(entity);
+#ifdef GOD_MODE
+    h.hp = 1000;
+    h.max_hp = 1000;
+#else
     h.hp = config.hp;
     h.max_hp = config.max_hp;
+#endif
 
     FireControl &fc = registry.fireControls.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;
     fc.ammo = STARTING_AMMO;
+#ifdef GOD_MODE
+    fc.damage_bonus = 100;
+#endif
 
     SpeedControl &sc = registry.speedControls.emplace(entity);
     sc.move_speed = config.move_speed;
@@ -99,21 +108,88 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     return entity;
 }
 
-Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
-    auto &config = ENEMY_CONFIGS[(int)type];
+Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
+    auto &config = BOSS_CONFIGS[(int)type];
     auto entity = Entity(config.name);
-    return createEnemy(entity, renderer, position, type);
-}
-
-Entity createEnemy(Entity entity, RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
-    auto &config = ENEMY_CONFIGS[(int)type];
-    spdlog::debug("spawning enemy");
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
 
     auto &enemy = registry.enemies.emplace(entity);
     enemy.detection_radius = config.detection_radius;
+
+    int attack_pattern_index = 0;
+    ATTACK_PATTERN attack_pattern = config.attack_patterns[attack_pattern_index];
+
+    auto &boss = registry.bosses.emplace(entity);
+    boss.type = type;
+    boss.curr_attack_pattern_index = attack_pattern_index;
+
+    auto &motion = registry.motions.emplace(entity);
+    motion.velocity = vec2(0.0f, 0.0f);
+    motion.position = position;
+    motion.angle = 0.f;
+    motion.scale = vec2(50.0f, 50.0f);
+
+    auto &health = registry.healths.emplace(entity);
+    health = config.health;
+
+    auto &fire = registry.fireControls.emplace(entity);
+    fire.cooldown_ms = ATTACK_CONFIGS[(int)attack_pattern].cooldown_ms;
+    fire.attack_pattern = attack_pattern;
+
+    auto &speed = registry.speedControls.emplace(entity);
+    speed.move_speed = config.move_speed;
+    speed.turn_speed = config.turn_speed;
+
+    registry.senses.emplace(entity);
+    AI &ai = registry.ais.emplace(entity);
+    ai.tree_file = "enemy_tree.txt";
+    ai.tree = load_tree(ai.tree_file);
+    ai.current_state = AIAction::IDLE;
+
+    registry.pursuits.emplace(entity);
+    registry.dropsCrackers.emplace(entity);
+
+    if (type == BOSS_TYPE::KING_CRABBY) {
+        motion.scale = vec2(80.0f, 80.0f);
+
+        // TODO: ADD DECISIONS
+        ai.tree_file = "bosses/king_crabby_tree.txt";
+        ai.tree = load_tree(ai.tree_file);
+
+        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 250;
+    } else {
+        // TODO: REPLACE PLACEHOLDERS
+        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 250;
+    }
+
+    return entity;
+}
+
+Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
+    auto &config = ENEMY_CONFIGS[(int)type];
+    Entity entity = Entity(config.name);
+
+    auto &enemy = registry.enemies.emplace(entity);
+    enemy.detection_radius = config.detection_radius;
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
     auto &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(0.0f, 0.0f);
@@ -167,7 +243,7 @@ Entity createEnemy(Entity entity, RenderSystem *renderer, vec2 position, ENEMY_T
         ai.tree_file = "leader_tree.txt";
         ai.tree = load_tree(ai.tree_file);
         ai.current_state = AIAction::PATROL;
-        
+
         registry.beziers.emplace(entity);
         registry.leaders.emplace(entity);
 
@@ -434,14 +510,14 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
         }
     }
 
-    Bullet &bullet = registry.bullets.insert(entity, {attack_config.damage, owner});
+    Bullet &bullet = registry.bullets.insert(entity, {attack_config.attack_effect, attack_config.damage, owner});
     registry.expirations.emplace(entity, attack_config.lifespan_ms);
 
     Motion &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(attack_config.projectile_speed, 0.f);
     motion.position = position;
     motion.angle = angle;
-    motion.scale = vec2(PROJECTILE_SIZE_PX);
+    motion.scale = vec2(attack_config.projectile_scale);
 
     Bouncy &bouncy = registry.bouncies.emplace(entity);
 
@@ -612,7 +688,8 @@ Entity createEffectSpawn(const vec2 position) {
 
 #pragma region ScreenOverlays
 
-Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans) {
+Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans,
+                  bool centered) {
     auto entity = Entity("Text");
 
     Text &t = registry.texts.emplace(entity);
@@ -621,11 +698,19 @@ Entity createText(std::string text, vec2 position, float scale, const glm::vec3 
     t.scale = scale;
     t.color = color;
     t.trans = trans;
+    t.centered = centered;
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::FONT,
                                             GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::OVERLAYS});
 
     return entity;
+}
+
+Entity createCompletionText(std::string message) {
+    Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f),
+                          glm::mat4(1.f), true);
+    registry.expirations.emplace(e, 2000.f);
+    return e;
 }
 
 #pragma endregion ScreenOverlays

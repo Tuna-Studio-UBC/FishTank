@@ -1,6 +1,9 @@
 #include "components.hpp"
 #include "systems/rendering/render_system.hpp" // for gl_has_errors
 
+// definiotion global debug state in components.hpp
+Debug debugging;
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "../ext/stb_image/stb_image.h"
 

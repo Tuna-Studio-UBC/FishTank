@@ -1,11 +1,13 @@
 #include "collision_system.hpp"
+#include "configs/attack_pattern.hpp"
 #include "mesh_collision.hpp"
 #include "systems/health/heal_damage_system.hpp"
 #include "systems/world/world_init.hpp"
+
 #include <spdlog/spdlog.h>
 
 // Toggle for mesh collider, 0 = on.
-static int MESH_COLLISION_MODE = 1; // set to any other value to turn it off and us AABB
+static int MESH_COLLISION_MODE = 0; // set to any other value to turn it off and use AABB
 
 vec2 get_bounding_box(const Motion &motion);
 
@@ -77,20 +79,34 @@ void CollisionSystem::step(float elapsed_ms) {
 // Player or Enemy
 bool CollisionSystem::is_actor(Entity entity) { return registry.players.has(entity) || registry.enemies.has(entity); }
 
+void CollisionSystem::handle_apply_damage(Bullet &bullet, Entity other_entity) {
+    AttackEffectConfig ae = ATTACK_EFFECT_CONFIGS[(int)bullet.attack_effect];
+    switch (bullet.attack_effect) {
+    default:
+    case ATTACK_EFFECT::NORMAL:
+        HealDamageSystem::add_damage(other_entity, bullet.damage, ae.damage_tint);
+        break;
+    case ATTACK_EFFECT::TOXIC:
+        Entity ot_entity = createOverTimeEffect<Damage>(other_entity, ae.interval_ms, ae.duration_ms, true,
+                                                        bullet.damage, ae.damage_tint);
+        break;
+    }
+}
+
 void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) {
     if (registry.bullets.has(bullet_entity)) {
         Bullet &bullet = registry.bullets.get(bullet_entity);
         // Bullet hit player
         if (registry.players.has(other_entity)) {
             if (bullet.owner != other_entity) {
-                HealDamageSystem::add_damage(other_entity, bullet.damage);
+                handle_apply_damage(bullet, other_entity);
                 registry.remove_all_components_of(bullet_entity);
             }
         }
         // Bullet hit enemy
         else if (registry.enemies.has(other_entity)) {
             if (registry.players.has(bullet.owner)) { // Only player bullets damage enemies
-                HealDamageSystem::add_damage(other_entity, bullet.damage);
+                handle_apply_damage(bullet, other_entity);
 
                 // Temp use bullet collision as trigger
                 Motion &m = registry.motions.get(bullet_entity);
@@ -122,7 +138,7 @@ void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) 
         // Handle hazards against player
         if (registry.players.has(other_entity)) {
             if (config.duration_ms > 0.f && config.interval_ms > 0.f) {
-                createOverTimeEffect<Damage>(other_entity, config.interval_ms, config.duration_ms, config.amount);
+                createOverTimeEffect<Damage>(other_entity, config.interval_ms, config.duration_ms, true, config.amount);
                 registry.remove_all_components_of(hazard_entity);
             } else {
                 HealDamageSystem::add_damage(other_entity, config.amount);

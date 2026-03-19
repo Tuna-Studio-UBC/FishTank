@@ -32,11 +32,9 @@ class WorldSystem {
     // call to close the window
     void close_window();
 
-    void restart_game();
+    void trigger_restart();
 
     // starts the game
-    void init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
-                       UpgradeSystem *upgrade_system);
     void init(RenderSystem *renderer, CameraSystem *camera_system, TileMapSystem *tilemap_system,
               UpgradeSystem *upgrade_system);
 
@@ -63,11 +61,9 @@ class WorldSystem {
     bool is_over() const;
 
   private:
-    void start_wave(Progress &progress);
     void clear_level_objects();
-    void load_level_tutorial(Progress &progress);
-    void load_level(Progress &progress);
-    void load_next_level();
+    // void load_level_tutorial(Progress &progress);
+    // void load_next_level();
     void try_progress_tutorial();
 
     // input callback functions
