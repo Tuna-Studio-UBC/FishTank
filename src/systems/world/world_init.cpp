@@ -149,7 +149,7 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     ai.current_state = AIAction::IDLE;
 
     registry.pursuits.emplace(entity);
-    registry.dropsCrackers.emplace(entity);
+    registry.dropsCrackers.emplace(entity, 10);
 
     if (type == BOSS_TYPE::KING_CRABBY) {
         motion.scale = vec2(80.0f, 80.0f);
@@ -219,7 +219,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         registry.distracteds.emplace(entity);
     }
 
-    registry.dropsCrackers.emplace(entity);
+    DropsCrackers &dc = registry.dropsCrackers.emplace(entity);
 
     if (type == ENEMY_TYPE::URCHIN) {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
@@ -230,6 +230,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 4;
         an.columns = 4;
         an.frame_time = 500;
+        dc = 3;
     } else if (type == ENEMY_TYPE::HOMING) {
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ISOPOD_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
@@ -239,6 +240,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.columns = 8;
         an.frame_time = 125;
         motion.scale = vec2(40.0f, 25.0f);
+        dc = 1;
     } else if (type == ENEMY_TYPE::MOTHER) {
         ai.tree_file = "leader_tree.txt";
         ai.tree = load_tree(ai.tree_file);
@@ -254,6 +256,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
+        dc = 4;
     } else {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
@@ -263,6 +266,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
+        dc = 1;
     }
 
     return entity;

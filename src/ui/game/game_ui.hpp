@@ -18,6 +18,7 @@ struct GameUI {
     void draw_boss_healthbars();
     void draw_ammo();
     void draw_minimap();
+    void draw_wallet();
     void draw_pause_menu();
     void draw_upgrade_menu();
     void draw_cursor();

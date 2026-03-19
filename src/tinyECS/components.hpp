@@ -147,6 +147,8 @@ struct Target {
 
 struct DropsCrackers {
     int cracker;
+    DropsCrackers() {};
+    DropsCrackers(int amount) : cracker(amount) {};
 };
 
 struct Wallet {
