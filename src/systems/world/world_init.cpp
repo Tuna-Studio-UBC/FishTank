@@ -102,6 +102,12 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     auto &config = ENEMY_CONFIGS[(int)type];
     auto entity = Entity(config.name);
+    return createEnemy(entity, renderer, position, type);
+}
+
+Entity createEnemy(Entity entity, RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
+    auto &config = ENEMY_CONFIGS[(int)type];
+    spdlog::debug("spawning enemy");
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);

@@ -488,15 +488,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         SpawnRequest &req = registry.spawnRequests.get(e);
         req.timer_ms -= elapsed_ms_since_last_update;
         if (req.timer_ms <= 0) {
-            Entity enemy = createEnemy(renderer, req.position, req.type);
+            createEnemy(e, renderer, req.position, req.type);
+            createEffectSmoke(req.position);
             if (req.type == ENEMY_TYPE::MOTHER) {
                 for (int i = 1; i < 7; i++) {
-                    createFollower(renderer, req.position + vec2(TILE_SIZE_PX * i, 0.f), enemy);
+                    createFollower(renderer, req.position + vec2(TILE_SIZE_PX * i, 0.f), e);
                     progress.remaining_enemies += 1;
                 }
             } 
 
-            registry.remove_all_components_of(e);
+            registry.spawnRequests.remove(e);
         }
     }
 
