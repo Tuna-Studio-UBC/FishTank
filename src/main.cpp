@@ -13,6 +13,7 @@
 #include "systems/ai/ai_system.hpp"
 #include "systems/health/death_system.hpp"
 #include "systems/health/heal_damage_system.hpp"
+#include "systems/level/level_system.hpp"
 #include "systems/physics/collision_system.hpp"
 #include "systems/physics/physics_system.hpp"
 #include "systems/player/camera_system.hpp"
@@ -24,7 +25,6 @@
 #include "systems/timed/ote_system.hpp"
 #include "systems/world/tilemap_system.hpp"
 #include "systems/world/world_system.hpp"
-#include "systems/level/level_system.hpp"
 
 #include "ui/debug/debug_ui.hpp"
 #include "ui/game/game_ui.hpp"

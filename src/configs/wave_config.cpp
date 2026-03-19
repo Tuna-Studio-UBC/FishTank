@@ -39,10 +39,10 @@ const std::vector<Level> LEVEL_CONFIGS = {
     {2, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, true},
 
     // Level 2
-    {6, MapType::TEST_MAP2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}},
+    {5, MapType::TEST_MAP2, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}},
 
     // Level 3
-    {7,
+    {6,
      MapType::TEST_MAP,
      {HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
      {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::DAMAGE_MULTIPLIER},

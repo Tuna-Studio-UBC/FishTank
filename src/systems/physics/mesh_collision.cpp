@@ -157,10 +157,12 @@ bool computePolygonMTV(const vec2 *polyA, size_t countA, const vec2 *polyB, size
 
     // Compute polygon centers for direction disambiguation
     vec2 centerA = {0.f, 0.f};
-    for (size_t i = 0; i < countA; ++i) centerA += polyA[i];
+    for (size_t i = 0; i < countA; ++i)
+        centerA += polyA[i];
     centerA /= (float)countA;
     vec2 centerB = {0.f, 0.f};
-    for (size_t i = 0; i < countB; ++i) centerB += polyB[i];
+    for (size_t i = 0; i < countB; ++i)
+        centerB += polyB[i];
     centerB /= (float)countB;
 
     // Lambda: project both polygons onto axis, check overlap, track minimum.
@@ -169,14 +171,18 @@ bool computePolygonMTV(const vec2 *polyA, size_t countA, const vec2 *polyB, size
         float minA = FLT_MAX, maxA = -FLT_MAX;
         for (size_t i = 0; i < countA; ++i) {
             float d = dot(polyA[i], axis);
-            if (d < minA) minA = d;
-            if (d > maxA) maxA = d;
+            if (d < minA)
+                minA = d;
+            if (d > maxA)
+                maxA = d;
         }
         float minB = FLT_MAX, maxB = -FLT_MAX;
         for (size_t i = 0; i < countB; ++i) {
             float d = dot(polyB[i], axis);
-            if (d < minB) minB = d;
-            if (d > maxB) maxB = d;
+            if (d < minB)
+                minB = d;
+            if (d > maxB)
+                maxB = d;
         }
         // check for gap
         if (maxA < minB || maxB < minA) {
@@ -197,16 +203,20 @@ bool computePolygonMTV(const vec2 *polyA, size_t countA, const vec2 *polyB, size
         vec2 edge = polyA[(i + 1) % countA] - polyA[i];
         vec2 normal = {-edge.y, edge.x};
         float len = length(normal);
-        if (len < 1e-10f) continue;
-        if (!testAxis(normal / len)) return false;
+        if (len < 1e-10f)
+            continue;
+        if (!testAxis(normal / len))
+            return false;
     }
     // Test edge normals from polyB
     for (size_t i = 0; i < countB; ++i) {
         vec2 edge = polyB[(i + 1) % countB] - polyB[i];
         vec2 normal = {-edge.y, edge.x};
         float len = length(normal);
-        if (len < 1e-10f) continue;
-        if (!testAxis(normal / len)) return false;
+        if (len < 1e-10f)
+            continue;
+        if (!testAxis(normal / len))
+            return false;
     }
 
     if (minOverlap == FLT_MAX)

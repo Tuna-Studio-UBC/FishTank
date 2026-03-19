@@ -345,13 +345,14 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 2),   TutorialStep(Tutorial::HAZARDS, 1), TutorialStep(Tutorial::HEALING, 1),
-    TutorialStep(Tutorial::AMMUNITION, 1), TutorialStep(Tutorial::COMBAT, 2),
-    TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
+    TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::HAZARDS, 1),
+    TutorialStep(Tutorial::HEALING, 1),  TutorialStep(Tutorial::AMMUNITION, 1),
+    TutorialStep(Tutorial::COMBAT, 2),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
 };
 
 struct Progress {
     bool trigger_restart = false;
+    bool trigger_skip_wave = false;
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;
@@ -475,6 +476,7 @@ struct Text {
     float scale = 1.f;
     vec3 color = {0.f, 0.f, 0.f};
     glm::mat4 trans = glm::mat4(1.f);
+    bool centered = false;
 };
 
 struct Overlay {};

@@ -143,50 +143,6 @@ bool WorldSystem::start_and_load_sounds() {
     return true;
 }
 
-// TODO ALEC: Port to level system
-void WorldSystem::start_wave(Progress &progress) {
-    auto config = WAVE_CONFIGS[progress.wave];
-    progress.remaining_enemies = config.enemies.size() + config.bosses.size();
-    vec2 pos;
-
-    if (registry.players.entities.size() > 0) {
-        // // Teleport player to a random position each wave
-        // Entity player = registry.players.entities[0];
-        // registry.motions.get(player).position = tilemap_system->get_random_position(SpawnTarget::PLAYER);
-    } else {
-        // Create player entity
-        pos = tilemap_system->get_random_position(SpawnTarget::PLAYER);
-        Entity player = createPlayer(renderer, pos);
-
-        // Create camera
-        camera_system->init(tilemap_system->get_current_map());
-    }
-
-    // Spawn bosses
-    for (auto boss : config.bosses) {
-        // TODO: Replace w/ just BOSS
-        pos = tilemap_system->get_random_position(SpawnTarget::BOSS | SpawnTarget::ENEMY);
-        createBoss(renderer, pos, boss);
-    }
-
-    // Spawn enemies
-    for (auto enemy : config.enemies) {
-        if (enemy == ENEMY_TYPE::MOTHER) {
-            if (registry.tilemaps.has(tilemap_system->get_current_map())) {
-                BezierPath &path = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop[0];
-                Entity leader = createEnemy(renderer, path.p0, enemy);
-                for (int i = 1; i < 7; i++) {
-                    createFollower(renderer, path.p0 + vec2(TILE_SIZE_PX * i, 0.f), leader);
-                    progress.remaining_enemies += 1;
-                }
-            }
-        } else {
-            pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
-            createEnemy(renderer, pos, enemy);
-        }
-    }
-}
-
 void WorldSystem::clear_level_objects() {
     for (auto entity_list : entities_to_clear)
         for (auto entity : *entity_list)
@@ -243,14 +199,14 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     //     progress_p = &registry.progresses.components[0];
     // }
     // Progress &progress = *progress_p;
-    // 
+    //
     // // Set up world level
     // tilemap_system->init();
     // tilemap_system->load_map(LEVEL_CONFIGS[progress.level].map_type);
-    // 
+    //
     // load_level(progress);
     // start_wave(progress);
-    // 
+    //
     // // ! FOR TESTING !
     // glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
     // createText("Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1),
@@ -555,10 +511,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 progress.is_tutorial_step_called = false;
                 progress.is_paused = false;
             }
+            progress.trigger_skip_wave = true;
 
             for (Entity e : registry.enemies.entities)
                 registry.remove_all_components_of(e);
-            progress.remaining_enemies = 0;
 
             Entity player = registry.players.entities[0];
             Health &health = registry.healths.get(player);
@@ -610,62 +566,4 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
     }
 }
 
-void WorldSystem::trigger_restart()
-{ 
-    registry.progresses.components[0].trigger_restart = true;
-}
-
-
-void WorldSystem::restart_game() {
-    bool is_tutorial = registry.progresses.components[0].is_tutorial;
-
-    particle_system.clear_all_particles();
-    registry.clear_all_components();
-
-    if (is_tutorial) {
-        init_tutorial(renderer, camera_system, tilemap_system, upgrade_system);
-    } else {
-        init(renderer, camera_system, tilemap_system, upgrade_system);
-    }
-}
-
-
-// TODO ALEC: Fix upgrades being carried over
-void WorldSystem::load_next_level() {
-    Progress progress = registry.progresses.components[0];
-    const bool was_tutorial = progress.is_tutorial;
-
-    progress.is_tutorial = false;
-    progress.is_tutorial_step_called = false;
-    progress.has_beat_level = false;
-    progress.is_game_over = false;
-    progress.level++;
-
-    if (progress.level >= LEVEL_CONFIGS.size()) {
-        close_window();
-        return;
-    }
-
-    progress.is_upgrade_menu_called = true;
-    progress.is_paused = true;
-
-    Entity current_player = registry.players.entities[0];
-    const Health previous_health = registry.healths.get(current_player);
-    const FireControl previous_fire_control = registry.fireControls.get(current_player);
-    const Wallet previous_wallet = registry.wallets.get(current_player);
-    const Upgrades previous_upgrades = registry.upgrades.get(current_player);
-
-    particle_system.clear_all_particles();
-    registry.clear_all_components();
-    Entity e = Entity();
-    registry.progresses.insert(e, progress);
-    init(renderer, camera_system, tilemap_system, upgrade_system);
-
-    Entity next_player = registry.players.entities[0];
-    if (!was_tutorial) {
-        registry.healths.get(next_player) = previous_health;
-        registry.fireControls.get(next_player) = previous_fire_control;
-        registry.wallets.get(next_player) = previous_wallet;
-        registry.upgrades.get(next_player) = previous_upgrades;
-    }
-}
+void WorldSystem::trigger_restart() { registry.progresses.components[0].trigger_restart = true; }

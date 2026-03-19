@@ -6,9 +6,9 @@
 #include <cfloat>
 #include <cmath>
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include <unordered_map>
 #include <unordered_set>
-#include <spdlog/spdlog.h>
 
 // Toggle for mesh collider, 0 = on.
 static int MESH_COLLISION_MODE = 0; // set to any other value to turn it off and us AABB
@@ -57,7 +57,9 @@ static SpatialGrid s_broadPhaseGrid;
 static std::vector<uint> s_nearbyBuf;
 
 // pre-computed wall AABB polygons (rebuilt once per frame; avoids per-test vector allocation)
-struct WallAABB { vec2 verts[4]; };
+struct WallAABB {
+    vec2 verts[4];
+};
 static std::vector<WallAABB> s_wallAABBs;
 
 // reusable buffers for the resolve loop (avoids per-iteration heap allocation)
@@ -135,8 +137,7 @@ bool collides_with_wall(Entity entity, const Motion &entity_motion) {
         if (has_mesh) {
             // use the exact SAT MTV test (presence of MTV => intersection)
             vec2 tmpMtv;
-            if (computePolygonMTV(s_cwwPolyWorld.data(), s_cwwPolyWorld.size(),
-                                  s_wallAABBs[wi].verts, 4, tmpMtv)) {
+            if (computePolygonMTV(s_cwwPolyWorld.data(), s_cwwPolyWorld.size(), s_wallAABBs[wi].verts, 4, tmpMtv)) {
                 return true;
             }
         } else {
@@ -165,9 +166,9 @@ void PhysicsSystem::step(float elapsed_ms) {
         s_wallGrid.insert(i, wm.position, half);
         // Pre-compute wall AABB polygon (avoids rebuilding per SAT test)
         s_wallAABBs[i].verts[0] = wm.position + vec2{-half.x, -half.y};
-        s_wallAABBs[i].verts[1] = wm.position + vec2{ half.x, -half.y};
-        s_wallAABBs[i].verts[2] = wm.position + vec2{ half.x,  half.y};
-        s_wallAABBs[i].verts[3] = wm.position + vec2{-half.x,  half.y};
+        s_wallAABBs[i].verts[1] = wm.position + vec2{half.x, -half.y};
+        s_wallAABBs[i].verts[2] = wm.position + vec2{half.x, half.y};
+        s_wallAABBs[i].verts[3] = wm.position + vec2{-half.x, half.y};
     }
 
     // Move each entity that has motion
@@ -453,12 +454,12 @@ void PhysicsSystem::step(float elapsed_ms) {
                     tmpSlide.position = candidatePos;
                     bool slide_ok = !collides_with_wall(entity, tmpSlide);
 
-                                       /* spdlog::debug(
-                        "PHYS_FALLBACK entity={} safe=({}, {}) escape=({}, {}) cand=({}, {}) slide_ok={} "
-                                  "saved_vel=({}, {}) prev_forward={}",
-                                  entity.id(), safe_pos.x, safe_pos.y, escape_normal.x, escape_normal.y, candidatePos.x,
-                                  candidatePos.y, slide_ok, saved_computed_local_x, saved_computed_local_y,
-                                  prev_local_forward);*/
+                    /* spdlog::debug(
+     "PHYS_FALLBACK entity={} safe=({}, {}) escape=({}, {}) cand=({}, {}) slide_ok={} "
+               "saved_vel=({}, {}) prev_forward={}",
+               entity.id(), safe_pos.x, safe_pos.y, escape_normal.x, escape_normal.y, candidatePos.x,
+               candidatePos.y, slide_ok, saved_computed_local_x, saved_computed_local_y,
+               prev_local_forward);*/
 
                     if (slide_ok) {
                         // slide succeeded: commit slide position and preserve computed local velocity

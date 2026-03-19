@@ -7,13 +7,11 @@ void LevelSystem::step(const float &elapsed_ms) {
         return;
     }
 
-    if (progress.is_game_over || progress.is_paused)
-    {
+    if (progress.is_game_over || progress.is_paused) {
         return;
     }
 
-    if (should_advance())
-    {
+    if (should_advance()) {
         spdlog::info("Wave {} complete, starting next wave.", wave + 1);
 
         if (progress.is_tutorial) {
@@ -28,7 +26,7 @@ void LevelSystem::step(const float &elapsed_ms) {
             }
         }
     }
-    
+
     handle_timer(elapsed_ms);
 }
 
@@ -44,8 +42,7 @@ void LevelSystem::handle_timer(const float &elapsed_ms) {
     }
 }
 
-void LevelSystem::trigger_win(Progress& progress)
-{
+void LevelSystem::trigger_win(Progress &progress) {
     progress.is_game_over = true;
     progress.has_beat_level = true;
 
@@ -89,10 +86,15 @@ void LevelSystem::load_wave(int wave) {
             createEnemy(renderer, pos, enemy);
         }
     }
+
+    for (auto boss : config.bosses) {
+        // TODO: Replace w/ just BOSS
+        pos = tilemap_system->get_random_position(SpawnTarget::BOSS | SpawnTarget::ENEMY);
+        createBoss(renderer, pos, boss);
+    }
 }
 
-void LevelSystem::load_level_components()
-{
+void LevelSystem::load_level_components() {
     tilemap_system->init_spawn_points();
     auto config = LEVEL_CONFIGS[level];
     vec2 pos;
@@ -112,9 +114,10 @@ void LevelSystem::load_level_components()
     }
 }
 
-
 void LevelSystem::load_level(int level) {
+
     Progress progress = registry.progresses.components[0];
+    const bool was_tutorial = progress.is_tutorial;
     progress.is_tutorial = false;
     progress.is_tutorial_step_called = false;
     progress.has_beat_level = false;
@@ -131,26 +134,27 @@ void LevelSystem::load_level(int level) {
     bool player_exists = registry.players.size() > 0;
 
     // Persist upgrades
-    int hp, max_hp, ammo, max_ammo, damage = 10;
-    if (player_exists) {
-        auto &health = registry.healths.get(registry.players.entities[0]);
-        auto &fc = registry.fireControls.get(registry.players.entities[0]);
-        hp = health.hp;
-        max_hp = health.max_hp;
-        ammo = fc.ammo;
-        max_ammo = fc.max_ammo;
-        damage = fc.damage_bonus;
+    Health previous_health;
+    FireControl previous_fire_control;
+    Wallet previous_wallet;
+    Upgrades previous_upgrades;
+
+    if (player_exists && !was_tutorial) {
+        Entity current_player = registry.players.entities[0];
+        previous_health = registry.healths.get(current_player);
+        previous_fire_control = registry.fireControls.get(current_player);
+        previous_wallet = registry.wallets.get(current_player);
+        previous_upgrades = registry.upgrades.get(current_player);
     }
 
     particle_system.clear_all_particles();
     registry.clear_all_components();
-    
+
     registry.progresses.insert(Entity("Progress"), progress);
-    
+
     tilemap_system->init();
     tilemap_system->load_map(LEVEL_CONFIGS[level].map_type);
     load_level_components();
-
 
     // Create player entity
     vec2 pos = tilemap_system->get_random_position(SpawnTarget::PLAYER);
@@ -159,14 +163,12 @@ void LevelSystem::load_level(int level) {
     // Create camera
     camera_system->init(tilemap_system->get_current_map());
 
-    if (player_exists) {
-        auto &health = registry.healths.get(registry.players.entities[0]);
-        auto &fc = registry.fireControls.get(registry.players.entities[0]);
-        health.hp = hp;
-        health.max_hp = max_hp;
-        fc.ammo = ammo;
-        fc.max_ammo = max_ammo;
-        fc.damage_bonus = damage;
+    if (player_exists && !was_tutorial) {
+        Entity current_player = registry.players.entities[0];
+        registry.healths.get(current_player) = previous_health;
+        registry.fireControls.get(current_player) = previous_fire_control;
+        registry.wallets.get(current_player) = previous_wallet;
+        registry.upgrades.get(current_player) = previous_upgrades;
     }
 }
 
@@ -217,8 +219,7 @@ void LevelSystem::load_tutorial() {
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
 }
 
-void LevelSystem::restart_game()
-{
+void LevelSystem::restart_game() {
     bool is_tutorial = registry.progresses.components[0].is_tutorial;
 
     particle_system.clear_all_particles();
@@ -234,8 +235,15 @@ void LevelSystem::restart_game()
     }
 }
 
-bool LevelSystem::should_advance() { 
-    return advance_timer == 0.f && registry.enemies.size() == 0; 
+bool LevelSystem::should_advance() {
+    if (registry.progresses.size() > 0) {
+        Progress &progress = registry.progresses.components[0];
+        if (progress.trigger_skip_wave) {
+            progress.trigger_skip_wave = false;
+            return true;
+        }
+    }
+    return advance_timer == 0.f && registry.enemies.size() == 0;
 }
 
 void LevelSystem::load_next_level() {
@@ -261,7 +269,7 @@ void LevelSystem::trigger_load_next_level() {
     }
 }
 
-void LevelSystem::trigger_load_next_wave() { 
+void LevelSystem::trigger_load_next_wave() {
     createCompletionText("LOADING WAVE: " + std::to_string(wave + 1));
     triggered_load_wave = true;
     advance_timer = 2000.f;

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common.hpp"
+#include "configs/enemy_config.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
-#include "configs/enemy_config.hpp"
 
 // Updates player and enemy health
 class DeathSystem {

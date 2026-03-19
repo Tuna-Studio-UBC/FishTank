@@ -1,34 +1,28 @@
 #pragma once
 
 #include "common.hpp"
+#include "configs/wave_config.cpp"
+#include "systems/player/camera_system.hpp"
+#include "systems/rendering/particle_system.hpp"
+#include "systems/world/world_init.hpp"
+#include "systems/world/world_system.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
-#include "configs/wave_config.cpp"
-#include "systems/world/world_init.hpp"
-#include "systems/player/camera_system.hpp"
-#include "systems/world/world_system.hpp"
-#include "systems/rendering/particle_system.hpp"
 
-class LevelSystem
-{
+class LevelSystem {
 
-public:
+  public:
     void step(const float &elapsed_ms);
 
-    LevelSystem(TileMapSystem *tilemap_system, RenderSystem *renderer, 
-        CameraSystem *camera_system, WorldSystem *ws) : 
-        tilemap_system(tilemap_system),
-        renderer(renderer),
-        camera_system(camera_system),
-        world_system(ws)
-    { };
+    LevelSystem(TileMapSystem *tilemap_system, RenderSystem *renderer, CameraSystem *camera_system, WorldSystem *ws)
+        : tilemap_system(tilemap_system), renderer(renderer), camera_system(camera_system), world_system(ws) {};
 
     void load_tutorial();
 
     void restart_game();
 
-private:
+  private:
     int wave = -1;
     int level = -1;
 

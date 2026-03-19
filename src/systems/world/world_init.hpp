@@ -33,7 +33,7 @@ Entity createBubbler(RenderSystem *renderer, vec2 position);
 Entity createWall(const vec2 &position, const vec2 &scale = vec2(TILE_SIZE_PX));
 
 Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color = glm::vec3(0.f, 0.f, 0.f),
-                  const glm::mat4 &trans = glm::mat4(1.f));
+                  const glm::mat4 &trans = glm::mat4(1.f), bool centered = false);
 
 Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutorial id);
 

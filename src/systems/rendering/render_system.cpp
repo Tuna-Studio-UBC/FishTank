@@ -5,12 +5,13 @@
 #include <spdlog/spdlog.h>
 
 // internal
+#include "systems/physics/physics_system.hpp"
 #include "systems/rendering/particle_system.hpp"
 #include "systems/rendering/render_system.hpp"
 #include "tinyECS/registry.hpp"
-#include "systems/physics/physics_system.hpp"
 
-void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, const GLsizei& num_indices, const GLuint program) {
+void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, const GLsizei &num_indices,
+               const GLuint program) {
     Transform transform;
     transform.translate((TILE_SIZE_PX * tile_pos) + (TILE_SIZE_PX / 2));
     transform.scale(vec2(TILE_SIZE_PX));
@@ -29,15 +30,15 @@ void draw_tile(TileSet &tileset, const TileMap &tilemap, const ivec2 &tile_pos, 
         vec2((tile_id % tileset_width) / (float)tileset_width, (tile_id / tileset_width) / (float)tileset_height);
     GLint atlas_offset_uloc = glGetUniformLocation(program, "atlas_offset");
     glUniform2fv(atlas_offset_uloc, 1, value_ptr(atlas_offset));
-    //gl_has_errors();
+    // gl_has_errors();
 
     GLuint transform_loc = glGetUniformLocation(program, "transform");
     glUniformMatrix3fv(transform_loc, 1, GL_FALSE, value_ptr(transform.mat));
-    //gl_has_errors();
-    
+    // gl_has_errors();
+
     // Drawing of num_indices/3 triangles specified in the index buffer
     glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-    //gl_has_errors();
+    // gl_has_errors();
 }
 
 void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, const mat3 &view) {
@@ -53,7 +54,7 @@ void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, con
 
     const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::TILEMAP];
     glUseProgram(program);
-    //gl_has_errors();
+    // gl_has_errors();
 
     assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
     const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
@@ -62,50 +63,50 @@ void RenderSystem::drawTileMap(const Entity &entity, const mat3 &projection, con
     // Setting vertex and index buffers
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    //gl_has_errors();
+    // gl_has_errors();
 
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
     GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
-    //gl_has_errors();
+    // gl_has_errors();
     assert(in_texcoord_loc >= 0);
 
     glEnableVertexAttribArray(in_position_loc);
     glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *)0);
-    //gl_has_errors();
+    // gl_has_errors();
 
     glEnableVertexAttribArray(in_texcoord_loc);
     glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *)sizeof(vec3));
 
     // Enabling and binding texture to slot 0
     glActiveTexture(GL_TEXTURE0);
-    //gl_has_errors();
+    // gl_has_errors();
 
     GLuint texture_id = texture_gl_handles[(GLuint)render_request.used_texture];
 
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    //gl_has_errors();
+    // gl_has_errors();
 
     // Getting uniform locations for glUniform* calls
     GLint color_uloc = glGetUniformLocation(program, "fcolor");
     const vec3 color = vec3(1);
     glUniform3fv(color_uloc, 1, value_ptr(color));
-    //gl_has_errors();
+    // gl_has_errors();
 
     GLint tileset_size_uloc = glGetUniformLocation(program, "tileset_size");
     glUniform2fv(tileset_size_uloc, 1, value_ptr(tileset.dimensions));
-    //gl_has_errors();
+    // gl_has_errors();
 
     GLuint projection_loc = glGetUniformLocation(program, "projection");
     glUniformMatrix3fv(projection_loc, 1, GL_FALSE, value_ptr(projection));
-    //gl_has_errors();
+    // gl_has_errors();
 
     GLuint view_loc = glGetUniformLocation(program, "view");
     glUniformMatrix3fv(view_loc, 1, GL_FALSE, value_ptr(view));
-    //gl_has_errors();
+    // gl_has_errors();
 
     GLuint tile_size_loc = glGetUniformLocation(program, "tile_size");
     glUniform1f(tile_size_loc, tileset.tile_width_px);
-    //gl_has_errors();
+    // gl_has_errors();
 
     // Get number of indices from index buffer, which has elements uint16_t
     GLint size = 0;
@@ -287,6 +288,19 @@ void RenderSystem::drawText(Entity entity) {
 
     // iterate through characters of the text string
     std::string::const_iterator c;
+
+    // Set texture filters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    if (t.centered) {
+        uint total_advance = 0;
+        for (c = text.begin(); c != text.end(); c++) {
+            total_advance += (ft_characters[*c].Advance >> 6) * scale;
+        }
+        x -= total_advance / 2;
+    }
+
     for (c = text.begin(); c != text.end(); c++) {
         Character ch = ft_characters[*c];
 
@@ -321,6 +335,10 @@ void RenderSystem::drawText(Entity entity) {
     }
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(vao);
+
+    // Reset texture filters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
 // first draw to an intermediate texture,
@@ -603,10 +621,14 @@ void RenderSystem::drawDebugGrid(const mat3 &projection, const mat3 &view) {
             continue;
 
         // 4 line segments (8 vertices)
-        verts.push_back({x0, y0, 0}); verts.push_back({x1, y0, 0});
-        verts.push_back({x1, y0, 0}); verts.push_back({x1, y1, 0});
-        verts.push_back({x1, y1, 0}); verts.push_back({x0, y1, 0});
-        verts.push_back({x0, y1, 0}); verts.push_back({x0, y0, 0});
+        verts.push_back({x0, y0, 0});
+        verts.push_back({x1, y0, 0});
+        verts.push_back({x1, y0, 0});
+        verts.push_back({x1, y1, 0});
+        verts.push_back({x1, y1, 0});
+        verts.push_back({x0, y1, 0});
+        verts.push_back({x0, y1, 0});
+        verts.push_back({x0, y0, 0});
     }
 
     if (verts.empty())
