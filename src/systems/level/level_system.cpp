@@ -174,6 +174,7 @@ void LevelSystem::load_level(int level) {
 
 void LevelSystem::load_tutorial() {
     level = -1;
+    wave = -1;
     Progress &progress = registry.progresses.components[0];
     progress.is_tutorial = true;
     progress.is_tutorial_step_called = false;
@@ -230,8 +231,9 @@ void LevelSystem::restart_game() {
         load_tutorial();
     } else {
         level = 0;
-        wave = 0;
+        wave = -1;
         load_level(0);
+        trigger_load_next_wave();
     }
 }
 
