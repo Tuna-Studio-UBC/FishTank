@@ -231,6 +231,7 @@ void LevelSystem::load_tutorial() {
     createBubbler(renderer, {425.f, 400.f});
 
     createMine(renderer, {450.f, 1150.f});
+    createAnemone(renderer, {350.f, 1000.f});
     createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
     createPowerUp(renderer, {800.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
     createPowerUp(renderer, {700.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
