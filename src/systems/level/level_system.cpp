@@ -232,6 +232,8 @@ void LevelSystem::load_tutorial() {
 
     createMine(renderer, {450.f, 1150.f});
     createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
+    createPowerUp(renderer, {800.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
+    createPowerUp(renderer, {700.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
 
     createTutorialTrigger(player_motion.position, vec2(50.f, 50.f), Tutorial::MOVEMENT);
     createTutorialTrigger(vec2(250.f, 1125.f), vec2(50.f, 350.f), Tutorial::HAZARDS);
