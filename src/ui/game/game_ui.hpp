@@ -28,4 +28,5 @@ struct GameUI {
     UpgradeSystem *upgrade_system = nullptr;
 };
 
-static GameUI game_ui;
+// prevent linker error
+extern GameUI game_ui;

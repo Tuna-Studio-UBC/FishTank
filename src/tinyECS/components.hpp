@@ -32,6 +32,7 @@ struct Enemy {
 struct Boss {
     BOSS_TYPE type;
     int curr_attack_pattern_index = 0;
+    int curr_phase = 1;
     float elapsed_time_ms = 0.f;
     float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
 };
@@ -171,14 +172,6 @@ struct Distracted {
     float remaining_ms;
 };
 
-// used in AISystem to request projectile creation in WorldSystem
-struct BulletRequest {
-    ATTACK_PATTERN attack_pattern;
-    vec2 position;
-    float angle;
-    Entity owner;
-};
-
 struct Bezier {
     int current_segment = 0;
     float t = 0.f;
@@ -219,6 +212,28 @@ struct Upgrades {
 };
 
 #pragma endregion Behaviour
+
+#pragma region Requests
+// =================================================================================
+// Requests
+// =================================================================================
+
+// used in AISystem to request projectile creation in WorldSystem
+struct BulletRequest {
+    ATTACK_PATTERN attack_pattern;
+    vec2 position;
+    float angle;
+    Entity owner;
+};
+
+// used to delay spawn and time SpawnEffect
+struct SpawnRequest {
+    vec2 position;
+    float timer_ms = 2000.f;
+    ENEMY_TYPE type;
+};
+
+#pragma endregion Requests
 
 #pragma region Pickups
 // =================================================================================
@@ -276,6 +291,12 @@ struct Motion {
     // last contact normal (world-space), and frames to keep it active
     vec2 contact_normal = {0, 0};
     int contact_cooldown_frames = 0;
+};
+
+struct Growth {
+    vec2 target_scale = {0, 0};
+    float factor = 5.f;
+    float rate_ps = 0.f;
 };
 
 // Stucture to store collision information
@@ -548,7 +569,9 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_MINE_SHEET = TEXTURE_HEALTH_SHEET + 1,
     TEXTURE_URCHIN_SHEET = TEXTURE_MINE_SHEET + 1,
     TEXTURE_ISOPOD_SHEET = TEXTURE_URCHIN_SHEET + 1,
-    TEXTURE_KING_CRABBY_SHEET = TEXTURE_ISOPOD_SHEET + 1,
+
+    TEXTURE_SHARKY_SHEET = TEXTURE_ISOPOD_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_SHEET + 1,
 
     TEXTURE_COUNT = TEXTURE_KING_CRABBY_SHEET + 1
 };

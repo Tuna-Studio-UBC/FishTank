@@ -162,6 +162,13 @@ Entity TileMapSystem::load_map(MapType map_type) {
 // Maps
 // =================================================================================
 
+Entity TileMapSystem::load_empty_map() {
+    init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
+    Entity map = init_tiles("empty_map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
+    init_tile_walls(&registry.tilemaps.get(map));
+    return map;
+}
+
 Entity TileMapSystem::load_test_map() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
     Entity map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);

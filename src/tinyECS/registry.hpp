@@ -58,6 +58,7 @@ class ECSRegistry {
 
     // Physics
     ComponentContainer<Motion> motions;
+    ComponentContainer<Growth> growths;
     ComponentContainer<Collision> collisions;
     ComponentContainer<ParticleEmitter> particleEmitters;
     ComponentContainer<MeshCollider> meshColliders;
@@ -78,6 +79,7 @@ class ECSRegistry {
     ComponentContainer<Colour> colours;
     ComponentContainer<Tint> tints;
     ComponentContainer<Animation> animations;
+    ComponentContainer<SpawnRequest> spawnRequests;
 
     // Map
     ComponentContainer<TileSet> tilesets;
@@ -141,6 +143,7 @@ class ECSRegistry {
 
         // Physics
         registry_list.push_back(&motions);
+        registry_list.push_back(&growths);
         registry_list.push_back(&collisions);
         registry_list.push_back(&particleEmitters);
 
@@ -161,6 +164,7 @@ class ECSRegistry {
         registry_list.push_back(&colours);
         registry_list.push_back(&tints);
         registry_list.push_back(&animations);
+        registry_list.push_back(&spawnRequests);
 
         // Map
         registry_list.push_back(&tilesets);

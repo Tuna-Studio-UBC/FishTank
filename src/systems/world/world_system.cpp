@@ -316,29 +316,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     return true;
 }
 
-void WorldSystem::handle_expiration(float elapsed_ms) {
-    for (Entity e : registry.expirations.entities) {
-        Expiration &exp = registry.expirations.get(e);
-        exp.lifespan_ms -= elapsed_ms;
-
-        if (exp.lifespan_ms <= 0) {
-            spdlog::debug("{} has expired", e.name_id());
-            registry.remove_all_components_of(e);
-        }
-    }
-
-    for (Entity e : registry.tints.entities) {
-        Tint &tint = registry.tints.get(e);
-
-        if (tint.life_ms == -99.f)
-            continue;
-
-        tint.life_ms -= elapsed_ms;
-        if (tint.life_ms <= 0)
-            registry.tints.remove(e);
-    }
-}
-
 void WorldSystem::respawn_player() {
     Entity &player = registry.players.entities[0];
     registry.remove_all_components_of(player);
@@ -429,6 +406,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             vec2 bell_pos = registry.motions.get(best_bell).position;
 
             for (Entity enemy : registry.enemies.entities) {
+                if (!registry.motions.has(enemy)) {
+                    continue;
+                }
                 Motion &enemy_motion = registry.motions.get(enemy);
                 if (entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
                     Sense &sense = registry.senses.get(enemy);
@@ -525,6 +505,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
+        // TODO: Change pause key to ESC
         if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             auto &progress = registry.progresses.components[0];
             if (progress.is_upgrade_menu_called) {

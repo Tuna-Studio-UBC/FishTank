@@ -42,6 +42,7 @@ Entity createCamera(vec2 position);
 // These effects are temporary and standalone
 Entity createEffectSmoke(const vec2 position);
 Entity createEffectBubbles(const vec2 position);
+Entity createEffectSpawn(const vec2 position);
 
 // Component can be: DamageMultiplier, SpeedMultiplier
 template <typename Component, typename... Args>

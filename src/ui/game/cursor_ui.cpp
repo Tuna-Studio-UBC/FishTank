@@ -2,6 +2,8 @@
 
 #include <iomanip>
 #include <sstream>
+// prevent linker error
+GameUI game_ui;
 
 void GameUI::draw_cursor() {
     ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ImGuiCond_Always);

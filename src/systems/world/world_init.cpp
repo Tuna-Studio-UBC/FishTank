@@ -146,21 +146,26 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
 
     registry.senses.emplace(entity);
     AI &ai = registry.ais.emplace(entity);
-    ai.tree_file = "enemy_tree.txt";
+    ai.tree_file = "bosses/boss_tree.txt";
     ai.tree = load_tree(ai.tree_file);
     ai.current_state = AIAction::IDLE;
 
     registry.pursuits.emplace(entity);
     registry.dropsCrackers.emplace(entity, 10);
 
-    if (type == BOSS_TYPE::KING_CRABBY) {
+    if (type == BOSS_TYPE::SHARKY) {
+        motion.scale = vec2(120.0f, 80.0f);
+
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SHARKY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 100;
+    } else if (type == BOSS_TYPE::KING_CRABBY) {
         motion.scale = vec2(80.0f, 80.0f);
 
-        // TODO: ADD DECISIONS
-        ai.tree_file = "bosses/king_crabby_tree.txt";
-        ai.tree = load_tree(ai.tree_file);
-
-        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
@@ -168,30 +173,22 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
-    } else {
-        // TODO: REPLACE PLACEHOLDERS
-        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
-                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
-
-        Animation &an = registry.animations.emplace(entity);
-        an.frame_count = 8;
-        an.columns = 8;
-        an.frame_time = 250;
+    } else if (type == BOSS_TYPE::EEEEL) {
+        // TODO
     }
 
     return entity;
 }
 
-Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
+Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
     auto &config = ENEMY_CONFIGS[(int)type];
-    auto entity = Entity(config.name);
-
-    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
-    registry.meshPtrs.emplace(entity, &mesh);
+    Entity entity = Entity(config.name);
 
     auto &enemy = registry.enemies.emplace(entity);
     enemy.detection_radius = config.detection_radius;
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
     auto &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(0.0f, 0.0f);
@@ -661,6 +658,32 @@ Entity createEffectBubbles(const vec2 position) {
     pe.particle_scale = 10;
     Motion &pm = registry.motions.emplace(e);
     pm.position = position;
+    return e;
+}
+
+Entity createEffectSpawn(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Spawn)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 1500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 80;
+    pe.particle_speed = 80;
+    pe.spawn_interval_ms = 20;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+    pe.particle_scale = 20;
+
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    pm.scale = vec2(TILE_SIZE_PX * 1.5);
+
+    registry.renderRequests.emplace(e,
+                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_BUBBLE,
+                                        EFFECT_ASSET_ID::TEXTURED, 
+                                        GEOMETRY_BUFFER_ID::SPRITE,
+                                        RENDER_LAYER::BACKGROUND
+                                    });
+    registry.tints.emplace(e, vec3(1.f, 0.2f, 0.2f));
     return e;
 }
 
