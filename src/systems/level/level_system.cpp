@@ -216,9 +216,9 @@ void LevelSystem::load_tutorial() {
     FireControl &player_fc = registry.fireControls.get(player);
     player_fc.ammo = 0;
 
-    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {150.f, 150.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {850.f, 150.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {500.f, 150.f}, ENEMY_TYPE::GUARD);
 
     // Set enemy health to something low for tutorial
     for (Entity e : registry.enemies.entities) {
