@@ -10,6 +10,7 @@
 
 const enum class MapType {
     TUTORIAL_MAP,
+    EMPTY_MAP,
     TEST_MAP,
     TEST_MAP2,
 };
@@ -26,6 +27,7 @@ class TileMapSystem {
                              int layer = 0);
     static void init_tile_walls(TileMap *tilemap);
 
+    static Entity load_empty_map();
     static Entity load_test_map();
     static Entity load_test_map2();
     static Entity load_tutorial_map();
@@ -49,6 +51,7 @@ class TileMapSystem {
         this->rng = std::default_random_engine(std::random_device()());
 
         // Define loadable maps here
+        LOAD_MAP_FN.emplace(MapType::EMPTY_MAP, TileMapSystem::load_empty_map);
         LOAD_MAP_FN.emplace(MapType::TEST_MAP, TileMapSystem::load_test_map);
         LOAD_MAP_FN.emplace(MapType::TEST_MAP2, TileMapSystem::load_test_map2);
         LOAD_MAP_FN.emplace(MapType::TUTORIAL_MAP, TileMapSystem::load_tutorial_map);
