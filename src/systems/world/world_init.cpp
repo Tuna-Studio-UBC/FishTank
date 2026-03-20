@@ -419,10 +419,20 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
         an.columns = 4;
         an.frame_count = 4;
         an.frame_time = 250;
+    } else if (config.type == POWER_UP_TYPE::DAMAGE_MULTIPLIER) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_WHEY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 8;
+        an.frame_count = 8;
+        an.frame_time = 125;
     } else {
-        registry.colours.emplace(entity, config.colour);
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                                GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SPEED_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
     }
 
     registry.pickUps.emplace(entity);
