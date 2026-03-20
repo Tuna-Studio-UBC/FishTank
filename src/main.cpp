@@ -219,7 +219,10 @@ int main() {
         debug_ui.draw_respawn(&world_system);
 #endif
 
-        game_ui.draw_cursor();
+        {
+            ZoneScopedN("RENDER: Cursor");
+            game_ui.draw_cursor();
+        }
 
         // Render
         {
