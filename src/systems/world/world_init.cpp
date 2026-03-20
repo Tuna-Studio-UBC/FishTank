@@ -139,6 +139,10 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     auto &fire = registry.fireControls.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)attack_pattern].cooldown_ms;
     fire.attack_pattern = attack_pattern;
+    if (type == BOSS_TYPE::SHARKY) {
+        // Add initial 3 second delay to allow the player to run
+        fire.cooldown_timer = -3000;
+    }
 
     auto &speed = registry.speedControls.emplace(entity);
     speed.move_speed = config.move_speed;
