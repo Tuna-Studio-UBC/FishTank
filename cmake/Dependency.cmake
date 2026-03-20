@@ -121,7 +121,7 @@ target_include_directories(tracy PUBLIC
   ${tracy_SOURCE_DIR}/public
 )
 
-target_compile_definitions(tracy PUBLIC TRACY_ENABLE TRACY_MEMORY TRACY_ON_DEMAND)
+target_compile_definitions(tracy PUBLIC TRACY_ENABLE TRACY_MEMORY TRACY_ON_DEMAND TRACY_CALLSTACK=10)
 
 # ============================================================
 # Helper function to link everything
