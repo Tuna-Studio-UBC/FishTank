@@ -18,6 +18,8 @@ struct Level {
     std::vector<float> bells;
     std::vector<float> bubblers; // TODO: Change type once bubblers are further developed
     bool upgrade_screen_before = false;
+    float spawn_threshold = 0.5f;
+    float time_threshold = 15000.f;
 };
 
 const std::vector<Wave> WAVE_CONFIGS = {

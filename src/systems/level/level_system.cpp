@@ -48,6 +48,7 @@ void LevelSystem::step(const float &elapsed_ms) {
 
 void LevelSystem::handle_timer(const float &elapsed_ms) {
     advance_timer = max(0.f, advance_timer - elapsed_ms);
+    time_since_last_wave = min(time_since_last_wave + elapsed_ms, 300000.f); // Capped to not have floating point issues
 
     if (advance_timer == 0.f) {
         if (triggered_load_level) {
@@ -74,6 +75,8 @@ void LevelSystem::trigger_win(Progress &progress) {
 }
 
 void LevelSystem::load_wave(int wave) {
+    enemies_spawned_last_wave = 0;
+    time_since_last_wave = 0.f;
     if (wave >= WAVE_CONFIGS.size())
         return;
     auto config = WAVE_CONFIGS[wave];
@@ -102,12 +105,14 @@ void LevelSystem::load_wave(int wave) {
         createEffectSpawn(pos);
         Entity e = Entity();
         registry.spawnRequests.insert(e, {pos, 2000.f, enemy});
+        enemies_spawned_last_wave++;
     }
 
     for (auto boss : config.bosses) {
         // TODO: Replace w/ just BOSS
         pos = tilemap_system->get_random_position(SpawnTarget::BOSS | SpawnTarget::ENEMY);
         createBoss(renderer, pos, boss);
+        enemies_spawned_last_wave++;
     }
 }
 
@@ -267,7 +272,22 @@ bool LevelSystem::should_advance() {
             return true;
         }
     }
-    return advance_timer == 0.f && registry.enemies.entities.size() == 0 && registry.spawnRequests.entities.size() == 0;
+
+    int num_enemies = registry.enemies.entities.size();
+    int num_spawn_requests = registry.spawnRequests.entities.size();
+    if (level == -1)
+        return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
+    
+    const Level &level_ref = LEVEL_CONFIGS[level];
+    if (wave == level_ref.last_wave) {
+        return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
+    } else if ((num_enemies + num_spawn_requests) / (float)enemies_spawned_last_wave <= level_ref.spawn_threshold) {
+        return advance_timer == 0.f;
+    } else if (time_since_last_wave > level_ref.time_threshold) {
+        time_since_last_wave = 0.f;
+        return true;
+    }
+    return false;
 }
 
 void LevelSystem::load_next_level() {
@@ -294,7 +314,7 @@ void LevelSystem::trigger_load_next_level() {
 }
 
 void LevelSystem::trigger_load_next_wave() {
-    createCompletionText("LOADING WAVE: " + std::to_string(wave + 1));
+    // createCompletionText("LOADING WAVE: " + std::to_string(wave + 1));
     triggered_load_wave = true;
     advance_timer = 50.f;
 }
