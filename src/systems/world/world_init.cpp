@@ -152,24 +152,17 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     registry.dropsCrackers.emplace(entity);
 
     if (type == BOSS_TYPE::SHARKY) {
-        motion.scale = vec2(80.0f, 80.0f);
+        motion.scale = vec2(120.0f, 80.0f);
 
-        // ai.tree_file = "bosses/boss_tree.txt";
-        // ai.tree = load_tree(ai.tree_file);
-
-        // TODO: REPLACE TEXTURE ASSET
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ISOPOD_SHEET, EFFECT_ASSET_ID::TEXTURED,
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SHARKY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
         Animation &an = registry.animations.emplace(entity);
         an.frame_count = 8;
         an.columns = 8;
-        an.frame_time = 125;
+        an.frame_time = 100;
     } else if (type == BOSS_TYPE::KING_CRABBY) {
         motion.scale = vec2(80.0f, 80.0f);
-
-        // ai.tree_file = "bosses/boss_tree.txt";
-        // ai.tree = load_tree(ai.tree_file);
 
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
@@ -178,15 +171,8 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
-    } else {
-        // TODO: REPLACE PLACEHOLDERS
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
-                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
-
-        Animation &an = registry.animations.emplace(entity);
-        an.frame_count = 8;
-        an.columns = 8;
-        an.frame_time = 250;
+    } else if (type == BOSS_TYPE::EEEEL) {
+        // TODO
     }
 
     return entity;

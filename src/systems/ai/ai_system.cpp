@@ -190,8 +190,8 @@ void AISystem::handle_bosses(float elapsed_ms) {
                     Bullet &bullet = registry.bullets.get(be);
                     if (bullet.owner == e && !registry.growths.has(be)) {
                         Growth &growth = registry.growths.emplace(be);
-                        growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 1.5f;
-                        growth.rate_ps = 5.f;
+                        growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 2.f;
+                        growth.rate_ps = 2.f;
                     }
                 }
             }
