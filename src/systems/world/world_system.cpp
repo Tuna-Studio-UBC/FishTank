@@ -429,6 +429,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             vec2 bell_pos = registry.motions.get(best_bell).position;
 
             for (Entity enemy : registry.enemies.entities) {
+                if (!registry.motions.has(enemy)) {
+                    continue;
+                }
                 Motion &enemy_motion = registry.motions.get(enemy);
                 if (entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
                     Sense &sense = registry.senses.get(enemy);

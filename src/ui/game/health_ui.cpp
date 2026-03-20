@@ -63,6 +63,9 @@ void GameUI::draw_enemy_healthbars() {
 
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "\nENEMIES:");
     for (Entity e : registry.enemies.entities) {
+        if (!registry.motions.has(e) || !registry.healths.has(e)) {
+            continue;
+        }
         Motion &m = registry.motions.get(e);
         Health &h = registry.healths.get(e);
         float ratio = (h.max_hp > 0) ? (float)h.hp / (float)h.max_hp : 0.f;

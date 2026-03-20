@@ -169,14 +169,6 @@ struct Distracted {
     float remaining_ms;
 };
 
-// used in AISystem to request projectile creation in WorldSystem
-struct BulletRequest {
-    ATTACK_PATTERN attack_pattern;
-    vec2 position;
-    float angle;
-    Entity owner;
-};
-
 struct Bezier {
     int current_segment = 0;
     float t = 0.f;
@@ -217,6 +209,28 @@ struct Upgrades {
 };
 
 #pragma endregion Behaviour
+
+#pragma region Requests
+// =================================================================================
+// Requests
+// =================================================================================
+
+// used in AISystem to request projectile creation in WorldSystem
+struct BulletRequest {
+    ATTACK_PATTERN attack_pattern;
+    vec2 position;
+    float angle;
+    Entity owner;
+};
+
+// used to delay spawn and time SpawnEffect
+struct SpawnRequest {
+    vec2 position;
+    float timer_ms = 2000.f;
+    ENEMY_TYPE type;
+};
+
+#pragma endregion Requests
 
 #pragma region Pickups
 // =================================================================================
