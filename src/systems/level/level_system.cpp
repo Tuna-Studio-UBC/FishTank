@@ -129,6 +129,11 @@ void LevelSystem::load_level_components() {
         pos = tilemap_system->get_random_position(SpawnTarget::AMMO);
         createBubbler(renderer, pos);
     }
+
+    for (auto power_up : config.powerups) {
+        pos = tilemap_system->get_random_position(SpawnTarget::POWERUP);
+        createPowerUp(renderer, pos, power_up);
+    }
 }
 
 void LevelSystem::load_level(int level) {

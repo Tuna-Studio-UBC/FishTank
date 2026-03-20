@@ -9,7 +9,7 @@
 
 enum class NodeType { CONDITION, ACTION, RANDOM };
 
-enum AIAction { IDLE, PURSUE, DISTRACTED, PATROL, SWITCH_ARSENAL };
+enum AIAction { IDLE, PURSUE, DISTRACTED, PATROL };
 
 struct TreeNode {
     int id;

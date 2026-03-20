@@ -144,21 +144,26 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
 
     registry.senses.emplace(entity);
     AI &ai = registry.ais.emplace(entity);
-    ai.tree_file = "enemy_tree.txt";
+    ai.tree_file = "bosses/boss_tree.txt";
     ai.tree = load_tree(ai.tree_file);
     ai.current_state = AIAction::IDLE;
 
     registry.pursuits.emplace(entity);
     registry.dropsCrackers.emplace(entity);
 
-    if (type == BOSS_TYPE::KING_CRABBY) {
+    if (type == BOSS_TYPE::SHARKY) {
+        motion.scale = vec2(120.0f, 80.0f);
+
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SHARKY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 100;
+    } else if (type == BOSS_TYPE::KING_CRABBY) {
         motion.scale = vec2(80.0f, 80.0f);
 
-        // TODO: ADD DECISIONS
-        ai.tree_file = "bosses/king_crabby_tree.txt";
-        ai.tree = load_tree(ai.tree_file);
-
-        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
@@ -166,16 +171,8 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
-    } else {
-        // TODO: REPLACE PLACEHOLDERS
-        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
-                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
-
-        Animation &an = registry.animations.emplace(entity);
-        an.frame_count = 8;
-        an.columns = 8;
-        an.frame_time = 250;
+    } else if (type == BOSS_TYPE::EEEEL) {
+        // TODO
     }
 
     return entity;

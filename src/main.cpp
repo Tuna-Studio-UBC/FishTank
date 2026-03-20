@@ -22,6 +22,8 @@
 #include "systems/rendering/animation_system.hpp"
 #include "systems/rendering/particle_system.hpp"
 #include "systems/rendering/render_system.hpp"
+#include "systems/timed/expiration_system.hpp"
+#include "systems/timed/growth_system.hpp"
 #include "systems/timed/ote_system.hpp"
 #include "systems/world/tilemap_system.hpp"
 #include "systems/world/world_system.hpp"
@@ -38,6 +40,8 @@ int main() {
     AISystem ai_system;
     PathfindingSystem path_system;
     CollisionSystem collision_system;
+    ExpirationSystem expiration_system;
+    GrowthSystem growth_system;
     OverTimeEffectSystem ote_system;
     HealDamageSystem heal_damage_system;
     DeathSystem death_system;
@@ -108,7 +112,8 @@ int main() {
 
         if (world_system.step(elapsed_ms)) {
             {
-                ZoneScopedN("SYS: OTE");
+                ZoneScopedN("SYS: Timed");
+                growth_system.step(elapsed_ms);
                 ote_system.step(elapsed_ms);
             }
             {
@@ -141,7 +146,7 @@ int main() {
             }
             {
                 ZoneScopedN("SYS: Expiration");
-                world_system.handle_expiration(elapsed_ms);
+                expiration_system.step(elapsed_ms);
             }
             {
                 ZoneScopedN("SYS: Particles");

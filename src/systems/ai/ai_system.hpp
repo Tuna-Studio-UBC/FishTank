@@ -18,5 +18,7 @@ class AISystem {
   public:
     void init(PathfindingSystem *system);
     void step(float elapsed_ms);
+    void switch_attack_pattern(Boss &boss, FireControl &fc, int next_pattern);
+    void handle_bosses(float elapsed_ms);
     void handle_detection();
 };
