@@ -185,9 +185,13 @@ class ECSRegistry {
 
     void list_all_components() {
         printf("Debug info on all registry entries:\n");
+        int total_components = 0;
         for (ContainerInterface *reg : registry_list)
-            if (reg->size() > 0)
+            if (reg->size() > 0) {
                 printf("%4d components of type %s\n", (int)reg->size(), typeid(*reg).name());
+                total_components += (int)reg->size();
+            }
+        printf("======== TOTAL COMPONENTS: %4d ========\n", total_components);
     }
 
     void list_all_components_of(Entity e) {
