@@ -5,6 +5,7 @@
 #include "imgui.h"
 
 #include "common.hpp"
+#include "systems/audio/audio_system.hpp"
 #include "systems/player/upgrade_system.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/registry.hpp"
@@ -13,6 +14,7 @@
 
 struct GameUI {
     void set_upgrade_system(UpgradeSystem *upgrade_system);
+    void set_audio_system(AudioSystem *audio_system);
     void draw_healthbar();
     void draw_enemy_healthbars();
     void draw_ammo();
@@ -22,6 +24,7 @@ struct GameUI {
 
   private:
     UpgradeSystem *upgrade_system = nullptr;
+    AudioSystem *audio_system = nullptr;
 };
 
 static GameUI game_ui;

@@ -16,10 +16,13 @@ class AudioSystem {
     void play_enemy_shot(const vec2 &source_pos, const vec2 &listener_pos);
     void play_player_shot_center(int volume);
     void play_bgm(const std::string &filename, int volume);
+    void set_master_volume(int volume);
+    int get_master_volume() const;
 
   private:
     void apply_spatial_to_channel(int channel, const vec2 &source_pos, const vec2 &listener_pos, float max_dist_px,
                                   float pan_dist_px, int base_volume);
+    void apply_master_volume() const;
 
     Mix_Chunk *hazard_warn_loop = nullptr;
     Mix_Chunk *enemy_shot = nullptr;
@@ -28,6 +31,8 @@ class AudioSystem {
     Mix_Music *bgm = nullptr;
 
     int hazard_warn_channel = -1;
+    int bgm_base_volume = 45;
+    int master_volume = MIX_MAX_VOLUME;
     Entity current_hazard;
     float hazard_update_acc_ms = 0.f;
 };
