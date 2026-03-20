@@ -67,6 +67,7 @@ class ECSRegistry {
     ComponentContainer<KeyboardInputState> keyboardInputs;
     ComponentContainer<MouseInputState> mouseInputs;
     ComponentContainer<Progress> progresses;
+    ComponentContainer<Scoring> scoring;
     ComponentContainer<TutorialTrigger> tutorialTriggers;
 
     // Sound
@@ -151,6 +152,7 @@ class ECSRegistry {
         registry_list.push_back(&keyboardInputs);
         registry_list.push_back(&mouseInputs);
         registry_list.push_back(&progresses);
+        registry_list.push_back(&scoring);
         registry_list.push_back(&tutorialTriggers);
 
         // Sound

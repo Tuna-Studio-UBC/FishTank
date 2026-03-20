@@ -183,6 +183,14 @@ int main() {
             game_ui.draw_minimap();
         }
         {
+            ZoneScopedN("RENDER: Wallet");
+            game_ui.draw_wallet();
+        }
+        {
+            ZoneScopedN("RENDER: Wallet");
+            game_ui.draw_score();
+        }
+        {
             ZoneScopedN("RENDER: Ammo");
             game_ui.draw_ammo();
         }

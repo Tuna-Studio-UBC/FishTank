@@ -148,6 +148,8 @@ struct Target {
 
 struct DropsCrackers {
     int cracker;
+    DropsCrackers() {};
+    DropsCrackers(int amount) : cracker(amount) {};
 };
 
 struct Wallet {
@@ -385,6 +387,14 @@ struct Progress {
     bool is_paused = false;
     bool is_game_over = false;
     bool has_beat_level = false;
+};
+
+struct Scoring {
+    int bullets_fired = 0;
+    int bullets_hit = 0;
+    int been_hit = 0;
+    int enemies_defeated = 0;
+    int crackers_earned = 0;
 };
 
 struct TutorialTrigger {

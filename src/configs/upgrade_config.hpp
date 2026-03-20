@@ -18,6 +18,6 @@ struct UpgradeInstance {
     UpgradeInstance(const UpgradeConfig config) : config(config) {};
 };
 
-const UpgradeConfig ATTACK_UPGRADE_CONFIG = {4, {0, 5, 5, 5}, {0, 2, 4, 6}};
-const UpgradeConfig MAX_AMMO_UPGRADE_CONFIG = {4, {0, 10, 10, 10}, {0, 2, 4, 6}};
-const UpgradeConfig MAX_HP_UPGRADE_CONFIG = {4, {0, 20, 30, 30}, {0, 2, 4, 6}};
+const UpgradeConfig ATTACK_UPGRADE_CONFIG = {4, {0, 5, 5, 10}, {0, 5, 10, 15}};
+const UpgradeConfig MAX_AMMO_UPGRADE_CONFIG = {4, {0, 10, 10, 20}, {0, 5, 10, 15}};
+const UpgradeConfig MAX_HP_UPGRADE_CONFIG = {4, {0, 20, 20, 40}, {0, 5, 10, 15}};

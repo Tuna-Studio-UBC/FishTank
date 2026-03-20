@@ -59,6 +59,8 @@ void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &
 
     fc.cooldown_timer = fc.cooldown_ms;
     fc.ammo -= ammo_cost;
+    Scoring &score = registry.scoring.components[0];
+    score.bullets_fired += 1;
 }
 
 void PlayerInputSystem::step(float elapsed_ms) {
