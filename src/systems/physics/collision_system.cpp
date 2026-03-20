@@ -94,6 +94,7 @@ void CollisionSystem::handle_apply_damage(Bullet &bullet, Entity other_entity) {
 }
 
 void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) {
+    Scoring &score = registry.scoring.components[0];
     if (registry.bullets.has(bullet_entity)) {
         Bullet &bullet = registry.bullets.get(bullet_entity);
         // Bullet hit player
@@ -101,12 +102,14 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
             if (bullet.owner != other_entity) {
                 handle_apply_damage(bullet, other_entity);
                 registry.remove_all_components_of(bullet_entity);
+                score.been_hit += 1;
             }
         }
         // Bullet hit enemy
         else if (registry.enemies.has(other_entity)) {
             if (registry.players.has(bullet.owner)) { // Only player bullets damage enemies
                 handle_apply_damage(bullet, other_entity);
+                score.bullets_hit += 1;
 
                 // Temp use bullet collision as trigger
                 Motion &m = registry.motions.get(bullet_entity);

@@ -1,7 +1,5 @@
 #include "game_ui.hpp"
 
-const ImVec4 UI_COLOUR = ImVec4(0.f, 0.418, 0.741f, 1.f); // Should this be here?
-
 void GameUI::draw_wallet() {
     float bar_width = 240;
     float bar_height = 30;

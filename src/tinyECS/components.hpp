@@ -368,6 +368,14 @@ struct Progress {
     bool has_beat_level = false;
 };
 
+struct Scoring {
+    int bullets_fired = 0;
+    int bullets_hit = 0;
+    int been_hit = 0;
+    int enemies_defeated = 0;
+    int crackers_earned = 0;
+};
+
 struct TutorialTrigger {
     Tutorial id;
     TutorialTrigger(Tutorial id) : id(id) {};
