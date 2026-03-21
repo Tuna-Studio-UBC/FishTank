@@ -41,7 +41,7 @@ const std::vector<Wave> WAVE_CONFIGS = {
 
 const std::vector<Level> LEVEL_CONFIGS = {
     // Level 1
-    {2, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, true},
+    {2, MapType::TEST_MAP3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, true},
 
     // Level 2
     {3,

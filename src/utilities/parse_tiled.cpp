@@ -28,13 +28,13 @@ rapidjson::Value *get_layer(std::string layer_name, rapidjson::Document &map_dom
     return nullptr;
 }
 
-TileMap parse_tilemap(const std::string &path) {
+TileMap parse_tilemap_layer(const std::string &path, const std::string &layer, const bool &get_spawn_points) {
     auto json_str = parse_file(path);
     rapidjson::Document map_dom;
     map_dom.Parse(json_str.c_str());
 
     // Parse main layer
-    rapidjson::Value &main_layer = *get_layer("main", map_dom);
+    rapidjson::Value &main_layer = *get_layer(layer, map_dom);
     const int width = main_layer["width"].GetInt();
     const int height = main_layer["height"].GetInt();
     const int x_offset = main_layer["x"].GetInt();
@@ -48,9 +48,9 @@ TileMap parse_tilemap(const std::string &path) {
 
     // Parse spawn points if they exist
     void *spawn_points_ptr = get_layer("spawn_points", map_dom);
-
     std::array<SPAWN_TARGET, MAX_TILES> spawn_points{SpawnTarget::NONE};
-    if (spawn_points_ptr != nullptr) {
+   
+    if (get_spawn_points && spawn_points_ptr != nullptr) {
         rapidjson::Value &spawn_points_layer = *(rapidjson::Value *)spawn_points_ptr;
         const auto spawn_points_data = spawn_points_layer["data"].GetArray();
         for (int i = 0; i < width * height; i++) {
@@ -59,6 +59,10 @@ TileMap parse_tilemap(const std::string &path) {
     }
 
     return TileMap(tiles, spawn_points, width, height, x_offset, y_offset);
+}
+
+TileMap parse_tilemap(const std::string &path) { 
+    return parse_tilemap_layer(path, "main", true); 
 }
 
 TileSet parse_tileset(const std::string &path) {

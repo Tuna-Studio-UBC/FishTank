@@ -53,15 +53,40 @@ Entity TileMapSystem::init_tiles(std::string map_file_name, std::string tileset_
                                  int layer) {
     Entity entity = Entity(map_file_name);
 
-    TileMap tilemap = parse_tilemap(get_path(FilePath::MAPS, map_file_name));
-    TileSet tileset = parse_tileset(get_path(FilePath::TILESETS, tileset_file_name));
+    TileMap& tilemap = registry.tilemaps.insert(entity, parse_tilemap(get_path(FilePath::MAPS, map_file_name)));
+    TileSet& tileset = registry.tilesets.insert(entity, parse_tileset(get_path(FilePath::TILESETS, tileset_file_name)));
 
-    registry.tilemaps.insert(entity, tilemap);
-    registry.tilemaps.get(entity).patrol_loop = generate_loop(tilemap);
-    registry.tilesets.insert(entity, tileset);
+    tilemap.patrol_loop = generate_loop(tilemap);
 
     registry.renderRequests.insert(
         entity, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::BACKGROUND + layer});
+
+
+#ifdef DEBUG_INIT_TILES
+    print_tilemap(tilemap);
+    print_tileset(tileset);
+#endif
+
+    return entity;
+}
+
+Entity TileMapSystem::init_tiles_full(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id,
+                                 int layer) {
+    Entity entity = Entity(map_file_name);
+    Entity entity_bkg = Entity(map_file_name);
+
+    TileMap &tilemap = registry.tilemaps.insert(entity, parse_tilemap(get_path(FilePath::MAPS, map_file_name)));
+    TileSet &tileset = registry.tilesets.insert(entity, parse_tileset(get_path(FilePath::TILESETS, tileset_file_name)));
+    TileMap &tilemap_bkg = registry.tilemaps.insert(entity_bkg, parse_tilemap_layer(get_path(FilePath::MAPS, map_file_name), "background", false));
+    registry.tilesets.insert(entity_bkg, tileset);
+
+    tilemap.patrol_loop = generate_loop(tilemap);
+
+    registry.renderRequests.insert(
+        entity, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::BACKGROUND + layer});
+
+    registry.renderRequests.insert(
+        entity_bkg, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::BACKGROUND - layer});
 
 #ifdef DEBUG_INIT_TILES
     print_tilemap(tilemap);
@@ -179,6 +204,12 @@ Entity TileMapSystem::load_test_map() {
 Entity TileMapSystem::load_test_map2() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
     Entity map = init_tiles("map2.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
+    init_tile_walls(&registry.tilemaps.get(map));
+    return map;
+}
+
+Entity TileMapSystem::load_test_map3() { 
+    Entity map = init_tiles_full("map3.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
     init_tile_walls(&registry.tilemaps.get(map));
     return map;
 }

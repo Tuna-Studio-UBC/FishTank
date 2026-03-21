@@ -13,6 +13,7 @@ const enum class MapType {
     EMPTY_MAP,
     TEST_MAP,
     TEST_MAP2,
+    TEST_MAP3
 };
 
 class TileMapSystem {
@@ -25,11 +26,15 @@ class TileMapSystem {
 
     static Entity init_tiles(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id,
                              int layer = 0);
+   
+    static Entity init_tiles_full(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id,
+                           int layer);
     static void init_tile_walls(TileMap *tilemap);
 
     static Entity load_empty_map();
     static Entity load_test_map();
     static Entity load_test_map2();
+    static Entity load_test_map3();
     static Entity load_tutorial_map();
 
     static std::vector<BezierPath> generate_loop(const TileMap &map);
@@ -54,6 +59,7 @@ class TileMapSystem {
         LOAD_MAP_FN.emplace(MapType::EMPTY_MAP, TileMapSystem::load_empty_map);
         LOAD_MAP_FN.emplace(MapType::TEST_MAP, TileMapSystem::load_test_map);
         LOAD_MAP_FN.emplace(MapType::TEST_MAP2, TileMapSystem::load_test_map2);
+        LOAD_MAP_FN.emplace(MapType::TEST_MAP3, TileMapSystem::load_test_map3);
         LOAD_MAP_FN.emplace(MapType::TUTORIAL_MAP, TileMapSystem::load_tutorial_map);
     }
 };
