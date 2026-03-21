@@ -95,7 +95,7 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
 
 void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
     // Gun 2 mine costs 10 ammo, Gun 1 burst costs 1 per shot
-    int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 10 : 1;
+    int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 5 : 1;
     if (fc.ammo < ammo_cost)
         return;
 
