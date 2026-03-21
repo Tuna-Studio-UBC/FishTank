@@ -16,11 +16,14 @@ Items relating directly to the player's view. (Entity interactions are in a sepa
 ### Shooting
 
 - Player can use `Left-Click` on their mouse to shoot a projectile. The projectile should travel in the direction of the cursor on screen. Player can shoot independently of their movement with the keyboard.
+- **M3:** Player can use `Right-Click` on their mouse to shoot the special projectile.
+- **M3:** Player can use the number `1` and `2` to swap between the basic and explosive weapons. Pressing `1` when you are already on the basic weapon does nothing and vice versa.
 
-### Menuing
+### Menu
 - **M2:** Player can press `T` at any time to restart tutorial.
 - **M2:** Player can press `Enter` to clear tutorial messages.
 - **M2:** Player can press `R` once they've won or lost to reset the game to after the tutorial.
+- **M3:** Player can press `ESC` to pause their game
 
 ## Rendering
 
@@ -55,17 +58,29 @@ Behaviours of various entity interactions, including collision, detection, and e
 - **M2:** Expiry: Projectiles should de-spawn after ten seconds for the player, or five seconds for the enemy, or after hitting a target
 - **M2:** Hitting Self: Projectiles should not be able to hit the creator (E.g. Player bullets cannot hit player, will pass through)
 - Player can only fire projectiles if they have ammunition (shown in the bottom UI)
+- **M3:** Friendly mines do not damage player and explode on enemy contact, damaging in a small area.
+- **M3:** Explosive shots explode on contact with another object instead of bouncing. When colliding with a mine, it results in a large explosion.
 
 ### Enemies
 
 - Player gets within detection distance: Enemy will begin shooting and chasing the player. Once it gets within a configurable range, it will stop approaching the player but will continue shooting.
 - **M2:** Exit detection distance: Crab enemies will only detect the player when they are nearby, and will lose the player if they exit their detection distance. Fish enemies do not have a maximum detection distance, and always track and follow the player.
 - **M2:** Pathfinding: Enemies should pathfind correctly around walls towards the player.
+- **M3:** When the "Mother" enemy is killed, any remaining children should switch from following the mother (Which is gone) to swarming the player. When the children of a mother are killed, the mother should switch to a basic crab attack pattern.
 
 ### Mesh-Based Collision
 - **M2:** Player has mesh-based collider that follows the rough contour of the fish.
 
 ## Bug List
+
+### [P1: Completing tutorial leads to win screen #123](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/123)
+
+Level transitions broke during refactoring, completing the tutorial leads directly into the win screen. Fixed, can be tested by completing the tutorial.
+
+Steps to reproduce:
+1. Load the game up for the first time, you are in the tutorial
+2. Defeat the 3 enemy crabs and enter the upgrade screen
+3. After exiting via `ESC`, you will be greeted by the win screen
 
 ### [P2: Lag Spike for Mesh-Based Collisions #96](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/96)
 
@@ -77,7 +92,9 @@ Steps to Replicate:
 2. Move the player against any collider (best to just rub against a wall)
 3. Observe drop in framerate
 
-**Unresolved as of M2**
+~~Unresolved as of M2~~
+
+**M3:** Resolved via refactoring the collision and physics systems. Observe that the frames remain relatively stable (Some minor variation allowed) when colliding with walls.
 
 ### [P1: Game Crash on Reset #68](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/62)
 
