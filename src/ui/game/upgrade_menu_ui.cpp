@@ -110,6 +110,10 @@ void draw_upgrade_card(UpgradeSystem *upgrade_system, Entity player, UPGRADE_TYP
 
 void GameUI::set_upgrade_system(UpgradeSystem *upgrade_system) { this->upgrade_system = upgrade_system; }
 
+void GameUI::set_audio_system(AudioSystem *audio_system) {
+    this->audio_system = audio_system;
+}
+
 void GameUI::draw_upgrade_menu() {
     Progress &progress = registry.progresses.components[0];
     if (!(progress.is_paused && progress.is_upgrade_menu_called))
@@ -174,7 +178,7 @@ void GameUI::draw_upgrade_menu() {
         draw_upgrade_card(upgrade_system, player, type, ImVec2(card_width, card_height), title_size);
     }
 
-    text = "Press 1 / 2 / 3 to upgrade, or click a card button. Press P to continue.";
+    text = "Press 1 / 2 / 3 to upgrade, or click a card button. Press Esc to continue.";
     text_size = ImGui::CalcTextSize(text);
     ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX - 90.f));
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);

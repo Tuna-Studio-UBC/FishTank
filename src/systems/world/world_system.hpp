@@ -53,6 +53,7 @@ class WorldSystem {
         return fps / fps_avg.size();
     }
     bool get_show_fps() const { return show_fps; }
+    AudioSystem *get_audio_system() { return &audio_system; }
 
     // should the game be over ?
     bool is_over() const;

@@ -329,11 +329,6 @@ bool WorldSystem::is_over() const { return bool(glfwWindowShouldClose(window)); 
 // on key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-    // exit game w/ ESC
-    if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
-        close_window();
-    }
-
     // We should have 1 and only ever 1 player input component
     assert(registry.keyboardInputs.components.size() == 1);
     Entity playerEntity = registry.players.entities[0];
@@ -505,8 +500,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
-        // TODO: Change pause key to ESC
-        if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             auto &progress = registry.progresses.components[0];
             if (progress.is_upgrade_menu_called) {
                 upgrade_system->close_upgrade_menu();

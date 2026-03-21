@@ -47,7 +47,7 @@ void GameUI::draw_minimap() {
 
     ImGuiIO &io = ImGui::GetIO();
     const float padding = 12.f;
-    const ImVec2 win_size(240.f, 240.f);
+    const ImVec2 win_size(200.f, 200.f);
 
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - win_size.x - padding, padding), ImGuiCond_Always);
     ImGui::SetNextWindowSize(win_size, ImGuiCond_Always);
