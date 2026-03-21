@@ -90,6 +90,10 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
     vec2 position = registry.motions.get(enemy).position;
 
     if (fire.cooldown_timer >= fire.cooldown_ms) {
+        // Skip if can't fire
+        if (!fire.can_shoot)
+            return;
+
         if (fire.attack_pattern == ATTACK_PATTERN::URCHIN) {
             float incAngle = 0.f;
             for (int i = 0; i < 8; i++) {
@@ -149,7 +153,6 @@ void AISystem::step(float elapsed_ms) {
 
 void AISystem::switch_attack_pattern(Boss &boss, FireControl &fc, int next_pattern) {
     auto config = BOSS_CONFIGS[(int)boss.type];
-    boss.curr_phase = next_pattern + 1;
     boss.curr_attack_pattern_index = next_pattern;
     fc.attack_pattern = config.attack_patterns[next_pattern];
     fc.cooldown_ms = ATTACK_CONFIGS[(int)fc.attack_pattern].cooldown_ms;
@@ -161,19 +164,37 @@ void AISystem::handle_bosses(float elapsed_ms) {
         Boss &boss = registry.bosses.get(e);
         boss.elapsed_time_ms += elapsed_ms;
 
-        auto config = BOSS_CONFIGS[(int)boss.type];
+        if (fc.can_shoot) {
+            // Shooting mode
+            fc.elapsed_can_shoot_ms += elapsed_ms;
+            if (fc.elapsed_can_shoot_ms >= fc.can_shoot_ms)
+                fc.can_shoot = false;
+            fc.elapsed_cd_can_shoot_ms = 0.f;
+        } else {
+            // Cooldown mode
+            fc.elapsed_cd_can_shoot_ms += elapsed_ms;
+            if (fc.elapsed_cd_can_shoot_ms >= fc.cd_can_shoot_ms)
+                fc.can_shoot = true;
+            fc.elapsed_can_shoot_ms = 0.f;
+        }
 
-        // if (boss.elapsed_time_ms >= boss.time_to_next_pattern_ms) {
-        //     boss.elapsed_time_ms = 0.f;
-        //     int next_ap = (boss.curr_attack_pattern_index + 1) % config.attack_patterns.size();
-        //     boss.curr_attack_pattern_index = next_ap;
-        //     fc.attack_pattern = config.attack_patterns[next_ap];
-        //     fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
-        //     spdlog::info("Boss {} switching to attack pattern {}", e.name(), next_ap);
-        // }
+        auto config = BOSS_CONFIGS[(int)boss.type];
 
         if (boss.type == BOSS_TYPE::SHARKY) {
             Health &health = registry.healths.get(e);
+
+            // Swap based on time
+            // if (boss.elapsed_time_ms >= boss.time_to_next_pattern_ms) {
+            //     boss.elapsed_time_ms = 0.f;
+
+            //     if (boss.curr_attack_pattern_index == 0) {
+            //         switch_attack_pattern(boss, fc, 1);
+            //         boss.time_to_next_pattern_ms = 8 * 1000.f;
+            //     } else {
+            //         switch_attack_pattern(boss, fc, 0);
+            //         boss.time_to_next_pattern_ms = 15 * 1000.f;
+            //     }
+            // }
 
             // Phase transitions
             if (health.hp <= health.max_hp * 0.5f && boss.curr_phase < 2) {

@@ -124,11 +124,18 @@ struct OverTimeEffect {
 struct FireControl {
     float cooldown_timer = 0; // ms
     float cooldown_ms = 2000; // ms
+
     ATTACK_PATTERN attack_pattern;
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
     int damage_bonus = 0;
     float refill_progress = 0.f;
+
+    bool can_shoot = true;
+    float can_shoot_ms = 5 * 1000.f;    // Time window for shooting mode
+    float cd_can_shoot_ms = 2 * 1000.f; // Time window for cooldown mode
+    float elapsed_can_shoot_ms = 0.f;
+    float elapsed_cd_can_shoot_ms = 0.f;
 };
 
 struct SpeedControl {
