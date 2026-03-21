@@ -13,13 +13,12 @@ void LevelSystem::step(const float &elapsed_ms) {
 
     if (should_advance()) {
         spdlog::info("Wave {} complete, starting next wave.", wave + 1);
-
         if (progress.is_tutorial) {
             trigger_load_next_level();
         } else {
             if (wave == LEVEL_CONFIGS[level].last_wave && level < LEVEL_CONFIGS.size() - 1) {
                 trigger_load_next_level();
-            } else if (wave < WAVE_CONFIGS.size() - 1 && wave < LEVEL_CONFIGS[level].last_wave) {
+            } else if (wave < (int)WAVE_CONFIGS.size() - 1 && wave < LEVEL_CONFIGS[level].last_wave) {
                 trigger_load_next_wave();
             } else {
                 trigger_win(progress);
@@ -197,6 +196,8 @@ void LevelSystem::load_level(int level) {
         registry.wallets.get(current_player) = previous_wallet;
         registry.upgrades.get(current_player) = previous_upgrades;
     }
+
+    time_since_last_wave = 0.f;
 }
 
 void LevelSystem::load_tutorial() {
