@@ -164,6 +164,7 @@ void LevelSystem::load_level(int level) {
     FireControl previous_fire_control;
     Wallet previous_wallet;
     Upgrades previous_upgrades;
+    Scoring previous_scoring;
 
     if (player_exists && !was_tutorial) {
         Entity current_player = registry.players.entities[0];
@@ -171,6 +172,7 @@ void LevelSystem::load_level(int level) {
         previous_fire_control = registry.fireControls.get(current_player);
         previous_wallet = registry.wallets.get(current_player);
         previous_upgrades = registry.upgrades.get(current_player);
+        previous_scoring = registry.scoring.get(current_player);
     }
 
     particle_system.clear_all_particles();
@@ -195,6 +197,7 @@ void LevelSystem::load_level(int level) {
         registry.fireControls.get(current_player) = previous_fire_control;
         registry.wallets.get(current_player) = previous_wallet;
         registry.upgrades.get(current_player) = previous_upgrades;
+        registry.scoring.get(current_player) = previous_scoring;
     }
 
     time_since_last_wave = 0.f;
