@@ -35,13 +35,20 @@ struct Boss {
     int curr_phase = 1;
 };
 
+enum class BulletType {
+    BASIC,          // Gun 1: bouncing bullets
+    EXPLOSIVE,      // Gun 2: explodes on impact
+    DEPLOYED_MINE   // Gun 2 right-click: player-deployed mine
+};
+
 struct Bullet {
     ATTACK_EFFECT attack_effect;
     int damage;
     Entity owner; // track who fired to prevent self hit
+    BulletType type = BulletType::BASIC;
 };
 // Uses: Motion
-// Optional: Bouncy
+// Optional: Bouncy, Explosive, DeployedMine
 
 struct Turret {
     float barrel_length_px = 30.f;
@@ -169,7 +176,39 @@ struct Pursuit {
 };
 
 struct Bouncy {
-    int bounces_remaining = 3;
+    int bounces_remaining = 3; // 1 bounce is basically no bounce, 2 bounce is one bounce, etc
+};
+
+struct Explosive {
+    float radius = 100.0f;
+    float damage = 30.0f;
+    bool triggered_by_explosion = false;  // For mine chain reaction
+};
+
+struct DeployedMine {
+    float deceleration_rate = 75.0f;  // 150px/s over 2s 
+    bool is_stationary = false;
+};
+
+enum class WeaponType {
+    GUN_1,
+    GUN_2
+};
+
+struct WeaponState {
+    WeaponType current_weapon = WeaponType::GUN_1;
+
+    // Gun 1 (reg/bouncing bullets)
+    float gun1_left_cooldown = 500.0f;   // ms
+    float gun1_right_cooldown = 1500.0f; // burst cooldown 1.5s
+    int burst_shots_remaining = 0;
+    float next_burst_time = 0.0f;
+    float last_right_click_time = 0.0f;
+
+    // Gun 2 (explosives)
+    float gun2_left_cooldown = 600.0f;   // ms
+    float gun2_right_cooldown = 2500.0f; // mine cooldown 2.5s
+    float last_left_click_time = 0.0f;
 };
 
 struct Distracted {
@@ -361,11 +400,12 @@ struct KeyboardInputState {
     KeyboardActions most_recent_turn = KeyboardActions::TurnRight;
 };
 
-enum MouseActions { LeftClick, MouseActionsCount };
+enum MouseActions { LeftClick, RightClick, MouseActionsCount };
 
 struct MouseInputState {
     vec2 mouse_pos;
     MouseActions current_action = MouseActionsCount;
+    MouseActions previous_action = MouseActionsCount;
 };
 
 // TODO: Move to config
@@ -381,7 +421,7 @@ struct TutorialStep {
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
     TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::HAZARDS, 1),
     TutorialStep(Tutorial::HEALING, 1),  TutorialStep(Tutorial::AMMUNITION, 1),
-    TutorialStep(Tutorial::COMBAT, 2),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
+    TutorialStep(Tutorial::COMBAT, 3),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
 };
 
 struct Progress {
@@ -590,8 +630,9 @@ enum class TEXTURE_ASSET_ID {
 
     TEXTURE_SHARKY_SHEET = TEXTURE_SPEED_SHEET + 1,
     TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_SHEET + 1,
+    TEXTURE_EXPLOSION_SHEET = TEXTURE_KING_CRABBY_SHEET + 1,
 
-    TEXTURE_COUNT = TEXTURE_KING_CRABBY_SHEET + 1
+    TEXTURE_COUNT = TEXTURE_EXPLOSION_SHEET + 1
 };
 
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

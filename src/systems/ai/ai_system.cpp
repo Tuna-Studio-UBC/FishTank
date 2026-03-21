@@ -247,7 +247,7 @@ void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     }
 
     // Firing logic
-    if (ps->walkable_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos))) {
+    if (ps->visible_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos))) {
         fire_projectiles(e, elapsed_ms, angle);
     }
 }

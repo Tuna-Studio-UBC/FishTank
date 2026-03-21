@@ -39,6 +39,9 @@ class ECSRegistry {
     ComponentContainer<DropsCrackers> dropsCrackers;
     ComponentContainer<Pursuit> pursuits;
     ComponentContainer<Bouncy> bouncies;
+    ComponentContainer<Explosive> explosives;
+    ComponentContainer<DeployedMine> deployedMines;
+    ComponentContainer<WeaponState> weaponStates;
     ComponentContainer<BulletRequest> bullet_requests;
     ComponentContainer<Distracted> distracteds;
     ComponentContainer<Sense> senses;
@@ -127,6 +130,9 @@ class ECSRegistry {
         registry_list.push_back(&dropsCrackers);
         registry_list.push_back(&pursuits);
         registry_list.push_back(&bouncies);
+        registry_list.push_back(&explosives);
+        registry_list.push_back(&deployedMines);
+        registry_list.push_back(&weaponStates);
         registry_list.push_back(&bullet_requests);
         registry_list.push_back(&distracteds);
         registry_list.push_back(&senses);
