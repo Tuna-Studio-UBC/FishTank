@@ -34,8 +34,18 @@ void LevelSystem::step(const float &elapsed_ms) {
             Entity entity = createEnemy(renderer, req.position, req.type);
             createEffectSmoke(req.position);
             if (req.type == ENEMY_TYPE::MOTHER) {
+                Bezier &b = registry.beziers.get(entity);
+                Motion &m = registry.motions.get(entity);
+                std::vector<BezierPath> &loop = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop;
+                for (int i = 0; i < loop.size(); i++) {
+                    vec2 p0 = loop[i].p0;
+                    if (m.position.x == p0.x && m.position.y == p0.y) {
+                        b.current_segment = i;
+                        break;
+                    }
+                }
                 for (int i = 1; i < 7; i++) {
-                    createFollower(renderer, req.position + vec2(TILE_SIZE_PX * i, 0.f), entity);
+                    createFollower(renderer, tilemap_system->get_random_position(SpawnTarget::ENEMY), entity);
                 }
             }
 
@@ -91,8 +101,13 @@ void LevelSystem::load_wave(int wave) {
     for (auto enemy : config.enemies) {
         if (enemy == ENEMY_TYPE::MOTHER) {
             if (registry.tilemaps.has(tilemap_system->get_current_map())) {
+                int idx = 0;
+                for (SpawnRequest sr : registry.spawnRequests.components) {
+                    idx += sr.type == ENEMY_TYPE::MOTHER ? 1 : 0;
+                }
+                spdlog::debug("spawning mother at the {} curve", idx);
                 Entity sp_e = Entity();
-                BezierPath &path = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop[0];
+                BezierPath &path = registry.tilemaps.get(tilemap_system->get_current_map()).patrol_loop[idx];
                 pos = path.p0;
             }
         } else {

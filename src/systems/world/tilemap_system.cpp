@@ -103,9 +103,9 @@ void TileMapSystem::init_tile_walls(TileMap *tilemap) {
 }
 
 // Helpers to shrink radius
-enum FailAxis { NOFAIL, FAIL_X, FAIL_Y };
+enum FAIL_AXIS { NO_FAIL, FAIL_X, FAIL_Y };
 
-FailAxis ellipse_fail_axis(vec2 center, float rx, float ry, TileMap *map) {
+FAIL_AXIS ellipse_fail_axis(vec2 center, float rx, float ry, TileMap *map) {
     int samples = (int)((rx + ry) * 0.1f);
     samples = std::max(samples, 64);
     const float entity_radius = TILE_SIZE_PX * 0.4f;
@@ -122,9 +122,9 @@ FailAxis ellipse_fail_axis(vec2 center, float rx, float ry, TileMap *map) {
 
         if (tile.x <= 0 || tile.y <= 0 || tile.x >= (int)map->width - 1 || tile.y >= (int)map->height - 1) {
             if (abs(dir.x) > abs(dir.y)) {
-                return FAIL_X;
+                return FAIL_AXIS::FAIL_X;
             } else {
-                return FAIL_Y;
+                return FAIL_AXIS::FAIL_Y;
             }
         }
 
@@ -132,14 +132,14 @@ FailAxis ellipse_fail_axis(vec2 center, float rx, float ry, TileMap *map) {
         if (!is_empty_tile(map->tile_ids[idx])) {
             spdlog::debug("wall");
             if (abs(dir.x) > abs(dir.y)) {
-                return FAIL_X;
+                return FAIL_AXIS::FAIL_X;
             } else {
-                return FAIL_Y;
+                return FAIL_AXIS::FAIL_Y;
             }
         }
     }
 
-    return NOFAIL;
+    return FAIL_AXIS::NO_FAIL;
 }
 
 void TileMapSystem::generate_loop(TileMap *map) {
@@ -159,7 +159,7 @@ void TileMapSystem::generate_loop(TileMap *map) {
 
     bool found = false;
     while (rx > TILE_SIZE_PX && ry > TILE_SIZE_PX) {
-        FailAxis fail = ellipse_fail_axis(center, rx, ry, map);
+        FAIL_AXIS fail = ellipse_fail_axis(center, rx, ry, map);
 
         if (fail == NONE) {
             found = true;
