@@ -67,7 +67,7 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
         registry.bouncies.remove(bullet);  // Remove bouncy component
         Bullet &b = registry.bullets.get(bullet);
         b.type = BulletType::EXPLOSIVE;
-        registry.explosives.emplace(bullet, Explosive{125.0f, 30.0f, false});
+        registry.explosives.emplace(bullet, Explosive{125.0f, 20.0f, false});
 
         // Make it a red bubble
         RenderRequest &rr = registry.renderRequests.get(bullet);
@@ -150,7 +150,7 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
             registry.tints.emplace(mine, vec3(0.4f, 1.0f, 0.4f));
         }
 
-        registry.explosives.emplace(mine, Explosive{60.0f, 150.0f, false});
+        registry.explosives.emplace(mine, Explosive{60.0f, 30.0f, false}); //radius , damage, can chain react
         registry.deployedMines.emplace(mine, DeployedMine{75.0f, false});
         registry.expirations.get(mine).lifespan_ms = 40000.0f;  // 40 seconds
 
