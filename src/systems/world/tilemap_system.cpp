@@ -142,6 +142,7 @@ FAIL_AXIS ellipse_fail_axis(vec2 center, float rx, float ry, TileMap *map) {
     return FAIL_AXIS::NO_FAIL;
 }
 
+// https://spencermortensen.com/articles/bezier-circle/
 void TileMapSystem::generate_loop(TileMap *map) {
     std::vector<BezierPath> loop;
 
