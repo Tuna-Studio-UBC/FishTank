@@ -18,6 +18,11 @@ void CollisionSystem::step(float elapsed_ms) {
         Entity entity_a = collision_registry.entities[i];
         Entity entity_b = collision_registry.components[i].other;
 
+        // Skip if either entity no longer has a motion component
+        if (!registry.motions.has(entity_a) || !registry.motions.has(entity_b)) {
+            continue;
+        }
+
         // narrow-phase check: if either has a mesh collider, run mesh-based test
         bool passNarrowPhase = true;
         bool mesh_enabled = (MESH_COLLISION_MODE == 0);
@@ -93,14 +98,114 @@ void CollisionSystem::handle_apply_damage(Bullet &bullet, Entity other_entity) {
     }
 }
 
+// helper function to recursively find all mines in chain reaction range
+// Funny story, this was orignally a bug where the game would crash if like two mines were triggered
+// at the same time so I turned it into a feature, bigger booms.
+void CollisionSystem::collect_chain_mines(Entity explosive_entity, vec2 center, float radius, 
+                                          std::vector<Entity>& collected_mines, 
+                                          float& total_damage, float& max_radius) {
+    for (Entity bullet : registry.bullets.entities) {
+        // Skip if already collected or if it's the original explosive
+        if (std::find(collected_mines.begin(), collected_mines.end(), bullet) != collected_mines.end()) {
+            continue;
+        }
+
+        if (registry.deployedMines.has(bullet) && registry.explosives.has(bullet) && registry.motions.has(bullet)) {
+            vec2 mine_pos = registry.motions.get(bullet).position;
+            float dist = length(mine_pos - center);
+
+            if (dist <= radius) {
+                // Add mine to the collection
+                collected_mines.push_back(bullet);
+
+                Explosive &mine_exp = registry.explosives.get(bullet);
+                total_damage += mine_exp.damage;
+                max_radius = std::max(max_radius, mine_exp.radius);
+
+                // recursively find mines that THIS mine would trigger
+                collect_chain_mines(explosive_entity, mine_pos, mine_exp.radius * 1.5f, 
+                                   collected_mines, total_damage, max_radius);
+            }
+        }
+    }
+}
+
+void CollisionSystem::handle_explosives(Entity explosive_entity, vec2 explosion_pos, float radius, float damage) {
+    // Collect all mines in chain reaction range
+    std::vector<Entity> chain_mines;
+    float total_damage = damage;
+    float max_radius = radius;
+
+    collect_chain_mines(explosive_entity, explosion_pos, radius, chain_mines, total_damage, max_radius);
+
+    // Calculate combined explosion stats
+    int mine_count = chain_mines.size();
+    float combined_radius = max_radius + (mine_count * 15.0f);  // Each mine adds 15 units to radius
+    float combined_damage = total_damage;
+
+    if (mine_count > 0) {
+        spdlog::info("combo: {} mines triggered! Final radius: {}, Final damage: {}", mine_count, combined_radius, combined_damage);
+    }
+
+    // Create explosion animation scaled to combined radius
+    Entity explosion_anim = Entity("ExplosionAnimation");
+    Motion &exp_motion = registry.motions.emplace(explosion_anim);
+    exp_motion.position = explosion_pos;
+    exp_motion.velocity = vec2(0.0f, 0.0f);  
+    exp_motion.angle = 0.0f;
+    exp_motion.scale = vec2(combined_radius * 2.0f, combined_radius * 2.0f);  // Scale by diameter
+
+    registry.renderRequests.insert(explosion_anim, 
+        {TEXTURE_ASSET_ID::TEXTURE_EXPLOSION_SHEET, 
+         EFFECT_ASSET_ID::TEXTURED,
+         GEOMETRY_BUFFER_ID::SPRITE,    
+         RENDER_LAYER::OVERLAYS});
+
+    Animation &an = registry.animations.emplace(explosion_anim);
+    an.columns = 5;  //the sprite sheet is 5x5 frames, can be adjusted accordingly if we change the art
+    an.rows = 5;
+    an.frame_count = 25;
+    an.frame_time = 30;  // 30ms per frame = 0.75s total
+
+    // expire after animation completes 
+    registry.expirations.emplace(explosion_anim, 25 * 30.0f);
+
+    // Damage enemies in combined radius
+    int enemies_hit = 0;
+    for (Entity enemy : registry.enemies.entities) {
+        if (!registry.motions.has(enemy)) continue;
+        vec2 enemy_pos = registry.motions.get(enemy).position;
+        float dist = length(enemy_pos - explosion_pos);
+        if (dist <= combined_radius) {
+            HealDamageSystem::add_damage(enemy, (int)combined_damage);
+            enemies_hit++;
+        }
+    }
+
+    // Remove all collected mines at once (safe, no iteration issues)
+    for (Entity mine : chain_mines) {
+        registry.remove_all_components_of(mine);
+    }
+}
+
 void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) {
     Scoring &score = registry.scoring.components[0];
     if (registry.bullets.has(bullet_entity)) {
         Bullet &bullet = registry.bullets.get(bullet_entity);
+        bool is_deployed_mine = (bullet.type == BulletType::DEPLOYED_MINE);
+        bool should_explode = registry.explosives.has(bullet_entity);
+
         // Bullet hit player
         if (registry.players.has(other_entity)) {
+            // Player mines don't damage the owner!
             if (bullet.owner != other_entity) {
                 handle_apply_damage(bullet, other_entity);
+                if (should_explode && !is_deployed_mine) {
+                    // Explosive bullets explode on player hit
+                    Explosive &exp = registry.explosives.get(bullet_entity);
+                    vec2 pos = registry.motions.get(bullet_entity).position;
+                    handle_explosives(bullet_entity, pos, exp.radius, exp.damage);
+                }
                 registry.remove_all_components_of(bullet_entity);
                 score.been_hit += 1;
             }
@@ -108,29 +213,83 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         // Bullet hit enemy
         else if (registry.enemies.has(other_entity)) {
             if (registry.players.has(bullet.owner)) { // Only player bullets damage enemies
-                handle_apply_damage(bullet, other_entity);
-                score.bullets_hit += 1;
+                // Get bullet position before any removal happens
+                vec2 bullet_pos = registry.motions.has(bullet_entity) ? registry.motions.get(bullet_entity).position : vec2(0, 0);
 
-                // Temp use bullet collision as trigger
-                Motion &m = registry.motions.get(bullet_entity);
-                createEffectBubbles(m.position);
+                // Deployed mines ONLY explode, don't do bullet damage
+                if (!is_deployed_mine) {
+                    handle_apply_damage(bullet, other_entity);
+                    score.bullets_hit += 1;
+                }
+
+                if (should_explode) {
+                    Explosive &exp = registry.explosives.get(bullet_entity);
+                    float radius = exp.triggered_by_explosion ? exp.radius * 2.0f : exp.radius;
+                    spdlog::info("Exploding bullet damage: {}", exp.damage + bullet.damage);
+                    handle_explosives(bullet_entity, bullet_pos, radius, exp.damage);
+                }
+
+                // Create effect bubbles at saved position
+                createEffectBubbles(bullet_pos);
 
                 registry.remove_all_components_of(bullet_entity);
             }
         }
-        // TODO: Enable if we don't like no-cancellations
-        // // Bullet hit bullet
-        // else if (registry.bullet.has(other_entity)) {
-        //     Entity other_bullet_owner = registry.bullet.get(other_entity).owner;
-        //     if (bullet.owner != other_bullet_owner &&
-        //         !(registry.enemies.has(bullet.owner) &&
-        //           registry.enemies.has(other_bullet_owner))) { // Ignore between enemies
-        //         registry.remove_all_components_of(bullet_entity);
-        //         registry.remove_all_components_of(other_entity);
-        //     }
-        // }
+        // Bullet hit bullet (explosive bullets can trigger deployed mines)
+        else if (registry.bullets.has(other_entity)) {
+            Bullet &other_bullet = registry.bullets.get(other_entity);
+
+            // Check if one is explosive and the other is a deployed mine (order independent)
+            bool is_explosive_mine_combo = 
+                (bullet.type == BulletType::EXPLOSIVE && other_bullet.type == BulletType::DEPLOYED_MINE) ||
+                (bullet.type == BulletType::DEPLOYED_MINE && other_bullet.type == BulletType::EXPLOSIVE);
+
+            if (is_explosive_mine_combo) {
+                // Determine which is which
+                Entity mine_entity = (bullet.type == BulletType::DEPLOYED_MINE) ? bullet_entity : other_entity;
+                Entity explosive_entity = (bullet.type == BulletType::EXPLOSIVE) ? bullet_entity : other_entity;
+
+                vec2 explosion_pos = registry.motions.get(mine_entity).position;
+                float combined_radius = 0.0f;
+                float combined_damage = 0.0f;
+
+                // Get mine explosion stats
+                if (registry.explosives.has(mine_entity)) {
+                    Explosive &mine_exp = registry.explosives.get(mine_entity);
+                    combined_radius += mine_exp.radius;
+                    combined_damage += mine_exp.damage;
+                }
+
+                // Get explosive bullet stats
+                if (registry.explosives.has(explosive_entity)) {
+                    Explosive &bullet_exp = registry.explosives.get(explosive_entity);
+                    combined_radius += bullet_exp.radius;
+                    combined_damage = bullet_exp.damage + bullet.damage;
+                }
+
+                spdlog::info("Explosive bullet hit mine! Initial radius: {}, Initial damage: {} (before chain reaction)", combined_radius, combined_damage);
+
+                // Trigger combined explosion at mine position
+                handle_explosives(mine_entity, explosion_pos, combined_radius, combined_damage);
+
+                // Remove both bullets
+                registry.remove_all_components_of(bullet_entity);
+                registry.remove_all_components_of(other_entity);
+            }
+        }
     }
 }
+// TODO: Enable if we don't like no-cancellations
+// // Bullet hit bullet
+// else if (registry.bullet.has(other_entity)) {
+//     Entity other_bullet_owner = registry.bullet.get(other_entity).owner;
+//     if (bullet.owner != other_bullet_owner &&
+//         !(registry.enemies.has(bullet.owner) &&
+//           registry.enemies.has(other_bullet_owner))) { // Ignore between enemies
+//         registry.remove_all_components_of(bullet_entity);
+//         registry.remove_all_components_of(other_entity);
+//     }
+// }
 
 // TODO: Handle applying hazards FX
 void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) {
@@ -158,7 +317,27 @@ void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) 
 
 void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
     if (registry.bullets.has(entity_a) && registry.walls.has(entity_b)) {
+        // Mines don't explode on walls, they just stop
+        if (registry.deployedMines.has(entity_a)) {
+            DeployedMine &mine = registry.deployedMines.get(entity_a);
+            mine.is_stationary = true;
+            if (registry.motions.has(entity_a)) {
+                registry.motions.get(entity_a).velocity = vec2(0, 0);
+            }
+            return;
+        }
+
+        // Explosive bullets explode on wall impact
+        if (registry.explosives.has(entity_a)) {
+            Explosive &exp = registry.explosives.get(entity_a);
+            vec2 pos = registry.motions.get(entity_a).position;
+            handle_explosives(entity_a, pos, exp.radius, exp.damage);
+            registry.remove_all_components_of(entity_a);
+            return;
+        }
+
         if (registry.bouncies.has(entity_a)) {
+            Bouncy &bouncy = registry.bouncies.get(entity_a);
             Motion &bullet_motion = registry.motions.get(entity_a);
             Motion &wall_motion = registry.motions.get(entity_b);
 
@@ -230,6 +409,12 @@ void CollisionSystem::handle_walls(Entity entity_a, Entity entity_b) {
                 bullet_motion.angle += 2 * M_PI;
             while (bullet_motion.angle >= 2 * M_PI)
                 bullet_motion.angle -= 2 * M_PI;
+
+            // Decrement bounces remaining and destroy if out of bounces
+            bouncy.bounces_remaining--;
+            if (bouncy.bounces_remaining <= 0) {
+                registry.remove_all_components_of(entity_a);
+            }
 
         } else {
             // Non-bouncy bullets get destroyed

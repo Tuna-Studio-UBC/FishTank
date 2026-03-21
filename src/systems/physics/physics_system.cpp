@@ -184,6 +184,28 @@ void PhysicsSystem::step(float elapsed_ms) {
         if (length(motion.last_safe_position) < SAFE_POS_EPS)
             motion.last_safe_position = motion.position;
 
+        // Handle mine deceleration before calculating velocity
+        if (registry.deployedMines.has(entity)) {
+            DeployedMine &mine = registry.deployedMines.get(entity);
+            if (!mine.is_stationary) {
+                float current_speed = length(motion.velocity);
+                current_speed -= mine.deceleration_rate * (elapsed_ms / 1000.f);
+                if (current_speed <= 0.0f) {
+                    mine.is_stationary = true;
+                    motion.velocity = vec2(0, 0);
+                } else {
+                    // Maintain direction but reduce speed
+                    if (length(motion.velocity) > 0.0001f) {
+                        vec2 direction = normalize(motion.velocity);
+                        motion.velocity = direction * current_speed;
+                    }
+                }
+            } else {
+                // mine doesn't move
+                motion.velocity = vec2(0, 0);
+            }
+        }
+
         auto velocity = motion.velocity * elapsed_ms / 1000.f;
 
         // Adjust angle based on angular velocity

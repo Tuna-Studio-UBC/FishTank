@@ -49,7 +49,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     registry.upgrades.emplace(entity);
 
     registry.scoring.emplace(entity);
-
+    registry.weaponStates.emplace(entity);
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -688,19 +688,23 @@ Entity createEffectSpawn(const vec2 position) {
     pe.spawn_interval_ms = 20;
     pe.standalone = true;
     pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
-    pe.particle_scale = 20;
+    pe.particle_scale = 5;
 
     Motion &pm = registry.motions.emplace(e);
     pm.position = position;
     pm.scale = vec2(TILE_SIZE_PX * 1.5);
 
     registry.renderRequests.emplace(e,
-                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_BUBBLE,
+                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_WHIRL_SHEET,
                                         EFFECT_ASSET_ID::TEXTURED, 
                                         GEOMETRY_BUFFER_ID::SPRITE,
                                         RENDER_LAYER::BACKGROUND
                                     });
-    registry.tints.emplace(e, vec3(1.f, 0.2f, 0.2f));
+
+    Animation &an = registry.animations.emplace(e);
+    an.columns = 7;
+    an.frame_count = 7;
+    an.frame_time = 100;
     return e;
 }
 

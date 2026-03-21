@@ -30,6 +30,7 @@ class TileMapSystem {
     static Entity init_tiles_full(std::string map_file_name, std::string tileset_file_name, TEXTURE_ASSET_ID textures_id,
                            int layer);
     static void init_tile_walls(TileMap *tilemap);
+    static void generate_loop(TileMap *map);
 
     static Entity load_empty_map();
     static Entity load_test_map();
@@ -37,7 +38,6 @@ class TileMapSystem {
     static Entity load_test_map3();
     static Entity load_tutorial_map();
 
-    static std::vector<BezierPath> generate_loop(const TileMap &map);
 
   public:
     TileMapSystem();

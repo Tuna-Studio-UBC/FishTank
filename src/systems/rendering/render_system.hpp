@@ -69,6 +69,7 @@ class RenderSystem {
 
         // Sprite sheets
         get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"), 
+        get_path(FilePath::SPRITE_SHEETS, "whirl_sheet.png"), 
         get_path(FilePath::SPRITE_SHEETS, "fish_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "turret_sheet.png"),
 
@@ -84,7 +85,8 @@ class RenderSystem {
         get_path(FilePath::SPRITE_SHEETS, "speed_sheet.png"),
 
         get_path(FilePath::SPRITE_SHEETS, "sharky_sheet.png"),
-        get_path(FilePath::SPRITE_SHEETS, "king_crabby_sheet.png")};
+        get_path(FilePath::SPRITE_SHEETS, "king_crabby_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "explosion_sheet.png")};
 
     std::array<GLuint, effect_count> effects;
     // Make sure these paths remain in sync with the associated enumerators.

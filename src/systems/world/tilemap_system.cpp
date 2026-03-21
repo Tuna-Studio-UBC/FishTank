@@ -56,7 +56,7 @@ Entity TileMapSystem::init_tiles(std::string map_file_name, std::string tileset_
     TileMap& tilemap = registry.tilemaps.insert(entity, parse_tilemap(get_path(FilePath::MAPS, map_file_name)));
     TileSet& tileset = registry.tilesets.insert(entity, parse_tileset(get_path(FilePath::TILESETS, tileset_file_name)));
 
-    tilemap.patrol_loop = generate_loop(tilemap);
+    // tilemap.patrol_loop = generate_loop(tilemap);
 
     registry.renderRequests.insert(
         entity, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::BACKGROUND + layer});
@@ -126,6 +126,109 @@ void TileMapSystem::init_tile_walls(TileMap *tilemap) {
     createWall(vec2(wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
     // right
     createWall(vec2(arena_width - wall_thickness / 2.f, arena_height / 2.f), vec2(wall_thickness, arena_height));
+}
+
+// Helpers to shrink radius
+enum FAIL_AXIS { NO_FAIL, FAIL_X, FAIL_Y };
+
+FAIL_AXIS ellipse_fail_axis(vec2 center, float rx, float ry, TileMap *map) {
+    int samples = (int)((rx + ry) * 0.1f);
+    samples = std::max(samples, 64);
+    const float entity_radius = TILE_SIZE_PX * 0.4f;
+
+    for (int i = 0; i < samples; i++) {
+        float t = (2.f * M_PI * i) / samples;
+
+        vec2 dir = vec2(cos(t), sin(t));
+        vec2 p = center + vec2(rx * dir.x, ry * dir.y);
+
+        p += normalize(dir) * entity_radius;
+
+        ivec2 tile = world_to_tile(p);
+
+        if (tile.x <= 0 || tile.y <= 0 || tile.x >= (int)map->width - 1 || tile.y >= (int)map->height - 1) {
+            if (abs(dir.x) > abs(dir.y)) {
+                return FAIL_AXIS::FAIL_X;
+            } else {
+                return FAIL_AXIS::FAIL_Y;
+            }
+        }
+
+        int idx = get_map_index(map->width, tile.x,  tile.y);
+        if (!is_empty_tile(map->tile_ids[idx])) {
+            spdlog::debug("wall");
+            if (abs(dir.x) > abs(dir.y)) {
+                return FAIL_AXIS::FAIL_X;
+            } else {
+                return FAIL_AXIS::FAIL_Y;
+            }
+        }
+    }
+
+    return FAIL_AXIS::NO_FAIL;
+}
+
+// https://spencermortensen.com/articles/bezier-circle/
+void TileMapSystem::generate_loop(TileMap *map) {
+    std::vector<BezierPath> loop;
+
+    const float entity_radius = TILE_SIZE_PX;
+    const float margin = TILE_SIZE_PX * 0.3f;
+    const float step = TILE_SIZE_PX * 0.5f;
+    vec2 center = vec2((map->width * TILE_SIZE_PX) * 0.5f, (map->height * TILE_SIZE_PX) * 0.5f);
+
+    // start from biggest radius, shrink down till valid
+    float max_rx = (map->width * TILE_SIZE_PX) * 0.5f;
+    float max_ry = (map->height * TILE_SIZE_PX) * 0.5f;
+
+    float rx = max_rx;
+    float ry = max_ry;
+
+    bool found = false;
+    while (rx > TILE_SIZE_PX && ry > TILE_SIZE_PX) {
+        FAIL_AXIS fail = ellipse_fail_axis(center, rx, ry, map);
+
+        if (fail == NONE) {
+            found = true;
+            break;
+        }
+
+        if (fail == FAIL_X) {
+            rx -= step;
+        } else if (fail == FAIL_Y) {
+            ry -= step;
+        }
+    }
+
+    if (!found) {
+        spdlog::warn("No valid centered loop found");
+        map->patrol_loop.clear();
+        return;
+    }
+
+    rx -= margin;
+    ry -= margin;
+
+    // cubic bezier approximation c
+    const float c = (4/3)*(sqrt(2)-1);
+
+    vec2 top = center + vec2(0, -ry);
+    vec2 right = center + vec2(rx, 0);
+    vec2 bottom = center + vec2(0, ry);
+    vec2 left = center + vec2(-rx, 0);
+
+    loop.push_back({top, top + vec2(c * rx, 0), right + vec2(0, -c * ry), right});
+
+    loop.push_back({right, right + vec2(0, c * ry), bottom + vec2(c * rx, 0), bottom});
+
+    loop.push_back({bottom, bottom + vec2(-c * rx, 0), left + vec2(0, c * ry), left});
+
+    loop.push_back({left, left + vec2(0, -c * ry), top + vec2(-c * rx, 0), top});
+
+    // uncomment below to check generated loop
+    // spdlog::debug("Generated centered loop at ({}, {}), rx={}, ry={}", center.x, center.y, rx, ry);
+
+    map->patrol_loop = loop;
 }
 
 void TileMapSystem::init_spawn_points() {
@@ -198,6 +301,7 @@ Entity TileMapSystem::load_test_map() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
     Entity map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
     init_tile_walls(&registry.tilemaps.get(map));
+    generate_loop(&registry.tilemaps.get(map));
     return map;
 }
 
@@ -205,6 +309,7 @@ Entity TileMapSystem::load_test_map2() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
     Entity map = init_tiles("map2.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
     init_tile_walls(&registry.tilemaps.get(map));
+    generate_loop(&registry.tilemaps.get(map));
     return map;
 }
 
@@ -222,35 +327,3 @@ Entity TileMapSystem::load_tutorial_map() {
 }
 
 #pragma endregion Maps
-
-std::vector<BezierPath> TileMapSystem::generate_loop(const TileMap &map) {
-    std::vector<BezierPath> loop;
-
-    float left = TILE_SIZE_PX * 1.5;
-    float right = (map.width - 1.5) * TILE_SIZE_PX;
-    float top = TILE_SIZE_PX * 1.5;
-    float bottom = (map.height - 1.5) * TILE_SIZE_PX;
-
-    vec2 top_mid = vec2((left + right) * 0.5f, top);
-    vec2 right_mid = vec2(right, (top + bottom) * 0.5f);
-    vec2 bottom_mid = vec2((left + right) * 0.5f, bottom);
-    vec2 left_mid = vec2(left, (top + bottom) * 0.5f);
-
-    float w = right - left;
-    float h = bottom - top;
-
-    float cx = w * 0.25f;
-    float cy = h * 0.25f;
-
-    loop.push_back({top_mid, vec2(top_mid.x + cx, top_mid.y), vec2(right_mid.x, right_mid.y - cy), right_mid});
-
-    loop.push_back({right_mid, vec2(right_mid.x, right_mid.y + cy), vec2(bottom_mid.x + cx, bottom_mid.y), bottom_mid});
-
-    loop.push_back({bottom_mid, vec2(bottom_mid.x - cx, bottom_mid.y), vec2(left_mid.x, left_mid.y + cy), left_mid});
-
-    loop.push_back({left_mid, vec2(left_mid.x, left_mid.y - cy), vec2(top_mid.x - cx, top_mid.y), top_mid});
-
-    spdlog::debug("creating loop at ({},{}), ({},{}), ({},{}), ({},{})", top_mid.x, top_mid.y, right_mid.x, right_mid.y,
-                  bottom_mid.x, bottom_mid.y, left_mid.x, left_mid.y);
-    return loop;
-}
