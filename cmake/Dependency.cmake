@@ -11,7 +11,8 @@ set(ENGINE_DEPENDENCIES_LOADED TRUE)
 set(SPDLOG_VERSION v1.17.0)
 set(FREETYPE_VERSION master)
 set(RMLUI_VERSION 6.2)
-set(IMGUI_VERSION v1.92.5)
+set(IMGUI_VERSION v1.92.5-docking)
+set(TRACY_VERSION v0.13.1)
 
 # Generic Options
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -50,11 +51,23 @@ target_include_directories(freetype PUBLIC ${FREETYPE_INCLUDE_DIRS})
 # RmlUi
 # ============================================================
 
-FetchContent_Declare(
-  rmlui
-  URL "https://github.com/mikke89/RmlUi/archive/${RMLUI_VERSION}.zip"
-)
-FetchContent_MakeAvailable(rmlui)
+# FetchContent_Declare(
+#   RmlUi
+#   URL "https://github.com/mikke89/RmlUi/archive/${RMLUI_VERSION}.zip"
+# )
+# FetchContent_MakeAvailable(RmlUi)
+
+# set(RMLUI_BACKEND_PATH ${RmlUi_SOURCE_DIR}/Backends)
+# add_library(rmlui_backend_GLFW_GL3 INTERFACE)
+# # target_sources(rmlui_backend_GLFW_GL3 INTERFACE
+# #   ${RMLUI_BACKEND_PATH}/RmlUi_Platform_GLFW.cpp
+# #   ${RMLUI_BACKEND_PATH}/RmlUi_Renderer_GL3.cpp
+# # )
+# target_include_directories(rmlui_backend_GLFW_GL3 INTERFACE ${RMLUI_BACKEND_PATH})
+# target_compile_definitions(rmlui_backend_GLFW_GL3 INTERFACE
+#   RMLUI_NUM_MSAA_SAMPLES=2
+#   RMLUI_GL3_CUSTOM_LOADER=<gl3w.h>
+# )
 
 # ============================================================
 # Dear ImGui
@@ -83,6 +96,33 @@ target_include_directories(imgui PUBLIC
 )
 
 # ============================================================
+# Tracy
+# ============================================================
+
+set(TRACY_ENABLE  ON)
+set(TRACY_ON_DEMAND ON)
+set(TRACY_GUI_GLEW ON)
+set(TRACY_BUILD_PROFILER OFF)
+
+FetchContent_Declare(
+  tracy
+  GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+  GIT_TAG ${TRACY_VERSION}
+)
+
+FetchContent_MakeAvailable(tracy)
+
+add_library(tracy STATIC
+  ${tracy_SOURCE_DIR}/public/TracyClient.cpp
+)
+
+target_include_directories(tracy PUBLIC
+  ${tracy_SOURCE_DIR}/public
+)
+
+target_compile_definitions(tracy PUBLIC TRACY_ENABLE)
+
+# ============================================================
 # Helper function to link everything
 # ============================================================
 
@@ -90,8 +130,10 @@ function(link_engine_dependencies target)
   target_link_libraries(${target} PUBLIC
     spdlog::spdlog
     freetype
-    rmlui
+    # rmlui
+    # rmlui_backend_GLFW_GL3
     imgui
+    tracy
   )
 
   target_include_directories(imgui PUBLIC ${GLFW_INCLUDE_DIRS})

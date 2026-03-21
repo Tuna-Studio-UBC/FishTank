@@ -12,6 +12,7 @@ class ECSRegistry {
     // Entity
     ComponentContainer<Player> players;
     ComponentContainer<Camera> cameras;
+    ComponentContainer<Boss> bosses;
     ComponentContainer<Enemy> enemies;
     ComponentContainer<Turret> turrets;
     ComponentContainer<Wall> walls;
@@ -41,9 +42,10 @@ class ECSRegistry {
     ComponentContainer<Distracted> distracteds;
     ComponentContainer<Sense> senses;
     ComponentContainer<AI> ais;
-    ComponentContainer<BezierPath> beziers;
+    ComponentContainer<Bezier> beziers;
     ComponentContainer<Boid> boids;
     ComponentContainer<Upgrades> upgrades;
+    ComponentContainer<Leader> leaders;
 
     // Pickups
     ComponentContainer<PickUp> pickUps;
@@ -56,6 +58,7 @@ class ECSRegistry {
 
     // Physics
     ComponentContainer<Motion> motions;
+    ComponentContainer<Growth> growths;
     ComponentContainer<Collision> collisions;
     ComponentContainer<ParticleEmitter> particleEmitters;
     ComponentContainer<MeshCollider> meshColliders;
@@ -64,6 +67,7 @@ class ECSRegistry {
     ComponentContainer<KeyboardInputState> keyboardInputs;
     ComponentContainer<MouseInputState> mouseInputs;
     ComponentContainer<Progress> progresses;
+    ComponentContainer<Scoring> scoring;
     ComponentContainer<TutorialTrigger> tutorialTriggers;
 
     // Sound
@@ -75,6 +79,7 @@ class ECSRegistry {
     ComponentContainer<Colour> colours;
     ComponentContainer<Tint> tints;
     ComponentContainer<Animation> animations;
+    ComponentContainer<SpawnRequest> spawnRequests;
 
     // Map
     ComponentContainer<TileSet> tilesets;
@@ -91,6 +96,7 @@ class ECSRegistry {
     ECSRegistry() {
         // Entity
         registry_list.push_back(&players);
+        registry_list.push_back(&bosses);
         registry_list.push_back(&enemies);
         registry_list.push_back(&turrets);
         registry_list.push_back(&walls);
@@ -124,6 +130,7 @@ class ECSRegistry {
         registry_list.push_back(&beziers);
         registry_list.push_back(&boids);
         registry_list.push_back(&upgrades);
+        registry_list.push_back(&leaders);
 
         // Pickups
         registry_list.push_back(&pickUps);
@@ -136,6 +143,7 @@ class ECSRegistry {
 
         // Physics
         registry_list.push_back(&motions);
+        registry_list.push_back(&growths);
         registry_list.push_back(&collisions);
         registry_list.push_back(&particleEmitters);
 
@@ -144,6 +152,7 @@ class ECSRegistry {
         registry_list.push_back(&keyboardInputs);
         registry_list.push_back(&mouseInputs);
         registry_list.push_back(&progresses);
+        registry_list.push_back(&scoring);
         registry_list.push_back(&tutorialTriggers);
 
         // Sound
@@ -155,6 +164,7 @@ class ECSRegistry {
         registry_list.push_back(&colours);
         registry_list.push_back(&tints);
         registry_list.push_back(&animations);
+        registry_list.push_back(&spawnRequests);
 
         // Map
         registry_list.push_back(&tilesets);
@@ -175,9 +185,13 @@ class ECSRegistry {
 
     void list_all_components() {
         printf("Debug info on all registry entries:\n");
+        int total_components = 0;
         for (ContainerInterface *reg : registry_list)
-            if (reg->size() > 0)
+            if (reg->size() > 0) {
                 printf("%4d components of type %s\n", (int)reg->size(), typeid(*reg).name());
+                total_components += (int)reg->size();
+            }
+        printf("======== TOTAL COMPONENTS: %4d ========\n", total_components);
     }
 
     void list_all_components_of(Entity e) {

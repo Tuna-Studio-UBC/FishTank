@@ -1,5 +1,8 @@
 #include "ai_system.hpp"
 
+#include "configs/attack_pattern.cpp"
+#include "configs/enemy_config.cpp"
+
 void AISystem::init(PathfindingSystem *system) { ps = system; }
 
 AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
@@ -97,6 +100,28 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 4.f;
             }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::SHOTGUN ||
+                   fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_GROW) {
+            float incAngle = -2 * M_PI / 12.f;
+            for (int i = 0; i < 5; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = angle + incAngle;
+                req.owner = enemy;
+                incAngle += M_PI / 12.f;
+            }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_NORMAL ||
+                   fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC) {
+            float incAngle = -1 * M_PI / 6.f;
+            for (int i = 0; i < 3; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = angle + incAngle;
+                req.owner = enemy;
+                incAngle += M_PI / 6.f;
+            }
         } else {
             registry.bullet_requests.insert(enemy, {fire.attack_pattern, position, angle, enemy});
         }
@@ -118,6 +143,100 @@ void AISystem::step(float elapsed_ms) {
 
         act(e, elapsed_ms, player_pos);
     }
+
+    handle_bosses(elapsed_ms);
+}
+
+void AISystem::switch_attack_pattern(Boss &boss, FireControl &fc, int next_pattern) {
+    auto config = BOSS_CONFIGS[(int)boss.type];
+    boss.curr_phase = next_pattern + 1;
+    boss.curr_attack_pattern_index = next_pattern;
+    fc.attack_pattern = config.attack_patterns[next_pattern];
+    fc.cooldown_ms = ATTACK_CONFIGS[(int)fc.attack_pattern].cooldown_ms;
+}
+
+void AISystem::handle_bosses(float elapsed_ms) {
+    for (Entity e : registry.bosses.entities) {
+        FireControl &fc = registry.fireControls.get(e);
+        Boss &boss = registry.bosses.get(e);
+        boss.elapsed_time_ms += elapsed_ms;
+
+        auto config = BOSS_CONFIGS[(int)boss.type];
+
+        // if (boss.elapsed_time_ms >= boss.time_to_next_pattern_ms) {
+        //     boss.elapsed_time_ms = 0.f;
+        //     int next_ap = (boss.curr_attack_pattern_index + 1) % config.attack_patterns.size();
+        //     boss.curr_attack_pattern_index = next_ap;
+        //     fc.attack_pattern = config.attack_patterns[next_ap];
+        //     fc.cooldown_ms = ATTACK_CONFIGS[next_ap].cooldown_ms;
+        //     spdlog::info("Boss {} switching to attack pattern {}", e.name(), next_ap);
+        // }
+
+        if (boss.type == BOSS_TYPE::SHARKY) {
+            Health &health = registry.healths.get(e);
+
+            // Phase transitions
+            if (health.hp <= health.max_hp * 0.5f && boss.curr_phase < 2) {
+                // Phase 2: Waves
+                switch_attack_pattern(boss, fc, 1);
+            } else {
+                // Phase 1: Normal
+            }
+
+            // Conditional changes
+            if (boss.curr_phase == 2) {
+                // Grow projectiles
+                for (Entity be : registry.bullets.entities) {
+                    Bullet &bullet = registry.bullets.get(be);
+                    if (bullet.owner == e && !registry.growths.has(be)) {
+                        Growth &growth = registry.growths.emplace(be);
+                        growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 2.f;
+                        growth.rate_ps = 2.f;
+                    }
+                }
+            }
+        } else if (boss.type == BOSS_TYPE::KING_CRABBY) {
+            Health &health = registry.healths.get(e);
+
+            // Phase transitions
+            if (health.hp <= health.max_hp * 0.33f && boss.curr_phase < 3) {
+                // Phase 3: Toxic Burst
+                switch_attack_pattern(boss, fc, 2);
+
+                SpeedControl &sc = registry.speedControls.get(e);
+                sc.move_speed = config.move_speed * 2.f;
+                sc.turn_speed = config.turn_speed * 2.f;
+            } else if (health.hp <= health.max_hp * 0.67f && boss.curr_phase < 2) {
+                // Phase 2: Toxic
+                switch_attack_pattern(boss, fc, 1);
+
+                SpeedControl &sc = registry.speedControls.get(e);
+                sc.move_speed = config.move_speed * 1.5f;
+                sc.turn_speed = config.turn_speed * 1.5f;
+            } else {
+                // Phase 1: Burst
+            }
+
+            // Conditional changes
+            if (boss.curr_phase == 3) {
+                // Regenerate health
+                if (health.hp <= health.max_hp * 0.5f)
+                    health.hp += 0.05f * elapsed_ms;
+
+                // Grow projectiles
+                for (Entity be : registry.bullets.entities) {
+                    Bullet &bullet = registry.bullets.get(be);
+                    if (bullet.owner == e && !registry.growths.has(be)) {
+                        Growth &growth = registry.growths.emplace(be);
+                        growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 2.f;
+                        growth.rate_ps = 10.f;
+                    }
+                }
+            }
+        } else if (boss.type == BOSS_TYPE::EEEEL) {
+            // TODO
+        }
+    }
 }
 
 void AISystem::run_patrol(Entity e, float elapsed_ms) {
@@ -127,10 +246,7 @@ void AISystem::run_patrol(Entity e, float elapsed_ms) {
     }
 
     Motion &motion = registry.motions.get(e);
-    update_leader(e, motion, elapsed_ms);
-    if (!registry.senses.get(e).is_patrolling) {
-        registry.beziers.get(e).curves_left = 6;
-    }
+    ps->update_leader(e, motion, elapsed_ms);
 
     float dt = elapsed_ms / 1000.f;
 
@@ -139,7 +255,8 @@ void AISystem::run_patrol(Entity e, float elapsed_ms) {
             continue;
         }
 
-        update_follower(follower_e, e, elapsed_ms);
+        ps->update_follower(follower_e, e, elapsed_ms);
+        fire_projectiles(follower_e, elapsed_ms, registry.motions.get(follower_e).angle + M_PI / 2);
     }
 }
 
@@ -198,6 +315,9 @@ void AISystem::run_distracted(Entity e, float elapsed_ms, vec2 player_pos) {
 }
 
 void AISystem::run_idle(Entity e) {
+    if (registry.boids.has(e)) {
+        return;
+    }
     Motion &motion = registry.motions.get(e);
     motion.velocity = vec2(0.f, 0.f);
 }

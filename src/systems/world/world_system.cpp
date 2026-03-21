@@ -143,115 +143,10 @@ bool WorldSystem::start_and_load_sounds() {
     return true;
 }
 
-void WorldSystem::start_wave(Progress &progress) {
-    auto config = WAVE_CONFIGS[progress.wave];
-    progress.remaining_enemies = config.enemies.size();
-    vec2 pos;
-
-    if (registry.players.entities.size() > 0) {
-        // // Teleport player to a random position each wave
-        // Entity player = registry.players.entities[0];
-        // registry.motions.get(player).position = tilemap_system->get_random_position(SpawnTarget::PLAYER);
-    } else {
-        // Create player entity
-        pos = tilemap_system->get_random_position(SpawnTarget::PLAYER);
-        Entity player = createPlayer(renderer, pos);
-
-        // Create camera
-        camera_system->init(tilemap_system->get_current_map());
-    }
-
-    for (auto enemy : config.enemies) {
-        pos = tilemap_system->get_random_position(SpawnTarget::ENEMY);
-        createEnemy(renderer, pos, enemy);
-    }
-}
-
 void WorldSystem::clear_level_objects() {
     for (auto entity_list : entities_to_clear)
         for (auto entity : *entity_list)
             registry.remove_all_components_of(entity);
-}
-
-void WorldSystem::load_level_tutorial(Progress &progress) {
-    progress.is_tutorial = true;
-    progress.is_tutorial_step_called = false;
-    progress.tutorial_step_id = Tutorial::MOVEMENT;
-    progress.tutorial_steps = TUTORIAL_STEPS;
-
-    Entity player = createPlayer(renderer, {250.f, 1750.f});
-    auto &player_motion = registry.motions.get(player);
-    player_motion.angle = -M_PI / 2;
-    auto &player_fc = registry.fireControls.get(player);
-    player_fc.ammo = 0;
-
-    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::GUARD);
-    progress.remaining_enemies = registry.enemies.size();
-
-    // Set enemy health to something low for tutorial
-    for (Entity e : registry.enemies.entities) {
-        Health &h = registry.healths.get(e);
-        h.hp = 50;
-        h.max_hp = 50;
-    }
-
-    createBubbler(renderer, {625.f, 875.f});
-    createBubbler(renderer, {425.f, 400.f});
-
-    createMine(renderer, {450.f, 1150.f});
-    createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
-
-    createTutorialTrigger(player_motion.position, vec2(50.f, 50.f), Tutorial::MOVEMENT);
-    createTutorialTrigger(vec2(250.f, 1125.f), vec2(50.f, 350.f), Tutorial::HAZARDS);
-    createTutorialTrigger(vec2(600.f, 1150.f), vec2(50.f, 450.f), Tutorial::HEALING);
-    createTutorialTrigger(vec2(750.f, 875.f), vec2(400.f, 150.f), Tutorial::AMMUNITION);
-    createTutorialTrigger(vec2(750.f, 725.f), vec2(400.f, 50.f), Tutorial::COMBAT);
-
-    camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
-}
-
-void WorldSystem::load_level(Progress &progress) {
-    progress.is_tutorial = false;
-
-    tilemap_system->init_spawn_points();
-    auto config = LEVEL_CONFIGS[progress.level];
-    vec2 pos;
-
-    for (auto item : config.hazards) {
-        pos = tilemap_system->get_random_position(SpawnTarget::HAZARD);
-        if (item == HAZARD_TYPE::MINE) {
-            createMine(renderer, pos);
-        } else if (item == HAZARD_TYPE::ANEMONE) {
-            createAnemone(renderer, pos);
-        }
-    }
-
-    for (auto bubbler : config.bubblers) {
-        pos = tilemap_system->get_random_position(SpawnTarget::AMMO);
-        createBubbler(renderer, pos);
-    }
-
-    for (auto item : config.powerups) {
-        pos = tilemap_system->get_random_position(SpawnTarget::POWERUP);
-        createPowerUp(renderer, pos, item);
-    }
-
-    for (auto bell : config.bells) {
-        pos = tilemap_system->get_random_position(SpawnTarget::DISTRACTION);
-        createBell(renderer, pos, bell);
-    }
-
-    // SECRET FOR M3 SHHHHHH
-    /*for (auto swarm : config.swarms) {
-        pos = get_random_position();
-        Entity leader = createLeader(renderer, pos);
-        for (int i = 1; i < swarm; i++) {
-            pos = get_random_position();
-            createFollower(renderer, pos, leader);
-        }
-    }*/
 }
 
 void WorldSystem::try_progress_tutorial() {
@@ -284,28 +179,8 @@ void WorldSystem::try_progress_tutorial() {
         FireControl &fc = registry.fireControls.get(registry.players.entities[0]);
         fc.ammo = fc.max_ammo;
 
-        load_next_level();
+        // load_next_level();
     }
-}
-
-void WorldSystem::init_tutorial(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
-                                UpgradeSystem *upgrade_system) {
-    this->renderer = renderer_arg;
-    this->camera_system = camera_arg;
-    this->tilemap_system = tilemap_arg;
-    this->upgrade_system = upgrade_system;
-
-    // Set up world level
-    tilemap_system->init();
-    tilemap_system->load_map(MapType::TUTORIAL_MAP);
-
-    auto e = Entity("Progress");
-    auto &progress = registry.progresses.emplace(e);
-    progress.level = -1;
-    load_level_tutorial(progress);
-
-    glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
-    createText("Tutorial", vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 }
 
 void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, TileMapSystem *tilemap_arg,
@@ -315,27 +190,27 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     this->tilemap_system = tilemap_arg;
     this->upgrade_system = upgrade_system;
 
-    Progress *progress_p;
-    if (registry.progresses.size() == 0) {
-        auto e = Entity("Progress");
-        progress_p = &registry.progresses.emplace(e);
-        progress_p->level = 0;
-    } else {
-        progress_p = &registry.progresses.components[0];
-    }
-    Progress &progress = *progress_p;
-
-    // Set up world level
-    tilemap_system->init();
-    tilemap_system->load_map(LEVEL_CONFIGS[progress.level].map_type);
-
-    load_level(progress);
-    start_wave(progress);
-
-    // ! FOR TESTING !
-    glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
-    createText("Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1),
-               vec2(WINDOW_WIDTH_PX / 2 - 100, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
+    // Progress *progress_p;
+    // if (registry.progresses.size() == 0) {
+    //     auto e = Entity("Progress");
+    //     progress_p = &registry.progresses.emplace(e);
+    //     progress_p->level = 0;
+    // } else {
+    //     progress_p = &registry.progresses.components[0];
+    // }
+    // Progress &progress = *progress_p;
+    //
+    // // Set up world level
+    // tilemap_system->init();
+    // tilemap_system->load_map(LEVEL_CONFIGS[progress.level].map_type);
+    //
+    // load_level(progress);
+    // start_wave(progress);
+    //
+    // // ! FOR TESTING !
+    // glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
+    // createText("Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1),
+    //            vec2(WINDOW_WIDTH_PX / 2 - 100, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
 
     /* Uncomment to use old testing entities
     createBell(renderer, { 300.f, 400.f }, 80.f);
@@ -390,55 +265,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     if (progress.is_paused)
         return false;
 
-    if (progress.remaining_enemies == 0) {
-        spdlog::info("Wave {} complete, starting next wave.", progress.wave + 1);
-        progress.wave += 1;
-
-        if (progress.is_tutorial) {
-            if (registry.texts.components.size() > 0)
-                registry.texts.components[0].text = "Tutorial";
-
-            progress.is_game_over = true;
-            progress.has_beat_level = true;
-            progress.wave = 0;
-            progress.level = -1;
-
-            // TODO: Also change this to a GUI overlay
-            Entity e = Entity("Overlay");
-            registry.overlays.emplace(e);
-            auto &motion = registry.motions.emplace(e);
-            motion.position = registry.motions.get(registry.cameras.entities[0]).position;
-            motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
-
-            registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_TUTORIAL_COMPLETE_OVERLAY,
-                                               EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE,
-                                               RENDER_LAYER::OVERLAYS});
-        } else {
-            if (progress.wave == LEVEL_CONFIGS[progress.level].last_wave && progress.level < LEVEL_CONFIGS.size() - 1) {
-                load_next_level();
-            } else if (WAVE_CONFIGS.size() > progress.wave && progress.wave < LEVEL_CONFIGS[progress.level].last_wave) {
-                // TODO: Maybe change this to a GUI overlay
-                if (registry.texts.components.size() > 0)
-                    registry.texts.components[0].text =
-                        "Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1);
-                start_wave(progress);
-            } else {
-                progress.is_game_over = true;
-                progress.has_beat_level = true;
-
-                // TODO: Also change this to a GUI overlay
-                Entity e = Entity("Overlay");
-                registry.overlays.emplace(e);
-                auto &motion = registry.motions.emplace(e);
-                motion.position = registry.motions.get(registry.cameras.entities[0]).position;
-                motion.scale = vec2(TILE_SIZE_PX * 10, TILE_SIZE_PX * 10);
-
-                registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
-                                                   GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
-            }
-        }
-    }
-
     for (Entity b : registry.bells.entities) {
         Bell &bell = registry.bells.get(b);
         if (bell.cooldown_timer > 0.f) {
@@ -488,29 +314,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     audio_system.update_hazard_warning(listener_pos, elapsed_ms_since_last_update);
 
     return true;
-}
-
-void WorldSystem::handle_expiration(float elapsed_ms) {
-    for (Entity e : registry.expirations.entities) {
-        Expiration &exp = registry.expirations.get(e);
-        exp.lifespan_ms -= elapsed_ms;
-
-        if (exp.lifespan_ms <= 0) {
-            spdlog::debug("{} has expired", e.name_id());
-            registry.remove_all_components_of(e);
-        }
-    }
-
-    for (Entity e : registry.tints.entities) {
-        Tint &tint = registry.tints.get(e);
-
-        if (tint.life_ms == -99.f)
-            continue;
-
-        tint.life_ms -= elapsed_ms;
-        if (tint.life_ms <= 0)
-            registry.tints.remove(e);
-    }
 }
 
 void WorldSystem::respawn_player() {
@@ -598,6 +401,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             vec2 bell_pos = registry.motions.get(best_bell).position;
 
             for (Entity enemy : registry.enemies.entities) {
+                if (!registry.motions.has(enemy)) {
+                    continue;
+                }
                 Motion &enemy_motion = registry.motions.get(enemy);
                 if (entity_in_radius(bell_pos - enemy_motion.position, enemy_motion.scale, bell.distraction_radius)) {
                     Sense &sense = registry.senses.get(enemy);
@@ -621,21 +427,21 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             auto &progress = registry.progresses.components[0];
             if ((progress.is_game_over && !progress.is_tutorial) ||
                 (progress.is_tutorial && progress.is_game_over && !progress.has_beat_level))
-                restart_game();
+                trigger_restart();
         }
 
         // TODO: Change progression behaviour in the future
         if (key == GLFW_KEY_ENTER) {
             auto &progress = registry.progresses.components[0];
             try_progress_tutorial();
-            if (!progress.is_upgrade_menu_called && !progress.is_tutorial && progress.has_beat_level && !progress.is_game_over)
-                load_next_level();
+            // if (!progress.is_tutorial && progress.has_beat_level && !progress.is_game_over)
+            //    load_next_level();
         }
 
 #pragma region DEBUG KEYS
 
-// #define ENABLE_LOAD_TUTORIAL
-// #define ENABLE_SKIP_WAVE
+#define ENABLE_LOAD_TUTORIAL
+#define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
 #define DEBUG_UPGRADE_INPUTS
 
@@ -669,7 +475,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         if (key == GLFW_KEY_T) {
             auto &progress = registry.progresses.components[0];
             progress.is_tutorial = true;
-            restart_game();
+            trigger_restart();
         }
 #endif
 
@@ -680,10 +486,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 progress.is_tutorial_step_called = false;
                 progress.is_paused = false;
             }
+            progress.trigger_skip_wave = true;
 
             for (Entity e : registry.enemies.entities)
                 registry.remove_all_components_of(e);
-            progress.remaining_enemies = 0;
 
             Entity player = registry.players.entities[0];
             Health &health = registry.healths.get(player);
@@ -735,54 +541,4 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
     }
 }
 
-void WorldSystem::restart_game() {
-    bool is_tutorial = registry.progresses.components[0].is_tutorial;
-
-    particle_system.clear_all_particles();
-    registry.clear_all_components();
-
-    if (is_tutorial) {
-        init_tutorial(renderer, camera_system, tilemap_system, upgrade_system);
-    } else {
-        init(renderer, camera_system, tilemap_system, upgrade_system);
-    }
-}
-
-void WorldSystem::load_next_level() {
-    Progress progress = registry.progresses.components[0];
-    const bool was_tutorial = progress.is_tutorial;
-
-    progress.is_tutorial = false;
-    progress.is_tutorial_step_called = false;
-    progress.has_beat_level = false;
-    progress.is_game_over = false;
-    progress.level++;
-
-    if (progress.level >= LEVEL_CONFIGS.size()) {
-        close_window();
-        return;
-    }
-
-    progress.is_upgrade_menu_called = true;
-    progress.is_paused = true;
-
-    Entity current_player = registry.players.entities[0];
-    const Health previous_health = registry.healths.get(current_player);
-    const FireControl previous_fire_control = registry.fireControls.get(current_player);
-    const Wallet previous_wallet = registry.wallets.get(current_player);
-    const Upgrades previous_upgrades = registry.upgrades.get(current_player);
-
-    particle_system.clear_all_particles();
-    registry.clear_all_components();
-    Entity e = Entity();
-    registry.progresses.insert(e, progress);
-    init(renderer, camera_system, tilemap_system, upgrade_system);
-
-    Entity next_player = registry.players.entities[0];
-    if (!was_tutorial) {
-        registry.healths.get(next_player) = previous_health;
-        registry.fireControls.get(next_player) = previous_fire_control;
-        registry.wallets.get(next_player) = previous_wallet;
-        registry.upgrades.get(next_player) = previous_upgrades;
-    }
-}
+void WorldSystem::trigger_restart() { registry.progresses.components[0].trigger_restart = true; }

@@ -57,6 +57,7 @@ Entity TileMapSystem::init_tiles(std::string map_file_name, std::string tileset_
     TileSet tileset = parse_tileset(get_path(FilePath::TILESETS, tileset_file_name));
 
     registry.tilemaps.insert(entity, tilemap);
+    registry.tilemaps.get(entity).patrol_loop = generate_loop(tilemap);
     registry.tilesets.insert(entity, tileset);
 
     registry.renderRequests.insert(
@@ -161,6 +162,13 @@ Entity TileMapSystem::load_map(MapType map_type) {
 // Maps
 // =================================================================================
 
+Entity TileMapSystem::load_empty_map() {
+    init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
+    Entity map = init_tiles("empty_map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
+    init_tile_walls(&registry.tilemaps.get(map));
+    return map;
+}
+
 Entity TileMapSystem::load_test_map() {
     init_tiles("background.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, -1);
     Entity map = init_tiles("map.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET, 1);
@@ -183,3 +191,35 @@ Entity TileMapSystem::load_tutorial_map() {
 }
 
 #pragma endregion Maps
+
+std::vector<BezierPath> TileMapSystem::generate_loop(const TileMap &map) {
+    std::vector<BezierPath> loop;
+
+    float left = TILE_SIZE_PX * 1.5;
+    float right = (map.width - 1.5) * TILE_SIZE_PX;
+    float top = TILE_SIZE_PX * 1.5;
+    float bottom = (map.height - 1.5) * TILE_SIZE_PX;
+
+    vec2 top_mid = vec2((left + right) * 0.5f, top);
+    vec2 right_mid = vec2(right, (top + bottom) * 0.5f);
+    vec2 bottom_mid = vec2((left + right) * 0.5f, bottom);
+    vec2 left_mid = vec2(left, (top + bottom) * 0.5f);
+
+    float w = right - left;
+    float h = bottom - top;
+
+    float cx = w * 0.25f;
+    float cy = h * 0.25f;
+
+    loop.push_back({top_mid, vec2(top_mid.x + cx, top_mid.y), vec2(right_mid.x, right_mid.y - cy), right_mid});
+
+    loop.push_back({right_mid, vec2(right_mid.x, right_mid.y + cy), vec2(bottom_mid.x + cx, bottom_mid.y), bottom_mid});
+
+    loop.push_back({bottom_mid, vec2(bottom_mid.x - cx, bottom_mid.y), vec2(left_mid.x, left_mid.y + cy), left_mid});
+
+    loop.push_back({left_mid, vec2(left_mid.x, left_mid.y - cy), vec2(top_mid.x - cx, top_mid.y), top_mid});
+
+    spdlog::debug("creating loop at ({},{}), ({},{}), ({},{}), ({},{})", top_mid.x, top_mid.y, right_mid.x, right_mid.y,
+                  bottom_mid.x, bottom_mid.y, left_mid.x, left_mid.y);
+    return loop;
+}

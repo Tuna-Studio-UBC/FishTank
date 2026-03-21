@@ -15,8 +15,8 @@ extern ECSRegistry registry;
 // Create player entity
 Entity createPlayer(RenderSystem *renderer, vec2 position);
 
+Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type);
 Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type);
-Entity createLeader(RenderSystem *renderer, vec2 position);
 Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader);
 
 Entity createTurret(RenderSystem *renderer, vec2 position);
@@ -33,7 +33,7 @@ Entity createBubbler(RenderSystem *renderer, vec2 position);
 Entity createWall(const vec2 &position, const vec2 &scale = vec2(TILE_SIZE_PX));
 
 Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color = glm::vec3(0.f, 0.f, 0.f),
-                  const glm::mat4 &trans = glm::mat4(1.f));
+                  const glm::mat4 &trans = glm::mat4(1.f), bool centered = false);
 
 Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutorial id);
 
@@ -42,6 +42,7 @@ Entity createCamera(vec2 position);
 // These effects are temporary and standalone
 Entity createEffectSmoke(const vec2 position);
 Entity createEffectBubbles(const vec2 position);
+Entity createEffectSpawn(const vec2 position);
 
 // Component can be: DamageMultiplier, SpeedMultiplier
 template <typename Component, typename... Args>
@@ -55,10 +56,16 @@ Entity createExpirationEffect(Entity target_entity, float lifespan_ms, Args &&..
 
 // Component can be: Damage, Heal
 template <typename Component, typename... Args>
-Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, Args &&...args) {
+Entity createOverTimeEffect(Entity target_entity, float interval_ms, float duration_ms, bool immediate_apply = true,
+                            Args &&...args) {
     auto ot_entity = Entity("OverTimeEffect");
     registry.get<Component>().emplace(ot_entity, std::forward<Args>(args)...);
-    registry.overTimeEffects.emplace(ot_entity, interval_ms, duration_ms);
+    if (immediate_apply)
+        registry.overTimeEffects.emplace(ot_entity, interval_ms, duration_ms, interval_ms - 1);
+    else
+        registry.overTimeEffects.emplace(ot_entity, interval_ms, duration_ms);
     registry.targets.emplace(ot_entity, target_entity);
     return ot_entity;
 }
+
+Entity createCompletionText(std::string message);

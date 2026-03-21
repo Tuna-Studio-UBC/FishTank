@@ -142,7 +142,12 @@ void GameUI::draw_minimap() {
         const Motion &m = registry.motions.get(e);
 
         ImVec2 c = world_to_minimap(m.position, map_min, map_size, world_w, world_h);
-        dl->AddCircleFilled(c, 3.2f, IM_COL32(255, 70, 70, 235));
+        if (registry.bosses.has(e)) {
+            dl->AddCircleFilled(c, 5.2f, IM_COL32(255, 255, 255, 255));
+            dl->AddCircleFilled(c, 5.f, IM_COL32(255, 70, 70, 235));
+        } else {
+            dl->AddCircleFilled(c, 3.2f, IM_COL32(255, 70, 70, 235));
+        }
     }
 
     // player

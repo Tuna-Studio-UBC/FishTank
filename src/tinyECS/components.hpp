@@ -6,6 +6,7 @@
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "configs/attack_pattern.hpp"
+#include "configs/enemy_config.hpp"
 #include "configs/hazard_config.cpp"
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
@@ -28,7 +29,16 @@ struct Enemy {
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
 
+struct Boss {
+    BOSS_TYPE type;
+    int curr_attack_pattern_index = 0;
+    int curr_phase = 1;
+    float elapsed_time_ms = 0.f;
+    float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
+};
+
 struct Bullet {
+    ATTACK_EFFECT attack_effect;
     int damage;
     Entity owner; // track who fired to prevent self hit
 };
@@ -87,7 +97,11 @@ struct Dead {};
 
 struct Damage {
     int amount;
-    Damage(int amount) { this->amount = amount; };
+    vec3 tint;
+    Damage(int amount, vec3 tint = {1.f, 0.25f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 // Optional: OverTimeEffect
 
@@ -100,9 +114,10 @@ struct OverTimeEffect {
     float interval_ms = 1000;      // ms
     float duration_time_ms = 3000; // ms
     float elapsed_time_ms = 0;     // ms
-    OverTimeEffect(float interval_ms, float duration_time_ms) {
+    OverTimeEffect(float interval_ms, float duration_time_ms, float elapsed_time_ms = 0) {
         this->interval_ms = interval_ms;
         this->duration_time_ms = duration_time_ms;
+        this->elapsed_time_ms = elapsed_time_ms;
     };
 };
 
@@ -133,6 +148,8 @@ struct Target {
 
 struct DropsCrackers {
     int cracker;
+    DropsCrackers() {};
+    DropsCrackers(int amount) : cracker(amount) {};
 };
 
 struct Wallet {
@@ -155,29 +172,23 @@ struct Distracted {
     float remaining_ms;
 };
 
-// used in AISystem to request projectile creation in WorldSystem
-struct BulletRequest {
-    ATTACK_PATTERN attack_pattern;
-    vec2 position;
-    float angle;
-    Entity owner;
+struct Bezier {
+    int current_segment = 0;
+    float t = 0.f;
+    float speed = 0.15f;
+    vec2 velocity;
 };
 
-struct BezierPath {
-    vec2 p0 = vec2(-1.f);
-    vec2 p1 = vec2(-1.f);
-    vec2 p2 = vec2(-1.f);
-    vec2 p3 = vec2(-1.f);
-    float t = 0.f;
-    float speed = 0.5f;
-    int curves_left = 6;
+struct Leader {
+    int followers = 0;
 };
 
 struct Boid {
     float perception_radius = 100.f;
     float alignment_weight = 1.f;
-    float cohesian_weight = 1.f;
+    float cohesian_weight = 0.9f;
     float separation_weight = 1.5f;
+    vec2 velocity;
     Entity leader;
 };
 
@@ -202,6 +213,28 @@ struct Upgrades {
 
 #pragma endregion Behaviour
 
+#pragma region Requests
+// =================================================================================
+// Requests
+// =================================================================================
+
+// used in AISystem to request projectile creation in WorldSystem
+struct BulletRequest {
+    ATTACK_PATTERN attack_pattern;
+    vec2 position;
+    float angle;
+    Entity owner;
+};
+
+// used to delay spawn and time SpawnEffect
+struct SpawnRequest {
+    vec2 position;
+    float timer_ms = 2000.f;
+    ENEMY_TYPE type;
+};
+
+#pragma endregion Requests
+
 #pragma region Pickups
 // =================================================================================
 // Pickups
@@ -216,7 +249,11 @@ struct PowerUp {
 
 struct Heal {
     int amount;
-    Heal(int amount) { this->amount = amount; };
+    vec3 tint;
+    Heal(int amount, vec3 tint = {0.25f, 1.f, 0.25f}) {
+        this->amount = amount;
+        this->tint = tint;
+    };
 };
 
 struct Bubbler {
@@ -256,6 +293,12 @@ struct Motion {
     int contact_cooldown_frames = 0;
 };
 
+struct Growth {
+    vec2 target_scale = {0, 0};
+    float factor = 5.f;
+    float rate_ps = 0.f;
+};
+
 // Stucture to store collision information
 struct Collision {
     // Note, the first object is stored in the ECS container.entities
@@ -290,7 +333,7 @@ struct ParticleEmitter {
 
 // Data structure for toggling debug mode
 struct Debug {
-    bool in_debug_mode = 0;
+    bool in_debug_mode = 0; // if 1 render spatial grid
     bool in_freeze_mode = 0;
 };
 extern Debug debugging;
@@ -325,16 +368,14 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 2),   TutorialStep(Tutorial::HAZARDS, 1), TutorialStep(Tutorial::HEALING, 1),
-    TutorialStep(Tutorial::AMMUNITION, 1), TutorialStep(Tutorial::COMBAT, 2),
-    TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
+    TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::HAZARDS, 1),
+    TutorialStep(Tutorial::HEALING, 1),  TutorialStep(Tutorial::AMMUNITION, 1),
+    TutorialStep(Tutorial::COMBAT, 2),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
 };
 
 struct Progress {
-    int wave = 0;
-    int level = 0;
-    int remaining_enemies = -1;
-
+    bool trigger_restart = false;
+    bool trigger_skip_wave = false;
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;
@@ -346,6 +387,14 @@ struct Progress {
     bool is_paused = false;
     bool is_game_over = false;
     bool has_beat_level = false;
+};
+
+struct Scoring {
+    int bullets_fired = 0;
+    int bullets_hit = 0;
+    int been_hit = 0;
+    int enemies_defeated = 0;
+    int crackers_earned = 0;
 };
 
 struct TutorialTrigger {
@@ -398,6 +447,13 @@ struct Mesh {
 
 #define MAX_TILES 4096 // 64x64
 
+struct BezierPath {
+    vec2 p0;
+    vec2 p1;
+    vec2 p2;
+    vec2 p3;
+};
+
 struct TileMap {
     std::array<unsigned short, MAX_TILES> tile_ids;
     std::array<SPAWN_TARGET, MAX_TILES> spawn_tile_ids;
@@ -405,6 +461,8 @@ struct TileMap {
     unsigned int height;
     unsigned int x_offset = 0;
     unsigned int y_offset = 0;
+
+    std::vector<BezierPath> patrol_loop;
 
     TileMap(std::array<unsigned short, MAX_TILES> tile_ids, std::array<unsigned int, MAX_TILES> spawn_tile_ids,
             unsigned int width, unsigned int height, unsigned int x_offset = 0, unsigned int y_offset = 0)
@@ -449,6 +507,7 @@ struct Text {
     float scale = 1.f;
     vec3 color = {0.f, 0.f, 0.f};
     glm::mat4 trans = glm::mat4(1.f);
+    bool centered = false;
 };
 
 struct Overlay {};
@@ -498,21 +557,33 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_BUBBLE = TEXTURE_LOSE_OVERLAY + 1,
     TEXTURE_BUBBLER = TEXTURE_BUBBLE + 1,
 
-    TEXTURE_SMOKE = TEXTURE_BUBBLER + 1,
+    TEXTURE_CURSOR = TEXTURE_BUBBLER + 1,
+
+    TEXTURE_SMOKE = TEXTURE_CURSOR + 1,
 
     TEXTURE_BUBBLE_SHEET = TEXTURE_SMOKE + 1,
     TEXTURE_FISH_SHEET = TEXTURE_BUBBLE_SHEET + 1,
     TEXTURE_TURRET_SHEET = TEXTURE_FISH_SHEET + 1,
+
     TEXTURE_CRAB_SHEET = TEXTURE_TURRET_SHEET + 1,
-    TEXTURE_HEALTH_SHEET = TEXTURE_CRAB_SHEET + 1,
-    TEXTURE_MINE_SHEET = TEXTURE_HEALTH_SHEET + 1,
-    TEXTURE_URCHIN_SHEET = TEXTURE_MINE_SHEET + 1,
+    TEXTURE_URCHIN_SHEET = TEXTURE_CRAB_SHEET + 1,
     TEXTURE_ISOPOD_SHEET = TEXTURE_URCHIN_SHEET + 1,
 
-    TEXTURE_COUNT = TEXTURE_ISOPOD_SHEET + 1
+    TEXTURE_MINE_SHEET = TEXTURE_ISOPOD_SHEET + 1,
+    TEXTURE_ANEMONE_SHEET = TEXTURE_MINE_SHEET + 1,
+
+    TEXTURE_HEALTH_SHEET = TEXTURE_ANEMONE_SHEET + 1,
+    TEXTURE_WHEY_SHEET = TEXTURE_HEALTH_SHEET + 1,
+    TEXTURE_SPEED_SHEET = TEXTURE_WHEY_SHEET + 1,
+
+    TEXTURE_SHARKY_SHEET = TEXTURE_SPEED_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_SHEET + 1,
+
+    TEXTURE_COUNT = TEXTURE_KING_CRABBY_SHEET + 1
 };
 
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
+const int last_tileset_id = (int)TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2;
 
 enum class EFFECT_ASSET_ID {
     COLOURED = 0,

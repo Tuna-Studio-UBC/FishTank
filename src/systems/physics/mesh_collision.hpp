@@ -16,6 +16,10 @@ bool polygonIntersectsPolygon(const std::vector<vec2> &polyA, const Motion &moti
 // utility
 // sprite_base_px: the authoring pixel size used for vertex coordinates (default 128px)
 std::vector<vec2> transformPolygon(const std::vector<vec2> &poly, const Motion &m, float sprite_base_px = 128.0f);
+// Output-reference overload: reuses existing buffer to avoid heap allocation
+void transformPolygon(const std::vector<vec2> &poly, const Motion &m, float sprite_base_px, std::vector<vec2> &out);
 
 // Compute minimal translation vector to separate polyA from polyB
 bool computePolygonMTV(const std::vector<vec2> &polyA_world, const std::vector<vec2> &polyB_world, vec2 &out_mtv);
+// Pointer-based overload: avoids vector overhead for fixed-size polygons (e.g. wall AABBs)
+bool computePolygonMTV(const vec2 *polyA, size_t countA, const vec2 *polyB, size_t countB, vec2 &out_mtv);

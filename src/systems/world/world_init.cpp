@@ -8,6 +8,7 @@
 #include <set>
 
 #pragma region Actors
+
 // =================================================================================
 // Actors
 // =================================================================================
@@ -26,18 +27,28 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     w.crackers = config.crackers;
 
     Health &h = registry.healths.emplace(entity);
+#ifdef GOD_MODE
+    h.hp = 1000;
+    h.max_hp = 1000;
+#else
     h.hp = config.hp;
     h.max_hp = config.max_hp;
+#endif
 
     FireControl &fc = registry.fireControls.emplace(entity);
     fc.cooldown_ms = config.fire_rate_cd_ms;
     fc.ammo = STARTING_AMMO;
+#ifdef GOD_MODE
+    fc.damage_bonus = 100;
+#endif
 
     SpeedControl &sc = registry.speedControls.emplace(entity);
     sc.move_speed = config.move_speed;
     sc.turn_speed = config.turn_speed;
 
     registry.upgrades.emplace(entity);
+
+    registry.scoring.emplace(entity);
 
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -99,9 +110,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
     return entity;
 }
 
-Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
-    auto &config = ENEMY_CONFIGS[(int)type];
-
+Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
+    auto &config = BOSS_CONFIGS[(int)type];
     auto entity = Entity(config.name);
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
@@ -109,6 +119,80 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
 
     auto &enemy = registry.enemies.emplace(entity);
     enemy.detection_radius = config.detection_radius;
+
+    int attack_pattern_index = 0;
+    ATTACK_PATTERN attack_pattern = config.attack_patterns[attack_pattern_index];
+
+    auto &boss = registry.bosses.emplace(entity);
+    boss.type = type;
+    boss.curr_attack_pattern_index = attack_pattern_index;
+
+    auto &motion = registry.motions.emplace(entity);
+    motion.velocity = vec2(0.0f, 0.0f);
+    motion.position = position;
+    motion.angle = 0.f;
+    motion.scale = vec2(50.0f, 50.0f);
+
+    auto &health = registry.healths.emplace(entity);
+    health = config.health;
+
+    auto &fire = registry.fireControls.emplace(entity);
+    fire.cooldown_ms = ATTACK_CONFIGS[(int)attack_pattern].cooldown_ms;
+    fire.attack_pattern = attack_pattern;
+    if (type == BOSS_TYPE::SHARKY) {
+        // Add initial 3 second delay to allow the player to run
+        fire.cooldown_timer = -3000;
+    }
+
+    auto &speed = registry.speedControls.emplace(entity);
+    speed.move_speed = config.move_speed;
+    speed.turn_speed = config.turn_speed;
+
+    registry.senses.emplace(entity);
+    AI &ai = registry.ais.emplace(entity);
+    ai.tree_file = "bosses/boss_tree.txt";
+    ai.tree = load_tree(ai.tree_file);
+    ai.current_state = AIAction::IDLE;
+
+    registry.pursuits.emplace(entity);
+    registry.dropsCrackers.emplace(entity, 10);
+
+    if (type == BOSS_TYPE::SHARKY) {
+        motion.scale = vec2(120.0f, 80.0f);
+
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SHARKY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 100;
+    } else if (type == BOSS_TYPE::KING_CRABBY) {
+        motion.scale = vec2(80.0f, 80.0f);
+
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 250;
+    } else if (type == BOSS_TYPE::EEEEL) {
+        // TODO
+    }
+
+    return entity;
+}
+
+Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
+    auto &config = ENEMY_CONFIGS[(int)type];
+    Entity entity = Entity(config.name);
+
+    auto &enemy = registry.enemies.emplace(entity);
+    enemy.detection_radius = config.detection_radius;
+
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
     auto &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(0.0f, 0.0f);
@@ -138,7 +222,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         registry.distracteds.emplace(entity);
     }
 
-    registry.dropsCrackers.emplace(entity);
+    DropsCrackers &dc = registry.dropsCrackers.emplace(entity);
 
     if (type == ENEMY_TYPE::URCHIN) {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
@@ -149,6 +233,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 4;
         an.columns = 4;
         an.frame_time = 500;
+        dc = 3;
     } else if (type == ENEMY_TYPE::HOMING) {
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ISOPOD_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
@@ -158,6 +243,23 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.columns = 8;
         an.frame_time = 125;
         motion.scale = vec2(40.0f, 25.0f);
+        dc = 1;
+    } else if (type == ENEMY_TYPE::MOTHER) {
+        ai.tree_file = "leader_tree.txt";
+        ai.tree = load_tree(ai.tree_file);
+        ai.current_state = AIAction::PATROL;
+
+        registry.beziers.emplace(entity);
+        registry.leaders.emplace(entity);
+
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 250;
+        dc = 4;
     } else {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
@@ -167,44 +269,18 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
+        dc = 1;
     }
 
     return entity;
 }
 
-Entity createLeader(RenderSystem *renderer, vec2 position) {
-    auto entity = Entity("Enemy");
-
-    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
-    registry.meshPtrs.emplace(entity, &mesh);
-
-    registry.beziers.emplace(entity);
-
-    auto &motion = registry.motions.emplace(entity);
-    motion.velocity = vec2(0.0f, 0.0f);
-    motion.position = position;
-    motion.angle = 0.f;
-    motion.scale = vec2(25.0f, 25.0f);
-
-    /* auto &speed = registry.speedControl.emplace(entity);
-    speed.move_speed = config.move_speed;
-    speed.turn_speed = config.turn_speed;*/
-
-    registry.senses.emplace(entity);
-    AI &ai = registry.ais.emplace(entity);
-    ai.tree_file = "leader_tree.txt";
-    ai.tree = load_tree(ai.tree_file);
-    ai.current_state = AIAction::IDLE;
-
-    registry.colours.emplace(entity, Colour(vec3(0.2f, 0.2f, 1.0f)));
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
-
-    return entity;
-}
-
 Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
-    auto entity = Entity("Enemy");
+    auto &config = ENEMY_CONFIGS[(int)ENEMY_TYPE::CHILD];
+    auto entity = Entity(config.name);
+
+    auto &enemy = registry.enemies.emplace(entity);
+    enemy.detection_radius = config.detection_radius;
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -212,19 +288,41 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
     Boid &boid = registry.boids.emplace(entity);
     boid.leader = leader;
 
+    registry.leaders.get(leader).followers += 1;
+
+    registry.senses.emplace(entity);
+    AI &ai = registry.ais.emplace(entity);
+    ai.tree_file = "follower_tree.txt";
+    ai.tree = load_tree(ai.tree_file);
+    ai.current_state = AIAction::IDLE;
+
+    auto &health = registry.healths.emplace(entity);
+    health = config.health;
+
+    auto &fire = registry.fireControls.emplace(entity);
+    fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
+    fire.cooldown_timer = get_random_float(5.f, fire.cooldown_ms);
+    fire.attack_pattern = config.attack_pattern;
+
+    auto &speed = registry.speedControls.emplace(entity);
+    speed.move_speed = config.move_speed;
+    speed.turn_speed = config.turn_speed;
+
+    registry.pursuits.emplace(entity);
+
     auto &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(0.0f, 0.0f);
     motion.position = position;
     motion.angle = 0.f;
     motion.scale = vec2(25.0f, 25.0f);
 
-    /* auto &speed = registry.speedControl.emplace(entity);
-    speed.move_speed = config.move_speed;
-    speed.turn_speed = config.turn_speed;*/
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
-    registry.colours.emplace(entity, Colour(vec3(0.2f, 0.2f, 1.0f)));
-    registry.renderRequests.insert(
-        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG, GEOMETRY_BUFFER_ID::DEBUG_LINE});
+    Animation &an = registry.animations.emplace(entity);
+    an.frame_count = 8;
+    an.columns = 8;
+    an.frame_time = 250;
 
     return entity;
 }
@@ -325,10 +423,20 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
         an.columns = 4;
         an.frame_count = 4;
         an.frame_time = 250;
+    } else if (config.type == POWER_UP_TYPE::DAMAGE_MULTIPLIER) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_WHEY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
     } else {
-        registry.colours.emplace(entity, config.colour);
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                                GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SPEED_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
     }
 
     registry.pickUps.emplace(entity);
@@ -419,14 +527,14 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
         }
     }
 
-    Bullet &bullet = registry.bullets.insert(entity, {attack_config.damage, owner});
+    Bullet &bullet = registry.bullets.insert(entity, {attack_config.attack_effect, attack_config.damage, owner});
     registry.expirations.emplace(entity, attack_config.lifespan_ms);
 
     Motion &motion = registry.motions.emplace(entity);
     motion.velocity = vec2(attack_config.projectile_speed, 0.f);
     motion.position = position;
     motion.angle = angle;
-    motion.scale = vec2(PROJECTILE_SIZE_PX);
+    motion.scale = vec2(attack_config.projectile_scale);
 
     Bouncy &bouncy = registry.bouncies.emplace(entity);
 
@@ -485,11 +593,14 @@ Entity createAnemone(RenderSystem *renderer, vec2 position) {
     motion.position = position;
     motion.velocity = {0.f, 0.f};
     motion.angle = 0.f;
-    motion.scale = {40.f, 40.f};
+    motion.scale = {60.f, 60.f};
 
-    registry.colours.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ANEMONE_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 16;
+    an.frame_count = 16;
+    an.frame_time = 62.5;
 
     return entity;
 }
@@ -567,11 +678,38 @@ Entity createEffectBubbles(const vec2 position) {
     return e;
 }
 
+Entity createEffectSpawn(const vec2 position) {
+    Entity e = Entity("Particle Emitter (Spawn)");
+    ParticleEmitter &pe = registry.particleEmitters.emplace(e);
+    pe.life_ms = 1500;
+    pe.particle_life_ms = 500;
+    pe.max_particles = 80;
+    pe.particle_speed = 80;
+    pe.spawn_interval_ms = 20;
+    pe.standalone = true;
+    pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+    pe.particle_scale = 20;
+
+    Motion &pm = registry.motions.emplace(e);
+    pm.position = position;
+    pm.scale = vec2(TILE_SIZE_PX * 1.5);
+
+    registry.renderRequests.emplace(e,
+                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_BUBBLE,
+                                        EFFECT_ASSET_ID::TEXTURED, 
+                                        GEOMETRY_BUFFER_ID::SPRITE,
+                                        RENDER_LAYER::BACKGROUND
+                                    });
+    registry.tints.emplace(e, vec3(1.f, 0.2f, 0.2f));
+    return e;
+}
+
 #pragma endregion Effects
 
 #pragma region ScreenOverlays
 
-Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans) {
+Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color, const glm::mat4 &trans,
+                  bool centered) {
     auto entity = Entity("Text");
 
     Text &t = registry.texts.emplace(entity);
@@ -580,11 +718,19 @@ Entity createText(std::string text, vec2 position, float scale, const glm::vec3 
     t.scale = scale;
     t.color = color;
     t.trans = trans;
+    t.centered = centered;
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::FONT,
                                             GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::OVERLAYS});
 
     return entity;
+}
+
+Entity createCompletionText(std::string message) {
+    Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f),
+                          glm::mat4(1.f), true);
+    registry.expirations.emplace(e, 2000.f);
+    return e;
 }
 
 #pragma endregion ScreenOverlays
