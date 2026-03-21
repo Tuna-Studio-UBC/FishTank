@@ -168,7 +168,7 @@ struct Pursuit {
 };
 
 struct Bouncy {
-    int bounces_remaining = 2; //  bounce is basically no bounce, 2 bounce is one bounce, etc
+    int bounces_remaining = 3; // 1 bounce is basically no bounce, 2 bounce is one bounce, etc
 };
 
 struct Explosive {
