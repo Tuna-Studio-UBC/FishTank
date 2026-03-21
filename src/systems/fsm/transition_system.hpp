@@ -9,6 +9,5 @@ class TransitionSystem {
   public:
     void step(float elapsed_ms);
 
-  private:
-    std::unique_ptr<State> create_state(STATE_TYPE type);
+    static std::unique_ptr<State> create_state(STATE_TYPE type);
 };

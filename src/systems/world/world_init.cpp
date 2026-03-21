@@ -165,6 +165,7 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     if (type == BOSS_TYPE::SHARKY) {
         motion.scale = vec2(120.0f, 80.0f);
 
+        registry.stateTransitionRequests.replace(entity, STATE_TYPE::SHARKY_NORMAL);
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SHARKY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
@@ -175,6 +176,7 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     } else if (type == BOSS_TYPE::KING_CRABBY) {
         motion.scale = vec2(80.0f, 80.0f);
 
+        registry.stateTransitionRequests.replace(entity, STATE_TYPE::KING_CRABBY_NORMAL);
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 

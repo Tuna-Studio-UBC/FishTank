@@ -33,8 +33,6 @@ struct Boss {
     BOSS_TYPE type;
     int curr_attack_pattern_index = 0;
     int curr_phase = 1;
-    float elapsed_time_ms = 0.f;
-    float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
 };
 
 struct Bullet {
@@ -242,7 +240,7 @@ struct SpawnRequest {
 
 // FSM state change requests
 struct StateTransitionRequest {
-    STATE_TYPE next_state = STATE_TYPE::IDLE;
+    STATE_TYPE next_state = STATE_TYPE::SHARKY_IDLE;
     StateTransitionRequest(STATE_TYPE next_state) { this->next_state = next_state; };
 };
 
