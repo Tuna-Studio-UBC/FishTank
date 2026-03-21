@@ -34,12 +34,18 @@ bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) { ret
 // TODO: STUB FUNCTION -- REPLACE WHEN WE IMPLEMENT DIFFERENT AMMO TYPES
 int PlayerInputSystem::get_player_ammo_cost() { return 1; }
 
-/**
-    Tries to fire a projectile if the firing cooldown is 0, and the player has sufficient ammo. Does nothing otherwise.
-*/
-void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &fc, const float &aim_angle) {
-    int ammo_cost = get_player_ammo_cost();
-    if (fc.cooldown_timer > 0.f || fc.ammo < ammo_cost)
+
+   // Tries to fire left click projectile (normal bullet for Gun 1, explosive for Gun 2)
+
+void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
+    // Gun 2 explosive bullets cost 10 ammo, Gun 1 costs 1
+    int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 10 : 1;
+    if (fc.ammo < ammo_cost)
+        return;
+
+    // Check cooldown based on weapon type
+    float cooldown = (ws.current_weapon == WeaponType::GUN_1) ? ws.gun1_left_cooldown : ws.gun2_left_cooldown;
+    if (game_time_ms - ws.last_left_click_time < cooldown)
         return;
 
     float barrel_len = DEFAULT_BARREL_LEN;
@@ -50,17 +56,139 @@ void PlayerInputSystem::try_fire_projectile(Motion &player_motion, FireControl &
 
     vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
     vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
-
     Entity player = registry.players.entities[0];
-    createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
+
+    if (ws.current_weapon == WeaponType::GUN_1) {
+        // Gun 1: Normal bouncing bullet (1 ammo)
+        createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
+    } else {
+        // Gun 2: Explosive bullet (10 ammo, no bouncing)
+        Entity bullet = createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
+        registry.bouncies.remove(bullet);  // Remove bouncy component
+        Bullet &b = registry.bullets.get(bullet);
+        b.type = BulletType::EXPLOSIVE;
+        registry.explosives.emplace(bullet, Explosive{125.0f, 30.0f, false});
+
+        // Make it a red bubble
+        RenderRequest &rr = registry.renderRequests.get(bullet);
+        rr.used_texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
+
+        // Add red tint
+        if (registry.tints.has(bullet)) {
+            registry.tints.get(bullet).tint = vec3(1.0f, 0.1f, 0.1f);  // Red
+        } else {
+            registry.tints.emplace(bullet, vec3(1.0f, 0.1f, 0.1f));
+        }
+    }
 
     auto &sr = registry.sound_requests.emplace_with_duplicates(player);
     sr.type = SOUND_EVENT::PLAYER_SHOT;
 
-    fc.cooldown_timer = fc.cooldown_ms;
+    ws.last_left_click_time = game_time_ms;
     fc.ammo -= ammo_cost;
     Scoring &score = registry.scoring.components[0];
     score.bullets_fired += 1;
+}
+
+
+  // Tries to fire right click projectile (burst for Gun 1, mine for Gun 2)
+
+void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
+    if (fc.ammo < 1)
+        return;
+
+    float barrel_len = DEFAULT_BARREL_LEN;
+    if (!registry.turrets.entities.empty()) {
+        Entity turret_entity = registry.turrets.entities[0];
+        barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
+    }
+
+    vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
+    vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
+    Entity player = registry.players.entities[0];
+
+    if (ws.current_weapon == WeaponType::GUN_1) {
+        // Gun 1: Burst fire (3 shots)
+        if (game_time_ms - ws.last_right_click_time < ws.gun1_right_cooldown)
+            return;
+
+        ws.burst_shots_remaining = 3;
+        ws.next_burst_time = game_time_ms;
+        ws.last_right_click_time = game_time_ms;
+    } else {
+        // Gun 2: Deploy mine
+        if (game_time_ms - ws.last_right_click_time < ws.gun2_right_cooldown)
+            return;
+
+        Entity mine = createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
+        registry.bouncies.remove(mine);  // don't bounce
+
+        Bullet &b = registry.bullets.get(mine);
+        b.type = BulletType::DEPLOYED_MINE;
+
+        Motion &mine_motion = registry.motions.get(mine);
+        mine_motion.velocity = vec2(150.0f, 0.f);  // slower speed
+        mine_motion.scale = vec2(40.f, 40.f);      // match hazard mine size
+
+        // Use mine sprite sheet with animation (green tint instead of red)
+        RenderRequest &rr = registry.renderRequests.get(mine);
+        rr.used_texture = TEXTURE_ASSET_ID::TEXTURE_MINE_SHEET;
+        rr.layer = RENDER_LAYER::INTERACTABLES;
+
+        // Add animation (same as hazard mine: 3 frames flashing)
+        Animation &an = registry.animations.emplace(mine);
+        an.columns = 3;
+        an.frame_count = 3;
+        an.frame_time = 500;
+
+        // Green tint to distinguish from red hazard mines
+        if (registry.tints.has(mine)) {
+            registry.tints.get(mine).tint = vec3(0.4f, 1.0f, 0.4f);  // Green
+        } else {
+            registry.tints.emplace(mine, vec3(0.4f, 1.0f, 0.4f));
+        }
+
+        registry.explosives.emplace(mine, Explosive{60.0f, 150.0f, false});
+        registry.deployedMines.emplace(mine, DeployedMine{75.0f, false});
+        registry.expirations.get(mine).lifespan_ms = 40000.0f;  // 40 seconds
+
+        auto &sr = registry.sound_requests.emplace_with_duplicates(player);
+        sr.type = SOUND_EVENT::PLAYER_SHOT;
+
+        ws.last_right_click_time = game_time_ms;
+        fc.ammo -= 1;
+    }
+}
+
+
+   // Processes burst fire for Gun 1
+
+void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
+    if (ws.burst_shots_remaining > 0 && game_time_ms >= ws.next_burst_time) {
+        if (fc.ammo < 1) {
+            ws.burst_shots_remaining = 0;
+            return;
+        }
+
+        float barrel_len = DEFAULT_BARREL_LEN;
+        if (!registry.turrets.entities.empty()) {
+            Entity turret_entity = registry.turrets.entities[0];
+            barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
+        }
+
+        vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
+        vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
+        Entity player = registry.players.entities[0];
+
+        createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
+
+        auto &sr = registry.sound_requests.emplace_with_duplicates(player);
+        sr.type = SOUND_EVENT::PLAYER_SHOT;
+
+        fc.ammo -= 1;
+        ws.burst_shots_remaining--;
+        ws.next_burst_time = game_time_ms + 100.0f;  // 100ms between burst shots
+    }
 }
 
 void PlayerInputSystem::step(float elapsed_ms) {
@@ -72,6 +200,12 @@ void PlayerInputSystem::step(float elapsed_ms) {
     MouseInputState &mouse_input = registry.mouseInputs.get(playerEntity);
     Motion &motion = registry.motions.get(playerEntity);
     SpeedControl &sc = registry.speedControls.get(playerEntity);
+
+    // Update game time
+    game_time_ms += elapsed_ms;
+
+    // Get weapon state
+    WeaponState &ws = registry.weaponStates.get(playerEntity);
 
     float dt = elapsed_ms / 1000.0f;
     bool quick_turn_active = (registry.playerQuickTurns.size() != 0);
@@ -153,8 +287,14 @@ void PlayerInputSystem::step(float elapsed_ms) {
         tm.angle = aim_angle;
     }
 
+    // Process burst fire
+    process_burst_fire(motion, fc, ws, aim_angle);
+
     if (mouse_input.current_action == MouseActions::LeftClick) {
-        try_fire_projectile(motion, fc, aim_angle);
+        try_fire_left_click(motion, fc, ws, aim_angle);
+    }
+    if (mouse_input.current_action == MouseActions::RightClick) {
+        try_fire_right_click(motion, fc, ws, aim_angle);
     }
 
     // Shift action over
