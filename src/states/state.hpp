@@ -18,6 +18,6 @@ class State {
     virtual void update(Entity e, float elapsed_ms) = 0;
 
     template <typename Registry> void request_transition(Registry &registry, Entity e, STATE_TYPE next) {
-        registry.stateTransitionRequests.replace<StateTransitionRequest>(e, next);
+        registry.stateTransitionRequests.replace(e, next);
     }
 };
