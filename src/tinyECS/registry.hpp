@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "components.hpp"
+#include "states/state_machine.hpp"
 #include "tiny_ecs.hpp"
 
 class ECSRegistry {
@@ -65,6 +66,7 @@ class ECSRegistry {
     ComponentContainer<Collision> collisions;
     ComponentContainer<ParticleEmitter> particleEmitters;
     ComponentContainer<MeshCollider> meshColliders;
+
     // Game State
     ComponentContainer<ScreenState> screenStates;
     ComponentContainer<KeyboardInputState> keyboardInputs;
@@ -72,6 +74,8 @@ class ECSRegistry {
     ComponentContainer<Progress> progresses;
     ComponentContainer<Scoring> scoring;
     ComponentContainer<TutorialTrigger> tutorialTriggers;
+    ComponentContainer<StateMachine> stateMachines;
+    ComponentContainer<StateTransitionRequest> stateTransitionRequests;
 
     // Sound
     ComponentContainer<SoundRequest> sound_requests;
@@ -160,6 +164,8 @@ class ECSRegistry {
         registry_list.push_back(&progresses);
         registry_list.push_back(&scoring);
         registry_list.push_back(&tutorialTriggers);
+        registry_list.push_back(&stateMachines);
+        registry_list.push_back(&stateTransitionRequests);
 
         // Sound
         registry_list.push_back(&sound_requests);
