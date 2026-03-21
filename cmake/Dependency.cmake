@@ -100,6 +100,7 @@ target_include_directories(imgui PUBLIC
 # ============================================================
 
 set(TRACY_ENABLE  ON)
+set(TRACY_MEMORY  ON)
 set(TRACY_ON_DEMAND ON)
 set(TRACY_GUI_GLEW ON)
 set(TRACY_BUILD_PROFILER OFF)
@@ -120,7 +121,7 @@ target_include_directories(tracy PUBLIC
   ${tracy_SOURCE_DIR}/public
 )
 
-target_compile_definitions(tracy PUBLIC TRACY_ENABLE)
+target_compile_definitions(tracy PUBLIC TRACY_ENABLE TRACY_MEMORY TRACY_ON_DEMAND TRACY_CALLSTACK=10)
 
 # ============================================================
 # Helper function to link everything

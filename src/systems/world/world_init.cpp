@@ -139,6 +139,10 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     auto &fire = registry.fireControls.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)attack_pattern].cooldown_ms;
     fire.attack_pattern = attack_pattern;
+    if (type == BOSS_TYPE::SHARKY) {
+        // Add initial 3 second delay to allow the player to run
+        fire.cooldown_timer = -3000;
+    }
 
     auto &speed = registry.speedControls.emplace(entity);
     speed.move_speed = config.move_speed;
@@ -419,10 +423,20 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
         an.columns = 4;
         an.frame_count = 4;
         an.frame_time = 250;
+    } else if (config.type == POWER_UP_TYPE::DAMAGE_MULTIPLIER) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_WHEY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
     } else {
-        registry.colours.emplace(entity, config.colour);
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                                GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SPEED_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
     }
 
     registry.pickUps.emplace(entity);
@@ -579,11 +593,14 @@ Entity createAnemone(RenderSystem *renderer, vec2 position) {
     motion.position = position;
     motion.velocity = {0.f, 0.f};
     motion.angle = 0.f;
-    motion.scale = {40.f, 40.f};
+    motion.scale = {60.f, 60.f};
 
-    registry.colours.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ANEMONE_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 16;
+    an.frame_count = 16;
+    an.frame_time = 62.5;
 
     return entity;
 }
