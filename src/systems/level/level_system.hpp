@@ -26,6 +26,9 @@ class LevelSystem {
     int wave = -1;
     int level = -1;
 
+    float time_since_last_wave = 0.f;
+    int enemies_spawned_last_wave = 0;
+
     float advance_timer = 0.f;
     bool triggered_load_wave = false;
     bool triggered_load_level = false;
