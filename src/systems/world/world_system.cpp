@@ -496,6 +496,22 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 #undef DEBUG_UPGRADE_INPUTS
 
+        // Weapon switching
+        if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+            Entity player = registry.players.entities[0];
+            if (registry.weaponStates.has(player)) {
+                WeaponState &ws = registry.weaponStates.get(player);
+                ws.current_weapon = WeaponType::GUN_1;
+            }
+        }
+        if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+            Entity player = registry.players.entities[0];
+            if (registry.weaponStates.has(player)) {
+                WeaponState &ws = registry.weaponStates.get(player);
+                ws.current_weapon = WeaponType::GUN_2;
+            }
+        }
+
 #ifdef ENABLE_LOAD_TUTORIAL
         if (key == GLFW_KEY_T) {
             auto &progress = registry.progresses.components[0];
@@ -560,9 +576,15 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
         if (button == GLFW_MOUSE_BUTTON_LEFT) {
             mi.current_action = MouseActions::LeftClick;
             try_progress_tutorial();
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            mi.current_action = MouseActions::RightClick;
         }
-    } else {
-        mi.current_action = MouseActions::MouseActionsCount;
+    } else if (action == GLFW_RELEASE) {
+        // Clear action on release
+        if ((button == GLFW_MOUSE_BUTTON_LEFT && mi.current_action == MouseActions::LeftClick) ||
+            (button == GLFW_MOUSE_BUTTON_RIGHT && mi.current_action == MouseActions::RightClick)) {
+            mi.current_action = MouseActions::MouseActionsCount;
+        }
     }
 }
 
