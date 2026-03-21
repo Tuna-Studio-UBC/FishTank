@@ -19,8 +19,6 @@ struct Node {
     bool operator>(const Node &other) const { return f > other.f; }
 };
 
-int get_map_index(int width, int x, int y) { return x + (y * width); }
-
 bool PathfindingSystem::is_out_of_bounds(ivec2 pos) {
     if (!registry.tilemaps.has(current_map)) {
         current_map = tms->get_current_map();

@@ -88,6 +88,8 @@ ivec2 world_to_tile(const vec2 &world_pos) {
     return {tx, ty};
 }
 
+int get_map_index(int width, int x, int y) { return x + (y * width); }
+
 vec2 tile_center_to_world(const ivec2 &tile) {
     float wx = tile.x * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2);
     float wy = tile.y * TILE_HEIGHT_PX + (TILE_HEIGHT_PX / 2);
