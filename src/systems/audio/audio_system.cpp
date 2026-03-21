@@ -6,6 +6,12 @@
 
 static int clamp_int(int v, int lo, int hi) { return std::max(lo, std::min(v, hi)); }
 
+void AudioSystem::apply_master_volume() const {
+    Mix_MasterVolume(master_volume);
+    const int music_volume = (bgm_base_volume * master_volume) / MIX_MAX_VOLUME;
+    Mix_VolumeMusic(clamp_int(music_volume, 0, MIX_MAX_VOLUME));
+}
+
 bool AudioSystem::load() {
     hazard_warn_loop = Mix_LoadWAV(get_path(AUDIO, "hazard_warn_loop.wav").c_str());
     enemy_shot = Mix_LoadWAV(get_path(AUDIO, "enemy_shot.wav").c_str());
@@ -20,11 +26,23 @@ bool AudioSystem::load() {
     }
 
     Mix_AllocateChannels(32);
+    apply_master_volume();
     spdlog::info("[Audio] Loaded SFX");
     return true;
 }
 
 void AudioSystem::shutdown() {
+    if (Mix_PlayingMusic()) {
+        Mix_HaltMusic();
+    }
+
+    if (hazard_warn_channel != -1) {
+        Mix_HaltChannel(hazard_warn_channel);
+        hazard_warn_channel = -1;
+    }
+
+    Mix_HaltChannel(-1);
+
     if (hazard_warn_loop) {
         Mix_FreeChunk(hazard_warn_loop);
         hazard_warn_loop = nullptr;
@@ -33,8 +51,6 @@ void AudioSystem::shutdown() {
         Mix_FreeChunk(enemy_shot);
         enemy_shot = nullptr;
     }
-
-    hazard_warn_channel = -1;
 
     if (player_shot) {
         Mix_FreeChunk(player_shot);
@@ -155,6 +171,7 @@ void AudioSystem::play_player_shot_center(int volume) {
 }
 
 void AudioSystem::play_bgm(const std::string &filename, int volume) {
+    bgm_base_volume = clamp_int(volume, 0, MIX_MAX_VOLUME);
 
     if (bgm) {
         Mix_FreeMusic(bgm);
@@ -168,6 +185,13 @@ void AudioSystem::play_bgm(const std::string &filename, int volume) {
         return;
     }
 
-    Mix_VolumeMusic(volume);
+    apply_master_volume();
     Mix_PlayMusic(bgm, -1);
 }
+
+void AudioSystem::set_master_volume(int volume) {
+    master_volume = clamp_int(volume, 0, MIX_MAX_VOLUME);
+    apply_master_volume();
+}
+
+int AudioSystem::get_master_volume() const { return master_volume; }

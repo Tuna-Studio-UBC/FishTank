@@ -82,6 +82,7 @@ int main() {
     world_system.init(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
     level_system.load_tutorial();
     game_ui.set_upgrade_system(&upgrade_system);
+    game_ui.set_audio_system(world_system.get_audio_system());
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);
@@ -219,7 +220,10 @@ int main() {
         debug_ui.draw_respawn(&world_system);
 #endif
 
-        game_ui.draw_cursor();
+        {
+            ZoneScopedN("RENDER: Cursor");
+            game_ui.draw_cursor();
+        }
 
         // Render
         {

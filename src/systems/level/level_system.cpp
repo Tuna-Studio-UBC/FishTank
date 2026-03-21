@@ -222,9 +222,9 @@ void LevelSystem::load_tutorial() {
     FireControl &player_fc = registry.fireControls.get(player);
     player_fc.ammo = 0;
 
-    createEnemy(renderer, {150.f, 200.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {850.f, 200.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {500.f, 400.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {150.f, 150.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {850.f, 150.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {500.f, 150.f}, ENEMY_TYPE::GUARD);
 
     // Set enemy health to something low for tutorial
     for (Entity e : registry.enemies.entities) {
@@ -237,7 +237,10 @@ void LevelSystem::load_tutorial() {
     createBubbler(renderer, {425.f, 400.f});
 
     createMine(renderer, {450.f, 1150.f});
+    createAnemone(renderer, {350.f, 1000.f});
     createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
+    createPowerUp(renderer, {800.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
+    createPowerUp(renderer, {700.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
 
     createTutorialTrigger(player_motion.position, vec2(50.f, 50.f), Tutorial::MOVEMENT);
     createTutorialTrigger(vec2(250.f, 1125.f), vec2(50.f, 350.f), Tutorial::HAZARDS);

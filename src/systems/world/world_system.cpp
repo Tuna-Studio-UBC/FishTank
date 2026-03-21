@@ -1,6 +1,8 @@
 // Header
 #include "systems/world/world_system.hpp"
 #include "systems/world/world_init.hpp"
+#include <tracy/Tracy.hpp>
+#define TracyLine TracyConcat(__LINE__, U) // Fix for MSVC
 
 // stlib
 #include "configs/wave_config.cpp"
@@ -240,6 +242,7 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
+    ZoneScopedN("SYS: World");
 
     // Updating window title
     std::stringstream title_ss;
@@ -328,11 +331,6 @@ bool WorldSystem::is_over() const { return bool(glfwWindowShouldClose(window)); 
 
 // on key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-
-    // exit game w/ ESC
-    if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
-        close_window();
-    }
 
     // We should have 1 and only ever 1 player input component
     assert(registry.keyboardInputs.components.size() == 1);
@@ -505,8 +503,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
-        // TODO: Change pause key to ESC
-        if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             auto &progress = registry.progresses.components[0];
             if (progress.is_upgrade_menu_called) {
                 upgrade_system->close_upgrade_menu();
