@@ -80,7 +80,7 @@ Entity TileMapSystem::init_tiles_full(std::string map_file_name, std::string til
     TileMap &tilemap_bkg = registry.tilemaps.insert(entity_bkg, parse_tilemap_layer(get_path(FilePath::MAPS, map_file_name), "background", false));
     registry.tilesets.insert(entity_bkg, tileset);
 
-    tilemap.patrol_loop = generate_loop(tilemap);
+    // tilemap.patrol_loop = generate_loop(tilemap);
 
     registry.renderRequests.insert(
         entity, {textures_id, EFFECT_ASSET_ID::TILEMAP, GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::BACKGROUND + layer});
@@ -316,6 +316,7 @@ Entity TileMapSystem::load_test_map2() {
 Entity TileMapSystem::load_test_map3() { 
     Entity map = init_tiles_full("map3.json", "tileset.json", TEXTURE_ASSET_ID::TEXTURE_GREYBOX_TILESET2, 1);
     init_tile_walls(&registry.tilemaps.get(map));
+    generate_loop(&registry.tilemaps.get(map));
     return map;
 }
 

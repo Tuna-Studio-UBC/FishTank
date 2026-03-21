@@ -25,9 +25,9 @@ struct Level {
 
 const std::vector<Wave> WAVE_CONFIGS = {
     // Level 1
-    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
+    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
     {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
-    {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}, {}, true},
+    {{ENEMY_TYPE::MOTHER}, {}, true},
 
     // Level 2
     {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING}},
@@ -52,7 +52,7 @@ const std::vector<Wave> WAVE_CONFIGS = {
 
 const std::vector<Level> LEVEL_CONFIGS = {
     // Level 1
-    {MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(15, 10)}},
+    {MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(15, 10), ivec2(2, 17), ivec2(27, 2)}, false, 0.4f},
 
     // Level 2
     {MapType::TEST_MAP2,
