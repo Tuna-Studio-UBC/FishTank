@@ -239,6 +239,21 @@ void TutorialUI::draw_tutorial_combat(TutorialStep tutorial) {
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
             ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
+        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+        ImGui::PopFont();
+    } else if (current_step == 3) {
+        ImGui::PushFont(io.Fonts->Fonts[2]);
+        text = "You have two weapon modes:\n\n"
+               "GUN 1 (Press 1): Regular bouncy bubbles\n"
+               "  - Left Click: Single shot\n"
+               "  - Right Click: Burst fire\n\n"
+               "GUN 2 (Press 2): Explosive rounds\n"
+               "  - Left Click: Explosive bubble\n"
+               "  - Right Click: Deploy mine\n\n"
+               "Tip: Shoot mines with explosive rounds for chain reactions!";
+        text_size = ImGui::CalcTextSize(text);
+        ImGui::SetCursorPos(
+            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
         ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
         ImGui::PopFont();
     }

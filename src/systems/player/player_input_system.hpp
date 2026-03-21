@@ -14,8 +14,11 @@ class PlayerInputSystem {
 
   private:
     const float DEFAULT_BARREL_LEN = 30.f;
+    float game_time_ms = 0.0f;
 
     int get_player_ammo_cost();
 
-    void try_fire_projectile(Motion &player_motion, FireControl &fc, const float &aim_angle);
+    void try_fire_left_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle);
+    void try_fire_right_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle);
+    void process_burst_fire(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle);
 };
