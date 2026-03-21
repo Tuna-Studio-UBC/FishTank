@@ -80,7 +80,7 @@ if(IS_OS_LINUX OR IS_OS_MAC)
     endif()
 
     # Increase warning level
-    target_compile_options(${PROJECT_NAME} PUBLIC "-Wall")
+    target_compile_options(${PROJECT_NAME} PUBLIC "-Wall" PRIVATE -g)
 elseif(IS_OS_WINDOWS)
     # https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
     set(GLFW_FOUND TRUE)

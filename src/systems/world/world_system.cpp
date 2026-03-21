@@ -1,6 +1,8 @@
 // Header
 #include "systems/world/world_system.hpp"
 #include "systems/world/world_init.hpp"
+#include <tracy/Tracy.hpp>
+#define TracyLine TracyConcat(__LINE__, U) // Fix for MSVC
 
 // stlib
 #include "configs/wave_config.cpp"
@@ -240,6 +242,7 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
+    ZoneScopedN("SYS: World");
 
     // Updating window title
     std::stringstream title_ss;
