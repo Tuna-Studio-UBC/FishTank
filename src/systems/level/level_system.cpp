@@ -129,8 +129,8 @@ void LevelSystem::load_level_components() {
         }
     }
 
-    for (auto bubbler : config.bubblers) {
-        pos = tilemap_system->get_random_position(SpawnTarget::AMMO);
+    for (ivec2 bubbler : config.bubblers) {
+        pos = bubbler * TILE_WIDTH_PX + (TILE_WIDTH_PX / 2);
         createBubbler(renderer, pos);
     }
 
