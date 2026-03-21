@@ -16,9 +16,9 @@ void LevelSystem::step(const float &elapsed_ms) {
         if (progress.is_tutorial) {
             trigger_load_next_level();
         } else {
-            if (wave == LEVEL_CONFIGS[level].last_wave && level < LEVEL_CONFIGS.size() - 1) {
+            if (WAVE_CONFIGS[wave].final_wave && level < LEVEL_CONFIGS.size() - 1) {
                 trigger_load_next_level();
-            } else if (wave < (int)WAVE_CONFIGS.size() - 1 && wave < LEVEL_CONFIGS[level].last_wave) {
+            } else if (wave < (int)WAVE_CONFIGS.size() - 1 && !WAVE_CONFIGS[wave].final_wave) {
                 trigger_load_next_wave();
             } else {
                 trigger_win(progress);
@@ -283,7 +283,7 @@ bool LevelSystem::should_advance() {
         return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
     
     const Level &level_ref = LEVEL_CONFIGS[level];
-    if (wave == level_ref.last_wave) {
+    if (wave >= 0 && WAVE_CONFIGS[wave].final_wave) {
         return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
     } else if ((num_enemies + num_spawn_requests) / (float)enemies_spawned_last_wave <= level_ref.spawn_threshold) {
         return advance_timer == 0.f;
