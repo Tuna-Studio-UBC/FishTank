@@ -69,6 +69,7 @@ class RenderSystem {
 
         // Sprite sheets
         get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"), 
+        get_path(FilePath::SPRITE_SHEETS, "whirl_sheet.png"), 
         get_path(FilePath::SPRITE_SHEETS, "fish_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "turret_sheet.png"),
 
