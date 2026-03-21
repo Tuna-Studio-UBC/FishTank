@@ -279,6 +279,17 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         }
     }
 }
+// TODO: Enable if we don't like no-cancellations
+// // Bullet hit bullet
+// else if (registry.bullet.has(other_entity)) {
+//     Entity other_bullet_owner = registry.bullet.get(other_entity).owner;
+//     if (bullet.owner != other_bullet_owner &&
+//         !(registry.enemies.has(bullet.owner) &&
+//           registry.enemies.has(other_bullet_owner))) { // Ignore between enemies
+//         registry.remove_all_components_of(bullet_entity);
+//         registry.remove_all_components_of(other_entity);
+//     }
+// }
 
 // TODO: Handle applying hazards FX
 void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) {
