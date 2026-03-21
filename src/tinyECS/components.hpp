@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -11,9 +12,8 @@
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
 #include "configs/upgrade_config.hpp"
-#include <array>
-#include <unordered_map>
-#include <utilities/parse_tree.hpp>
+#include "states/state_types.hpp"
+#include "utilities/parse_tree.hpp"
 
 #pragma region Entity
 // =================================================================================
@@ -33,8 +33,6 @@ struct Boss {
     BOSS_TYPE type;
     int curr_attack_pattern_index = 0;
     int curr_phase = 1;
-    float elapsed_time_ms = 0.f;
-    float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
 };
 
 enum class BulletType {
@@ -131,11 +129,18 @@ struct OverTimeEffect {
 struct FireControl {
     float cooldown_timer = 0; // ms
     float cooldown_ms = 2000; // ms
+
     ATTACK_PATTERN attack_pattern;
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
     int damage_bonus = 0;
     float refill_progress = 0.f;
+
+    bool can_shoot = true;
+    float can_shoot_ms = 5 * 1000.f;    // Time window for shooting mode
+    float cd_can_shoot_ms = 2 * 1000.f; // Time window for cooldown mode
+    float elapsed_can_shoot_ms = 0.f;
+    float elapsed_cd_can_shoot_ms = 0.f;
 };
 
 struct SpeedControl {
@@ -270,6 +275,12 @@ struct SpawnRequest {
     vec2 position;
     float timer_ms = 2000.f;
     ENEMY_TYPE type;
+};
+
+// FSM state change requests
+struct StateTransitionRequest {
+    STATE_TYPE next_state = STATE_TYPE::SHARKY_IDLE;
+    StateTransitionRequest(STATE_TYPE next_state) { this->next_state = next_state; };
 };
 
 #pragma endregion Requests
@@ -441,6 +452,7 @@ struct TutorialTrigger {
     Tutorial id;
     TutorialTrigger(Tutorial id) : id(id) {};
 };
+
 #pragma endregion Game State
 
 #pragma region Sound

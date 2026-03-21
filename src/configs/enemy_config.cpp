@@ -3,6 +3,9 @@
 #include "common.hpp"
 #include "tinyECS/components.hpp"
 
+#ifndef ENEMY_CONFIG
+#define ENEMY_CONFIG
+
 #pragma region Enemies
 // =================================================================================
 // Enemies
@@ -55,7 +58,7 @@ struct BossConfig {
 static const BossConfig BOSS_CONFIGS[boss_count] = {
     // Sharky
     {"Sharky",
-     {250, 250},
+     {400, 400},
      150.f,
      M_PI * 1.5f,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
@@ -63,11 +66,11 @@ static const BossConfig BOSS_CONFIGS[boss_count] = {
 
     // King Crabby
     {"King Crabby",
-     {1000, 1000},
+     {1200, 1200},
      100.f,
      M_PI,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
-     {ATTACK_PATTERN::KING_CRABBY_NORMAL, ATTACK_PATTERN::KING_CRABBY_TOXIC, ATTACK_PATTERN::KING_CRABBY_TOXIC_GROW}},
+     {ATTACK_PATTERN::KING_CRABBY_NORMAL, ATTACK_PATTERN::KING_CRABBY_TOXIC_A, ATTACK_PATTERN::KING_CRABBY_TOXIC_B}},
 
     // EEEEL
     {"EEEEL",
@@ -79,3 +82,5 @@ static const BossConfig BOSS_CONFIGS[boss_count] = {
 };
 
 #pragma endregion Bosses
+
+#endif
