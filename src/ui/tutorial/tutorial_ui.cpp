@@ -129,15 +129,15 @@ void TutorialUI::draw_tutorial_hazards(TutorialStep tutorial) {
         const char *text = "WATCH OUT!";
         ImVec2 text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 100.f));
+            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 200.f));
         ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "In the game you'll encounter some hazards, such as mines (blinking red obstacles).";
+        text = "In the game you'll encounter some hazards:\n\nMines (Blinking red obstacles).\nAnemones (Purple stinging tentacles)";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
+            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
         ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
         ImGui::PopFont();
     }
@@ -157,7 +157,7 @@ void TutorialUI::draw_tutorial_healing(TutorialStep tutorial) {
     int current_step = tutorial.current_step;
     if (current_step == 1) {
         ImGui::PushFont(io.Fonts->Fonts[1]);
-        const char *text = "RECOVERY: HEALTH";
+        const char *text = "MECHANIC: POWER UPS";
         ImVec2 text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(
             ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 150.f));
@@ -165,7 +165,7 @@ void TutorialUI::draw_tutorial_healing(TutorialStep tutorial) {
         ImGui::PopFont();
 
         ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "You'll also encounter some health packs.\n\nJust swim over them to replenish your health!";
+        text = "You'll also encounter some health packs and other powerups.\nJust swim over them to get their effects!\n\nFeathers give a temporary speed boost\nThe yellow container gives a temporary damage boost\nHealth packs replenish health (Not consumed at full health)";
         text_size = ImGui::CalcTextSize(text);
         ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
         ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
