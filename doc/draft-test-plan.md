@@ -82,6 +82,17 @@ Steps to reproduce:
 2. Defeat the 3 enemy crabs and enter the upgrade screen
 3. After exiting via `ESC`, you will be greeted by the win screen
 
+### [P2: Health bars render on top of game over message #117](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/117)
+
+Health bar render layer is on top of game over message.
+
+Steps to reproduce:
+1. Position an enemy in the middle of your screen
+2. Lose to that enemy
+3. See that the health bar is on top
+
+This has to do with how we've structured our rendering pipeline, not fixed as of M3 since this requires some restructuring in the rendering flow.
+
 ### [P2: Lag Spike for Mesh-Based Collisions #96](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/96)
 
 Significant performance hit for mesh-based collisions. Will have to optimize the detections in the collisions/physics systems, and perform some pruning for far enough entities.
