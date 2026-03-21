@@ -2,7 +2,9 @@
 #include "configs/attack_pattern.cpp"
 #include "configs/enemy_config.cpp"
 #include "configs/player_config.cpp"
+#include "states/boss_states.hpp"
 #include "tinyECS/registry.hpp"
+
 #include <iostream>
 #include <map>
 #include <set>
@@ -157,6 +159,9 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     registry.pursuits.emplace(entity);
     registry.dropsCrackers.emplace(entity, 10);
 
+    StateMachine &sm = registry.stateMachines.emplace(entity);
+    registry.stateTransitionRequests.replace(entity, STATE_TYPE::IDLE);
+
     if (type == BOSS_TYPE::SHARKY) {
         motion.scale = vec2(120.0f, 80.0f);
 
@@ -184,7 +189,7 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     return entity;
 }
 
-Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
+Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     auto &config = ENEMY_CONFIGS[(int)type];
     Entity entity = Entity(config.name);
 
@@ -694,12 +699,8 @@ Entity createEffectSpawn(const vec2 position) {
     pm.position = position;
     pm.scale = vec2(TILE_SIZE_PX * 1.5);
 
-    registry.renderRequests.emplace(e,
-                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_BUBBLE,
-                                        EFFECT_ASSET_ID::TEXTURED, 
-                                        GEOMETRY_BUFFER_ID::SPRITE,
-                                        RENDER_LAYER::BACKGROUND
-                                    });
+    registry.renderRequests.emplace(e, RenderRequest{TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
+                                                     GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::BACKGROUND});
     registry.tints.emplace(e, vec3(1.f, 0.2f, 0.2f));
     return e;
 }

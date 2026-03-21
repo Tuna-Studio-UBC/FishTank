@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -11,9 +12,8 @@
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
 #include "configs/upgrade_config.hpp"
-#include <array>
-#include <unordered_map>
-#include <utilities/parse_tree.hpp>
+#include "states/state_types.hpp"
+#include "utilities/parse_tree.hpp"
 
 #pragma region Entity
 // =================================================================================
@@ -240,6 +240,12 @@ struct SpawnRequest {
     ENEMY_TYPE type;
 };
 
+// FSM state change requests
+struct StateTransitionRequest {
+    STATE_TYPE next_state = STATE_TYPE::IDLE;
+    StateTransitionRequest(STATE_TYPE next_state) { this->next_state = next_state; };
+};
+
 #pragma endregion Requests
 
 #pragma region Pickups
@@ -408,6 +414,7 @@ struct TutorialTrigger {
     Tutorial id;
     TutorialTrigger(Tutorial id) : id(id) {};
 };
+
 #pragma endregion Game State
 
 #pragma region Sound

@@ -11,6 +11,8 @@
 
 // internal
 #include "systems/ai/ai_system.hpp"
+#include "systems/fsm/fsm_system.hpp"
+#include "systems/fsm/transition_system.hpp"
 #include "systems/health/death_system.hpp"
 #include "systems/health/heal_damage_system.hpp"
 #include "systems/level/level_system.hpp"
@@ -41,6 +43,7 @@ int main() {
     PathfindingSystem path_system;
     CollisionSystem collision_system;
     ExpirationSystem expiration_system;
+    FSMSystem fsm_system;
     GrowthSystem growth_system;
     OverTimeEffectSystem ote_system;
     HealDamageSystem heal_damage_system;
@@ -53,6 +56,7 @@ int main() {
     CameraSystem camera_system;
     AnimationSystem animation_system;
     TileMapSystem tilemap_system;
+    TransitionSystem transition_system;
     UpgradeSystem upgrade_system;
     LevelSystem level_system(&tilemap_system, &renderer_system, &camera_system, &world_system);
 
@@ -128,6 +132,11 @@ int main() {
             {
                 ZoneScopedN("SYS: PickUp");
                 pick_up_system.step(elapsed_ms);
+            }
+            {
+                ZoneScopedN("SYS: State Machines");
+                fsm_system.step(elapsed_ms);
+                transition_system.step(elapsed_ms);
             }
             {
                 ZoneScopedN("SYS: AI Detection");
