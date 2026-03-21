@@ -1,3 +1,6 @@
+#ifndef ATTACK_CONFIG
+#define ATTACK_CONFIG
+
 #include "attack_pattern.hpp"
 #include "common.hpp"
 #include "tinyECS/components.hpp"
@@ -43,7 +46,7 @@ static const AttackConfig ATTACK_CONFIGS[attack_count] = {
 
     // Sharky
     {ATTACK_EFFECT::NORMAL, 5, 3000.f, BASE_PROJECTILE_SPEED * 2, 100.f, Tint({0.2f, 0.9f, 1.f})},
-    {ATTACK_EFFECT::NORMAL, 2, 5000.f, BASE_PROJECTILE_SPEED * 2, 100.f, Tint({0.2f, 0.9f, 1.f})},
+    {ATTACK_EFFECT::NORMAL, 4, 5000.f, BASE_PROJECTILE_SPEED * 2.25, 100.f, Tint({0.2f, 0.9f, 1.f})},
 
     // King Crabby
     {ATTACK_EFFECT::NORMAL, 10, 5000.f, BASE_PROJECTILE_SPEED, 1000.f, Tint({1.f, 0.5f, 0.8f})},
@@ -51,7 +54,9 @@ static const AttackConfig ATTACK_CONFIGS[attack_count] = {
     {ATTACK_EFFECT::TOXIC, 5, 3000.f, BASE_PROJECTILE_SPEED * 1.25, 2000.f, Tint({0.f, 0.f, 0.f}),
      PROJECTILE_SIZE_PX * 1.25f},
 
-    {ATTACK_EFFECT::TOXIC, 5, 3000.f, BASE_PROJECTILE_SPEED * 2, 3000.f, Tint({0.f, 0.f, 0.f})},
+    {ATTACK_EFFECT::TOXIC, 5, 3000.f, BASE_PROJECTILE_SPEED * 2, 1000.f, Tint({0.f, 0.f, 0.f})},
 
     // EEEEL
     {ATTACK_EFFECT::NORMAL, 10, 10000.f, BASE_PROJECTILE_SPEED * 0.75, 4000.f, Tint({1.f, 0.f, 1.f})}};
+
+#endif
