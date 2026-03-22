@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "components.hpp"
+#include "states/state_machine.hpp"
 #include "tiny_ecs.hpp"
 
 class ECSRegistry {
@@ -38,6 +39,9 @@ class ECSRegistry {
     ComponentContainer<DropsCrackers> dropsCrackers;
     ComponentContainer<Pursuit> pursuits;
     ComponentContainer<Bouncy> bouncies;
+    ComponentContainer<Explosive> explosives;
+    ComponentContainer<DeployedMine> deployedMines;
+    ComponentContainer<WeaponState> weaponStates;
     ComponentContainer<BulletRequest> bullet_requests;
     ComponentContainer<Distracted> distracteds;
     ComponentContainer<Sense> senses;
@@ -62,12 +66,16 @@ class ECSRegistry {
     ComponentContainer<Collision> collisions;
     ComponentContainer<ParticleEmitter> particleEmitters;
     ComponentContainer<MeshCollider> meshColliders;
+
     // Game State
     ComponentContainer<ScreenState> screenStates;
     ComponentContainer<KeyboardInputState> keyboardInputs;
     ComponentContainer<MouseInputState> mouseInputs;
     ComponentContainer<Progress> progresses;
+    ComponentContainer<Scoring> scoring;
     ComponentContainer<TutorialTrigger> tutorialTriggers;
+    ComponentContainer<StateMachine> stateMachines;
+    ComponentContainer<StateTransitionRequest> stateTransitionRequests;
 
     // Sound
     ComponentContainer<SoundRequest> sound_requests;
@@ -122,6 +130,9 @@ class ECSRegistry {
         registry_list.push_back(&dropsCrackers);
         registry_list.push_back(&pursuits);
         registry_list.push_back(&bouncies);
+        registry_list.push_back(&explosives);
+        registry_list.push_back(&deployedMines);
+        registry_list.push_back(&weaponStates);
         registry_list.push_back(&bullet_requests);
         registry_list.push_back(&distracteds);
         registry_list.push_back(&senses);
@@ -151,7 +162,10 @@ class ECSRegistry {
         registry_list.push_back(&keyboardInputs);
         registry_list.push_back(&mouseInputs);
         registry_list.push_back(&progresses);
+        registry_list.push_back(&scoring);
         registry_list.push_back(&tutorialTriggers);
+        registry_list.push_back(&stateMachines);
+        registry_list.push_back(&stateTransitionRequests);
 
         // Sound
         registry_list.push_back(&sound_requests);
@@ -183,9 +197,13 @@ class ECSRegistry {
 
     void list_all_components() {
         printf("Debug info on all registry entries:\n");
+        int total_components = 0;
         for (ContainerInterface *reg : registry_list)
-            if (reg->size() > 0)
+            if (reg->size() > 0) {
                 printf("%4d components of type %s\n", (int)reg->size(), typeid(*reg).name());
+                total_components += (int)reg->size();
+            }
+        printf("======== TOTAL COMPONENTS: %4d ========\n", total_components);
     }
 
     void list_all_components_of(Entity e) {

@@ -19,8 +19,6 @@ struct Node {
     bool operator>(const Node &other) const { return f > other.f; }
 };
 
-int get_map_index(int width, int x, int y) { return x + (y * width); }
-
 bool PathfindingSystem::is_out_of_bounds(ivec2 pos) {
     if (!registry.tilemaps.has(current_map)) {
         current_map = tms->get_current_map();
@@ -46,10 +44,12 @@ int h_cost(const ivec2 &a, const ivec2 &b) {
     int dx = abs(a.x - b.x);
     int dy = abs(a.y - b.y);
 
-    int min_d = std::min(dx, dy);
+    return 10 * (dx + dy);
+
+    /* int min_d = std::min(dx, dy);
     int max_d = std::max(dx, dy);
 
-    return (14 * min_d) + (10 * (max_d - min_d));
+    return (14 * min_d) + (10 * (max_d - min_d));*/
 }
 
 bool PathfindingSystem::walkable_bresenhams_line(ivec2 a, ivec2 b) {
@@ -72,8 +72,8 @@ bool PathfindingSystem::walkable_bresenhams_line(ivec2 a, ivec2 b) {
         }
 
         int e2 = 2 * err;
-        // int prev_x = x1;
-        // int prev_y = y1;
+        int prev_x = x1;
+        int prev_y = y1;
         if (e2 > -dy) {
             err -= dy;
             x1 += sx;
@@ -84,11 +84,57 @@ bool PathfindingSystem::walkable_bresenhams_line(ivec2 a, ivec2 b) {
         }
 
         // modify Bresenham's to check if all neighbours walkable
-        if (!is_walkable(x1 - 1, y1) || !is_walkable(x1, y1 - 1) || !is_walkable(x1, y1 + 1) ||
+        /*if (!is_walkable(x1 - 1, y1) || !is_walkable(x1, y1 - 1) || !is_walkable(x1, y1 + 1) ||
             !is_walkable(x1 + 1, y1)) {
             return false;
+        }*/
+        if (x1 != prev_x && y1 != prev_y) {
+            if (!is_walkable(prev_x, y1) || !is_walkable(x1, prev_y)) {
+                return false;
+            }
         }
-        /* if (x1 != prev_x && y1 != prev_y) {
+    }
+
+    return true;
+}
+
+bool PathfindingSystem::visible_bresenhams_line(ivec2 a, ivec2 b) {
+    int x1 = a.x;
+    int y1 = a.y;
+    int x2 = b.x;
+    int y2 = b.y;
+
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+
+    int sx = (x1 < x2) ? 1 : -1;
+    int sy = (y1 < y2) ? 1 : -1;
+
+    int err = dx - dy;
+
+    while (true) {
+        if (x1 == x2 && y1 == y2) {
+            break;
+        }
+
+        int e2 = 2 * err;
+        //int prev_x = x1;
+        //int prev_y = y1;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+
+        if (!is_walkable(x1, y1)) {
+            return false;
+        }
+        /*
+        // modify Bresenham's to check if diagonal is walkable
+        if (x1 != prev_x && y1 != prev_y) {
             if (!is_walkable(prev_x, y1) || !is_walkable(x1, prev_y)) {
                 return false;
             }
@@ -109,7 +155,7 @@ std::vector<ivec2> PathfindingSystem::prune_path(std::vector<ivec2> &path) {
     int curr = 0;
 
     for (int i = 2; i < path.size(); i++) {
-        if (!walkable_bresenhams_line(path[curr], path[i])) {
+        if (!walkable_bresenhams_line(path[curr], path[i]) && (pruned_path.empty() || pruned_path.back() != path[i - 1])) {
             pruned_path.push_back(path[i - 1]);
             curr = i - 1;
         }
@@ -218,36 +264,19 @@ std::vector<vec2> PathfindingSystem::path_finding(const vec2 &start_world, const
         vec2 world_coord = tile_center_to_world(t);
         float buffer = TILE_SIZE_PX * 0.25f;
 
-        vec2 offset = vec2(0.f);
+        vec2 offset(0);
 
-        if (!is_walkable(t.x + 1, t.y + 1)) {
-            offset.x -= buffer;
-            offset.y -= buffer;
-        }
-        if (!is_walkable(t.x + 1, t.y - 1)) {
-            offset.x -= buffer;
-            offset.y += buffer;
-        }
-        if (!is_walkable(t.x - 1, t.y + 1)) {
-            offset.x += buffer;
-            offset.y -= buffer;
-        }
-        if (!is_walkable(t.x - 1, t.y - 1)) {
-            offset.x += buffer;
-            offset.y += buffer;
-        }
-        if (!is_walkable(t.x + 1, t.y)) {
-            offset.x -= buffer;
-        }
-        if (!is_walkable(t.x - 1, t.y)) {
-            offset.x += buffer;
-        }
-        if (!is_walkable(t.x, t.y + 1)) {
-            offset.y -= buffer;
-        }
-        if (!is_walkable(t.x, t.y - 1)) {
-            offset.y += buffer;
-        }
+        if (!is_walkable(t.x + 1, t.y) || !is_walkable(t.x + 1, t.y - 1) || !is_walkable(t.x + 1, t.y + 1))
+            offset.x -= 1;
+        if (!is_walkable(t.x - 1, t.y) || !is_walkable(t.x - 1, t.y - 1) || !is_walkable(t.x - 1, t.y + 1))
+            offset.x += 1;
+        if (!is_walkable(t.x, t.y + 1) || !is_walkable(t.x + 1, t.y + 1) || !is_walkable(t.x - 1, t.y + 1))
+            offset.y -= 1;
+        if (!is_walkable(t.x, t.y - 1) || !is_walkable(t.x + 1, t.y - 1) || !is_walkable(t.x - 1, t.y - 1))
+            offset.y += 1;
+
+        if (length(offset) > 0)
+            offset = normalize(offset) * buffer;
 
         world_path.push_back(world_coord + offset);
     }

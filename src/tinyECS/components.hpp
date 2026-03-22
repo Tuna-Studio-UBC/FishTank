@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -11,9 +12,8 @@
 #include "configs/power_up_config.cpp"
 #include "configs/spawn_target_config.hpp"
 #include "configs/upgrade_config.hpp"
-#include <array>
-#include <unordered_map>
-#include <utilities/parse_tree.hpp>
+#include "states/state_types.hpp"
+#include "utilities/parse_tree.hpp"
 
 #pragma region Entity
 // =================================================================================
@@ -33,17 +33,22 @@ struct Boss {
     BOSS_TYPE type;
     int curr_attack_pattern_index = 0;
     int curr_phase = 1;
-    float elapsed_time_ms = 0.f;
-    float time_to_next_pattern_ms = 15 * 1000.f; // TODO: Move out to enemy_config.cpp
+};
+
+enum class BulletType {
+    BASIC,        // Gun 1: bouncing bullets
+    EXPLOSIVE,    // Gun 2: explodes on impact
+    DEPLOYED_MINE // Gun 2 right-click: player-deployed mine
 };
 
 struct Bullet {
     ATTACK_EFFECT attack_effect;
     int damage;
     Entity owner; // track who fired to prevent self hit
+    BulletType type = BulletType::BASIC;
 };
 // Uses: Motion
-// Optional: Bouncy
+// Optional: Bouncy, Explosive, DeployedMine
 
 struct Turret {
     float barrel_length_px = 30.f;
@@ -124,11 +129,18 @@ struct OverTimeEffect {
 struct FireControl {
     float cooldown_timer = 0; // ms
     float cooldown_ms = 2000; // ms
+
     ATTACK_PATTERN attack_pattern;
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
     int damage_bonus = 0;
     float refill_progress = 0.f;
+
+    bool can_shoot = true;
+    float can_shoot_ms = 5 * 1000.f;    // Time window for shooting mode
+    float cd_can_shoot_ms = 2 * 1000.f; // Time window for cooldown mode
+    float elapsed_can_shoot_ms = 0.f;
+    float elapsed_cd_can_shoot_ms = 0.f;
 };
 
 struct SpeedControl {
@@ -148,6 +160,8 @@ struct Target {
 
 struct DropsCrackers {
     int cracker;
+    DropsCrackers() {};
+    DropsCrackers(int amount) : cracker(amount) {};
 };
 
 struct Wallet {
@@ -162,7 +176,36 @@ struct Pursuit {
 };
 
 struct Bouncy {
-    int bounces_remaining = 3;
+    int bounces_remaining = 3; // 1 bounce is basically no bounce, 2 bounce is one bounce, etc
+};
+
+struct Explosive {
+    float radius = 100.0f;
+    float damage = 20.0f;
+    bool triggered_by_explosion = false; // For mine chain reaction
+};
+
+struct DeployedMine {
+    float deceleration_rate = 75.0f; // 150px/s over 2s
+    bool is_stationary = false;
+};
+
+enum class WeaponType { GUN_1, GUN_2 };
+
+struct WeaponState {
+    WeaponType current_weapon = WeaponType::GUN_1;
+
+    // Gun 1 (reg/bouncing bullets)
+    float gun1_left_cooldown = 500.0f;   // ms
+    float gun1_right_cooldown = 1500.0f; // burst cooldown 1.5s
+    int burst_shots_remaining = 0;
+    float next_burst_time = 0.0f;
+    float last_right_click_time = 0.0f;
+
+    // Gun 2 (explosives)
+    float gun2_left_cooldown = 600.0f;   // ms
+    float gun2_right_cooldown = 2500.0f; // mine cooldown 2.5s
+    float last_left_click_time = 0.0f;
 };
 
 struct Distracted {
@@ -229,6 +272,12 @@ struct SpawnRequest {
     vec2 position;
     float timer_ms = 2000.f;
     ENEMY_TYPE type;
+};
+
+// FSM state change requests
+struct StateTransitionRequest {
+    STATE_TYPE next_state = STATE_TYPE::SHARKY_IDLE;
+    StateTransitionRequest(STATE_TYPE next_state) { this->next_state = next_state; };
 };
 
 #pragma endregion Requests
@@ -348,11 +397,12 @@ struct KeyboardInputState {
     KeyboardActions most_recent_turn = KeyboardActions::TurnRight;
 };
 
-enum MouseActions { LeftClick, MouseActionsCount };
+enum MouseActions { LeftClick, RightClick, MouseActionsCount };
 
 struct MouseInputState {
     vec2 mouse_pos;
     MouseActions current_action = MouseActionsCount;
+    MouseActions previous_action = MouseActionsCount;
 };
 
 // TODO: Move to config
@@ -368,16 +418,19 @@ struct TutorialStep {
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
     TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::HAZARDS, 1),
     TutorialStep(Tutorial::HEALING, 1),  TutorialStep(Tutorial::AMMUNITION, 1),
-    TutorialStep(Tutorial::COMBAT, 2),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
+    TutorialStep(Tutorial::COMBAT, 3),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
 };
 
 struct Progress {
     bool trigger_restart = false;
     bool trigger_skip_wave = false;
+    bool is_transitioning_level = false;
+
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;
     bool is_upgrade_menu_called = false;
+    bool force_skip_tutorial = false;
     Tutorial tutorial_step_id = Tutorial::MOVEMENT;
     std::vector<TutorialStep> tutorial_steps;
 
@@ -387,10 +440,19 @@ struct Progress {
     bool has_beat_level = false;
 };
 
+struct Scoring {
+    int bullets_fired = 0;
+    int bullets_hit = 0;
+    int been_hit = 0;
+    int enemies_defeated = 0;
+    int crackers_earned = 0;
+};
+
 struct TutorialTrigger {
     Tutorial id;
     TutorialTrigger(Tutorial id) : id(id) {};
 };
+
 #pragma endregion Game State
 
 #pragma region Sound
@@ -552,18 +614,26 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_SMOKE = TEXTURE_CURSOR + 1,
 
     TEXTURE_BUBBLE_SHEET = TEXTURE_SMOKE + 1,
-    TEXTURE_FISH_SHEET = TEXTURE_BUBBLE_SHEET + 1,
+    TEXTURE_WHIRL_SHEET = TEXTURE_BUBBLE_SHEET + 1,
+    TEXTURE_FISH_SHEET = TEXTURE_WHIRL_SHEET + 1,
     TEXTURE_TURRET_SHEET = TEXTURE_FISH_SHEET + 1,
+
     TEXTURE_CRAB_SHEET = TEXTURE_TURRET_SHEET + 1,
-    TEXTURE_HEALTH_SHEET = TEXTURE_CRAB_SHEET + 1,
-    TEXTURE_MINE_SHEET = TEXTURE_HEALTH_SHEET + 1,
-    TEXTURE_URCHIN_SHEET = TEXTURE_MINE_SHEET + 1,
+    TEXTURE_URCHIN_SHEET = TEXTURE_CRAB_SHEET + 1,
     TEXTURE_ISOPOD_SHEET = TEXTURE_URCHIN_SHEET + 1,
 
-    TEXTURE_SHARKY_SHEET = TEXTURE_ISOPOD_SHEET + 1,
-    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_SHEET + 1,
+    TEXTURE_MINE_SHEET = TEXTURE_ISOPOD_SHEET + 1,
+    TEXTURE_ANEMONE_SHEET = TEXTURE_MINE_SHEET + 1,
 
-    TEXTURE_COUNT = TEXTURE_KING_CRABBY_SHEET + 1
+    TEXTURE_HEALTH_SHEET = TEXTURE_ANEMONE_SHEET + 1,
+    TEXTURE_WHEY_SHEET = TEXTURE_HEALTH_SHEET + 1,
+    TEXTURE_SPEED_SHEET = TEXTURE_WHEY_SHEET + 1,
+
+    TEXTURE_SHARKY_SHEET = TEXTURE_SPEED_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_SHEET + 1,
+    TEXTURE_EXPLOSION_SHEET = TEXTURE_KING_CRABBY_SHEET + 1,
+
+    TEXTURE_COUNT = TEXTURE_EXPLOSION_SHEET + 1
 };
 
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

@@ -52,14 +52,14 @@ void DeathSystem::step(float elapsed_ms) {
 
                     // Drop crackers
                     if (registry.dropsCrackers.has(e) && !registry.players.entities.empty()) {
-                        static std::mt19937 rng(std::random_device{}());
-                        static std::uniform_int_distribution<int> cracker_dist(1, 3);
-
                         DropsCrackers &drops = registry.dropsCrackers.get(e);
-                        drops.cracker = cracker_dist(rng);
                         Entity player = registry.players.entities[0];
                         Wallet &wallet = registry.wallets.get(player);
                         wallet.crackers += drops.cracker;
+
+                        Scoring &score = registry.scoring.components[0];
+                        score.crackers_earned += drops.cracker;
+                        score.enemies_defeated += 1;
 
                         spdlog::info("{} collected {} crackers! Total: {}", player.name_id(), drops.cracker,
                                      wallet.crackers);

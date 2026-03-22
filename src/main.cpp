@@ -11,6 +11,8 @@
 
 // internal
 #include "systems/ai/ai_system.hpp"
+#include "systems/fsm/fsm_system.hpp"
+#include "systems/fsm/transition_system.hpp"
 #include "systems/health/death_system.hpp"
 #include "systems/health/heal_damage_system.hpp"
 #include "systems/level/level_system.hpp"
@@ -41,6 +43,7 @@ int main() {
     PathfindingSystem path_system;
     CollisionSystem collision_system;
     ExpirationSystem expiration_system;
+    FSMSystem fsm_system;
     GrowthSystem growth_system;
     OverTimeEffectSystem ote_system;
     HealDamageSystem heal_damage_system;
@@ -53,6 +56,7 @@ int main() {
     CameraSystem camera_system;
     AnimationSystem animation_system;
     TileMapSystem tilemap_system;
+    TransitionSystem transition_system;
     UpgradeSystem upgrade_system;
     LevelSystem level_system(&tilemap_system, &renderer_system, &camera_system, &world_system);
 
@@ -82,6 +86,7 @@ int main() {
     world_system.init(&renderer_system, &camera_system, &tilemap_system, &upgrade_system);
     level_system.load_tutorial();
     game_ui.set_upgrade_system(&upgrade_system);
+    game_ui.set_audio_system(world_system.get_audio_system());
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);
@@ -127,6 +132,11 @@ int main() {
             {
                 ZoneScopedN("SYS: PickUp");
                 pick_up_system.step(elapsed_ms);
+            }
+            {
+                ZoneScopedN("SYS: State Machines");
+                fsm_system.step(elapsed_ms);
+                transition_system.step(elapsed_ms);
             }
             {
                 ZoneScopedN("SYS: AI Detection");
@@ -183,6 +193,14 @@ int main() {
             game_ui.draw_minimap();
         }
         {
+            ZoneScopedN("RENDER: Wallet");
+            game_ui.draw_wallet();
+        }
+        {
+            ZoneScopedN("RENDER: Wallet");
+            game_ui.draw_score();
+        }
+        {
             ZoneScopedN("RENDER: Ammo");
             game_ui.draw_ammo();
         }
@@ -211,7 +229,10 @@ int main() {
         debug_ui.draw_respawn(&world_system);
 #endif
 
-        game_ui.draw_cursor();
+        {
+            ZoneScopedN("RENDER: Cursor");
+            game_ui.draw_cursor();
+        }
 
         // Render
         {

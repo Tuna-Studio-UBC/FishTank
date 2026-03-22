@@ -2,7 +2,9 @@
 #include "configs/attack_pattern.cpp"
 #include "configs/enemy_config.cpp"
 #include "configs/player_config.cpp"
+#include "states/boss_states.hpp"
 #include "tinyECS/registry.hpp"
+
 #include <iostream>
 #include <map>
 #include <set>
@@ -48,6 +50,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 
     registry.upgrades.emplace(entity);
 
+    registry.scoring.emplace(entity);
+    registry.weaponStates.emplace(entity);
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -137,6 +141,10 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     auto &fire = registry.fireControls.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)attack_pattern].cooldown_ms;
     fire.attack_pattern = attack_pattern;
+    if (type == BOSS_TYPE::SHARKY) {
+        // Add initial 3 second delay to allow the player to run
+        fire.cooldown_timer = -3000;
+    }
 
     auto &speed = registry.speedControls.emplace(entity);
     speed.move_speed = config.move_speed;
@@ -149,11 +157,15 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     ai.current_state = AIAction::IDLE;
 
     registry.pursuits.emplace(entity);
-    registry.dropsCrackers.emplace(entity);
+    registry.dropsCrackers.emplace(entity, 10);
+
+    StateMachine &sm = registry.stateMachines.emplace(entity);
+    registry.stateTransitionRequests.replace(entity, STATE_TYPE::IDLE);
 
     if (type == BOSS_TYPE::SHARKY) {
         motion.scale = vec2(120.0f, 80.0f);
 
+        registry.stateTransitionRequests.replace(entity, STATE_TYPE::SHARKY_NORMAL);
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SHARKY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
@@ -164,6 +176,7 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     } else if (type == BOSS_TYPE::KING_CRABBY) {
         motion.scale = vec2(80.0f, 80.0f);
 
+        registry.stateTransitionRequests.replace(entity, STATE_TYPE::KING_CRABBY_NORMAL);
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
@@ -178,7 +191,7 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     return entity;
 }
 
-Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
+Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     auto &config = ENEMY_CONFIGS[(int)type];
     Entity entity = Entity(config.name);
 
@@ -216,7 +229,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
         registry.distracteds.emplace(entity);
     }
 
-    registry.dropsCrackers.emplace(entity);
+    DropsCrackers &dc = registry.dropsCrackers.emplace(entity);
 
     if (type == ENEMY_TYPE::URCHIN) {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
@@ -227,6 +240,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 4;
         an.columns = 4;
         an.frame_time = 500;
+        dc = 3;
     } else if (type == ENEMY_TYPE::HOMING) {
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ISOPOD_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
@@ -236,6 +250,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
         an.columns = 8;
         an.frame_time = 125;
         motion.scale = vec2(40.0f, 25.0f);
+        dc = 1;
     } else if (type == ENEMY_TYPE::MOTHER) {
         ai.tree_file = "leader_tree.txt";
         ai.tree = load_tree(ai.tree_file);
@@ -251,6 +266,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
+        dc = 4;
     } else {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
@@ -260,6 +276,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position, ENEMY_TYPE type) {
         an.frame_count = 8;
         an.columns = 8;
         an.frame_time = 250;
+        dc = 1;
     }
 
     return entity;
@@ -413,10 +430,20 @@ Entity createPowerUp(RenderSystem *renderer, vec2 position, POWER_UP_TYPE type) 
         an.columns = 4;
         an.frame_count = 4;
         an.frame_time = 250;
+    } else if (config.type == POWER_UP_TYPE::DAMAGE_MULTIPLIER) {
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_WHEY_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
     } else {
-        registry.colours.emplace(entity, config.colour);
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                                GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_SPEED_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+        Animation &an = registry.animations.emplace(entity);
+        an.columns = 4;
+        an.frame_count = 4;
+        an.frame_time = 250;
     }
 
     registry.pickUps.emplace(entity);
@@ -573,11 +600,14 @@ Entity createAnemone(RenderSystem *renderer, vec2 position) {
     motion.position = position;
     motion.velocity = {0.f, 0.f};
     motion.angle = 0.f;
-    motion.scale = {40.f, 40.f};
+    motion.scale = {60.f, 60.f};
 
-    registry.colours.emplace(entity, config.colour);
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::EGG,
-                                            GEOMETRY_BUFFER_ID::EGG, RENDER_LAYER::INTERACTABLES});
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_ANEMONE_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+    Animation &an = registry.animations.emplace(entity);
+    an.columns = 16;
+    an.frame_count = 16;
+    an.frame_time = 62.5;
 
     return entity;
 }
@@ -665,19 +695,23 @@ Entity createEffectSpawn(const vec2 position) {
     pe.spawn_interval_ms = 20;
     pe.standalone = true;
     pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
-    pe.particle_scale = 20;
+    pe.particle_scale = 5;
 
     Motion &pm = registry.motions.emplace(e);
     pm.position = position;
     pm.scale = vec2(TILE_SIZE_PX * 1.5);
 
     registry.renderRequests.emplace(e,
-                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_BUBBLE,
+                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_WHIRL_SHEET,
                                         EFFECT_ASSET_ID::TEXTURED, 
                                         GEOMETRY_BUFFER_ID::SPRITE,
                                         RENDER_LAYER::BACKGROUND
                                     });
-    registry.tints.emplace(e, vec3(1.f, 0.2f, 0.2f));
+
+    Animation &an = registry.animations.emplace(e);
+    an.columns = 7;
+    an.frame_count = 7;
+    an.frame_time = 100;
     return e;
 }
 

@@ -1,6 +1,8 @@
 // Header
 #include "systems/world/world_system.hpp"
 #include "systems/world/world_init.hpp"
+#include <tracy/Tracy.hpp>
+#define TracyLine TracyConcat(__LINE__, U) // Fix for MSVC
 
 // stlib
 #include "configs/wave_config.cpp"
@@ -240,6 +242,7 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
+    ZoneScopedN("SYS: World");
 
     // Updating window title
     std::stringstream title_ss;
@@ -328,11 +331,6 @@ bool WorldSystem::is_over() const { return bool(glfwWindowShouldClose(window)); 
 
 // on key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-
-    // exit game w/ ESC
-    if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
-        close_window();
-    }
 
     // We should have 1 and only ever 1 player input component
     assert(registry.keyboardInputs.components.size() == 1);
@@ -476,6 +474,40 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 #undef DEBUG_UPGRADE_INPUTS
 
+        // Weapon switching
+        if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+            Entity player = registry.players.entities[0];
+            if (registry.weaponStates.has(player)) {
+                WeaponState &ws = registry.weaponStates.get(player);
+                ws.current_weapon = WeaponType::GUN_1;
+
+                // reset turret to original color 
+                if (!registry.turrets.entities.empty()) {
+                    Entity turret = registry.turrets.entities[0];
+                    if (registry.tints.has(turret)) {
+                        registry.tints.remove(turret);
+                    }
+                }
+            }
+        }
+        if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+            Entity player = registry.players.entities[0];
+            if (registry.weaponStates.has(player)) {
+                WeaponState &ws = registry.weaponStates.get(player);
+                ws.current_weapon = WeaponType::GUN_2;
+
+                // make turret red
+                if (!registry.turrets.entities.empty()) {
+                    Entity turret = registry.turrets.entities[0];
+                    if (registry.tints.has(turret)) {
+                        registry.tints.get(turret).tint = vec3(1.0f, 0.1f, 0.1f);
+                    } else {
+                        registry.tints.emplace(turret, vec3(1.0f, 0.1f, 0.1f));
+                    }
+                }
+            }
+        }
+
 #ifdef ENABLE_LOAD_TUTORIAL
         if (key == GLFW_KEY_T) {
             auto &progress = registry.progresses.components[0];
@@ -505,8 +537,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
-        // TODO: Change pause key to ESC
-        if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             auto &progress = registry.progresses.components[0];
             if (progress.is_upgrade_menu_called) {
                 upgrade_system->close_upgrade_menu();
@@ -541,9 +572,15 @@ void WorldSystem::on_mouse_button_pressed(int button, int action, int mods) {
         if (button == GLFW_MOUSE_BUTTON_LEFT) {
             mi.current_action = MouseActions::LeftClick;
             try_progress_tutorial();
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            mi.current_action = MouseActions::RightClick;
         }
-    } else {
-        mi.current_action = MouseActions::MouseActionsCount;
+    } else if (action == GLFW_RELEASE) {
+        // Clear action on release
+        if ((button == GLFW_MOUSE_BUTTON_LEFT && mi.current_action == MouseActions::LeftClick) ||
+            (button == GLFW_MOUSE_BUTTON_RIGHT && mi.current_action == MouseActions::RightClick)) {
+            mi.current_action = MouseActions::MouseActionsCount;
+        }
     }
 }
 
