@@ -181,7 +181,7 @@ struct Bouncy {
 
 struct Explosive {
     float radius = 100.0f;
-    float damage = 30.0f;
+    float damage = 20.0f;
     bool triggered_by_explosion = false;  // For mine chain reaction
 };
 
