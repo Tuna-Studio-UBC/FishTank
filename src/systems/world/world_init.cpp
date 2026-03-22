@@ -567,6 +567,8 @@ Entity createMine(RenderSystem *renderer, vec2 position) {
     registry.mines.emplace(entity);
     registry.hazards.emplace(entity, HAZARD_TYPE::MINE);
 
+    registry.explosives.emplace(entity, Explosive{100.0f, 0.0f, false});
+
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
     registry.meshPtrs.emplace(entity, &mesh);
 
@@ -701,12 +703,8 @@ Entity createEffectSpawn(const vec2 position) {
     pm.position = position;
     pm.scale = vec2(TILE_SIZE_PX * 1.5);
 
-    registry.renderRequests.emplace(e,
-                                    RenderRequest{TEXTURE_ASSET_ID::TEXTURE_WHIRL_SHEET,
-                                        EFFECT_ASSET_ID::TEXTURED, 
-                                        GEOMETRY_BUFFER_ID::SPRITE,
-                                        RENDER_LAYER::BACKGROUND
-                                    });
+    registry.renderRequests.emplace(e, RenderRequest{TEXTURE_ASSET_ID::TEXTURE_WHIRL_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                     GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::BACKGROUND});
 
     Animation &an = registry.animations.emplace(e);
     an.columns = 7;
