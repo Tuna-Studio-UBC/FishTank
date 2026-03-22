@@ -101,9 +101,9 @@ void CollisionSystem::handle_apply_damage(Bullet &bullet, Entity other_entity) {
 // helper function to recursively find all mines in chain reaction range
 // Funny story, this was orignally a bug where the game would crash if like two mines were triggered
 // at the same time so I turned it into a feature, bigger booms.
-void CollisionSystem::collect_chain_mines(Entity explosive_entity, vec2 center, float radius, 
-                                          std::vector<Entity>& collected_mines, 
-                                          float& total_damage, float& max_radius) {
+void CollisionSystem::collect_chain_mines(Entity explosive_entity, vec2 center, float radius,
+                                          std::vector<Entity> &collected_mines, float &total_damage,
+                                          float &max_radius) {
     for (Entity bullet : registry.bullets.entities) {
         // Skip if already collected or if it's the original explosive
         if (std::find(collected_mines.begin(), collected_mines.end(), bullet) != collected_mines.end()) {
@@ -123,8 +123,8 @@ void CollisionSystem::collect_chain_mines(Entity explosive_entity, vec2 center, 
                 max_radius = std::max(max_radius, mine_exp.radius);
 
                 // recursively find mines that THIS mine would trigger
-                collect_chain_mines(explosive_entity, mine_pos, mine_exp.radius * 1.5f, 
-                                   collected_mines, total_damage, max_radius);
+                collect_chain_mines(explosive_entity, mine_pos, mine_exp.radius * 1.5f, collected_mines, total_damage,
+                                    max_radius);
             }
         }
     }
@@ -140,40 +140,40 @@ void CollisionSystem::handle_explosives(Entity explosive_entity, vec2 explosion_
 
     // Calculate combined explosion stats
     int mine_count = chain_mines.size();
-    float combined_radius = max_radius + (mine_count * 15.0f);  // Each mine adds 15 units to radius
+    float combined_radius = max_radius + (mine_count * 15.0f); // Each mine adds 15 units to radius
     float combined_damage = total_damage;
 
     if (mine_count > 0) {
-        spdlog::info("combo: {} mines triggered! Final radius: {}, Final damage: {}", mine_count, combined_radius, combined_damage);
+        spdlog::info("combo: {} mines triggered! Final radius: {}, Final damage: {}", mine_count, combined_radius,
+                     combined_damage);
     }
 
     // Create explosion animation scaled to combined radius
     Entity explosion_anim = Entity("ExplosionAnimation");
     Motion &exp_motion = registry.motions.emplace(explosion_anim);
     exp_motion.position = explosion_pos;
-    exp_motion.velocity = vec2(0.0f, 0.0f);  
+    exp_motion.velocity = vec2(0.0f, 0.0f);
     exp_motion.angle = 0.0f;
-    exp_motion.scale = vec2(combined_radius * 2.0f, combined_radius * 2.0f);  // Scale by diameter
+    exp_motion.scale = vec2(combined_radius * 2.0f, combined_radius * 2.0f); // Scale by diameter
 
-    registry.renderRequests.insert(explosion_anim, 
-        {TEXTURE_ASSET_ID::TEXTURE_EXPLOSION_SHEET, 
-         EFFECT_ASSET_ID::TEXTURED,
-         GEOMETRY_BUFFER_ID::SPRITE,    
-         RENDER_LAYER::OVERLAYS});
+    registry.renderRequests.insert(explosion_anim,
+                                   {TEXTURE_ASSET_ID::TEXTURE_EXPLOSION_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                    GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
 
     Animation &an = registry.animations.emplace(explosion_anim);
-    an.columns = 5;  //the sprite sheet is 5x5 frames, can be adjusted accordingly if we change the art
+    an.columns = 5; // the sprite sheet is 5x5 frames, can be adjusted accordingly if we change the art
     an.rows = 5;
     an.frame_count = 25;
-    an.frame_time = 30;  // 30ms per frame = 0.75s total
+    an.frame_time = 30; // 30ms per frame = 0.75s total
 
-    // expire after animation completes 
+    // expire after animation completes
     registry.expirations.emplace(explosion_anim, 25 * 30.0f);
 
     // Damage enemies in combined radius
     int enemies_hit = 0;
     for (Entity enemy : registry.enemies.entities) {
-        if (!registry.motions.has(enemy)) continue;
+        if (!registry.motions.has(enemy))
+            continue;
         vec2 enemy_pos = registry.motions.get(enemy).position;
         float dist = length(enemy_pos - explosion_pos);
         if (dist <= combined_radius) {
@@ -214,7 +214,8 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         else if (registry.enemies.has(other_entity)) {
             if (registry.players.has(bullet.owner)) { // Only player bullets damage enemies
                 // Get bullet position before any removal happens
-                vec2 bullet_pos = registry.motions.has(bullet_entity) ? registry.motions.get(bullet_entity).position : vec2(0, 0);
+                vec2 bullet_pos =
+                    registry.motions.has(bullet_entity) ? registry.motions.get(bullet_entity).position : vec2(0, 0);
 
                 // Deployed mines ONLY explode, don't do bullet damage
                 if (!is_deployed_mine) {
@@ -240,7 +241,7 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
             Bullet &other_bullet = registry.bullets.get(other_entity);
 
             // Check if one is explosive and the other is a deployed mine (order independent)
-            bool is_explosive_mine_combo = 
+            bool is_explosive_mine_combo =
                 (bullet.type == BulletType::EXPLOSIVE && other_bullet.type == BulletType::DEPLOYED_MINE) ||
                 (bullet.type == BulletType::DEPLOYED_MINE && other_bullet.type == BulletType::EXPLOSIVE);
 
@@ -267,7 +268,9 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
                     combined_damage = bullet_exp.damage + bullet.damage;
                 }
 
-                spdlog::info("Explosive bullet hit mine! Initial radius: {}, Initial damage: {} (before chain reaction)", combined_radius, combined_damage);
+                spdlog::info(
+                    "Explosive bullet hit mine! Initial radius: {}, Initial damage: {} (before chain reaction)",
+                    combined_radius, combined_damage);
 
                 // Trigger combined explosion at mine position
                 handle_explosives(mine_entity, explosion_pos, combined_radius, combined_damage);
@@ -304,12 +307,25 @@ void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) 
                 registry.remove_all_components_of(hazard_entity);
             } else {
                 HealDamageSystem::add_damage(other_entity, config.amount);
+
+                if (registry.explosives.has(hazard_entity)) {
+                    Explosive &exp = registry.explosives.get(hazard_entity);
+                    handle_explosives(hazard_entity, registry.motions.get(hazard_entity).position, exp.radius,
+                                      exp.damage);
+                }
+
                 registry.remove_all_components_of(hazard_entity);
             }
         }
         // Handle hazards against enemy
         else if (registry.enemies.has(other_entity)) {
             HealDamageSystem::add_damage(other_entity, config.amount);
+
+            if (registry.explosives.has(hazard_entity)) {
+                Explosive &exp = registry.explosives.get(hazard_entity);
+                handle_explosives(hazard_entity, registry.motions.get(hazard_entity).position, exp.radius, exp.damage);
+            }
+
             registry.remove_all_components_of(hazard_entity);
         }
     }
