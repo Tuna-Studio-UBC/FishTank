@@ -58,7 +58,8 @@ const std::vector<Level> LEVEL_CONFIGS = {
      {HAZARD_TYPE::MINE, HAZARD_TYPE::ANEMONE},
      {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
      {},
-     {0.f, 0.f}},
+     {0.f, 0.f},
+    true},
 
     // Level 4
     {7,
