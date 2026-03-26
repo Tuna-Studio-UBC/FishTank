@@ -36,9 +36,9 @@ struct Boss {
 };
 
 enum class BulletType {
-    BASIC,          // Gun 1: bouncing bullets
-    EXPLOSIVE,      // Gun 2: explodes on impact
-    DEPLOYED_MINE   // Gun 2 right-click: player-deployed mine
+    BASIC,        // Gun 1: bouncing bullets
+    EXPLOSIVE,    // Gun 2: explodes on impact
+    DEPLOYED_MINE // Gun 2 right-click: player-deployed mine
 };
 
 struct Bullet {
@@ -182,18 +182,15 @@ struct Bouncy {
 struct Explosive {
     float radius = 100.0f;
     float damage = 20.0f;
-    bool triggered_by_explosion = false;  // For mine chain reaction
+    bool triggered_by_explosion = false; // For mine chain reaction
 };
 
 struct DeployedMine {
-    float deceleration_rate = 75.0f;  // 150px/s over 2s 
+    float deceleration_rate = 75.0f; // 150px/s over 2s
     bool is_stationary = false;
 };
 
-enum class WeaponType {
-    GUN_1,
-    GUN_2
-};
+enum class WeaponType { GUN_1, GUN_2 };
 
 struct WeaponState {
     WeaponType current_weapon = WeaponType::GUN_1;
@@ -427,10 +424,13 @@ const std::vector<TutorialStep> TUTORIAL_STEPS = {
 struct Progress {
     bool trigger_restart = false;
     bool trigger_skip_wave = false;
+    bool is_transitioning_level = false;
+
     // Game state - Tutorial
     bool is_tutorial = false;
     bool is_tutorial_step_called = false;
     bool is_upgrade_menu_called = false;
+    bool force_skip_tutorial = false;
     Tutorial tutorial_step_id = Tutorial::MOVEMENT;
     std::vector<TutorialStep> tutorial_steps;
 

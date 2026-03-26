@@ -444,9 +444,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #pragma region DEBUG KEYS
 
 #define ENABLE_LOAD_TUTORIAL
-#define ENABLE_SKIP_WAVE
+// #define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
-#define DEBUG_UPGRADE_INPUTS
+// #define DEBUG_UPGRADE_INPUTS
 
 #ifdef DEBUG_UPGRADE_INPUTS
         {
@@ -472,7 +472,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
         }
 #endif
-#undef DEBUG_UPGRADE_INPUTS
+// #undef DEBUG_UPGRADE_INPUTS
 
         // Weapon switching
         if (key == GLFW_KEY_1 && action == GLFW_PRESS) {

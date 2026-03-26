@@ -299,7 +299,7 @@ bool LevelSystem::should_advance() {
     int num_spawn_requests = registry.spawnRequests.entities.size();
     if (level == -1)
         return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
-    
+
     const Level &level_ref = LEVEL_CONFIGS[level];
     if (wave >= 0 && WAVE_CONFIGS[wave].final_wave) {
         return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
@@ -313,6 +313,10 @@ bool LevelSystem::should_advance() {
 }
 
 void LevelSystem::load_next_level() {
+    if (registry.progresses.size() > 0) {
+        Progress &progress = registry.progresses.components[0];
+        progress.is_transitioning_level = false;
+    }
     triggered_load_level = false;
     level++;
     load_level(level);
@@ -328,6 +332,16 @@ void LevelSystem::load_next_wave() {
 void LevelSystem::trigger_load_next_level() {
     triggered_load_level = true;
     advance_timer = 2000.f;
+
+    if (registry.progresses.size() > 0) {
+        Progress &progress = registry.progresses.components[0];
+        progress.is_transitioning_level = true;
+        if (progress.force_skip_tutorial) {
+            progress.force_skip_tutorial = false;
+            advance_timer = 0.f;
+        }
+    }
+
     if (level == -1) {
         createCompletionText("TUTORIAL COMPLETE!!");
     } else {

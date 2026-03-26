@@ -68,7 +68,6 @@ const std::vector<Level> LEVEL_CONFIGS = {
      {},
      {ivec2(2, 18), ivec2(28, 2)},
      true},
-
     // Level 4
     {MapType::TEST_MAP3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(2, 9), ivec2(14, 9), ivec2(26, 9)}, true},
     // Level 5
