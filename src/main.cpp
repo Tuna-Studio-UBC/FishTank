@@ -79,6 +79,7 @@ int main() {
     }
 
     // initialize game state (done outside of systems)
+    registry.persistences.emplace(Entity("Persistence"));
     registry.progresses.emplace(Entity("Progress"));
 
     // initialize the main systems

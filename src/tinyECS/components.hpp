@@ -378,6 +378,14 @@ struct ParticleEmitter {
 // Game State
 // =================================================================================
 
+struct Persistence {
+    int level = 0;
+    int wave = 0;
+    int kills = 0;
+    int score = 0;
+    int high_score = 0;
+};
+
 // Data structure for toggling debug mode
 struct Debug {
     bool in_debug_mode = 0; // if 1 render spatial grid

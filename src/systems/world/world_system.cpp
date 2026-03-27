@@ -24,13 +24,6 @@ WorldSystem::WorldSystem() {
 }
 
 WorldSystem::~WorldSystem() {
-    // Destroy music components
-    // if (background_music != nullptr)
-    // 	Mix_FreeMusic(background_music);
-    // if (invader_hit_sound != nullptr)
-    // 	Mix_FreeChunk(invader_hit_sound);
-    // if (tower_hit_sound != nullptr)
-    // 	Mix_FreeChunk(tower_hit_sound);
     audio_system.shutdown();
     Mix_CloseAudio();
 
@@ -130,18 +123,6 @@ bool WorldSystem::start_and_load_sounds() {
 
     audio_system.play_bgm("bgm.wav", 45);
 
-    /*background_music = Mix_LoadMUS(get_path(FilePath::AUDIO, "music.wav").c_str());
-    invader_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "invader_hit.wav").c_str());
-    tower_hit_sound = Mix_LoadWAV(get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
-
-    if (background_music == nullptr || invader_hit_sound == nullptr || tower_hit_sound == nullptr) {
-            fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-                    get_path(FilePath::AUDIO, "music.wav").c_str(),
-                    get_path(FilePath::AUDIO, "invader_hit.wav").c_str(),
-                    get_path(FilePath::AUDIO, "tower_hit.wav").c_str());
-            return false;
-    }*/
-
     return true;
 }
 
@@ -191,53 +172,6 @@ void WorldSystem::init(RenderSystem *renderer_arg, CameraSystem *camera_arg, Til
     this->camera_system = camera_arg;
     this->tilemap_system = tilemap_arg;
     this->upgrade_system = upgrade_system;
-
-    // Progress *progress_p;
-    // if (registry.progresses.size() == 0) {
-    //     auto e = Entity("Progress");
-    //     progress_p = &registry.progresses.emplace(e);
-    //     progress_p->level = 0;
-    // } else {
-    //     progress_p = &registry.progresses.components[0];
-    // }
-    // Progress &progress = *progress_p;
-    //
-    // // Set up world level
-    // tilemap_system->init();
-    // tilemap_system->load_map(LEVEL_CONFIGS[progress.level].map_type);
-    //
-    // load_level(progress);
-    // start_wave(progress);
-    //
-    // // ! FOR TESTING !
-    // glm::vec3 font_color = glm::vec3(0.f, 1.f, 0.f);
-    // createText("Level " + std::to_string(progress.level + 1) + " - Wave " + std::to_string(progress.wave + 1),
-    //            vec2(WINDOW_WIDTH_PX / 2 - 100, WINDOW_HEIGHT_PX - 48), 1.f, font_color, glm::mat4(1.f));
-
-    /* Uncomment to use old testing entities
-    createBell(renderer, { 300.f, 400.f }, 80.f);
-    createBell(renderer, { 700.f, 200.f }, 80.f);
-
-    // ! FOR TESTING ! NEED TO FIX COLOUR INDICATORS (maybe set an init colour)
-    // createOverTimeEffect<Damage>(player, 1000.f, 5000.f, 10);
-    // createOverTimeEffect<Heal>(player, 1000.f, 5000.f, 10);
-
-    ENEMY_TYPE type = ENEMY_TYPE::URCHIN; // TESTING: change this out to test types
-    Entity enemy1 = createEnemy(renderer, vec2{ TILE_SIZE_PX * 5, TILE_SIZE_PX * 5 }, type);
-
-    // ! FOR TESTING !
-    createPowerUp(renderer, {500.f, 500.f}, POWER_UP_TYPE::HEAL);
-    createPowerUp(renderer, {700.f, 500.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
-    createPowerUp(renderer, {600.f, 500.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
-
-    // ! FOR TESTING !
-    createMine(renderer, {500.f, 400.f});
-    createAnemone(renderer, {500.f, 600.f});
-
-    // start playing background music indefinitely
-    //Commented out duo to compiler errors
-    spdlog::info("Starting music...");
-    Mix_PlayMusic(background_music, -1);*/
 }
 
 // Update our game world
@@ -444,9 +378,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #pragma region DEBUG KEYS
 
 #define ENABLE_LOAD_TUTORIAL
-// #define ENABLE_SKIP_WAVE
+#define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
-// #define DEBUG_UPGRADE_INPUTS
+        // #define DEBUG_UPGRADE_INPUTS
 
 #ifdef DEBUG_UPGRADE_INPUTS
         {
@@ -472,7 +406,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
         }
 #endif
-// #undef DEBUG_UPGRADE_INPUTS
+        // #undef DEBUG_UPGRADE_INPUTS
 
         // Weapon switching
         if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
@@ -481,7 +415,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 WeaponState &ws = registry.weaponStates.get(player);
                 ws.current_weapon = WeaponType::GUN_1;
 
-                // reset turret to original color 
+                // reset turret to original color
                 if (!registry.turrets.entities.empty()) {
                     Entity turret = registry.turrets.entities[0];
                     if (registry.tints.has(turret)) {

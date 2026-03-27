@@ -1,6 +1,7 @@
 #include "level_system.hpp"
 
 void LevelSystem::step(const float &elapsed_ms) {
+    assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress &progress = registry.progresses.components[0];
     if (progress.trigger_restart) {
         restart_game();
@@ -12,13 +13,16 @@ void LevelSystem::step(const float &elapsed_ms) {
     }
 
     if (should_advance()) {
-        spdlog::info("Wave {} complete, starting next wave.", wave + 1);
+        assert(registry.persistences.size() > 0 && "Persistence component not found");
+        Persistence &persist = registry.persistences.components[0];
+        spdlog::info("Wave {} complete, starting next wave.", persist.wave + 1);
         if (progress.is_tutorial) {
             trigger_load_next_level();
         } else {
-            if (wave == LEVEL_CONFIGS[level].last_wave && level < LEVEL_CONFIGS.size() - 1) {
+            if (persist.wave == LEVEL_CONFIGS[persist.level].last_wave && persist.level < LEVEL_CONFIGS.size() - 1) {
                 trigger_load_next_level();
-            } else if (wave < (int)WAVE_CONFIGS.size() - 1 && wave < LEVEL_CONFIGS[level].last_wave) {
+            } else if (persist.wave < (int)WAVE_CONFIGS.size() - 1 &&
+                       persist.wave < LEVEL_CONFIGS[persist.level].last_wave) {
                 trigger_load_next_wave();
             } else {
                 trigger_win(progress);
@@ -81,6 +85,11 @@ void LevelSystem::trigger_win(Progress &progress) {
 
     registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
                                        GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
+
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+    persist.level = 0;
+    persist.wave = -1;
 }
 
 void LevelSystem::load_wave(int wave) {
@@ -132,9 +141,12 @@ void LevelSystem::load_wave(int wave) {
 
 void LevelSystem::load_level_components() {
     tilemap_system->init_spawn_points();
-    auto config = LEVEL_CONFIGS[level];
-    vec2 pos;
 
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+    auto config = LEVEL_CONFIGS[persist.level];
+
+    vec2 pos;
     for (auto item : config.hazards) {
         pos = tilemap_system->get_random_position(SpawnTarget::HAZARD);
         if (item == HAZARD_TYPE::MINE) {
@@ -156,7 +168,7 @@ void LevelSystem::load_level_components() {
 }
 
 void LevelSystem::load_level(int level) {
-
+    assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress progress = registry.progresses.components[0];
     const bool was_tutorial = progress.is_tutorial;
     progress.is_tutorial = false;
@@ -219,8 +231,12 @@ void LevelSystem::load_level(int level) {
 }
 
 void LevelSystem::load_tutorial() {
-    level = -1;
-    wave = -1;
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+    persist.level = -1;
+    persist.wave = -1;
+
+    assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress &progress = registry.progresses.components[0];
     progress.is_tutorial = true;
     progress.is_tutorial_step_called = false;
@@ -279,29 +295,34 @@ void LevelSystem::restart_game() {
     if (is_tutorial) {
         load_tutorial();
     } else {
-        level = 0;
-        wave = -1;
-        load_level(0);
+        assert(registry.persistences.size() > 0 && "Persistence component not found");
+        Persistence &persist = registry.persistences.components[0];
+        load_level(persist.level);
+
+        // Load from last wave
+        persist.wave = (persist.level > 0) ? LEVEL_CONFIGS[persist.level - 1].last_wave : -1;
         trigger_load_next_wave();
     }
 }
 
 bool LevelSystem::should_advance() {
-    if (registry.progresses.size() > 0) {
-        Progress &progress = registry.progresses.components[0];
-        if (progress.trigger_skip_wave) {
-            progress.trigger_skip_wave = false;
-            return true;
-        }
+    assert(registry.progresses.size() > 0 && "Progress component not found");
+    Progress &progress = registry.progresses.components[0];
+    if (progress.trigger_skip_wave) {
+        progress.trigger_skip_wave = false;
+        return true;
     }
 
     int num_enemies = registry.enemies.entities.size();
     int num_spawn_requests = registry.spawnRequests.entities.size();
-    if (level == -1)
+
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+    if (persist.level == -1)
         return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
 
-    const Level &level_ref = LEVEL_CONFIGS[level];
-    if (wave == level_ref.last_wave) {
+    const Level &level_ref = LEVEL_CONFIGS[persist.level];
+    if (persist.wave == level_ref.last_wave) {
         return advance_timer == 0.f && num_enemies == 0 && num_spawn_requests == 0;
     } else if ((num_enemies + num_spawn_requests) / (float)enemies_spawned_last_wave <= level_ref.spawn_threshold) {
         return advance_timer == 0.f;
@@ -313,39 +334,48 @@ bool LevelSystem::should_advance() {
 }
 
 void LevelSystem::load_next_level() {
-    if (registry.progresses.size() > 0) {
-        Progress &progress = registry.progresses.components[0];
-        progress.is_transitioning_level = false;
-    }
+    assert(registry.progresses.size() > 0 && "Progress component not found");
+    Progress &progress = registry.progresses.components[0];
+    progress.is_transitioning_level = false;
+
     triggered_load_level = false;
-    level++;
-    load_level(level);
+
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+    persist.level++;
+
+    load_level(persist.level);
     trigger_load_next_wave();
 }
 
 void LevelSystem::load_next_wave() {
     triggered_load_wave = false;
-    wave++;
-    load_wave(wave);
+
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+    persist.wave++;
+
+    load_wave(persist.wave);
 }
 
 void LevelSystem::trigger_load_next_level() {
     triggered_load_level = true;
     advance_timer = 2000.f;
 
-    if (registry.progresses.size() > 0) {
-        Progress &progress = registry.progresses.components[0];
-        progress.is_transitioning_level = true;
-        if (progress.force_skip_tutorial) {
-            progress.force_skip_tutorial = false;
-            advance_timer = 0.f;
-        }
+    assert(registry.progresses.size() > 0 && "Progress component not found");
+    Progress &progress = registry.progresses.components[0];
+    progress.is_transitioning_level = true;
+    if (progress.force_skip_tutorial) {
+        progress.force_skip_tutorial = false;
+        advance_timer = 0.f;
     }
 
-    if (level == -1) {
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+    if (persist.level == -1) {
         createCompletionText("TUTORIAL COMPLETE!!");
     } else {
-        createCompletionText("LEVEL " + std::to_string(level + 1) + " COMPLETE!!");
+        createCompletionText("LEVEL " + std::to_string(persist.level + 1) + " COMPLETE!!");
     }
 }
 
