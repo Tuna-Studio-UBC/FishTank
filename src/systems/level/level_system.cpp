@@ -86,8 +86,10 @@ void LevelSystem::trigger_win(Progress &progress) {
     registry.renderRequests.insert(e, {TEXTURE_ASSET_ID::TEXTURE_WIN_OVERLAY, EFFECT_ASSET_ID::TEXTURED,
                                        GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
 
+    // Reset persistence
     assert(registry.persistences.size() > 0 && "Persistence component not found");
     Persistence &persist = registry.persistences.components[0];
+    persist.reset();
     persist.level = 0;
     persist.wave = -1;
 }
@@ -167,7 +169,7 @@ void LevelSystem::load_level_components() {
     }
 }
 
-void LevelSystem::load_level(int level) {
+void LevelSystem::load_level(int level, bool should_persist) {
     assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress progress = registry.progresses.components[0];
     const bool was_tutorial = progress.is_tutorial;
@@ -187,19 +189,12 @@ void LevelSystem::load_level(int level) {
     bool player_exists = registry.players.size() > 0;
 
     // Persist upgrades
-    Health previous_health;
-    FireControl previous_fire_control;
-    Wallet previous_wallet;
-    Upgrades previous_upgrades;
-    Scoring previous_scoring;
-
-    if (player_exists && !was_tutorial) {
-        Entity current_player = registry.players.entities[0];
-        previous_health = registry.healths.get(current_player);
-        previous_fire_control = registry.fireControls.get(current_player);
-        previous_wallet = registry.wallets.get(current_player);
-        previous_upgrades = registry.upgrades.get(current_player);
-        previous_scoring = registry.scoring.get(current_player);
+    if (player_exists && !was_tutorial && should_persist) {
+        Entity player = registry.players.entities[0];
+        Persistence &persist = registry.persistences.components[0];
+        persist.wallet = registry.wallets.get(player);
+        persist.upgrades = registry.upgrades.get(player);
+        persist.score = registry.scoring.get(player);
     }
 
     particle_system.clear_all_particles();
@@ -218,13 +213,12 @@ void LevelSystem::load_level(int level) {
     // Create camera
     camera_system->init(tilemap_system->get_current_map());
 
-    if (player_exists && !was_tutorial) {
-        Entity current_player = registry.players.entities[0];
-        registry.healths.get(current_player) = previous_health;
-        registry.fireControls.get(current_player) = previous_fire_control;
-        registry.wallets.get(current_player) = previous_wallet;
-        registry.upgrades.get(current_player) = previous_upgrades;
-        registry.scoring.get(current_player) = previous_scoring;
+    if (player_exists && !was_tutorial && should_persist) {
+        Entity player = registry.players.entities[0];
+        Persistence &persist = registry.persistences.components[0];
+        registry.wallets.get(player) = persist.wallet;
+        registry.upgrades.get(player) = persist.upgrades;
+        registry.scoring.get(player) = persist.score;
     }
 
     time_since_last_wave = 0.f;
@@ -233,6 +227,7 @@ void LevelSystem::load_level(int level) {
 void LevelSystem::load_tutorial() {
     assert(registry.persistences.size() > 0 && "Persistence component not found");
     Persistence &persist = registry.persistences.components[0];
+    persist.reset();
     persist.level = -1;
     persist.wave = -1;
 
@@ -288,6 +283,18 @@ void LevelSystem::load_tutorial() {
 void LevelSystem::restart_game() {
     bool is_tutorial = registry.progresses.components[0].is_tutorial;
 
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+
+    // Persist any stats if not first level or tutorial
+    if (!is_tutorial && persist.level > 0) {
+        assert(registry.players.size() > 0 && "Player component not found");
+        Entity player = registry.players.entities[0];
+        persist.wallet = registry.wallets.get(player);
+        persist.upgrades = registry.upgrades.get(player);
+        persist.score = registry.scoring.get(player);
+    }
+
     particle_system.clear_all_particles();
     registry.clear_all_components();
     registry.progresses.emplace(Entity("Progress"));
@@ -295,13 +302,21 @@ void LevelSystem::restart_game() {
     if (is_tutorial) {
         load_tutorial();
     } else {
-        assert(registry.persistences.size() > 0 && "Persistence component not found");
-        Persistence &persist = registry.persistences.components[0];
-        load_level(persist.level);
+        // Load level, but don't persist since registry was cleared
+        load_level(persist.level, false);
 
         // Load from last wave
         persist.wave = (persist.level > 0) ? LEVEL_CONFIGS[persist.level - 1].last_wave : -1;
         trigger_load_next_wave();
+
+        // Reset any stats
+        if (persist.level > 0) {
+            assert(registry.players.size() > 0 && "Player component not found");
+            Entity player = registry.players.entities[0];
+            registry.wallets.get(player) = persist.wallet;
+            registry.upgrades.get(player) = persist.upgrades;
+            registry.scoring.get(player) = persist.score;
+        }
     }
 }
 
@@ -380,7 +395,9 @@ void LevelSystem::trigger_load_next_level() {
 }
 
 void LevelSystem::trigger_load_next_wave() {
-    // createCompletionText("LOADING WAVE: " + std::to_string(wave + 1));
+    // assert(registry.persistences.size() > 0 && "Persistence component not found");
+    // Persistence &persist = registry.persistences.components[0];
+    // createCompletionText("LOADING WAVE: " + std::to_string(persist.wave + 1));
     triggered_load_wave = true;
     advance_timer = 50.f;
 }

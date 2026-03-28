@@ -483,8 +483,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
 
     // Log debug info
-    if (key == GLFW_KEY_L) {
+    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
         registry.list_all_components();
+    }
+
+    // Log persistence info
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        Persistence &persist = registry.persistences.components[0];
+        spdlog::info("Level: {}, Wave: {}", persist.level, persist.wave);
+        spdlog::info("Wallet: {}", persist.wallet.crackers);
+
+        for (int i = 0; i < UPGRADE_TYPE::UPGRADE_COUNT; i++) {
+            spdlog::info("Upgrade {}: {}", i, persist.upgrades.upgrade_instances[i].level);
+        }
     }
 
 #pragma endregion DEBUG KEYS

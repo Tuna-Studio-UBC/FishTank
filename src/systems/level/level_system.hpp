@@ -39,7 +39,8 @@ class LevelSystem {
     void trigger_load_next_level();
     void trigger_win(Progress &progress);
 
-    void load_level(int level);
+    // Set `should_persist=true` to persist what's in registry at the time
+    void load_level(int level, bool should_persist = true);
     void load_wave(int wave);
 
     void load_next_level();
