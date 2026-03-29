@@ -2,13 +2,13 @@
 
 #include "tinyECS/registry.hpp"
 
-class Filesystem {
+class PersistFile {
     public:
-        Filesystem() {};
+        PersistFile() {};
 
         void save();
 
         void load();
 };
 
-extern Filesystem filesystem;
+extern PersistFile persist_file;

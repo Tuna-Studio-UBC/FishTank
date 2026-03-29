@@ -1,8 +1,8 @@
-#include "filesystem.hpp"
+#include "persist_file.hpp"
 #include <spdlog/spdlog.h>
 #include <string>
 
-Filesystem filesystem;
+PersistFile persist_file;
 
 std::string SAVE_DIR = PROJECT_SOURCE_DIR + std::string("data/");
 std::string SAVE_FILE = SAVE_DIR + std::string("data.txt");
@@ -39,14 +39,14 @@ void print_persistence() {
 }
 #endif
 
-void Filesystem::load() {
+void PersistFile::load() {
     spdlog::info("Loading game info");
     #ifdef DEBUG_FILESYSTEM
     print_persistence();
     #endif
 }
 
-void Filesystem::save() {
+void PersistFile::save() {
     spdlog::info("Saving game info");
     #ifdef DEBUG_FILESYSTEM
     print_persistence();
