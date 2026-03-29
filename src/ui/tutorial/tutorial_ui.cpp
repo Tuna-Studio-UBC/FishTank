@@ -201,42 +201,31 @@ void TutorialUI::draw_tutorial_combat(TutorialStep tutorial) {
     ImGui::PushFont(io.Fonts->Fonts[1]);
     const char *text = "COMBAT";
     ImVec2 text_size = ImGui::CalcTextSize(text);
-    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 150.f));
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 200.f));
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
     ImGui::PopFont();
 
-    int current_step = tutorial.current_step;
-    if (current_step == 1) {
-        ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "Uh oh! We've got some enemies ahead of us!\n\nSee if you can take 'em out!\n\nPoint and click with "
-               "your mouse to fire some bubbles!";
-        text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
-        ImGui::PopFont();
-    } else if (current_step == 2) {
-        ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "But be careful, they can fire back!";
-        text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
-        ImGui::PopFont();
-    } else if (current_step == 3) {
-        ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "You have two weapon modes:\n\n"
-               "GUN 1 (Press 1): Regular bouncy bubbles\n"
-               "  - Left Click: Single shot\n"
-               "  - Right Click: Burst fire\n\n"
-               "GUN 2 (Press 2): Explosive rounds\n"
-               "  - Left Click: Explosive bubble\n"
-               "  - Right Click: Deploy mine\n\n"
-               "Tip: Shoot mines with explosive rounds for chain reactions!";
-        text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);
-        ImGui::PopFont();
-    }
+    ImGui::PushFont(io.Fonts->Fonts[2]);
+    text = "Move the mouse to aim";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 100.f));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+
+    text = "Press 1 / 2\nto switch weapons";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(
+        ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2 - 200.f, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+
+    text = "Left / Right (mouse)\nto switch attacks";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(
+        ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2 + 200.f, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+
+    text = "Clear this area to start playing for real!";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 100.f));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+    ImGui::PopFont();
 }

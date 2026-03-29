@@ -418,7 +418,7 @@ struct TutorialStep {
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
     TutorialStep(Tutorial::MOVEMENT, 2), 
     TutorialStep(Tutorial::INTERACT, 1),
-    TutorialStep(Tutorial::COMBAT, 3)
+    TutorialStep(Tutorial::COMBAT, 1)
 };
 
 struct Progress {

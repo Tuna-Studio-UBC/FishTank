@@ -249,6 +249,9 @@ void LevelSystem::load_tutorial() {
         Health &h = registry.healths.get(e);
         h.hp = 50;
         h.max_hp = 50;
+
+        registry.fireControls.get(e).cooldown_ms = 5000.f;
+        registry.enemies.get(e).detection_radius = 300.f;
     }
 
     Entity target = createBubbler(renderer, {625.f, 875.f});
