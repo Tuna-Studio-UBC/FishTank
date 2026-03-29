@@ -259,7 +259,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         registry.beziers.emplace(entity);
         registry.leaders.emplace(entity);
 
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_MOTHER_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
         Animation &an = registry.animations.emplace(entity);
@@ -308,7 +308,7 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
 
     auto &fire = registry.fireControls.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
-    fire.cooldown_timer = get_random_float(5.f, fire.cooldown_ms);
+    fire.cooldown_timer = get_random_float(0.f, fire.cooldown_ms - 2000.f);
     fire.attack_pattern = config.attack_pattern;
 
     auto &speed = registry.speedControls.emplace(entity);
@@ -323,13 +323,15 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
     motion.angle = 0.f;
     motion.scale = vec2(25.0f, 25.0f);
 
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_MOTHER_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
     Animation &an = registry.animations.emplace(entity);
     an.frame_count = 8;
     an.columns = 8;
-    an.frame_time = 250;
+    an.frame_time = 125;
+
+    registry.tints.emplace(entity, vec3(1.f, 0.5f, 0.5f));
 
     return entity;
 }
@@ -470,12 +472,22 @@ Entity createBubbler(RenderSystem *renderer, vec2 position) {
     pe.particle_life_ms = 400;
     pe.max_particles = 10;
     pe.particle_speed = 75;
-    pe.spawn_interval_ms = 100;
+    pe.spawn_interval_ms = 150;
     pe.particle_scale = 10;
     pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+
+    Entity bubbler_bubble = Entity();
+    auto &bubble_motion = registry.motions.emplace(bubbler_bubble);
+    bubble_motion.position = position;
+    bubble_motion.scale = {25.f, 25.f};
+
+    registry.tints.emplace(bubbler_bubble, vec3(0.3f));
+    registry.bubblerBubbles.emplace(bubbler_bubble, entity);
+    registry.renderRequests.insert(bubbler_bubble, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES_PRIORITY});
 
     return entity;
 }

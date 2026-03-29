@@ -16,7 +16,7 @@ struct Level {
     std::vector<HAZARD_TYPE> hazards;
     std::vector<POWER_UP_TYPE> powerups;
     std::vector<float> bells;
-    std::vector<float> bubblers; // TODO: Change type once bubblers are further developed
+    std::vector<ivec2> bubblers;
     bool upgrade_screen_before = false;
     float spawn_threshold = 0.5f;
     float time_threshold = 15000.f;
@@ -24,48 +24,60 @@ struct Level {
 
 const std::vector<Wave> WAVE_CONFIGS = {
     // Level 1
-    {{ENEMY_TYPE::GUARD}},
+    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
+    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
     {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN}},
-    {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
+    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
+    {{ENEMY_TYPE::MOTHER}, {}},
 
-    // Level 2: Boss
-    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}, {BOSS_TYPE::SHARKY}},
+    // Level 2
+    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
+    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}},
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}},
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::URCHIN}},
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::GUARD}},
 
-    // Level 3
-    {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::MOTHER, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING}},
-    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}},
-    {{ENEMY_TYPE::GUARD, ENEMY_TYPE::URCHIN, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}},
+    // Level 3: Boss
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}, {BOSS_TYPE::SHARKY}},
 
-    // Level 4: Boss
-    {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD, ENEMY_TYPE::GUARD}, {BOSS_TYPE::KING_CRABBY}}};
+    // Level 4
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::URCHIN}},
+    {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING}},
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}},
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::URCHIN, ENEMY_TYPE::HOMING}},
+    {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}, {}},
+
+    // Level 5: Boss
+    {{ENEMY_TYPE::MOTHER}, {BOSS_TYPE::KING_CRABBY}}
+};
 
 const std::vector<Level> LEVEL_CONFIGS = {
     // Level 1
-    {2, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {0.f, 0.f}, false},
+    {4, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(15, 10), ivec2(2, 17), ivec2(27, 2)}, false, 0.5f},
 
     // Level 2
-    {3,
-     MapType::EMPTY_MAP,
+    {9, MapType::TEST_MAP2,
+    {HAZARD_TYPE::MINE, HAZARD_TYPE::ANEMONE},
+    {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
+    {},
+    {ivec2(2), ivec2(28, 18)},
+    true,
+    0.3f},
+    
+    // Level 3
+    {10, MapType::EMPTY_MAP,
      {HAZARD_TYPE::MINE, HAZARD_TYPE::MINE},
      {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
      {},
-     {0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+     {ivec2(2, 18), ivec2(28, 2)},
      true},
-
-    // Level 3
-    {6,
-     MapType::TEST_MAP2,
-     {HAZARD_TYPE::MINE, HAZARD_TYPE::ANEMONE},
-     {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
-     {},
-     {0.f, 0.f},
-    true},
-
     // Level 4
-    {7,
-     MapType::TEST_MAP,
-     {HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
-     {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::DAMAGE_MULTIPLIER},
-     {},
-     {0.f, 0.f, 0.f},
-     true}};
+    {15, MapType::TEST_MAP3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(2, 9), ivec2(14, 9), ivec2(26, 9)}, true},
+    // Level 5
+    {16, MapType::TEST_MAP,
+    {HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
+    {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::DAMAGE_MULTIPLIER},
+    {},
+    {ivec2(3), ivec2(27, 17)},
+    true}
+};
