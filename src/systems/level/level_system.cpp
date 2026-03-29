@@ -360,6 +360,8 @@ void LevelSystem::load_next_level() {
     persist.level++;
 
     load_level(persist.level);
+    FireControl &fc = registry.fireControls.get(registry.players.entities[0]);
+    fc.ammo = fc.max_ammo;
     trigger_load_next_wave();
 }
 

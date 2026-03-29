@@ -86,8 +86,8 @@ void DeathSystem::changeEnemyType(Entity enemy, ENEMY_TYPE type) {
         registry.boids.remove(enemy);
         auto config = ENEMY_CONFIGS[(int)type];
         FireControl &fc = registry.fireControls.get(enemy);
-        fc.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
-        fc.attack_pattern = config.attack_pattern;
+        fc.cooldown_ms = ATTACK_CONFIGS[(int)ATTACK_PATTERN::VENGENCE].cooldown_ms;
+        fc.attack_pattern = ATTACK_PATTERN::VENGENCE;
         break;
     }
 
