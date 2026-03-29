@@ -169,6 +169,23 @@ void LevelSystem::load_level_components() {
     }
 }
 
+void LevelSystem::apply_upgrades(Entity& player, Upgrades& upgrades) {
+    if (registry.fireControls.has(player)) {
+        FireControl &fc = registry.fireControls.get(player);
+        int bonus = upgrades.upgrade_instances[MAX_AMMO].config.bonus[upgrades.upgrade_instances[MAX_AMMO].level];
+        fc.max_ammo = STARTING_AMMO + bonus;
+        fc.ammo = STARTING_AMMO + bonus;
+        bonus = upgrades.upgrade_instances[ATTACK].config.bonus[upgrades.upgrade_instances[ATTACK].level];
+        fc.damage_bonus = bonus;
+    }
+    if (registry.healths.has(player)) {
+        Health &health = registry.healths.get(player);
+        int bonus = upgrades.upgrade_instances[MAX_HP].config.bonus[upgrades.upgrade_instances[MAX_HP].level];
+        health.max_hp = 100 + bonus;
+        health.hp = 100 + bonus;
+    }
+}
+
 void LevelSystem::load_level(int level, bool should_persist) {
     assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress progress = registry.progresses.components[0];
@@ -219,6 +236,7 @@ void LevelSystem::load_level(int level, bool should_persist) {
         registry.wallets.get(player) = persist.wallet;
         registry.upgrades.get(player) = persist.upgrades;
         registry.scoring.get(player) = persist.score;
+        apply_upgrades(player, persist.upgrades);
     }
 
     time_since_last_wave = 0.f;
