@@ -59,6 +59,7 @@ class ECSRegistry {
     ComponentContainer<SpeedMultiplier> speedMultipliers;
     ComponentContainer<DamageMultiplier> damageMultipliers;
     ComponentContainer<Bubbler> bubblers;
+    ComponentContainer<BubblerBubble> bubblerBubbles;
 
     // Physics
     ComponentContainer<Motion> motions;
@@ -151,6 +152,7 @@ class ECSRegistry {
         registry_list.push_back(&speedMultipliers);
         registry_list.push_back(&damageMultipliers);
         registry_list.push_back(&bubblers);
+        registry_list.push_back(&bubblerBubbles);
 
         // Physics
         registry_list.push_back(&motions);

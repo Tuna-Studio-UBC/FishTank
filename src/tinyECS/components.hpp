@@ -303,8 +303,8 @@ struct Heal {
 };
 
 struct Bubbler {
-    int ammo_given = 10;
-    float recharge_timer = 0.f;
+    int ammo_given = 15;
+    float recharge_timer = 5000.f;
     bool charged = false;
 };
 // Optional: OverTimeEffect
@@ -317,6 +317,11 @@ struct SpeedMultiplier {
 struct DamageMultiplier {
     float multiplier;
     DamageMultiplier(float multiplier) { this->multiplier = multiplier; };
+};
+
+struct BubblerBubble {
+    Entity parent_bubbler;
+    BubblerBubble(Entity parent_bubbler) : parent_bubbler(parent_bubbler) {};
 };
 
 #pragma endregion Pickups
@@ -667,6 +672,7 @@ const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 enum RENDER_LAYER {
     BACKGROUND = 0,
     INTERACTABLES = 5,
+    INTERACTABLES_PRIORITY = 6,
     ACTORS = 10,
     PROJECTILES = ACTORS + 1,
     TURRETS = PROJECTILES + 1,

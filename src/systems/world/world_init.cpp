@@ -470,12 +470,22 @@ Entity createBubbler(RenderSystem *renderer, vec2 position) {
     pe.particle_life_ms = 400;
     pe.max_particles = 10;
     pe.particle_speed = 75;
-    pe.spawn_interval_ms = 100;
+    pe.spawn_interval_ms = 150;
     pe.particle_scale = 10;
     pe.texture = TEXTURE_ASSET_ID::TEXTURE_BUBBLE;
 
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLER, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES});
+
+    Entity bubbler_bubble = Entity();
+    auto &bubble_motion = registry.motions.emplace(bubbler_bubble);
+    bubble_motion.position = position;
+    bubble_motion.scale = {25.f, 25.f};
+
+    registry.tints.emplace(bubbler_bubble, vec3(0.3f));
+    registry.bubblerBubbles.emplace(bubbler_bubble, entity);
+    registry.renderRequests.insert(bubbler_bubble, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES_PRIORITY});
 
     return entity;
 }
