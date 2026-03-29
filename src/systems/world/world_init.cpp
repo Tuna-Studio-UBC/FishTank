@@ -588,12 +588,13 @@ Entity createMine(RenderSystem *renderer, vec2 position) {
     return entity;
 }
 
-Entity createAnemone(RenderSystem *renderer, vec2 position) {
+Entity createAnemone(RenderSystem *renderer, vec2 position, bool tutorial) {
     auto entity = Entity("Anemone");
 
-    auto &config = HAZARD_CONFIGS[(int)HAZARD_TYPE::ANEMONE];
+    HAZARD_TYPE type = tutorial ? HAZARD_TYPE::TUTORIAL_ANEMONE : HAZARD_TYPE::ANEMONE;
+    auto &config = HAZARD_CONFIGS[(int)type];
     registry.anemones.emplace(entity);
-    registry.hazards.emplace(entity, HAZARD_TYPE::ANEMONE);
+    registry.hazards.emplace(entity, type);
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::EGG);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -739,6 +740,13 @@ Entity createCompletionText(std::string message) {
     Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f),
                           glm::mat4(1.f), true);
     registry.expirations.emplace(e, 2000.f);
+    return e;
+}
+
+Entity createLabelText(std::string message, vec2 pos, Entity object, vec3 colour, bool top) {
+    Entity e = createText(message, pos, 0.5f, colour, glm::mat4(1.f), true);
+
+    registry.labels.insert(e, {object, top});
     return e;
 }
 

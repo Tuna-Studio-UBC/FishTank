@@ -87,6 +87,7 @@ class ECSRegistry {
     ComponentContainer<Tint> tints;
     ComponentContainer<Animation> animations;
     ComponentContainer<SpawnRequest> spawnRequests;
+    ComponentContainer<Label> labels;
 
     // Map
     ComponentContainer<TileSet> tilesets;
@@ -177,6 +178,7 @@ class ECSRegistry {
         registry_list.push_back(&tints);
         registry_list.push_back(&animations);
         registry_list.push_back(&spawnRequests);
+        registry_list.push_back(&labels);
 
         // Map
         registry_list.push_back(&tilesets);
