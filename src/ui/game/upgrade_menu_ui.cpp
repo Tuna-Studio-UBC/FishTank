@@ -110,6 +110,8 @@ void draw_upgrade_card(UpgradeSystem *upgrade_system, Entity player, UPGRADE_TYP
 
 void GameUI::set_upgrade_system(UpgradeSystem *upgrade_system) { this->upgrade_system = upgrade_system; }
 
+void GameUI::set_level_system(LevelSystem *level_system) { this->level_system = level_system; }
+
 void GameUI::set_audio_system(AudioSystem *audio_system) {
     this->audio_system = audio_system;
 }
