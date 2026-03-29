@@ -134,7 +134,6 @@ struct FireControl {
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
     int damage_bonus = 0;
-    float refill_progress = 0.f;
 
     bool can_shoot = true;
     float can_shoot_ms = 5 * 1000.f;    // Time window for shooting mode
@@ -304,7 +303,9 @@ struct Heal {
 };
 
 struct Bubbler {
-    float ammo_per_second = 10.f;
+    int ammo_given = 10;
+    float recharge_timer = 0.f;
+    bool charged = false;
 };
 // Optional: OverTimeEffect
 

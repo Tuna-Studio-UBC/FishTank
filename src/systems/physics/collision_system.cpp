@@ -603,12 +603,11 @@ void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b,
             FireControl &fc = registry.fireControls.get(entity_a);
             Bubbler &bubbler = registry.bubblers.get(entity_b);
 
-            fc.refill_progress = fc.refill_progress + elapsed_ms * bubbler.ammo_per_second;
-            // Ammo cannot exceed max ammo
-            int new_ammo = min((int)(fc.refill_progress / PROGRESS_PER_AMMO), fc.max_ammo - fc.ammo);
-            fc.ammo += new_ammo;
-            // Refill progress cannot exceed PROGRESS_PER_AMMO
-            fc.refill_progress = min(fc.refill_progress - new_ammo * PROGRESS_PER_AMMO, (float)PROGRESS_PER_AMMO);
+            if (bubbler.charged) {
+                fc.ammo = min(fc.ammo + bubbler.ammo_given, fc.max_ammo);
+                bubbler.charged = false;
+                bubbler.recharge_timer = 0;
+            }
         }
     }
 };

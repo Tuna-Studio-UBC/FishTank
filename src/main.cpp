@@ -29,6 +29,7 @@
 #include "systems/timed/ote_system.hpp"
 #include "systems/world/tilemap_system.hpp"
 #include "systems/world/world_system.hpp"
+#include "systems/bubbler/bubbler_system.hpp"
 
 #include "ui/debug/debug_ui.hpp"
 #include "ui/game/game_ui.hpp"
@@ -58,6 +59,7 @@ int main() {
     TileMapSystem tilemap_system;
     TransitionSystem transition_system;
     UpgradeSystem upgrade_system;
+    BubblerSystem bubbler_system;
     LevelSystem level_system(&tilemap_system, &renderer_system, &camera_system, &world_system);
 
     // Configure spdlog
@@ -146,6 +148,10 @@ int main() {
             {
                 ZoneScopedN("SYS: AI Step");
                 ai_system.step(elapsed_ms);
+            }
+            {
+                ZoneScopedN("SYS: Bubbler");
+                bubbler_system.step(elapsed_ms);
             }
             {
                 ZoneScopedN("SYS: Physics");
