@@ -23,9 +23,6 @@ class LevelSystem {
     void restart_game();
 
   private:
-    int wave = -1;
-    int level = -1;
-
     float time_since_last_wave = 0.f;
     int enemies_spawned_last_wave = 0;
 
@@ -42,7 +39,8 @@ class LevelSystem {
     void trigger_load_next_level();
     void trigger_win(Progress &progress);
 
-    void load_level(int level);
+    // Set `should_persist=true` to persist what's in registry at the time
+    void load_level(int level, bool should_persist = true);
     void load_wave(int wave);
 
     void load_next_level();

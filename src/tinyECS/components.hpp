@@ -446,6 +446,7 @@ struct Scoring {
     int been_hit = 0;
     int enemies_defeated = 0;
     int crackers_earned = 0;
+    Scoring() : bullets_fired(0), bullets_hit(0), been_hit(0), enemies_defeated(0), crackers_earned(0) {}
 };
 
 struct TutorialTrigger {
@@ -685,3 +686,29 @@ struct EntityRRPairCompare {
 };
 
 #pragma endregion Rendering
+
+#pragma region Persistence
+// =================================================================================
+// Persistence
+// =================================================================================
+
+struct Persistence {
+    int level = 0;
+    int wave = -1;
+
+    // Stats
+    Upgrades upgrades = Upgrades();
+    Wallet wallet = Wallet();
+    Scoring score = Scoring();
+
+    void reset() {
+        level = 0;
+        wave = -1;
+
+        upgrades = Upgrades();
+        wallet = Wallet();
+        score = Scoring();
+    }
+};
+
+#pragma endregion Persistence

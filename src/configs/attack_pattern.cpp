@@ -40,8 +40,11 @@ static const AttackConfig ATTACK_CONFIGS[attack_count] = {
     {ATTACK_EFFECT::NORMAL, 10, 10000.f, BASE_PROJECTILE_SPEED * 0.75, 3000.f, Tint({1.f, 0.f, 1.f})},
 
     // Havoc
-    {ATTACK_EFFECT::NORMAL, 5, 3000.f, BASE_PROJECTILE_SPEED * 1.f, 5000.f, Tint({1.f, 0.5f, 0.25f})},
+    {ATTACK_EFFECT::NORMAL, 1, 3000.f, BASE_PROJECTILE_SPEED * 0.5f, 5000.f, Tint({1.f, 0.5f, 0.25f})},
 
+    // Vengence
+    {ATTACK_EFFECT::NORMAL, 1, 3000.f, BASE_PROJECTILE_SPEED * 1.5f, 2000.f, Tint({1.f, 0.5f, 0.25f})},
+    
     /* --------------------------------- BOSSES --------------------------------- */
 
     // Sharky

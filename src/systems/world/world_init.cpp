@@ -308,7 +308,7 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
 
     auto &fire = registry.fireControls.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)config.attack_pattern].cooldown_ms;
-    fire.cooldown_timer = get_random_float(5.f, fire.cooldown_ms);
+    fire.cooldown_timer = get_random_float(0.f, fire.cooldown_ms - 2000.f);
     fire.attack_pattern = config.attack_pattern;
 
     auto &speed = registry.speedControls.emplace(entity);
