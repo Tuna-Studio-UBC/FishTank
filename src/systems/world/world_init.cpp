@@ -259,7 +259,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         registry.beziers.emplace(entity);
         registry.leaders.emplace(entity);
 
-        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_MOTHER_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
         Animation &an = registry.animations.emplace(entity);
@@ -323,13 +323,15 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
     motion.angle = 0.f;
     motion.scale = vec2(25.0f, 25.0f);
 
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
+    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_MOTHER_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
     Animation &an = registry.animations.emplace(entity);
     an.frame_count = 8;
     an.columns = 8;
-    an.frame_time = 250;
+    an.frame_time = 125;
+
+    registry.tints.emplace(entity, vec3(1.f, 0.5f, 0.5f));
 
     return entity;
 }
