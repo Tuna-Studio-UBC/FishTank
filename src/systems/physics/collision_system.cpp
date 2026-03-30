@@ -643,17 +643,22 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
 }
 
 void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b, float &elapsed_ms) {
-    if (registry.players.has(entity_a) && registry.bubblers.has(entity_b)) {
+    if (registry.players.has(entity_a) && registry.bubblerBubbles.has(entity_b)) {
         if (registry.fireControls.has(entity_a)) {
+            BubblerBubble &bubbler_bubbler = registry.bubblerBubbles.get(entity_b);
             FireControl &fc = registry.fireControls.get(entity_a);
-            Bubbler &bubbler = registry.bubblers.get(entity_b);
+            Bubbler &bubbler = registry.bubblers.get(bubbler_bubbler.parent_bubbler);
 
-            fc.refill_progress = fc.refill_progress + elapsed_ms * bubbler.ammo_per_second;
-            // Ammo cannot exceed max ammo
-            int new_ammo = min((int)(fc.refill_progress / PROGRESS_PER_AMMO), fc.max_ammo - fc.ammo);
-            fc.ammo += new_ammo;
-            // Refill progress cannot exceed PROGRESS_PER_AMMO
-            fc.refill_progress = min(fc.refill_progress - new_ammo * PROGRESS_PER_AMMO, (float)PROGRESS_PER_AMMO);
+            if (bubbler.charged) {
+                fc.ammo = min(fc.ammo + bubbler.ammo_given, fc.max_ammo);
+                bubbler.charged = false;
+                bubbler.recharge_timer = 0;
+                vec2 &pos = registry.motions.get(entity_b).position;
+                createEffectBubbles(pos);
+                createEffectBubbles(pos);
+                createEffectBubbles(pos);
+                createEffectBubbles(pos);
+            }
         }
     }
 };

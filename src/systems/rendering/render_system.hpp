@@ -76,6 +76,7 @@ class RenderSystem {
         get_path(FilePath::SPRITE_SHEETS, "crab_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "urchin_sheet.png"), 
         get_path(FilePath::SPRITE_SHEETS, "isopod_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "mother_sheet.png"),
 
         get_path(FilePath::SPRITE_SHEETS, "mine_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "anemone_sheet.png"),
@@ -151,7 +152,7 @@ class RenderSystem {
 
     // On-screen rendering
     void drawToScreen();
-    void drawText(Entity entity);
+    void drawText(Entity entity, const mat3 &projection, const mat3 &view);
 
     void sortRenderRequests(std::vector<Entity> *draw_list);
 

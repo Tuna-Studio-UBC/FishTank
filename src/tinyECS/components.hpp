@@ -134,7 +134,6 @@ struct FireControl {
     int ammo = 0;
     int max_ammo = STARTING_AMMO;
     int damage_bonus = 0;
-    float refill_progress = 0.f;
 
     bool can_shoot = true;
     float can_shoot_ms = 5 * 1000.f;    // Time window for shooting mode
@@ -310,7 +309,9 @@ struct Heal {
 };
 
 struct Bubbler {
-    float ammo_per_second = 10.f;
+    int ammo_given = 15;
+    float recharge_timer = 5000.f;
+    bool charged = false;
 };
 // Optional: OverTimeEffect
 
@@ -322,6 +323,11 @@ struct SpeedMultiplier {
 struct DamageMultiplier {
     float multiplier;
     DamageMultiplier(float multiplier) { this->multiplier = multiplier; };
+};
+
+struct BubblerBubble {
+    Entity parent_bubbler;
+    BubblerBubble(Entity parent_bubbler) : parent_bubbler(parent_bubbler) {};
 };
 
 #pragma endregion Pickups
@@ -432,7 +438,7 @@ struct MouseInputState {
 };
 
 // TODO: Move to config
-enum Tutorial { MOVEMENT = 1, HAZARDS, HEALING, AMMUNITION, COMBAT, UPGRADE_SYSTEM };
+enum Tutorial { MOVEMENT = 1, INTERACT, COMBAT };
 
 struct TutorialStep {
     Tutorial id;
@@ -442,9 +448,9 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::HAZARDS, 1),
-    TutorialStep(Tutorial::HEALING, 1),  TutorialStep(Tutorial::AMMUNITION, 1),
-    TutorialStep(Tutorial::COMBAT, 3),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
+    TutorialStep(Tutorial::MOVEMENT, 2), 
+    TutorialStep(Tutorial::INTERACT, 1),
+    TutorialStep(Tutorial::COMBAT, 1)
 };
 
 struct Progress {
@@ -472,11 +478,17 @@ struct Scoring {
     int been_hit = 0;
     int enemies_defeated = 0;
     int crackers_earned = 0;
+    Scoring() : bullets_fired(0), bullets_hit(0), been_hit(0), enemies_defeated(0), crackers_earned(0) {}
 };
 
 struct TutorialTrigger {
     Tutorial id;
     TutorialTrigger(Tutorial id) : id(id) {};
+};
+
+struct Label {
+    Entity target;
+    bool top;
 };
 
 #pragma endregion Game State
@@ -647,8 +659,9 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_CRAB_SHEET = TEXTURE_TURRET_SHEET + 1,
     TEXTURE_URCHIN_SHEET = TEXTURE_CRAB_SHEET + 1,
     TEXTURE_ISOPOD_SHEET = TEXTURE_URCHIN_SHEET + 1,
+    TEXTURE_MOTHER_SHEET = TEXTURE_ISOPOD_SHEET + 1,
 
-    TEXTURE_MINE_SHEET = TEXTURE_ISOPOD_SHEET + 1,
+    TEXTURE_MINE_SHEET = TEXTURE_MOTHER_SHEET + 1,
     TEXTURE_ANEMONE_SHEET = TEXTURE_MINE_SHEET + 1,
 
     TEXTURE_HEALTH_SHEET = TEXTURE_ANEMONE_SHEET + 1,
@@ -691,6 +704,7 @@ const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 enum RENDER_LAYER {
     BACKGROUND = 0,
     INTERACTABLES = 5,
+    INTERACTABLES_PRIORITY = 6,
     ACTORS = 10,
     PROJECTILES = ACTORS + 1,
     TURRETS = PROJECTILES + 1,
@@ -711,3 +725,29 @@ struct EntityRRPairCompare {
 };
 
 #pragma endregion Rendering
+
+#pragma region Persistence
+// =================================================================================
+// Persistence
+// =================================================================================
+
+struct Persistence {
+    int level = 0;
+    int wave = -1;
+
+    // Stats
+    Upgrades upgrades = Upgrades();
+    Wallet wallet = Wallet();
+    Scoring score = Scoring();
+
+    void reset() {
+        level = 0;
+        wave = -1;
+
+        upgrades = Upgrades();
+        wallet = Wallet();
+        score = Scoring();
+    }
+};
+
+#pragma endregion Persistence

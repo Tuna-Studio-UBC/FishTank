@@ -1,11 +1,15 @@
 #include "game_ui.hpp"
 
+namespace {
+constexpr float HUD_TOP_LEFT_PADDING = 12.f;
+}
+
 void GameUI::draw_score() {
     float bar_width = 240;
     float bar_height = 30;
     ImGuiIO &io = ImGui::GetIO();
-    ImGui::SetNextWindowSize(ImVec2(bar_width, bar_height));
-    ImGui::SetNextWindowPos(ImVec2(bar_width / 2, bar_height / 2), ImGuiCond_Once, ImVec2(.5f, .5f));
+    ImGui::SetNextWindowSize(ImVec2(bar_width, bar_height), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(HUD_TOP_LEFT_PADDING, HUD_TOP_LEFT_PADDING), ImGuiCond_Always);
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                                     ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                     ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoCollapse |

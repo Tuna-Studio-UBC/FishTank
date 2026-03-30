@@ -59,6 +59,7 @@ class ECSRegistry {
     ComponentContainer<SpeedMultiplier> speedMultipliers;
     ComponentContainer<DamageMultiplier> damageMultipliers;
     ComponentContainer<Bubbler> bubblers;
+    ComponentContainer<BubblerBubble> bubblerBubbles;
 
     // Physics
     ComponentContainer<Motion> motions;
@@ -73,6 +74,7 @@ class ECSRegistry {
     ComponentContainer<MouseInputState> mouseInputs;
     ComponentContainer<ParryState> parryStates;
     ComponentContainer<DashState> dashStates;
+    ComponentContainer<Persistence> persistences;
     ComponentContainer<Progress> progresses;
     ComponentContainer<Scoring> scoring;
     ComponentContainer<TutorialTrigger> tutorialTriggers;
@@ -89,6 +91,7 @@ class ECSRegistry {
     ComponentContainer<Tint> tints;
     ComponentContainer<Animation> animations;
     ComponentContainer<SpawnRequest> spawnRequests;
+    ComponentContainer<Label> labels;
 
     // Map
     ComponentContainer<TileSet> tilesets;
@@ -152,6 +155,7 @@ class ECSRegistry {
         registry_list.push_back(&speedMultipliers);
         registry_list.push_back(&damageMultipliers);
         registry_list.push_back(&bubblers);
+        registry_list.push_back(&bubblerBubbles);
 
         // Physics
         registry_list.push_back(&motions);
@@ -163,6 +167,7 @@ class ECSRegistry {
         registry_list.push_back(&screenStates);
         registry_list.push_back(&keyboardInputs);
         registry_list.push_back(&mouseInputs);
+        registry_list.push_back(&persistences);
         registry_list.push_back(&progresses);
         registry_list.push_back(&scoring);
         registry_list.push_back(&tutorialTriggers);
@@ -179,6 +184,7 @@ class ECSRegistry {
         registry_list.push_back(&tints);
         registry_list.push_back(&animations);
         registry_list.push_back(&spawnRequests);
+        registry_list.push_back(&labels);
 
         // Map
         registry_list.push_back(&tilesets);
@@ -193,8 +199,14 @@ class ECSRegistry {
     }
 
     void clear_all_components() {
-        for (ContainerInterface *reg : registry_list)
-            reg->clear();
+        for (ContainerInterface *reg : registry_list) {
+            // A bit hacky, but a special case for persistence
+            if (reg == &persistences) {
+                continue;
+            } else {
+                reg->clear();
+            }
+        }
     }
 
     void list_all_components() {

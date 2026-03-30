@@ -29,6 +29,7 @@
 #include "systems/timed/ote_system.hpp"
 #include "systems/world/tilemap_system.hpp"
 #include "systems/world/world_system.hpp"
+#include "systems/bubbler/bubbler_system.hpp"
 
 #include "ui/debug/debug_ui.hpp"
 #include "ui/game/game_ui.hpp"
@@ -58,6 +59,7 @@ int main() {
     TileMapSystem tilemap_system;
     TransitionSystem transition_system;
     UpgradeSystem upgrade_system;
+    BubblerSystem bubbler_system;
     LevelSystem level_system(&tilemap_system, &renderer_system, &camera_system, &world_system);
 
     // Configure spdlog
@@ -79,6 +81,7 @@ int main() {
     }
 
     // initialize game state (done outside of systems)
+    registry.persistences.emplace(Entity("Persistence"));
     registry.progresses.emplace(Entity("Progress"));
 
     // initialize the main systems
@@ -87,6 +90,7 @@ int main() {
     level_system.load_tutorial();
     game_ui.set_upgrade_system(&upgrade_system);
     game_ui.set_audio_system(world_system.get_audio_system());
+    game_ui.set_level_system(&level_system);
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);
@@ -147,6 +151,10 @@ int main() {
                 ai_system.step(elapsed_ms);
             }
             {
+                ZoneScopedN("SYS: Bubbler");
+                bubbler_system.step(elapsed_ms);
+            }
+            {
                 ZoneScopedN("SYS: Physics");
                 physics_system.step(elapsed_ms);
             }
@@ -203,6 +211,10 @@ int main() {
         {
             ZoneScopedN("RENDER: Ammo");
             game_ui.draw_ammo();
+        }
+        {
+            ZoneScopedN("RENDER: Ammo Types");
+            game_ui.draw_ammo_types();
         }
         {
             ZoneScopedN("RENDER: Upgrade");
