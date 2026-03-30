@@ -26,9 +26,6 @@ class LevelSystem {
     bool is_in_tutorial() const;
 
   private:
-    int wave = -1;
-    int level = -1;
-
     float time_since_last_wave = 0.f;
     int enemies_spawned_last_wave = 0;
 

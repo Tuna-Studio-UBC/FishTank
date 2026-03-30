@@ -1,8 +1,13 @@
 #include "level_system.hpp"
 
-int LevelSystem::get_current_wave() const { return wave; }
+int LevelSystem::get_current_wave() const {
+    Persistence &persist = registry.persistences.components[0];
+    return persist.wave;
+}
 
 int LevelSystem::get_total_waves_for_current_level() const {
+    Persistence &persist = registry.persistences.components[0];
+    int level = persist.level;
     if (level < 0 || level >= (int)LEVEL_CONFIGS.size()) {
         return 0;
     }
