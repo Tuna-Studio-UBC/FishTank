@@ -1,5 +1,19 @@
 #include "level_system.hpp"
 
+int LevelSystem::get_current_wave() const { return wave; }
+
+int LevelSystem::get_total_waves_for_current_level() const {
+    if (level < 0 || level >= (int)LEVEL_CONFIGS.size()) {
+        return 0;
+    }
+
+    return LEVEL_CONFIGS[level].last_wave + 1;
+}
+
+bool LevelSystem::is_in_tutorial() const {
+    return !registry.progresses.components.empty() && registry.progresses.components[0].is_tutorial;
+}
+
 void LevelSystem::step(const float &elapsed_ms) {
     assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress &progress = registry.progresses.components[0];
