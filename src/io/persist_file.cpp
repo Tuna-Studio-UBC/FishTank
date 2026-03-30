@@ -14,7 +14,7 @@ std::string SCORE_FILE = SAVE_DIR + std::string("score.txt");
 // - The highest score so far
 // - The data in the persistence object (Info from the start of the most recent level)
 
-#define DEBUG_FILESYSTEM
+// #define DEBUG_FILESYSTEM
 
 #ifdef DEBUG_FILESYSTEM
 void print_persistence() {
@@ -154,6 +154,14 @@ void PersistFile::save() {
     }
 
     Persistence &per = registry.persistences.components[0];
+
+    // Pre-save check
+    if (per.level < 0) {
+        spdlog::debug("Tutorial detected. Do not save progress");
+        return;
+    }
+
+    // Saving
 
     auto &wal = per.wallet;
     auto &sco = per.score;
