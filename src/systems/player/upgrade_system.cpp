@@ -48,23 +48,23 @@ void UpgradeSystem::try_upgrade_player(const UPGRADE_TYPE type) {
 void UpgradeSystem::upgrade_max_ammo(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.fireControls.has(player)) {
         FireControl &fc = registry.fireControls.get(player);
-        fc.max_ammo += upgrade_instance.config.bonus[upgrade_instance.level];
-        fc.ammo += upgrade_instance.config.bonus[upgrade_instance.level];
+        fc.max_ammo = STARTING_AMMO + upgrade_instance.config.bonus[upgrade_instance.level];
+        fc.ammo = STARTING_AMMO + upgrade_instance.config.bonus[upgrade_instance.level];
     }
 }
 
 void UpgradeSystem::upgrade_max_hp(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.healths.has(player)) {
         Health &health = registry.healths.get(player);
-        health.max_hp += upgrade_instance.config.bonus[upgrade_instance.level];
-        health.hp += upgrade_instance.config.bonus[upgrade_instance.level];
+        health.max_hp = 100 + upgrade_instance.config.bonus [upgrade_instance.level];
+        health.hp = 100 + upgrade_instance.config.bonus [upgrade_instance.level];
     }
 }
 
 void UpgradeSystem::upgrade_attack(Entity &player, UpgradeInstance &upgrade_instance) {
     if (registry.fireControls.has(player)) {
         FireControl &fc = registry.fireControls.get(player);
-        fc.damage_bonus += upgrade_instance.config.bonus[upgrade_instance.level];
+        fc.damage_bonus = upgrade_instance.config.bonus[upgrade_instance.level];
     }
 }
 

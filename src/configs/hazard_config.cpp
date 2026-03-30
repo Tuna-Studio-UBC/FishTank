@@ -22,4 +22,5 @@ struct HazardConfig {
 static const HazardConfig HAZARD_CONFIGS[hazard_count] = {
     HazardConfig(HAZARD_TYPE::MINE, vec3(.2f, .2f, .2f), 50.f),
     HazardConfig(HAZARD_TYPE::ANEMONE, vec3(1.f, .2f, 1.f), 15.f, 5000.f, 1000.f),
+    HazardConfig(HAZARD_TYPE::ANEMONE, vec3(1.f, .2f, 1.f), 15.f, 3000.f, 1000.f),
 };

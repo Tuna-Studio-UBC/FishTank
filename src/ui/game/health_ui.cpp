@@ -1,6 +1,13 @@
 #include "game_ui.hpp"
 
+#include "systems/level/level_system.hpp"
 #include "systems/player/camera_system.hpp"
+
+namespace {
+constexpr float HUD_TOP_LEFT_PADDING = 12.f;
+constexpr float SCORE_UI_HEIGHT = 30.f;
+constexpr float HUD_VERTICAL_GAP = 6.f;
+} // namespace
 
 void GameUI::draw_healthbar() {
     float bar_width = 300;
@@ -59,9 +66,27 @@ void GameUI::draw_enemy_healthbars() {
     ImU32 colour_start = ImGui::ColorConvertFloat4ToU32(ImVec4(1.f, 0.f, 0.f, 1.f));
     ImU32 colour_end = ImGui::ColorConvertFloat4ToU32(ImVec4(0.f, 1.f, 0.f, 1.f));
 
-    ImGui::PushFont(io.Fonts->Fonts[3]);
+    if (level_system == nullptr || !level_system->is_in_tutorial()) {
+        const float counter_width = 240.f;
+        const float counter_height = 34.f;
+        ImGui::SetNextWindowPos(ImVec2(HUD_TOP_LEFT_PADDING, HUD_TOP_LEFT_PADDING + SCORE_UI_HEIGHT + HUD_VERTICAL_GAP),
+                                ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(counter_width, counter_height), ImGuiCond_Always);
 
-    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "\nENEMIES:");
+        ImGuiWindowFlags counter_flags =
+            ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs |
+            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground;
+
+        if (ImGui::Begin("Enemy Counter", nullptr, counter_flags)) {
+            const std::string enemy_count_text = "Enemies: " + std::to_string(registry.enemies.entities.size());
+            ImGui::PushFont(io.Fonts->Fonts[3]);
+            ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", enemy_count_text.c_str());
+            ImGui::PopFont();
+        }
+        ImGui::End();
+    }
+
     for (Entity e : registry.enemies.entities) {
         if (!registry.motions.has(e) || !registry.healths.has(e)) {
             continue;
@@ -69,10 +94,6 @@ void GameUI::draw_enemy_healthbars() {
         Motion &m = registry.motions.get(e);
         Health &h = registry.healths.get(e);
         float ratio = (h.max_hp > 0) ? (float)h.hp / (float)h.max_hp : 0.f;
-
-        ImGui::TextColored(
-            ImVec4(1.f, 1.f, 1.f, 1.f),
-            std::string(e.name() + ": " + std::to_string(h.hp) + "/" + std::to_string(h.max_hp)).c_str());
 
         // Skip bosses, they have their own health bar
         if (registry.bosses.has(e))
@@ -96,8 +117,6 @@ void GameUI::draw_enemy_healthbars() {
         ImU32 colour = colour_lerp(colour_start, colour_end, ratio);
         draw_list->AddRectFilled(health_rect_min, health_rect_max, colour);
     }
-
-    ImGui::PopFont();
     ImGui::End();
 }
 

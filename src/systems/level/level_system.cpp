@@ -1,5 +1,24 @@
 #include "level_system.hpp"
 
+int LevelSystem::get_current_wave() const {
+    Persistence &persist = registry.persistences.components[0];
+    return persist.wave;
+}
+
+int LevelSystem::get_total_waves_for_current_level() const {
+    Persistence &persist = registry.persistences.components[0];
+    int level = persist.level;
+    if (level < 0 || level >= (int)LEVEL_CONFIGS.size()) {
+        return 0;
+    }
+
+    return LEVEL_CONFIGS[level].last_wave + 1;
+}
+
+bool LevelSystem::is_in_tutorial() const {
+    return !registry.progresses.components.empty() && registry.progresses.components[0].is_tutorial;
+}
+
 void LevelSystem::step(const float &elapsed_ms) {
     assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress &progress = registry.progresses.components[0];
@@ -155,7 +174,7 @@ void LevelSystem::load_level_components() {
         if (item == HAZARD_TYPE::MINE) {
             createMine(renderer, pos);
         } else if (item == HAZARD_TYPE::ANEMONE) {
-            createAnemone(renderer, pos);
+            createAnemone(renderer, pos, false);
         }
     }
 
@@ -167,6 +186,23 @@ void LevelSystem::load_level_components() {
     for (auto power_up : config.powerups) {
         pos = tilemap_system->get_random_position(SpawnTarget::POWERUP);
         createPowerUp(renderer, pos, power_up);
+    }
+}
+
+void LevelSystem::apply_upgrades(Entity &player, Upgrades &upgrades) {
+    if (registry.fireControls.has(player)) {
+        FireControl &fc = registry.fireControls.get(player);
+        int bonus = upgrades.upgrade_instances[MAX_AMMO].config.bonus[upgrades.upgrade_instances[MAX_AMMO].level];
+        fc.max_ammo = STARTING_AMMO + bonus;
+        fc.ammo = STARTING_AMMO + bonus;
+        bonus = upgrades.upgrade_instances[ATTACK].config.bonus[upgrades.upgrade_instances[ATTACK].level];
+        fc.damage_bonus = bonus;
+    }
+    if (registry.healths.has(player)) {
+        Health &health = registry.healths.get(player);
+        int bonus = upgrades.upgrade_instances[MAX_HP].config.bonus[upgrades.upgrade_instances[MAX_HP].level];
+        health.max_hp = 100 + bonus;
+        health.hp = 100 + bonus;
     }
 }
 
@@ -220,6 +256,7 @@ void LevelSystem::load_level(int level, bool should_persist) {
         registry.wallets.get(player) = persist.wallet;
         registry.upgrades.get(player) = persist.upgrades;
         registry.scoring.get(player) = persist.score;
+        apply_upgrades(player, persist.upgrades);
     }
 
     time_since_last_wave = 0.f;
@@ -261,21 +298,29 @@ void LevelSystem::load_tutorial() {
         Health &h = registry.healths.get(e);
         h.hp = 50;
         h.max_hp = 50;
+
+        registry.fireControls.get(e).cooldown_ms = 5000.f;
+        registry.enemies.get(e).detection_radius = 300.f;
     }
 
-    createBubbler(renderer, {625.f, 875.f});
+    Entity target = createBubbler(renderer, {625.f, 875.f});
+    createLabelText("Fill up!", {625.f, 875.f}, target, vec3(0.95f, 0.65f, 0.38f), true);
     createBubbler(renderer, {425.f, 400.f});
 
-    createMine(renderer, {450.f, 1150.f});
-    createAnemone(renderer, {350.f, 1000.f});
-    createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
-    createPowerUp(renderer, {800.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
-    createPowerUp(renderer, {700.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
+    target = createMine(renderer, {450.f, 1150.f});
+    registry.explosives.get(target).damage = 25.f;
+    createLabelText("Mine", {450.f, 1150.f}, target, vec3(1.f, 0.f, 0.f), true);
+    target = createAnemone(renderer, {350.f, 1000.f}, true);
+    createLabelText("Anemone", {350.f, 1000.f}, target, vec3(1.f, 0.f, 0.f), false);
+    target = createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
+    createLabelText("Health", {350.f, 1000.f}, target, vec3(0.f, 1.f, 0.f), true);
+    target = createPowerUp(renderer, {800.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
+    createLabelText("More Damage", {350.f, 1000.f}, target, vec3(0.f, 1.f, 0.f), true);
+    target = createPowerUp(renderer, {700.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
+    createLabelText("More Speed", {350.f, 1000.f}, target, vec3(0.f, 1.f, 0.f), true);
 
     createTutorialTrigger(player_motion.position, vec2(50.f, 50.f), Tutorial::MOVEMENT);
-    createTutorialTrigger(vec2(250.f, 1125.f), vec2(50.f, 350.f), Tutorial::HAZARDS);
-    createTutorialTrigger(vec2(600.f, 1150.f), vec2(50.f, 450.f), Tutorial::HEALING);
-    createTutorialTrigger(vec2(750.f, 875.f), vec2(400.f, 150.f), Tutorial::AMMUNITION);
+    createTutorialTrigger(vec2(250.f, 1125.f), vec2(50.f, 350.f), Tutorial::INTERACT);
     createTutorialTrigger(vec2(750.f, 725.f), vec2(400.f, 50.f), Tutorial::COMBAT);
 
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
@@ -317,6 +362,7 @@ void LevelSystem::restart_game() {
             registry.wallets.get(player) = persist.wallet;
             registry.upgrades.get(player) = persist.upgrades;
             registry.scoring.get(player) = persist.score;
+            apply_upgrades(player, persist.upgrades);
         }
     }
 }
