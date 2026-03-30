@@ -21,6 +21,7 @@
 WorldSystem::WorldSystem() {
     // seeding rng with random device
     rng = std::default_random_engine(std::random_device()());
+    rng = std::default_random_engine(std::random_device()());
 }
 
 WorldSystem::~WorldSystem() {
@@ -398,6 +399,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             if (key == GLFW_KEY_C && action == GLFW_PRESS)
                 upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+            
+            if (key == GLFW_KEY_Z) {
+                for (auto &wallet : registry.wallets.components)
+                    wallet.crackers += 5;
+            }
         }
 #endif
         // #undef DEBUG_UPGRADE_INPUTS
@@ -461,11 +467,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             health.hp = health.max_hp;
             FireControl &fc = registry.fireControls.get(player);
             fc.ammo = fc.max_ammo;
-        }
-
-        if (key == GLFW_KEY_Z) {
-            for (auto &wallet : registry.wallets.components)
-                wallet.crackers += 5;
         }
 #endif
 
