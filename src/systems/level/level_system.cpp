@@ -27,6 +27,11 @@ void LevelSystem::step(const float &elapsed_ms) {
         return;
     }
 
+    if (progress.trigger_load) {
+        load_game();
+        return;
+    }
+
     if (progress.is_game_over || progress.is_paused) {
         return;
     }
@@ -323,6 +328,35 @@ void LevelSystem::load_tutorial() {
     createTutorialTrigger(vec2(750.f, 725.f), vec2(400.f, 50.f), Tutorial::COMBAT);
 
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
+}
+
+void LevelSystem::load_game() {
+    assert(registry.progresses.size() > 0 && "Progress component not found");
+    Progress &progress = registry.progresses.components[0];
+    progress.trigger_load = false;
+
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+
+    particle_system.clear_all_particles();
+    registry.clear_all_components();
+    registry.progresses.emplace(Entity("Progress"));
+
+    if (persist.level == -1) {
+        load_tutorial();
+    } else {
+        load_level(persist.level, false);
+
+        persist.wave = (persist.level > 0) ? LEVEL_CONFIGS[persist.level - 1].last_wave : -1;
+        trigger_load_next_wave();
+
+        assert(registry.players.size() > 0 && "Player component not found");
+        Entity player = registry.players.entities[0];
+        registry.wallets.get(player) = persist.wallet;
+        registry.upgrades.get(player) = persist.upgrades;
+        registry.scoring.get(player) = persist.score;
+        apply_upgrades(player, persist.upgrades);
+    }
 }
 
 void LevelSystem::restart_game() {

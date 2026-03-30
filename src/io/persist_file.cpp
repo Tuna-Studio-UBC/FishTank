@@ -138,7 +138,7 @@ void PersistFile::load() {
 
     Progress &pro = registry.progresses.components[0];
 
-    pro.trigger_restart = true;
+    pro.trigger_load = true;
 }
 
 void PersistFile::save() {

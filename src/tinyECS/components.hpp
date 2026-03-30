@@ -429,6 +429,7 @@ const std::vector<TutorialStep> TUTORIAL_STEPS = {
 
 struct Progress {
     bool trigger_restart = false;
+    bool trigger_load = false;
     bool trigger_skip_wave = false;
     bool is_transitioning_level = false;
 
