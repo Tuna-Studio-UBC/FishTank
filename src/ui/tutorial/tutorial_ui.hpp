@@ -15,11 +15,8 @@ struct TutorialUI {
     void draw_tutorial_skip_button();
 
     void draw_tutorial_movement(TutorialStep tutorial);
-    void draw_tutorial_hazards(TutorialStep tutorial);
-    void draw_tutorial_healing(TutorialStep tutorial);
-    void draw_tutorial_ammo(TutorialStep tutorial);
+    void draw_tutorial_interactables(TutorialStep tutorial);
     void draw_tutorial_combat(TutorialStep tutorial);
-    void draw_tutorial_upgrade_system(TutorialStep tutorial);
 };
 
 static TutorialUI tutorial_ui;

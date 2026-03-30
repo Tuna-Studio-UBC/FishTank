@@ -412,7 +412,7 @@ struct MouseInputState {
 };
 
 // TODO: Move to config
-enum Tutorial { MOVEMENT = 1, HAZARDS, HEALING, AMMUNITION, COMBAT, UPGRADE_SYSTEM };
+enum Tutorial { MOVEMENT = 1, INTERACT, COMBAT };
 
 struct TutorialStep {
     Tutorial id;
@@ -422,9 +422,9 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::HAZARDS, 1),
-    TutorialStep(Tutorial::HEALING, 1),  TutorialStep(Tutorial::AMMUNITION, 1),
-    TutorialStep(Tutorial::COMBAT, 3),   TutorialStep(Tutorial::UPGRADE_SYSTEM, 1),
+    TutorialStep(Tutorial::MOVEMENT, 2), 
+    TutorialStep(Tutorial::INTERACT, 1),
+    TutorialStep(Tutorial::COMBAT, 1)
 };
 
 struct Progress {
@@ -458,6 +458,11 @@ struct Scoring {
 struct TutorialTrigger {
     Tutorial id;
     TutorialTrigger(Tutorial id) : id(id) {};
+};
+
+struct Label {
+    Entity target;
+    bool top;
 };
 
 #pragma endregion Game State

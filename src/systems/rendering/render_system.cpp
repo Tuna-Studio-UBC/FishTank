@@ -260,7 +260,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection, const
     gl_has_errors();
 }
 
-void RenderSystem::drawText(Entity entity) {
+void RenderSystem::drawText(Entity entity, const mat3 &projection, const mat3 &view) {
     Text &t = registry.texts.get(entity);
     std::string text = t.text;
     float x = t.position.x;
@@ -268,6 +268,20 @@ void RenderSystem::drawText(Entity entity) {
     float scale = t.scale;
     const glm::vec3 &color = t.color;
     const glm::mat4 &trans = t.trans;
+
+    if (registry.labels.has(entity)) {
+        Label &label = registry.labels.get(entity);
+        if (registry.motions.has(label.target)) {
+            Motion &tm = registry.motions.get(label.target);
+            float offset = label.top ? -TILE_SIZE_PX : TILE_SIZE_PX;
+            vec3 world_pos = vec3(tm.position.x, tm.position.y + offset, 1.f);
+            vec3 pos_view = view * world_pos;
+            vec3 pos_proj = projection * pos_view;
+
+            x = (pos_proj.x * 0.5f + 0.5f) * WINDOW_WIDTH_PX;
+            y = (pos_proj.y * 0.5f + 0.5f) * WINDOW_HEIGHT_PX;
+        }
+    }
 
     // enable blending
     glEnable(GL_BLEND);
@@ -539,7 +553,7 @@ void RenderSystem::draw() {
         } else if (registry.tilemaps.has(entity)) {
             drawTileMap(entity, projection_2D, view_2D);
         } else if (registry.texts.has(entity)) {
-            drawText(entity);
+            drawText(entity, projection_2D, view_2D);
         }
     }
 

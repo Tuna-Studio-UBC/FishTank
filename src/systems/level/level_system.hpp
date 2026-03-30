@@ -21,6 +21,9 @@ class LevelSystem {
     void load_tutorial();
 
     void restart_game();
+    int get_current_wave() const;
+    int get_total_waves_for_current_level() const;
+    bool is_in_tutorial() const;
 
   private:
     float time_since_last_wave = 0.f;
@@ -50,4 +53,5 @@ class LevelSystem {
     bool should_advance();
 
     void handle_timer(const float &elapsed_ms);
+    void apply_upgrades(Entity &player, Upgrades &upgrades);
 };
