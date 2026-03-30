@@ -188,7 +188,7 @@ void LevelSystem::load_level_components() {
     }
 }
 
-void LevelSystem::apply_upgrades(Entity& player, Upgrades& upgrades) {
+void LevelSystem::apply_upgrades(Entity &player, Upgrades &upgrades) {
     if (registry.fireControls.has(player)) {
         FireControl &fc = registry.fireControls.get(player);
         int bonus = upgrades.upgrade_instances[MAX_AMMO].config.bonus[upgrades.upgrade_instances[MAX_AMMO].level];
@@ -361,6 +361,7 @@ void LevelSystem::restart_game() {
             registry.wallets.get(player) = persist.wallet;
             registry.upgrades.get(player) = persist.upgrades;
             registry.scoring.get(player) = persist.score;
+            apply_upgrades(player, persist.upgrades);
         }
     }
 }
