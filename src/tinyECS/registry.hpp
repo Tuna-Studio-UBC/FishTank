@@ -71,6 +71,8 @@ class ECSRegistry {
     ComponentContainer<ScreenState> screenStates;
     ComponentContainer<KeyboardInputState> keyboardInputs;
     ComponentContainer<MouseInputState> mouseInputs;
+    ComponentContainer<ParryState> parryStates;
+    ComponentContainer<DashState> dashStates;
     ComponentContainer<Progress> progresses;
     ComponentContainer<Scoring> scoring;
     ComponentContainer<TutorialTrigger> tutorialTriggers;

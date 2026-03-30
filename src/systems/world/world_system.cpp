@@ -355,6 +355,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN) {
         ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
     }
+    if (key == GLFW_KEY_F) {
+        ps.current_actions[KeyboardActions::Parry] = key_pressed;
+    }
+    if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
+        ps.current_actions[KeyboardActions::Dash] = key_pressed;
+    }
 
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_E) {
@@ -421,8 +427,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             // spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
         }
-
-        if (key == GLFW_KEY_F) {
+        // changed to P for performance display, wanted parry to be on a more accessible key, soz
+        if (key == GLFW_KEY_P) {
             show_fps = !show_fps;
         }
 
@@ -503,6 +509,23 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                         registry.tints.get(turret).tint = vec3(1.0f, 0.1f, 0.1f);
                     } else {
                         registry.tints.emplace(turret, vec3(1.0f, 0.1f, 0.1f));
+                    }
+                }
+            }
+        }
+        if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+            Entity player = registry.players.entities[0];
+            if (registry.weaponStates.has(player)) {
+                WeaponState &ws = registry.weaponStates.get(player);
+                ws.current_weapon = WeaponType::GUN_3;
+
+                // make turret green
+                if (!registry.turrets.entities.empty()) {
+                    Entity turret = registry.turrets.entities[0];
+                    if (registry.tints.has(turret)) {
+                        registry.tints.get(turret).tint = vec3(0.2f, 1.0f, 0.2f);
+                    } else {
+                        registry.tints.emplace(turret, vec3(0.2f, 1.0f, 0.2f));
                     }
                 }
             }
