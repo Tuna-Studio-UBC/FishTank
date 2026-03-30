@@ -108,6 +108,37 @@ void PersistFile::load() {
 
     spdlog::info("Loading data:\n{} {}\n{}\n{} {} {} {} {}\n{} {} {}", level, wave, crackers, been_hit, bullets_fired,
                  bullets_hit, crackers_earned, enemies_defeated, attack_level, ammo_level, hp_level);
+
+    if (registry.persistences.components.size() == 0) {
+        spdlog::debug("No persistence object found");
+        return;
+    }
+
+    Persistence &per = registry.persistences.components[0];
+    
+    per.level = level;
+    per.wave = wave;
+
+    per.wallet.crackers = crackers;
+
+    per.score.been_hit = been_hit;
+    per.score.bullets_fired = bullets_fired;
+    per.score.bullets_hit = bullets_hit;
+    per.score.crackers_earned = crackers_earned;
+    per.score.enemies_defeated = enemies_defeated;
+
+    per.upgrades.upgrade_instances[0].level = attack_level;
+    per.upgrades.upgrade_instances[1].level = ammo_level;
+    per.upgrades.upgrade_instances[2].level = hp_level;
+
+    if (registry.progresses.components.size() == 0) {
+        spdlog::debug("No progress object found");
+        return;
+    }
+
+    Progress &pro = registry.progresses.components[0];
+
+    pro.trigger_restart = true;
 }
 
 void PersistFile::save() {
