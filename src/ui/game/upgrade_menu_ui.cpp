@@ -23,11 +23,8 @@ std::string get_upgrade_bonus_label(UPGRADE_TYPE type) {
     }
 }
 
-int get_total_bonus(const UpgradeInstance &upgrade) {
-    int total_bonus = 0;
-    for (unsigned int level = 1; level <= upgrade.level; ++level)
-        total_bonus += upgrade.config.bonus[level];
-    return total_bonus;
+int get_total_bonus(const UpgradeInstance &upgrade) { 
+    return upgrade.config.bonus[upgrade.level]; 
 }
 
 void draw_upgrade_card(UpgradeSystem *upgrade_system, Entity player, UPGRADE_TYPE type, const ImVec2 &card_size,

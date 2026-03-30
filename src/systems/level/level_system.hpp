@@ -53,4 +53,5 @@ class LevelSystem {
     bool should_advance();
 
     void handle_timer(const float &elapsed_ms);
+    void apply_upgrades(Entity &player, Upgrades &upgrades);
 };

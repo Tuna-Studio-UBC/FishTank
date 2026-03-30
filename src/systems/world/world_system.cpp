@@ -462,6 +462,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             FireControl &fc = registry.fireControls.get(player);
             fc.ammo = fc.max_ammo;
         }
+
+        if (key == GLFW_KEY_Z) {
+            for (auto &wallet : registry.wallets.components)
+                wallet.crackers += 5;
+        }
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
