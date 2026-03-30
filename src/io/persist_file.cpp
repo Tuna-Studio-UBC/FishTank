@@ -60,6 +60,54 @@ void PersistFile::load() {
     #ifdef DEBUG_FILESYSTEM
     print_persistence();
     #endif
+
+    std::ifstream inputFile(SAVE_FILE);
+    if (!inputFile.is_open()) {
+        spdlog::error("Error: Could not open the file for loading");
+        return;
+    }
+
+    // Reading the various expected parts
+    std::string line;
+
+    int level, wave;
+    if(std::getline(inputFile, line)) {
+        std::stringstream ss_line(line);
+        ss_line >> level >> wave;
+    } else {
+        spdlog::error("Error: Could not read first line of file");
+        return;
+    }
+
+    unsigned int crackers;
+    if (std::getline(inputFile, line)) {
+        std::stringstream ss_line(line);
+        ss_line >> crackers;
+    } else {
+        spdlog::error("Error: Could not read second line of file");
+        return;
+    }
+
+    int been_hit, bullets_fired, bullets_hit, crackers_earned, enemies_defeated;
+    if (std::getline(inputFile, line)) {
+        std::stringstream ss_line(line);
+        ss_line >> been_hit >> bullets_fired >> bullets_hit >> crackers_earned >> enemies_defeated;
+    } else {
+        spdlog::error("Error: Could not read third line of file");
+        return;
+    }
+
+    unsigned int attack_level, ammo_level, hp_level;
+    if (std::getline(inputFile, line)) {
+        std::stringstream ss_line(line);
+        ss_line >> attack_level >> ammo_level >> hp_level;
+    } else {
+        spdlog::error("Error: Could not read fourth line of file");
+        return;
+    }
+
+    spdlog::info("Loading data:\n{} {}\n{}\n{} {} {} {} {}\n{} {} {}", level, wave, crackers, been_hit, bullets_fired,
+                 bullets_hit, crackers_earned, enemies_defeated, attack_level, ammo_level, hp_level);
 }
 
 void PersistFile::save() {
