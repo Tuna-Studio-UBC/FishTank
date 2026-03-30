@@ -390,14 +390,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                     upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
             }
 
-            if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-                upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
-
             if (key == GLFW_KEY_X && action == GLFW_PRESS)
                 upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
 
             if (key == GLFW_KEY_C && action == GLFW_PRESS)
                 upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+            
+            if (key == GLFW_KEY_Z) {
+                for (auto &wallet : registry.wallets.components)
+                    wallet.crackers += 5;
+            }
         }
 #endif
         // #undef DEBUG_UPGRADE_INPUTS
@@ -461,11 +463,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             health.hp = health.max_hp;
             FireControl &fc = registry.fireControls.get(player);
             fc.ammo = fc.max_ammo;
-        }
-
-        if (key == GLFW_KEY_Z) {
-            for (auto &wallet : registry.wallets.components)
-                wallet.crackers += 5;
         }
 #endif
 
