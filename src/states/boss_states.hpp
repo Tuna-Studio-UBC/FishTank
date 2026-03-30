@@ -78,6 +78,10 @@ class SharkyEnragedState : public SharkyState {
 
         switch_attack_pattern(e, 1);
 
+        // Change sprite
+        RenderRequest &rr = registry.renderRequests.get(e);
+        rr.used_texture = TEXTURE_ASSET_ID::TEXTURE_SHARKY_ENRAGED_SHEET;
+
         // Adjust speed
         auto config = BOSS_CONFIGS[(int)boss.type];
         SpeedControl &sc = registry.speedControls.get(e);
@@ -89,7 +93,7 @@ class SharkyEnragedState : public SharkyState {
             Bullet &bullet = registry.bullets.get(be);
             if (bullet.owner == e && !registry.growths.has(be)) {
                 Growth &growth = registry.growths.emplace(be);
-                growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 2.f;
+                growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 1.75f;
                 growth.rate_ps = 2.f;
             }
         }
@@ -135,29 +139,32 @@ class KingCrabbyEnragedState : public KingCrabbyState {
 
         switch_attack_pattern(e, 2);
 
+        // Change sprite
+        RenderRequest &rr = registry.renderRequests.get(e);
+        rr.used_texture = TEXTURE_ASSET_ID::TEXTURE_KING_CRABBY_ENRAGED_SHEET;
+
         // Adjust speed
         auto config = BOSS_CONFIGS[(int)boss.type];
         SpeedControl &sc = registry.speedControls.get(e);
-        sc.move_speed = 0.f;
+        sc.move_speed = config.move_speed * 1.5f;
         sc.turn_speed = config.turn_speed * 2.f;
 
         // Adjust attack window
         FireControl &fc = registry.fireControls.get(e);
-        fc.can_shoot_ms = 6 * 1000.f;
-        fc.cd_can_shoot_ms = 4 * 1000.f;
+        fc.can_shoot_ms = 3 * 1000.f;
+        fc.cd_can_shoot_ms = 5 * 1000.f;
 
         // Regenerate health
         Health &health = registry.healths.get(e);
-        if (health.hp <= health.max_hp * 0.5f)
-            health.hp += 0.05f * elapsed_ms;
+        if (health.hp <= health.max_hp * 0.5f && !fc.can_shoot)
+            health.hp += 10.f * (elapsed_ms / 1000.f);
 
-        // Grow projectiles
+        // Speed up projectiles
         for (Entity be : registry.bullets.entities) {
             Bullet &bullet = registry.bullets.get(be);
             if (bullet.owner == e && !registry.growths.has(be)) {
-                Growth &growth = registry.growths.emplace(be);
-                growth.target_scale = vec2(PROJECTILE_SIZE_PX, PROJECTILE_SIZE_PX) * 2.f;
-                growth.rate_ps = 10.f;
+                Motion &motion = registry.motions.get(be);
+                motion.velocity += 0.25f * motion.velocity * (elapsed_ms / 1000.f);
             }
         }
     }

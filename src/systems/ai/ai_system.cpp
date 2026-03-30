@@ -106,8 +106,7 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 4.f;
             }
-        } else if (fire.attack_pattern == ATTACK_PATTERN::SHOTGUN ||
-                   fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_B) {
+        } else if (fire.attack_pattern == ATTACK_PATTERN::SHOTGUN) {
             float incAngle = -2 * M_PI / 12.f;
             for (int i = 0; i < 5; i++) {
                 auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
@@ -127,6 +126,16 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.angle = angle + incAngle;
                 req.owner = enemy;
                 incAngle += M_PI / 6.f;
+            }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_B) {
+            float incAngle = get_random_float(0.f, 1.f) * M_PI;
+            for (int i = 0; i < 6; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = incAngle;
+                req.owner = enemy;
+                incAngle += M_PI / 3.f;
             }
         } else {
             registry.bullet_requests.insert(enemy, {fire.attack_pattern, position, angle, enemy});
@@ -183,9 +192,9 @@ void AISystem::handle_bosses(float elapsed_ms) {
                 fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::SHARKY_ENRAGED));
             }
         } else if (boss.type == BOSS_TYPE::KING_CRABBY) {
-            if (health.hp <= health.max_hp * 0.33f && boss.curr_phase < 3) {
+            if (health.hp <= health.max_hp * 0.5f && boss.curr_phase < 3) {
                 fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::KING_CRABBY_ENRAGED));
-            } else if (health.hp <= health.max_hp * 0.67f && boss.curr_phase < 2) {
+            } else if (health.hp <= health.max_hp * 0.75f && boss.curr_phase < 2) {
                 fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::KING_CRABBY_TOXIC));
             }
         } else if (boss.type == BOSS_TYPE::EEEEL) {

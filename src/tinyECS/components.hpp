@@ -137,7 +137,7 @@ struct FireControl {
 
     bool can_shoot = true;
     float can_shoot_ms = 5 * 1000.f;    // Time window for shooting mode
-    float cd_can_shoot_ms = 2 * 1000.f; // Time window for cooldown mode
+    float cd_can_shoot_ms = 3 * 1000.f; // Time window for cooldown mode
     float elapsed_can_shoot_ms = 0.f;
     float elapsed_cd_can_shoot_ms = 0.f;
 };
@@ -422,10 +422,7 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 2), 
-    TutorialStep(Tutorial::INTERACT, 1),
-    TutorialStep(Tutorial::COMBAT, 1)
-};
+    TutorialStep(Tutorial::MOVEMENT, 2), TutorialStep(Tutorial::INTERACT, 1), TutorialStep(Tutorial::COMBAT, 1)};
 
 struct Progress {
     bool trigger_restart = false;
@@ -643,8 +640,10 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_SPEED_SHEET = TEXTURE_WHEY_SHEET + 1,
 
     TEXTURE_SHARKY_SHEET = TEXTURE_SPEED_SHEET + 1,
-    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_SHEET + 1,
-    TEXTURE_EXPLOSION_SHEET = TEXTURE_KING_CRABBY_SHEET + 1,
+    TEXTURE_SHARKY_ENRAGED_SHEET = TEXTURE_SHARKY_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_ENRAGED_SHEET + 1,
+    TEXTURE_KING_CRABBY_ENRAGED_SHEET = TEXTURE_KING_CRABBY_SHEET + 1,
+    TEXTURE_EXPLOSION_SHEET = TEXTURE_KING_CRABBY_ENRAGED_SHEET + 1,
 
     TEXTURE_COUNT = TEXTURE_EXPLOSION_SHEET + 1
 };

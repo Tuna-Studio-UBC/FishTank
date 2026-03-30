@@ -58,7 +58,7 @@ struct BossConfig {
 static const BossConfig BOSS_CONFIGS[boss_count] = {
     // Sharky
     {"Sharky",
-     {400, 400},
+     {500, 500},
      150.f,
      M_PI * 1.5f,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
