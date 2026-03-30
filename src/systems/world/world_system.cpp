@@ -21,7 +21,6 @@
 WorldSystem::WorldSystem() {
     // seeding rng with random device
     rng = std::default_random_engine(std::random_device()());
-    rng = std::default_random_engine(std::random_device()());
 }
 
 WorldSystem::~WorldSystem() {
