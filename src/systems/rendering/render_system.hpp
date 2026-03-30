@@ -152,7 +152,7 @@ class RenderSystem {
 
     // On-screen rendering
     void drawToScreen();
-    void drawText(Entity entity);
+    void drawText(Entity entity, const mat3 &projection, const mat3 &view);
 
     void sortRenderRequests(std::vector<Entity> *draw_list);
 

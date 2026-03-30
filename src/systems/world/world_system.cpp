@@ -143,14 +143,8 @@ void WorldSystem::try_progress_tutorial() {
         TutorialStep &step = progress.tutorial_steps[progress.tutorial_step_id - 1];
 
         if (step.current_step >= step.total_steps) {
-            if (step.id == Tutorial::COMBAT) {
-                progress.tutorial_step_id = Tutorial::UPGRADE_SYSTEM;
-                progress.is_paused = true;
-                progress.is_tutorial_step_called = true;
-            } else {
-                progress.is_paused = false;
-                progress.is_tutorial_step_called = false;
-            }
+            progress.is_paused = false;
+            progress.is_tutorial_step_called = false;
         } else {
             step.current_step++;
             spdlog::debug("[TUTORIAL] Progressed to step {} of tutorial #{}", step.current_step, (int)step.id);
