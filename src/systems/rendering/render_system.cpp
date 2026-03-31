@@ -273,8 +273,23 @@ void RenderSystem::drawText(Entity entity, const mat3 &projection, const mat3 &v
         Label &label = registry.labels.get(entity);
         if (registry.motions.has(label.target)) {
             Motion &tm = registry.motions.get(label.target);
-            float offset = label.top ? -TILE_SIZE_PX : TILE_SIZE_PX;
-            vec3 world_pos = vec3(tm.position.x, tm.position.y + offset, 1.f);
+            float offset_x = 0;
+            float offset_y = 0;
+            switch (label.offset) { 
+            case OFFSET::TOP:
+                offset_y -= TILE_SIZE_PX;
+                break;
+            case OFFSET::BOTTOM:
+                offset_y += TILE_SIZE_PX;
+                break;
+            case OFFSET::LEFT:
+                offset_x -= (TILE_SIZE_PX * 1.5);
+                break;
+            case OFFSET::RIGHT:
+                offset_x += (TILE_SIZE_PX * 1.5);
+                break;
+            }
+            vec3 world_pos = vec3(tm.position.x + offset_x, tm.position.y + offset_y, 1.f);
             vec3 pos_view = view * world_pos;
             vec3 pos_proj = projection * pos_view;
 

@@ -755,10 +755,20 @@ Entity createCompletionText(std::string message) {
     return e;
 }
 
-Entity createLabelText(std::string message, vec2 pos, Entity object, vec3 colour, bool top) {
-    Entity e = createText(message, pos, 0.5f, colour, glm::mat4(1.f), true);
+Entity createLabelText(std::string message, Entity object, vec3 colour, OFFSET offset) {
+    Entity e = createText(message, registry.motions.get(object).position, 0.75f, colour, glm::mat4(1.f), true);
 
-    registry.labels.insert(e, {object, top});
+    registry.labels.insert(e, {object, offset});
+    return e;
+}
+
+Entity createLabelText(std::string message, vec2 pos, vec3 colour, OFFSET offset) {
+    Entity e = createText(message, pos, 0.75f, colour, glm::mat4(1.f), true);
+
+    Entity m_e = Entity();
+    Motion &m = registry.motions.emplace(m_e);
+    m.position = pos;
+    registry.labels.insert(e, {m_e, offset});
     return e;
 }
 

@@ -460,9 +460,10 @@ struct TutorialTrigger {
     TutorialTrigger(Tutorial id) : id(id) {};
 };
 
+enum OFFSET { TOP, BOTTOM, LEFT, RIGHT };
 struct Label {
     Entity target;
-    bool top;
+    OFFSET offset;
 };
 
 #pragma endregion Game State
