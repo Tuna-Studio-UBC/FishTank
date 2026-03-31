@@ -15,6 +15,10 @@ class AISystem {
     void run_distracted(Entity e, float elapsed_ms, vec2 player_pos);
     void run_patrol(Entity e, float elapsed_ms);
 
+    // Helpers
+    float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 player_pos, float elapsed_ms,
+                       float stopping_dist);
+
   public:
     void init(PathfindingSystem *system);
     void step(float elapsed_ms);

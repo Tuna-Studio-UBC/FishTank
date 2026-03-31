@@ -46,8 +46,8 @@ AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
     }
 }
 
-float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 player_pos, float elapsed_ms,
-                   float stopping_dist) {
+float AISystem::adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 player_pos, float elapsed_ms,
+                             float stopping_dist) {
     vec2 position = motion.position;
     float angle = motion.angle;
 
@@ -72,8 +72,50 @@ float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 pl
         diff += 2 * M_PI;
     }
 
-    float step = std::clamp(diff, -max_turn, max_turn);
+    // Adjust angle to avoid walls
+    TileMap &map = registry.tilemaps.get(ps->get_current_map());
+    vec2 force = vec2(0.f);
+    float avoid_radius = TILE_SIZE_PX + length(motion.scale);
+    float avoid_factor = 60.f;
+    ivec2 tile = world_to_tile(motion.position);
 
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            ivec2 check_tile = tile + ivec2(dx, dy);
+            if (check_tile.x < 0 || check_tile.y < 0 || check_tile.x >= map.width || check_tile.y >= map.height) {
+                continue;
+            }
+
+            int idx = check_tile.y * map.width + check_tile.x;
+            if (map.tile_ids[idx] == 0) {
+                continue;
+            }
+
+            vec2 wall_center = tile_center_to_world(check_tile);
+            vec2 wall_diff = motion.position - wall_center;
+            float dist = length(wall_diff);
+
+            if (dist < avoid_radius && dist > 0.f) {
+                vec2 push = normalize(wall_diff);
+                float strength = (avoid_radius - dist) / avoid_radius;
+                force += push * strength * avoid_factor;
+            }
+        }
+    }
+
+    // Readjust
+    if (length(force) > 0.f) {
+        target_angle_radians = atan2(force.y, force.x);
+        diff = target_angle_radians - current_angle;
+        while (diff > M_PI) {
+            diff -= 2 * M_PI;
+        }
+        while (diff < -M_PI) {
+            diff += 2 * M_PI;
+        }
+    }
+
+    float step = std::clamp(diff, -max_turn, max_turn);
     current_angle += step;
 
     if (current_angle >= 2 * M_PI) {

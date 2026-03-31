@@ -1,4 +1,4 @@
 # NodeID,Type,ConditionName,TrueChildID,FalseChildID,Action,Probability
 1,Condition,sees_player,2,3,
 2,Action, , , ,PURSUE,
-3,Action, , , ,IDLE,
+3,Action, , , ,PATROL,
