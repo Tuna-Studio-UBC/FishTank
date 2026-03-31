@@ -69,5 +69,7 @@ Entity createOverTimeEffect(Entity target_entity, float interval_ms, float durat
 }
 
 Entity createCompletionText(std::string message);
+
+Entity createTimeBonusText(int bonus_points);
 Entity createLabelText(std::string message, Entity object, vec3 colour, OFFSET offset);
 Entity createLabelText(std::string message, vec2 pos, vec3 colour, OFFSET offset);

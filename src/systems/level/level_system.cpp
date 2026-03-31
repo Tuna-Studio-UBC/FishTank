@@ -27,6 +27,11 @@ void LevelSystem::step(const float &elapsed_ms) {
         return;
     }
 
+    if (progress.trigger_load) {
+        load_game();
+        return;
+    }
+
     if (progress.is_game_over || progress.is_paused) {
         return;
     }
@@ -81,6 +86,7 @@ void LevelSystem::step(const float &elapsed_ms) {
 void LevelSystem::handle_timer(const float &elapsed_ms) {
     advance_timer = max(0.f, advance_timer - elapsed_ms);
     time_since_last_wave = min(time_since_last_wave + elapsed_ms, 300000.f); // Capped to not have floating point issues
+    time_since_level_start = min(time_since_level_start + elapsed_ms, 3000000.f);
 
     if (advance_timer == 0.f) {
         if (triggered_load_level) {
@@ -339,6 +345,35 @@ void LevelSystem::load_tutorial() {
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
 }
 
+void LevelSystem::load_game() {
+    assert(registry.progresses.size() > 0 && "Progress component not found");
+    Progress &progress = registry.progresses.components[0];
+    progress.trigger_load = false;
+
+    assert(registry.persistences.size() > 0 && "Persistence component not found");
+    Persistence &persist = registry.persistences.components[0];
+
+    particle_system.clear_all_particles();
+    registry.clear_all_components();
+    registry.progresses.emplace(Entity("Progress"));
+
+    if (persist.level == -1) {
+        load_tutorial();
+    } else {
+        load_level(persist.level, false);
+
+        persist.wave = (persist.level > 0) ? LEVEL_CONFIGS[persist.level - 1].last_wave : -1;
+        trigger_load_next_wave();
+
+        assert(registry.players.size() > 0 && "Player component not found");
+        Entity player = registry.players.entities[0];
+        registry.wallets.get(player) = persist.wallet;
+        registry.upgrades.get(player) = persist.upgrades;
+        registry.scoring.get(player) = persist.score;
+        apply_upgrades(player, persist.upgrades);
+    }
+}
+
 void LevelSystem::restart_game() {
     bool is_tutorial = registry.progresses.components[0].is_tutorial;
 
@@ -414,6 +449,7 @@ void LevelSystem::load_next_level() {
     progress.is_transitioning_level = false;
 
     triggered_load_level = false;
+    time_since_level_start = 0.f;
 
     assert(registry.persistences.size() > 0 && "Persistence component not found");
     Persistence &persist = registry.persistences.components[0];
@@ -453,13 +489,25 @@ void LevelSystem::trigger_load_next_level() {
         createCompletionText("TUTORIAL COMPLETE!!");
     } else {
         createCompletionText("LEVEL " + std::to_string(persist.level + 1) + " COMPLETE!!");
+        handle_time_bonus();
     }
 }
 
+void LevelSystem::handle_time_bonus() { 
+    Scoring& scoring = registry.scoring.components[0];
+    Persistence &persist = registry.persistences.components[0];
+    Wallet &wallet = registry.wallets.components[0];
+    float relative_time = time_since_level_start - LEVEL_CONFIGS[persist.level].time_bonus_threshold;
+    int crackers_earned = 5;
+    if (relative_time > 0.f) {
+        crackers_earned = max(0, 4 - ((int)relative_time / 5000));
+    }
+    scoring.crackers_earned += crackers_earned;
+    wallet.crackers += crackers_earned;
+    createTimeBonusText(crackers_earned * 1000);
+}
+
 void LevelSystem::trigger_load_next_wave() {
-    // assert(registry.persistences.size() > 0 && "Persistence component not found");
-    // Persistence &persist = registry.persistences.components[0];
-    // createCompletionText("LOADING WAVE: " + std::to_string(persist.wave + 1));
     triggered_load_wave = true;
     advance_timer = 50.f;
 }

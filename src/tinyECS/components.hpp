@@ -189,7 +189,7 @@ struct DeployedMine {
     bool is_stationary = false;
 };
 
-enum class WeaponType { GUN_1, GUN_2 };
+enum class WeaponType { GUN_1, GUN_2, GUN_3 };
 
 struct WeaponState {
     WeaponType current_weapon = WeaponType::GUN_1;
@@ -205,6 +205,12 @@ struct WeaponState {
     float gun2_left_cooldown = 600.0f;   // ms
     float gun2_right_cooldown = 2500.0f; // mine cooldown 2.5s
     float last_left_click_time = 0.0f;
+
+    // Gun 3 (minigun)
+    float gun3_left_cooldown = 150.0f;   // ms - rapid fire
+    float gun3_right_cooldown = 3000.0f; // ms - full auto cooldown 3s
+    int minigun_shots_remaining = 0;
+    float next_minigun_time = 0.0f;
 };
 
 struct Distracted {
@@ -395,12 +401,32 @@ struct ScreenState {
     float darken_screen_factor = -1;
 };
 
-enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, KeyboardActionsCount };
+enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, Parry, Dash, KeyboardActionsCount };
 
 struct KeyboardInputState {
     bool current_actions[KeyboardActions::KeyboardActionsCount];
     bool previous_actions[KeyboardActions::KeyboardActionsCount];
     KeyboardActions most_recent_turn = KeyboardActions::TurnRight;
+};
+
+struct ParryState {
+    bool is_active = false;              
+    float window_ms = 500.0f;            // Parry window duration (0.5 seconds) this doesn't work the way i wanted it but it works so its fine.
+    float window_timer = 0.0f;           // Current parry window timer
+    float cooldown_ms = 1000.0f;         // Cooldown between parries (1 second tweakable)
+    float cooldown_timer = 0.0f;         // Current cooldown timer
+    float deflect_radius = 75.0f;        // Radius to deflect projectiles
+};
+
+struct DashState {
+    bool is_dashing = false;             // Currently dashing
+    float duration_ms = 200.0f;          // Dash duration (0.2 seconds)
+    float duration_timer = 0.0f;         // Current dash timer
+    float cooldown_ms = 1000.0f;         // Cooldown between dashes (like 1 second, also tweakable)
+    float cooldown_timer = 0.0f;         // Current cooldown timer
+    float dash_speed = 800.0f;           // Dash speed in px/s
+    vec2 dash_direction = {0.0f, 0.0f};  // Direction of dash
+    bool has_dealt_damage = false;       // Track if damage dealt this dash to prevent multiple hits
 };
 
 enum MouseActions { LeftClick, RightClick, MouseActionsCount };
@@ -429,6 +455,7 @@ const std::vector<TutorialStep> TUTORIAL_STEPS = {
 
 struct Progress {
     bool trigger_restart = false;
+    bool trigger_load = false;
     bool trigger_skip_wave = false;
     bool is_transitioning_level = false;
 

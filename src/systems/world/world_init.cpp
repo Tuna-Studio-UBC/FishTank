@@ -52,6 +52,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 
     registry.scoring.emplace(entity);
     registry.weaponStates.emplace(entity);
+    registry.parryStates.emplace(entity);  // add parry state for player
+    registry.dashStates.emplace(entity);   // add dash state for player
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -750,7 +752,15 @@ Entity createText(std::string text, vec2 position, float scale, const glm::vec3 
 }
 
 Entity createCompletionText(std::string message) {
-    Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2 - 50, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f),
+    Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f),
+                          glm::mat4(1.f), true);
+    registry.expirations.emplace(e, 2000.f);
+    return e;
+}
+
+Entity createTimeBonusText(int bonus_points) {
+    Entity e = createText("BONUS POINTS: " + std::to_string(bonus_points), vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX - 350),
+                          2.f, vec3(1.f),
                           glm::mat4(1.f), true);
     registry.expirations.emplace(e, 2000.f);
     return e;

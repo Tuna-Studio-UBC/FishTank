@@ -174,7 +174,7 @@ void TutorialUI::draw_tutorial_combat(TutorialStep tutorial) {
     ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 100.f));
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
 
-    text = "Press 1 / 2\nto switch weapons";
+    text = "Press 1 / 2 / 3\nto switch weapons";
     text_size = ImGui::CalcTextSize(text);
     ImGui::SetCursorPos(
         ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2 - 200.f, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
@@ -186,9 +186,14 @@ void TutorialUI::draw_tutorial_combat(TutorialStep tutorial) {
         ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2 + 200.f, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
 
-    text = "Clear this area to start playing for real!";
+    text = "Press F to deflect attacks!\n\nPress SHIFT to dash!";
     text_size = ImGui::CalcTextSize(text);
     ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 100.f));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+
+    text = "Clear this area to start playing for real!";
+    text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 200.f));
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
     ImGui::PopFont();
 }

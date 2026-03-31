@@ -20,6 +20,7 @@ struct Level {
     bool upgrade_screen_before = false;
     float spawn_threshold = 0.5f;
     float time_threshold = 15000.f;
+    float time_bonus_threshold = 0.f;
 };
 
 const std::vector<Wave> WAVE_CONFIGS = {
@@ -53,7 +54,16 @@ const std::vector<Wave> WAVE_CONFIGS = {
 
 const std::vector<Level> LEVEL_CONFIGS = {
     // Level 1
-    {4, MapType::TEST_MAP, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(15, 10), ivec2(2, 17), ivec2(27, 2)}, false, 0.5f},
+    {4,
+     MapType::TEST_MAP,
+     {HAZARD_TYPE::MINE},
+     {POWER_UP_TYPE::HEAL},
+     {},
+     {ivec2(15, 10), ivec2(2, 17), ivec2(27, 2)},
+     false,
+     0.5f,
+     15000.f,
+    75000.f},
 
     // Level 2
     {9, MapType::TEST_MAP2,
@@ -62,7 +72,10 @@ const std::vector<Level> LEVEL_CONFIGS = {
     {},
     {ivec2(2), ivec2(28, 18)},
     true,
-    0.3f},
+    0.3f,
+    15000.f,
+    75000.f
+    },
     
     // Level 3
     {10, MapType::EMPTY_MAP,
@@ -70,14 +83,20 @@ const std::vector<Level> LEVEL_CONFIGS = {
      {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
      {},
      {ivec2(2, 18), ivec2(28, 2)},
-     true},
+     true,
+    0.5f,
+    15000.f,
+    45000.f},
     // Level 4
-    {15, MapType::TEST_MAP3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(2, 9), ivec2(14, 9), ivec2(26, 9)}, true},
+    {15, MapType::TEST_MAP3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(2, 9), ivec2(14, 9), ivec2(26, 9)}, true, 0.5f, 15000.f, 60000.f},
     // Level 5
     {16, MapType::TEST_MAP,
     {HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
     {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::DAMAGE_MULTIPLIER},
     {},
     {ivec2(3), ivec2(27, 17)},
-    true}
+    true,
+    0.5f,
+    15000.f,
+    50000.f}
 };
