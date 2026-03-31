@@ -89,51 +89,14 @@ void TutorialUI::draw_tutorial_movement(TutorialStep tutorial) {
     ImVec2 rect_max_filled = ImVec2(rect_min_filled.x + size.x, rect_min_filled.y + size.y);
     draw_list->AddRectFilled(rect_min_filled, rect_max_filled, IM_COL32(10, 10, 10, 180), 0.f, 0.f);
 
-    int current_step = tutorial.current_step;
-    if (current_step == 1) {
-        ImGui::PushFont(io.Fonts->Fonts[1]);
+    ImGui::PushFont(io.Fonts->Fonts[1]);
 
-        const char *text = "Welcome to FishTank!";
-        ImVec2 text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
+    const char *text = "Welcome to FishTank!";
+    ImVec2 text_size = ImGui::CalcTextSize(text);
+    ImGui::SetCursorPos(ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2));
+    ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
 
-        ImGui::PopFont();
-    } else if (current_step == 2) {
-        ImGui::PushFont(io.Fonts->Fonts[1]);
-        const char *text = "Here's how to move around";
-        ImVec2 text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 200.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
-        ImGui::PopFont();
-
-        ImGui::PushFont(io.Fonts->Fonts[2]);
-        text = "W = SWIM";
-        text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 - 50.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
-
-        text = "A = TURN LEFT";
-        text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2 - 200.f, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
-
-        text = "D = TURN RIGHT";
-        text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2 + 200.f, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 50.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
-
-        text = "S = TURN 180 DEGREES";
-        text_size = ImGui::CalcTextSize(text);
-        ImGui::SetCursorPos(
-            ImVec2(WINDOW_WIDTH_PX / 2 - text_size.x / 2, WINDOW_HEIGHT_PX / 2 - text_size.y / 2 + 150.f));
-        ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), text);
-        ImGui::PopFont();
-    }
+    ImGui::PopFont();
 }
 
 void TutorialUI::draw_tutorial_interactables(TutorialStep tutorial) {

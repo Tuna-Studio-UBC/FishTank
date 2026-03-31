@@ -320,18 +320,21 @@ void LevelSystem::load_tutorial() {
     createLabelText("Anemone", target, vec3(1.f, 0.f, 0.f), OFFSET::BOTTOM);
     target = createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
     createLabelText("Health", target, vec3(0.f, 1.f, 0.f), OFFSET::TOP);
-    target = createPowerUp(renderer, {800.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
-    createLabelText("More Damage", target, vec3(0.f, 1.f, 0.f), OFFSET::BOTTOM);
-    target = createPowerUp(renderer, {700.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
+    target = createPowerUp(renderer, {750.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
+    createLabelText("More Damage", target, vec3(0.f, 1.f, 0.f), OFFSET::TOP);
+    target = createPowerUp(renderer, {600.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
     createLabelText("More Speed", target, vec3(0.f, 1.f, 0.f), OFFSET::TOP);
 
     createTutorialTrigger(player_motion.position, vec2(50.f, 50.f), Tutorial::MOVEMENT);
-    Entity label = createLabelText("INTERACT", {300.f, 1200.f}, vec3(1.f), OFFSET::TOP);
+    Entity label = createLabelText("INTERACT", {250.f, 1200.f}, vec3(1.f), OFFSET::TOP);
     registry.texts.get(label).scale = 1.5f;
     label = createLabelText("COMBAT", {750.f, 775.f}, vec3(1.f), OFFSET::TOP);
     registry.texts.get(label).scale = 1.5f;
-    //createTutorialTrigger(vec2(250.f, 1125.f), vec2(50.f, 350.f), Tutorial::INTERACT);
-    //createTutorialTrigger(vec2(750.f, 725.f), vec2(400.f, 50.f), Tutorial::COMBAT);
+
+    createLabelText("1/2/3 - Switch Weapon", {825.f, 350.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("Left - Attack 1", {825.f, 400.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("Right - Attack 2", {825.f, 450.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("Point and Click!", {825.f, 550.f}, vec3(1.f), OFFSET::TOP);
 
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
 }

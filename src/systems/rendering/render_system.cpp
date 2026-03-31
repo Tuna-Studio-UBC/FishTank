@@ -295,6 +295,9 @@ void RenderSystem::drawText(Entity entity, const mat3 &projection, const mat3 &v
 
             x = (pos_proj.x * 0.5f + 0.5f) * WINDOW_WIDTH_PX;
             y = (pos_proj.y * 0.5f + 0.5f) * WINDOW_HEIGHT_PX;
+        } else {
+            registry.remove_all_components_of(entity);
+            return;
         }
     }
 
