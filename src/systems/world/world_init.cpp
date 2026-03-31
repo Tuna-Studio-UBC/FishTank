@@ -52,6 +52,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 
     registry.scoring.emplace(entity);
     registry.weaponStates.emplace(entity);
+    registry.parryStates.emplace(entity);  // add parry state for player
+    registry.dashStates.emplace(entity);   // add dash state for player
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
