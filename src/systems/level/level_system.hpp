@@ -21,6 +21,7 @@ class LevelSystem {
     void load_tutorial();
 
     void restart_game();
+    void load_game();
     int get_current_wave() const;
     int get_total_waves_for_current_level() const;
     bool is_in_tutorial() const;

@@ -6,6 +6,7 @@
 
 // stlib
 #include "configs/wave_config.cpp"
+#include "io/persist_file.hpp"
 #include "systems/physics/physics_system.hpp"
 #include "systems/rendering/particle_system.hpp"
 #include <cassert>
@@ -482,8 +483,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
 
     // Log debug info
-    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
         registry.list_all_components();
+    }
+
+    if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+        persist_file.save();
+    }
+
+    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+        persist_file.load();
     }
 
     // Log persistence info
