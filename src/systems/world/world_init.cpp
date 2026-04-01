@@ -781,14 +781,14 @@ Entity createTimeBonusText(int bonus_points) {
 }
 
 Entity createLabelText(std::string message, Entity object, vec3 colour, OFFSET offset) {
-    Entity e = createText(message, registry.motions.get(object).position, 0.75f, colour, glm::mat4(1.f), true, true);
+    Entity e = createText(message, registry.motions.get(object).position, 0.65f, colour, glm::mat4(1.f), true, true);
 
     registry.labels.insert(e, {object, offset});
     return e;
 }
 
 Entity createLabelText(std::string message, vec2 pos, vec3 colour, OFFSET offset) {
-    Entity e = createText(message, pos, 0.75f, colour, glm::mat4(1.f), true, true);
+    Entity e = createText(message, pos, 0.65f, colour, glm::mat4(1.f), true, true);
 
     Entity m_e = Entity();
     Motion &m = registry.motions.emplace(m_e);
