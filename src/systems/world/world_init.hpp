@@ -33,7 +33,7 @@ Entity createBubbler(RenderSystem *renderer, vec2 position);
 Entity createWall(const vec2 &position, const vec2 &scale = vec2(TILE_SIZE_PX));
 
 Entity createText(std::string text, vec2 position, float scale, const glm::vec3 &color = glm::vec3(0.f, 0.f, 0.f),
-                  const glm::mat4 &trans = glm::mat4(1.f), bool centered = false);
+                  const glm::mat4 &trans = glm::mat4(1.f), bool centered = false, bool label = false);
 
 Entity createTutorialTrigger(const vec2 position, const vec2 size, const Tutorial id);
 
@@ -69,4 +69,7 @@ Entity createOverTimeEffect(Entity target_entity, float interval_ms, float durat
 }
 
 Entity createCompletionText(std::string message);
-Entity createLabelText(std::string message, vec2 pos, Entity object, vec3 colour, bool top);
+
+Entity createTimeBonusText(int bonus_points);
+Entity createLabelText(std::string message, Entity object, vec3 colour, OFFSET offset);
+Entity createLabelText(std::string message, vec2 pos, vec3 colour, OFFSET offset);

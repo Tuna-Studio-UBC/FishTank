@@ -28,13 +28,13 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
     {"Urchin", {100, 100}, 0.f, 0.f, 500.f, ATTACK_PATTERN::URCHIN},
 
     // Guard
-    {"Crab", {50, 50}, 50.f, M_PI / 2.f, 600.f, ATTACK_PATTERN::SINGLE},
+    {"Crab", {50, 50}, 50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE},
 
     // Homing
     {"Isopod", {30, 30}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::RAPID},
 
     // Swarm
-    {"Mother", {50, 50}, 50.f, M_PI / 2.f, 600.f, ATTACK_PATTERN::SINGLE},
+    {"Mother", {50, 50}, 50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE},
 
     {"Child", {30, 30}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::HAVOC}};
 

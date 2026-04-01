@@ -21,6 +21,7 @@ class LevelSystem {
     void load_tutorial();
 
     void restart_game();
+    void load_game();
     int get_current_wave() const;
     int get_total_waves_for_current_level() const;
     bool is_in_tutorial() const;
@@ -28,6 +29,7 @@ class LevelSystem {
   private:
     float time_since_last_wave = 0.f;
     int enemies_spawned_last_wave = 0;
+    float time_since_level_start = 0.f;
 
     float advance_timer = 0.f;
     bool triggered_load_wave = false;
@@ -53,5 +55,6 @@ class LevelSystem {
     bool should_advance();
 
     void handle_timer(const float &elapsed_ms);
+    void handle_time_bonus();
     void apply_upgrades(Entity &player, Upgrades &upgrades);
 };
