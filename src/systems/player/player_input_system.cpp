@@ -36,14 +36,28 @@ bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) { ret
 // TODO: STUB FUNCTION -- REPLACE WHEN WE IMPLEMENT DIFFERENT AMMO TYPES
 int PlayerInputSystem::get_player_ammo_cost() { return 1; }
 
+namespace {
+void queue_no_ammo_sound(Entity player, WeaponState &ws, float game_time_ms) {
+    if (game_time_ms - ws.last_no_ammo_sound_time < ws.no_ammo_sound_cooldown)
+        return;
+
+    auto &sr = registry.sound_requests.emplace_with_duplicates(player);
+    sr.type = SOUND_EVENT::NO_AMMO;
+    ws.last_no_ammo_sound_time = game_time_ms;
+}
+} // namespace
+
 
    // Tries to fire left click projectile (normal bullet for Gun 1, explosive for Gun 2)
 
 void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
     // Gun 2 explosive bullets cost 10 ammo, Gun 1 costs 1
     int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 10 : 1;
-    if (fc.ammo < ammo_cost)
+    Entity player = registry.players.entities[0];
+    if (fc.ammo < ammo_cost) {
+        queue_no_ammo_sound(player, ws, game_time_ms);
         return;
+    }
 
     // Check cooldown based on weapon type
     float cooldown = (ws.current_weapon == WeaponType::GUN_1) ? ws.gun1_left_cooldown : ws.gun2_left_cooldown;
@@ -58,7 +72,6 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
 
     vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
     vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
-    Entity player = registry.players.entities[0];
 
     if (ws.current_weapon == WeaponType::GUN_1) {
         // Gun 1: Normal bouncing bullet (1 ammo)
@@ -98,8 +111,11 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
 void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
     // Gun 2 mine costs 10 ammo, Gun 1 burst costs 1 per shot
     int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 5 : 1;
-    if (fc.ammo < ammo_cost)
+    Entity player = registry.players.entities[0];
+    if (fc.ammo < ammo_cost) {
+        queue_no_ammo_sound(player, ws, game_time_ms);
         return;
+    }
 
     float barrel_len = DEFAULT_BARREL_LEN;
     if (!registry.turrets.entities.empty()) {
@@ -109,7 +125,6 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
 
     vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
     vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
-    Entity player = registry.players.entities[0];
 
     if (ws.current_weapon == WeaponType::GUN_1) {
         // Gun 1: Burst fire (3 shots)
@@ -169,7 +184,9 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
 
 void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
     if (ws.burst_shots_remaining > 0 && game_time_ms >= ws.next_burst_time) {
+        Entity player = registry.players.entities[0];
         if (fc.ammo < 1) {
+            queue_no_ammo_sound(player, ws, game_time_ms);
             ws.burst_shots_remaining = 0;
             return;
         }
@@ -182,7 +199,6 @@ void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &f
 
         vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
         vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
-        Entity player = registry.players.entities[0];
 
         createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
 

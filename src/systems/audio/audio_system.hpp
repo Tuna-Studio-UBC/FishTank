@@ -25,6 +25,7 @@ class AudioSystem {
     void play_ammo_load_center(int volume = 100);
     void play_clear_game_center(int volume = 112);
     void play_game_over_center(int volume = 108);
+    void play_no_ammo_center(int volume = 96);
     void play_bgm(const std::string &filename, int volume);
     void set_master_volume(int volume);
     int get_master_volume() const;
@@ -47,6 +48,7 @@ class AudioSystem {
     Mix_Chunk *ammo_load = nullptr;
     Mix_Chunk *clear_game = nullptr;
     Mix_Chunk *game_over = nullptr;
+    Mix_Chunk *no_ammo = nullptr;
     Mix_Music *bgm = nullptr;
 
     int hazard_warn_channel = -1;

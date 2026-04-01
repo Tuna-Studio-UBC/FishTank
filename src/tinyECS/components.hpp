@@ -205,6 +205,9 @@ struct WeaponState {
     float gun2_left_cooldown = 600.0f;   // ms
     float gun2_right_cooldown = 2500.0f; // mine cooldown 2.5s
     float last_left_click_time = 0.0f;
+
+    float last_no_ammo_sound_time = -1000.0f;
+    float no_ammo_sound_cooldown = 250.0f;
 };
 
 struct Distracted {
@@ -482,6 +485,7 @@ enum class SOUND_EVENT {
     AMMO_LOAD,
     CLEAR_GAME,
     GAME_OVER,
+    NO_AMMO,
 };
 
 struct SoundRequest {

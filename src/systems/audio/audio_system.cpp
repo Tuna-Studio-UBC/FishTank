@@ -37,9 +37,11 @@ bool AudioSystem::load() {
     Mix_VolumeChunk(clear_game, 108);
     game_over = Mix_LoadWAV(get_path(AUDIO, "game_over.wav").c_str());
     Mix_VolumeChunk(game_over, 108);
+    no_ammo = Mix_LoadWAV(get_path(AUDIO, "no_ammo.wav").c_str());
+    Mix_VolumeChunk(no_ammo, 96);
 
     if (!hazard_warn_loop || !enemy_shot || !player_shot || !cannon_shot || !shot_mine || !power_up || !hit_hazard ||
-        !enemy_dead || !complete_level || !upgrade || !ammo_load || !clear_game || !game_over) {
+        !enemy_dead || !complete_level || !upgrade || !ammo_load || !clear_game || !game_over || !no_ammo) {
         spdlog::error("[Audio] Failed to load audio. Ensure files exist in res/audio/");
         spdlog::error("[Audio] hazard_warn_loop.wav path = {}", get_path(AUDIO, "hazard_warn_loop.wav"));
         spdlog::error("[Audio] enemy_shot.wav path = {}", get_path(AUDIO, "enemy_shot.wav"));
@@ -54,6 +56,7 @@ bool AudioSystem::load() {
         spdlog::error("[Audio] ammo_load.wav path = {}", get_path(AUDIO, "ammo_load.wav"));
         spdlog::error("[Audio] clear_game.wav path = {}", get_path(AUDIO, "clear_game.wav"));
         spdlog::error("[Audio] game_over.wav path = {}", get_path(AUDIO, "game_over.wav"));
+        spdlog::error("[Audio] no_ammo.wav path = {}", get_path(AUDIO, "no_ammo.wav"));
         return false;
     }
 
@@ -127,6 +130,10 @@ void AudioSystem::shutdown() {
     if (game_over) {
         Mix_FreeChunk(game_over);
         game_over = nullptr;
+    }
+    if (no_ammo) {
+        Mix_FreeChunk(no_ammo);
+        no_ammo = nullptr;
     }
 
     if (bgm) {
@@ -336,6 +343,16 @@ void AudioSystem::play_game_over_center(int volume) {
     if (!game_over)
         return;
     int ch = Mix_PlayChannel(-1, game_over, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_no_ammo_center(int volume) {
+    if (!no_ammo)
+        return;
+    int ch = Mix_PlayChannel(-1, no_ammo, 0);
     if (ch == -1)
         return;
     Mix_Volume(ch, std::clamp(volume, 0, 128));

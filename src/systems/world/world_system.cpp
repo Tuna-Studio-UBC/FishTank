@@ -204,6 +204,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             audio_system.play_clear_game_center();
         } else if (sr.type == SOUND_EVENT::GAME_OVER) {
             audio_system.play_game_over_center();
+        } else if (sr.type == SOUND_EVENT::NO_AMMO) {
+            audio_system.play_no_ammo_center();
         }
     }
     registry.sound_requests.clear();
