@@ -411,7 +411,7 @@ struct ScreenState {
     float darken_screen_factor = -1;
 };
 
-enum KeyboardActions { MoveForward, TurnLeft, TurnRight, QuickTurn, Parry, Dash, KeyboardActionsCount };
+enum KeyboardActions { MoveForward, TurnLeft, TurnRight, MoveBackward, Parry, Dash, KeyboardActionsCount };
 
 struct KeyboardInputState {
     bool current_actions[KeyboardActions::KeyboardActionsCount];

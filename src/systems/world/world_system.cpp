@@ -302,7 +302,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         ps.most_recent_turn = KeyboardActions::TurnRight;
     }
     if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN) {
-        ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
+        ps.current_actions[KeyboardActions::MoveBackward] = key_pressed;
     }
     if (key == GLFW_KEY_F) {
         ps.current_actions[KeyboardActions::Parry] = key_pressed;
