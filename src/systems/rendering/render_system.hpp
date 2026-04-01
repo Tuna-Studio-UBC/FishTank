@@ -71,8 +71,11 @@ class RenderSystem {
         get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "whirl_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "fish_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "turret_sheet.png"),
 
-        get_path(FilePath::SPRITE_SHEETS, "crab_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "urchin_sheet.png"),
-        get_path(FilePath::SPRITE_SHEETS, "isopod_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "mother_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "crab_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "urchin_sheet.png"), 
+        get_path(FilePath::SPRITE_SHEETS, "isopod_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "mother_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "dasher_sheet.png"),
 
         get_path(FilePath::SPRITE_SHEETS, "mine_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "anemone_sheet.png"),
 
