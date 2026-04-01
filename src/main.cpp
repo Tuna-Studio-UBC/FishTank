@@ -90,6 +90,7 @@ int main() {
     level_system.load_tutorial();
     game_ui.set_upgrade_system(&upgrade_system);
     game_ui.set_audio_system(world_system.get_audio_system());
+    pick_up_system.set_audio_system(world_system.get_audio_system());
     game_ui.set_level_system(&level_system);
     camera_system.init(tilemap_system.get_current_map());
     path_system.init(&tilemap_system);

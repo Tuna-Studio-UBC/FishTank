@@ -211,6 +211,10 @@ struct WeaponState {
     float gun3_right_cooldown = 3000.0f; // ms - full auto cooldown 3s
     int minigun_shots_remaining = 0;
     float next_minigun_time = 0.0f;
+    
+    // Gun no ammo
+    float last_no_ammo_sound_time = -1000.0f;
+    float no_ammo_sound_cooldown = 250.0f;
 };
 
 struct Distracted {
@@ -501,6 +505,16 @@ struct Label {
 // =================================================================================
 enum class SOUND_EVENT {
     PLAYER_SHOT,
+    PLAYER_CANNON_SHOT,
+    PLAYER_SHOT_MINE,
+    PLAYER_HIT_HAZARD,
+    ENEMY_DEAD,
+    COMPLETE_LEVEL,
+    UPGRADE_APPLY,
+    AMMO_LOAD,
+    CLEAR_GAME,
+    GAME_OVER,
+    NO_AMMO,
 };
 
 struct SoundRequest {

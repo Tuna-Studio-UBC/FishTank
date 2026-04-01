@@ -22,6 +22,9 @@ void DeathSystem::step(float elapsed_ms) {
 
                 if (registry.players.has(e)) {
                     // TODO: Handle player death
+                    auto &sr = registry.sound_requests.emplace_with_duplicates(e);
+                    sr.type = SOUND_EVENT::GAME_OVER;
+
                     registry.progresses.components[0].is_game_over = true;
                     registry.progresses.components[0].has_beat_level = false;
                     Entity e = Entity("Overlay");
@@ -34,6 +37,10 @@ void DeathSystem::step(float elapsed_ms) {
                                                     GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::OVERLAYS});
                 } else if (registry.enemies.has(e)) {
                     // TODO: Handle enemy death
+                    Entity sound_owner = !registry.players.entities.empty() ? registry.players.entities[0] : Entity("EnemyDeadSound");
+                    auto &sr = registry.sound_requests.emplace_with_duplicates(sound_owner);
+                    sr.type = SOUND_EVENT::ENEMY_DEAD;
+
                     if (registry.boids.has(e)) {
                         Entity leader = registry.boids.get(e).leader;
                         Leader &ld = registry.leaders.get(leader);

@@ -319,9 +319,13 @@ void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) 
         if (registry.players.has(other_entity)) {
             if (config.duration_ms > 0.f && config.interval_ms > 0.f) {
                 createOverTimeEffect<Damage>(other_entity, config.interval_ms, config.duration_ms, true, config.amount);
+                auto &sr = registry.sound_requests.emplace_with_duplicates(other_entity);
+                sr.type = SOUND_EVENT::PLAYER_HIT_HAZARD;
                 registry.remove_all_components_of(hazard_entity);
             } else {
                 HealDamageSystem::add_damage(other_entity, config.amount);
+                auto &sr = registry.sound_requests.emplace_with_duplicates(other_entity);
+                sr.type = SOUND_EVENT::PLAYER_HIT_HAZARD;
 
                 if (registry.explosives.has(hazard_entity)) {
                     Explosive &exp = registry.explosives.get(hazard_entity);
@@ -650,6 +654,7 @@ void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b,
             Bubbler &bubbler = registry.bubblers.get(bubbler_bubbler.parent_bubbler);
 
             if (bubbler.charged) {
+                int previous_ammo = fc.ammo;
                 fc.ammo = min(fc.ammo + bubbler.ammo_given, fc.max_ammo);
                 bubbler.charged = false;
                 bubbler.recharge_timer = 0;
@@ -658,6 +663,11 @@ void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b,
                 createEffectBubbles(pos);
                 createEffectBubbles(pos);
                 createEffectBubbles(pos);
+
+                if (fc.ammo > previous_ammo) {
+                    auto &sr = registry.sound_requests.emplace_with_duplicates(entity_a);
+                    sr.type = SOUND_EVENT::AMMO_LOAD;
+                }
             }
         }
     }
