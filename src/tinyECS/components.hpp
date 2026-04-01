@@ -448,7 +448,7 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 2), 
+    TutorialStep(Tutorial::MOVEMENT, 1), 
     TutorialStep(Tutorial::INTERACT, 1),
     TutorialStep(Tutorial::COMBAT, 1)
 };
@@ -487,9 +487,10 @@ struct TutorialTrigger {
     TutorialTrigger(Tutorial id) : id(id) {};
 };
 
+enum OFFSET { TOP, BOTTOM, LEFT, RIGHT };
 struct Label {
     Entity target;
-    bool top;
+    OFFSET offset;
 };
 
 #pragma endregion Game State
@@ -704,6 +705,7 @@ const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 enum RENDER_LAYER {
     BACKGROUND = 0,
+    LABELS = 1,
     INTERACTABLES = 5,
     INTERACTABLES_PRIORITY = 6,
     ACTORS = 10,

@@ -292,7 +292,12 @@ void LevelSystem::load_tutorial() {
     Motion &player_motion = registry.motions.get(player);
     player_motion.angle = -M_PI / 2;
     FireControl &player_fc = registry.fireControls.get(player);
-    player_fc.ammo = 0;
+    player_fc.ammo = 10;
+
+    createLabelText("W - SWIM", player_motion.position, vec3(1.f), OFFSET::TOP);
+    createLabelText("A - LEFT", player_motion.position, vec3(1.f), OFFSET::LEFT);
+    createLabelText("D - RIGHT", player_motion.position, vec3(1.f), OFFSET::RIGHT);
+    createLabelText("S - REVERSE", player_motion.position, vec3(1.f), OFFSET::BOTTOM);
 
     createEnemy(renderer, {150.f, 150.f}, ENEMY_TYPE::GUARD);
     createEnemy(renderer, {850.f, 150.f}, ENEMY_TYPE::GUARD);
@@ -305,28 +310,37 @@ void LevelSystem::load_tutorial() {
         h.max_hp = 50;
 
         registry.fireControls.get(e).cooldown_ms = 5000.f;
-        registry.enemies.get(e).detection_radius = 300.f;
+        registry.enemies.get(e).detection_radius = 400.f;
     }
 
-    Entity target = createBubbler(renderer, {625.f, 875.f});
-    createLabelText("Fill up!", {625.f, 875.f}, target, vec3(0.95f, 0.65f, 0.38f), true);
+    Entity target = createBubbler(renderer, {750.f, 875.f});
+    registry.bubblers.get(target).ammo_given = 30;
+    createLabelText("Pick up more ammo!", target, vec3(0.95f, 0.65f, 0.38f), OFFSET::TOP);
+    createLabelText("Come back later for more", target, vec3(0.95f, 0.65f, 0.38f), OFFSET::BOTTOM);
     createBubbler(renderer, {425.f, 400.f});
 
     target = createMine(renderer, {450.f, 1150.f});
     registry.explosives.get(target).damage = 25.f;
-    createLabelText("Mine", {450.f, 1150.f}, target, vec3(1.f, 0.f, 0.f), true);
+    createLabelText("Mine", target, vec3(1.f, 0.f, 0.f), OFFSET::TOP);
     target = createAnemone(renderer, {350.f, 1000.f}, true);
-    createLabelText("Anemone", {350.f, 1000.f}, target, vec3(1.f, 0.f, 0.f), false);
+    createLabelText("Anemone", target, vec3(1.f, 0.f, 0.f), OFFSET::BOTTOM);
     target = createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
-    createLabelText("Health", {350.f, 1000.f}, target, vec3(0.f, 1.f, 0.f), true);
-    target = createPowerUp(renderer, {800.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
-    createLabelText("More Damage", {350.f, 1000.f}, target, vec3(0.f, 1.f, 0.f), true);
-    target = createPowerUp(renderer, {700.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
-    createLabelText("More Speed", {350.f, 1000.f}, target, vec3(0.f, 1.f, 0.f), true);
+    createLabelText("Health", target, vec3(0.f, 1.f, 0.f), OFFSET::TOP);
+    target = createPowerUp(renderer, {750.f, 1300.f}, POWER_UP_TYPE::DAMAGE_MULTIPLIER);
+    createLabelText("More Damage", target, vec3(0.f, 1.f, 0.f), OFFSET::TOP);
+    target = createPowerUp(renderer, {600.f, 1300.f}, POWER_UP_TYPE::SPEED_MULTIPLIER);
+    createLabelText("More Speed", target, vec3(0.f, 1.f, 0.f), OFFSET::TOP);
 
     createTutorialTrigger(player_motion.position, vec2(50.f, 50.f), Tutorial::MOVEMENT);
-    createTutorialTrigger(vec2(250.f, 1125.f), vec2(50.f, 350.f), Tutorial::INTERACT);
-    createTutorialTrigger(vec2(750.f, 725.f), vec2(400.f, 50.f), Tutorial::COMBAT);
+    Entity label = createLabelText("INTERACT", {250.f, 1200.f}, vec3(1.f), OFFSET::TOP);
+    registry.texts.get(label).scale = 1.5f;
+    label = createLabelText("COMBAT", {750.f, 775.f}, vec3(1.f), OFFSET::TOP);
+    registry.texts.get(label).scale = 1.5f;
+
+    createLabelText("1/2/3 - Switch Weapon", {825.f, 350.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("Left - Attack 1", {825.f, 400.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("Right - Attack 2", {825.f, 450.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("Point and Click!", {825.f, 550.f}, vec3(1.f), OFFSET::TOP);
 
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
 }
