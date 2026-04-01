@@ -305,9 +305,6 @@ void LevelSystem::load_tutorial() {
 
     // Set enemy health to something low for tutorial
     for (Entity e : registry.enemies.entities) {
-        if (registry.fireControls.has(e)) {
-            registry.fireControls.get(e).cooldown_ms = 5000.f;
-        }
         registry.detections.insert(e, {400.f});
     }
 
