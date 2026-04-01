@@ -5,8 +5,8 @@
 
 float MAX_SPEED_MULTIPLIER = 2.8;             // Max speed = move speed * x
 float ACCELERATION_MULTIPLIER = 3;
-float DECELERATION_MULTIPLIER = 4;          // Deceleration = move speed * x
-float QUICK_TURN_MULTIPLIER = 2;            // QT speed = turn speed * x
+float DECELERATION_MULTIPLIER = 5;          // Deceleration = move speed * x
+float AUTO_DECELERATION_MULTIPLIER = 2;          // Deceleration = move speed * x
 float ANGULAR_VELOCITY_MULTIPLIER = 0.8;
 float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4; // How fast we lose rotation velocity
 
@@ -348,6 +348,8 @@ void PlayerInputSystem::step(float elapsed_ms) {
         motion.velocity.x = std::min(max_speed, motion.velocity.x + (sc.move_speed * dt * ACCELERATION_MULTIPLIER));
     } else if (key_held(KeyboardActions::MoveBackward, keyboard_input)) {
         motion.velocity.x = std::max(0.f, motion.velocity.x - (DECELERATION_MULTIPLIER * sc.move_speed * dt));
+    } else {
+        motion.velocity.x = std::max(0.f, motion.velocity.x - (AUTO_DECELERATION_MULTIPLIER * sc.move_speed) * dt);
     }
 
     FireControl &fc = registry.fireControls.get(playerEntity);
