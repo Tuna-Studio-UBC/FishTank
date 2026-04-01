@@ -86,7 +86,7 @@ float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 pl
     return motion.angle;
 }
 
-void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
+void try_fire(Entity enemy, float elapsed_ms, float angle) {
     FireControl &fire = registry.fireControls.get(enemy);
     fire.cooldown_timer += elapsed_ms;
     vec2 position = registry.motions.get(enemy).position;
@@ -135,7 +135,8 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
     }
 }
 
-void ram_dash(Entity e, float elapsed_ms, float angle) {
+// repurposed from player input
+void try_dash(Entity e, float elapsed_ms, float angle) {
     Motion &motion = registry.motions.get(e);
     DashState &dash = registry.dashStates.get(e);
     dash.dash_direction = direction_to_unit_vector(angle);
@@ -253,15 +254,12 @@ void AISystem::run_patrol(Entity e, float elapsed_ms) {
         }
 
         ps->update_follower(follower_e, e, elapsed_ms);
-        fire_projectiles(follower_e, elapsed_ms, registry.motions.get(follower_e).angle + M_PI / 2);
+        try_fire(follower_e, elapsed_ms, registry.motions.get(follower_e).angle + M_PI / 2);
     }
 }
 
 void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     Motion &motion_i = registry.motions.get(e);
-    if (registry.detections.has(e) && !entity_in_radius(player_pos - motion_i.position, motion_i.scale, registry.detections.get(e).radius)) {
-        return;
-    }
 
     if (registry.dashStates.has(e) && registry.dashStates.get(e).is_dashing) {
         return;
@@ -303,10 +301,10 @@ void AISystem::run_attack(Entity e, float elapsed_ms) {
     // Firing logic
     switch (type) { 
     case ENEMY_TYPE::DASHER:
-        ram_dash(e, elapsed_ms, angle);
+        try_dash(e, elapsed_ms, angle);
         break;
     default:
-        fire_projectiles(e, elapsed_ms, angle);
+        try_fire(e, elapsed_ms, angle);
         break;
     }
 }
@@ -338,6 +336,11 @@ void AISystem::run_idle(Entity e) {
 
 void AISystem::act(Entity e, float elapsed_ms, vec2 player_pos) {
     AI &ai = registry.ais.get(e);
+    Motion &motion_i = registry.motions.get(e);
+    if (registry.detections.has(e) &&
+        !entity_in_radius(player_pos - motion_i.position, motion_i.scale, registry.detections.get(e).radius)) {
+        ai.current_state = AIAction::IDLE;
+    }
 
     switch (ai.current_state) {
     case AIAction::ATTACKING:

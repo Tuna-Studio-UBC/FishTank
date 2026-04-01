@@ -270,6 +270,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     } else if (type == ENEMY_TYPE::DASHER) {
         DashState &ds = registry.dashStates.emplace(entity);
         ds.cooldown_ms = fire.cooldown_ms;
+        ds.cooldown_timer = fire.cooldown_ms;
         registry.fireControls.remove(entity);
 
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
