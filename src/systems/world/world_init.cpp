@@ -273,7 +273,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         ds.cooldown_timer = fire.cooldown_ms;
         registry.fireControls.remove(entity);
 
-        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
+        // placeholder sprite
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_URCHIN_SHEET, EFFECT_ASSET_ID::TEXTURED,
                                                 GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
 
