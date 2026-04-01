@@ -212,6 +212,7 @@ struct WeaponState {
     float gun3_right_cooldown = 3000.0f; // ms - full auto cooldown 3s
     int minigun_shots_remaining = 0;
     float next_minigun_time = 0.0f;
+    int gun3_shots_since_ammo_consumed = 0; // Track shots for half-ammo consumption
 
     // Gun no ammo
     float last_no_ammo_sound_time = -1000.0f;

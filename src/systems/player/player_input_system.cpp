@@ -51,12 +51,21 @@ void queue_no_ammo_sound(Entity player, WeaponState &ws, float game_time_ms) {
    // Tries to fire left click projectile (normal bullet for Gun 1, explosive for Gun 2)
 
 void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
-    // Gun 2 explosive bullets cost 10 ammo, Gun 3 costs 1, Gun 1 costs 1
+    // Gun 2 explosive bullets cost 10 ammo, Gun 3 costs 0.5 (every 2 shots), Gun 1 costs 1
     int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 10 : 1;
     Entity player = registry.players.entities[0];
-    if (fc.ammo < ammo_cost) {
-        queue_no_ammo_sound(player, ws, game_time_ms);
-        return;
+
+    // For gun 3, check if we can fire (need ammo or have shot credit)
+    if (ws.current_weapon == WeaponType::GUN_3) {
+        if (fc.ammo <= 0 && ws.gun3_shots_since_ammo_consumed == 0) {
+            queue_no_ammo_sound(player, ws, game_time_ms);
+            return;
+        }
+    } else {
+        if (fc.ammo < ammo_cost) {
+            queue_no_ammo_sound(player, ws, game_time_ms);
+            return;
+        }
     }
 
     // Check cooldown based on weapon type
@@ -131,7 +140,18 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
     sr.type = (ws.current_weapon == WeaponType::GUN_2) ? SOUND_EVENT::PLAYER_CANNON_SHOT : SOUND_EVENT::PLAYER_SHOT;
 
     ws.last_left_click_time = game_time_ms;
-    fc.ammo -= ammo_cost;
+
+    // Handle ammo consumption for gun 3 (half rate)
+    if (ws.current_weapon == WeaponType::GUN_3) {
+        ws.gun3_shots_since_ammo_consumed++;
+        if (ws.gun3_shots_since_ammo_consumed >= 2) {
+            fc.ammo -= 1;
+            ws.gun3_shots_since_ammo_consumed = 0;
+        }
+    } else {
+        fc.ammo -= ammo_cost;
+    }
+
     Scoring &score = registry.scoring.components[0];
     score.bullets_fired += 1;
 }
@@ -140,18 +160,25 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
   // Tries to fire right click projectile (burst for Gun 1, mine for Gun 2)
 
 void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
-    // Gun 2 mine costs 5 ammo, Gun 1 burst costs 1 per shot, Gun 3 full-auto uses all remaining
+    // Gun 2 mine costs 5 ammo, Gun 1 burst costs 1 per shot, Gun 3 full-auto uses half rate
     int ammo_cost = 1;
     if (ws.current_weapon == WeaponType::GUN_2) {
         ammo_cost = 5;
-    } else if (ws.current_weapon == WeaponType::GUN_3) {
-        ammo_cost = 1;
     }
 
     Entity player = registry.players.entities[0];
-    if (fc.ammo < ammo_cost) {
-        queue_no_ammo_sound(player, ws, game_time_ms);
-        return;
+
+    // For gun 3 right-click, check if we can start full-auto (need ammo or have shot credit)
+    if (ws.current_weapon == WeaponType::GUN_3) {
+        if (fc.ammo <= 0 && ws.gun3_shots_since_ammo_consumed == 0) {
+            queue_no_ammo_sound(player, ws, game_time_ms);
+            return;
+        }
+    } else {
+        if (fc.ammo < ammo_cost) {
+            queue_no_ammo_sound(player, ws, game_time_ms);
+            return;
+        }
     }
 
     float barrel_len = DEFAULT_BARREL_LEN;
@@ -214,11 +241,12 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
         ws.last_right_click_time = game_time_ms;
         fc.ammo -= ammo_cost;
     } else if (ws.current_weapon == WeaponType::GUN_3) {
-        // Gun 3: mini-gun mode / dump all remaining ammo rapidly
+        // Gun 3: mini-gun mode / dump all remaining ammo rapidly (at half rate)
         if (game_time_ms - ws.last_right_click_time < ws.gun3_right_cooldown)
             return;
 
-        ws.minigun_shots_remaining = fc.ammo;  // Use all remaining ammo
+        // Calculate total shots available: current ammo * 2 + any extra shot credit
+        ws.minigun_shots_remaining = (fc.ammo * 2) + ws.gun3_shots_since_ammo_consumed;
         ws.next_minigun_time = game_time_ms;
         ws.last_right_click_time = game_time_ms;
     }
@@ -257,7 +285,8 @@ void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &f
 
     // minigun full-auto fire (GUN_3)
     if (ws.minigun_shots_remaining > 0 && game_time_ms >= ws.next_minigun_time) {
-        if (fc.ammo < 1) {
+        // Check if we can continue shooting (need ammo or have shot credit)
+        if (fc.ammo <= 0 && ws.gun3_shots_since_ammo_consumed == 0) {
             ws.minigun_shots_remaining = 0;
             return;
         }
@@ -298,7 +327,13 @@ void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &f
         auto &sr = registry.sound_requests.emplace_with_duplicates(player);
         sr.type = SOUND_EVENT::PLAYER_SHOT;
 
-        fc.ammo -= 1;
+        // Handle ammo consumption for minigun (half rate)
+        ws.gun3_shots_since_ammo_consumed++;
+        if (ws.gun3_shots_since_ammo_consumed >= 2) {
+            fc.ammo -= 1;
+            ws.gun3_shots_since_ammo_consumed = 0;
+        }
+
         ws.minigun_shots_remaining--;
         ws.next_minigun_time = game_time_ms + 50.0f;  // 50ms between minigun shots (twice as fast as burst)
 
@@ -411,8 +446,8 @@ void PlayerInputSystem::step(float elapsed_ms) {
         }
     }
 
-    // activate dash on key press (only if not on cooldown and not already dashing)
-    if (key_pressed(KeyboardActions::Dash, keyboard_input) && dash.cooldown_timer <= 0.0f && !dash.is_dashing) {
+    // activate dash on key press (only if not on cooldown, not already dashing, and moving forward)
+    if (key_pressed(KeyboardActions::Dash, keyboard_input) && dash.cooldown_timer <= 0.0f && !dash.is_dashing && key_held(KeyboardActions::MoveForward, keyboard_input)) {
         dash.is_dashing = true;
         dash.duration_timer = dash.duration_ms;
         dash.cooldown_timer = dash.cooldown_ms;
