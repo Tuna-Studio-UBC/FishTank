@@ -324,66 +324,30 @@ void PlayerInputSystem::step(float elapsed_ms) {
     WeaponState &ws = registry.weaponStates.get(playerEntity);
 
     float dt = elapsed_ms / 1000.0f;
-    bool quick_turn_active = (registry.playerQuickTurns.size() != 0);
-    float quick_turn_duration = (M_PI / sc.turn_speed) * 1000.f / QUICK_TURN_MULTIPLIER;
 
-    // Process Turn Input
-    if (key_pressed(KeyboardActions::QuickTurn, keyboard_input) && !quick_turn_active) {
-        Entity e = Entity("PlayerQuickTurn");
-        PlayerQuickTurn &qt = registry.playerQuickTurns.emplace(e);
-        motion.angular_velocity = 0;
-        if (keyboard_input.most_recent_turn == KeyboardActions::TurnLeft) {
-            qt.direction = -1;
-        } else {
-            qt.direction = 1;
-        }
-        qt.duration_ms = quick_turn_duration;
-    } else if (!quick_turn_active) {
-        float turn_dir = 0.f;
-        if (key_held(KeyboardActions::TurnLeft, keyboard_input)) {
-            turn_dir -= 1.f;
-        }
-        if (key_held(KeyboardActions::TurnRight, keyboard_input)) {
-            turn_dir += 1.f;
-        }
-        // motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
-        if (turn_dir != 0.f) {
-            motion.angular_velocity = turn_dir * sc.turn_speed * ANGULAR_VELOCITY_MULTIPLIER;
-        } else if (motion.angular_velocity > 0) {
-            motion.angular_velocity =
-                std::max(0.f, motion.angular_velocity - sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
-        } else if (motion.angular_velocity < 0) {
-            motion.angular_velocity =
-                std::min(0.f, motion.angular_velocity + sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
-        }
+    float turn_dir = 0.f;
+    if (key_held(KeyboardActions::TurnLeft, keyboard_input)) {
+        turn_dir -= 1.f;
     }
-
-    // Process Quick Turn
-    if (quick_turn_active) {
-        assert(registry.playerQuickTurns.size() == 1);
-        PlayerQuickTurn &qt = registry.playerQuickTurns.components[0];
-        qt.duration_ms -= elapsed_ms;
-
-        float relevant_ms = elapsed_ms;
-        if (qt.duration_ms < 0) {
-            relevant_ms += qt.duration_ms;
-        }
-
-        float quick_turn_amount = (M_PI * relevant_ms * qt.direction) / quick_turn_duration;
-        motion.angle = std::fmod(motion.angle + quick_turn_amount, 2 * M_PI);
-
-        if (qt.duration_ms <= 0) {
-            for (Entity &e : registry.playerQuickTurns.entities) {
-                registry.remove_all_components_of(e);
-            }
-        }
+    if (key_held(KeyboardActions::TurnRight, keyboard_input)) {
+        turn_dir += 1.f;
+    }
+    // motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
+    if (turn_dir != 0.f) {
+        motion.angular_velocity = turn_dir * sc.turn_speed * ANGULAR_VELOCITY_MULTIPLIER;
+    } else if (motion.angular_velocity > 0) {
+        motion.angular_velocity =
+            std::max(0.f, motion.angular_velocity - sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
+    } else if (motion.angular_velocity < 0) {
+        motion.angular_velocity =
+            std::min(0.f, motion.angular_velocity + sc.turn_speed * dt * ANGULAR_VELOCITY_LOSS_MULTIPLIER);
     }
 
     if (key_held(KeyboardActions::MoveForward, keyboard_input)) {
         float max_speed = MAX_SPEED_MULTIPLIER * sc.move_speed;
-        motion.velocity.x = std::min(max_speed, motion.velocity.x + sc.move_speed * dt * ACCELERATION_MULTIPLIER);
-    } else {
-        motion.velocity.x = std::max(0.f, motion.velocity.x - (DECELERATION_MULTIPLIER * sc.move_speed) * dt);
+        motion.velocity.x = std::min(max_speed, motion.velocity.x + (sc.move_speed * dt * ACCELERATION_MULTIPLIER));
+    } else if (key_held(KeyboardActions::MoveBackward, keyboard_input)) {
+        motion.velocity.x = std::max(0.f, motion.velocity.x - (DECELERATION_MULTIPLIER * sc.move_speed * dt));
     }
 
     FireControl &fc = registry.fireControls.get(playerEntity);
