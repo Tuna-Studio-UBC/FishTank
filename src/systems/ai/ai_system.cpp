@@ -158,6 +158,14 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 12.f;
             }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::SHARKY_WAVES) {
+            float incAngle = fire.last_angle + M_PI / 8.f;
+            fire.last_angle = incAngle;
+            auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+            req.attack_pattern = fire.attack_pattern;
+            req.position = position;
+            req.angle = incAngle;
+            req.owner = enemy;
         } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_NORMAL ||
                    fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_A) {
             float incAngle = -1 * M_PI / 6.f;
@@ -170,7 +178,7 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 incAngle += M_PI / 6.f;
             }
         } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_B) {
-            float incAngle = get_random_float(0.f, 1.f) * M_PI;
+            float incAngle = 0.f;
             for (int i = 0; i < 6; i++) {
                 auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
                 req.attack_pattern = fire.attack_pattern;
@@ -178,6 +186,18 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
                 req.angle = incAngle;
                 req.owner = enemy;
                 incAngle += M_PI / 3.f;
+            }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::EEEEL_DEFENSIVE_SWIRL) {
+            float incAngle = fire.last_angle + M_PI / 16.f;
+            fire.last_angle = incAngle;
+            for (int i = 0; i < 4; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = incAngle;
+                req.owner = enemy;
+                req.is_bouncy = false;
+                incAngle += M_PI / 2.f;
             }
         } else {
             registry.bullet_requests.insert(enemy, {fire.attack_pattern, position, angle, enemy});
@@ -240,7 +260,16 @@ void AISystem::handle_bosses(float elapsed_ms) {
                 fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::KING_CRABBY_TOXIC));
             }
         } else if (boss.type == BOSS_TYPE::EEEEL) {
-            // TODO
+            if (health.hp <= health.max_hp * 0.4f && boss.curr_phase < 3) {
+                // Remove all old projectiles
+                for (Entity projectile : registry.bullets.entities) {
+                    if (registry.bullets.get(projectile).owner == e)
+                        registry.remove_all_components_of(projectile);
+                }
+                fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::EEEEL_ENRAGED));
+            } else if (health.hp <= health.max_hp * 0.65f && boss.curr_phase < 2) {
+                fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::EEEEL_DEFENSIVE_SWIRL));
+            }
         }
     }
 }

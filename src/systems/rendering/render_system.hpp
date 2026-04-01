@@ -83,6 +83,9 @@ class RenderSystem {
         get_path(FilePath::SPRITE_SHEETS, "sharky_enraged_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "king_crabby_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "king_crabby_enraged_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "eeeel_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "eeeel_enraged_sheet.png"),
+
         get_path(FilePath::SPRITE_SHEETS, "explosion_sheet.png")};
 
     std::array<GLuint, effect_count> effects;

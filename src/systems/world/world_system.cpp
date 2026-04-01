@@ -227,7 +227,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             }
         }
 
-        createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
+        createProjectile(req.position, req.angle, req.attack_pattern, req.owner, 0, req.is_bouncy);
     }
     registry.bullet_requests.clear();
 

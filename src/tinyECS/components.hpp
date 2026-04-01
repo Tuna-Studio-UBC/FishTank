@@ -140,6 +140,7 @@ struct FireControl {
     float cd_can_shoot_ms = 3 * 1000.f; // Time window for cooldown mode
     float elapsed_can_shoot_ms = 0.f;
     float elapsed_cd_can_shoot_ms = 0.f;
+    float last_angle = 0.f;
 };
 
 struct SpeedControl {
@@ -264,6 +265,7 @@ struct BulletRequest {
     vec2 position;
     float angle;
     Entity owner;
+    bool is_bouncy = true;
 };
 
 // used to delay spawn and time SpawnEffect
@@ -643,7 +645,10 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_SHARKY_ENRAGED_SHEET = TEXTURE_SHARKY_SHEET + 1,
     TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_ENRAGED_SHEET + 1,
     TEXTURE_KING_CRABBY_ENRAGED_SHEET = TEXTURE_KING_CRABBY_SHEET + 1,
-    TEXTURE_EXPLOSION_SHEET = TEXTURE_KING_CRABBY_ENRAGED_SHEET + 1,
+    TEXTURE_EEEEL_SHEET = TEXTURE_KING_CRABBY_ENRAGED_SHEET + 1,
+    TEXTURE_EEEEL_ENRAGED_SHEET = TEXTURE_EEEEL_SHEET + 1,
+
+    TEXTURE_EXPLOSION_SHEET = TEXTURE_EEEEL_ENRAGED_SHEET + 1,
 
     TEXTURE_COUNT = TEXTURE_EXPLOSION_SHEET + 1
 };
