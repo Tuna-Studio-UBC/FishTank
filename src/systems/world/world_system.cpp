@@ -183,6 +183,31 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     Progress &progress = registry.progresses.components[0];
 
+    for (auto &sr : registry.sound_requests.components) {
+        if (sr.type == SOUND_EVENT::PLAYER_SHOT) {
+            audio_system.play_player_shot_center(128);
+        } else if (sr.type == SOUND_EVENT::PLAYER_CANNON_SHOT) {
+            audio_system.play_cannon_shot_center();
+        } else if (sr.type == SOUND_EVENT::PLAYER_SHOT_MINE) {
+            audio_system.play_shot_mine_center();
+        } else if (sr.type == SOUND_EVENT::PLAYER_HIT_HAZARD) {
+            audio_system.play_hit_hazard_center();
+        } else if (sr.type == SOUND_EVENT::ENEMY_DEAD) {
+            audio_system.play_enemy_dead_center();
+        } else if (sr.type == SOUND_EVENT::COMPLETE_LEVEL) {
+            audio_system.play_complete_level_center();
+        } else if (sr.type == SOUND_EVENT::UPGRADE_APPLY) {
+            audio_system.play_upgrade_center();
+        } else if (sr.type == SOUND_EVENT::AMMO_LOAD) {
+            audio_system.play_ammo_load_center();
+        } else if (sr.type == SOUND_EVENT::CLEAR_GAME) {
+            audio_system.play_clear_game_center();
+        } else if (sr.type == SOUND_EVENT::GAME_OVER) {
+            audio_system.play_game_over_center();
+        }
+    }
+    registry.sound_requests.clear();
+
     // Check if game is over
     if (progress.is_game_over == true) {
         ScreenState &screen = registry.screenStates.components[0];
@@ -230,13 +255,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         createProjectile(req.position, req.angle, req.attack_pattern, req.owner);
     }
     registry.bullet_requests.clear();
-
-    for (auto &sr : registry.sound_requests.components) {
-        if (sr.type == SOUND_EVENT::PLAYER_SHOT) {
-            audio_system.play_player_shot_center(128);
-        }
-    }
-    registry.sound_requests.clear();
 
     // Remove debug info from the last step
     while (registry.debugComponents.entities.size() > 0)

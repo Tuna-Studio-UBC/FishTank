@@ -473,6 +473,15 @@ struct Label {
 // =================================================================================
 enum class SOUND_EVENT {
     PLAYER_SHOT,
+    PLAYER_CANNON_SHOT,
+    PLAYER_SHOT_MINE,
+    PLAYER_HIT_HAZARD,
+    ENEMY_DEAD,
+    COMPLETE_LEVEL,
+    UPGRADE_APPLY,
+    AMMO_LOAD,
+    CLEAR_GAME,
+    GAME_OVER,
 };
 
 struct SoundRequest {

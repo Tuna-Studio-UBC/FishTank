@@ -84,7 +84,7 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
     }
 
     auto &sr = registry.sound_requests.emplace_with_duplicates(player);
-    sr.type = SOUND_EVENT::PLAYER_SHOT;
+    sr.type = (ws.current_weapon == WeaponType::GUN_2) ? SOUND_EVENT::PLAYER_CANNON_SHOT : SOUND_EVENT::PLAYER_SHOT;
 
     ws.last_left_click_time = game_time_ms;
     fc.ammo -= ammo_cost;
@@ -157,7 +157,7 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
         registry.expirations.get(mine).lifespan_ms = 40000.0f;  // 40 seconds
 
         auto &sr = registry.sound_requests.emplace_with_duplicates(player);
-        sr.type = SOUND_EVENT::PLAYER_SHOT;
+        sr.type = SOUND_EVENT::PLAYER_SHOT_MINE;
 
         ws.last_right_click_time = game_time_ms;
         fc.ammo -= ammo_cost;

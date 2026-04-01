@@ -95,6 +95,10 @@ void LevelSystem::trigger_win(Progress &progress) {
     progress.is_game_over = true;
     progress.has_beat_level = true;
 
+    Entity sound_owner = !registry.players.entities.empty() ? registry.players.entities[0] : Entity("ClearGameSound");
+    auto &sr = registry.sound_requests.emplace_with_duplicates(sound_owner);
+    sr.type = SOUND_EVENT::CLEAR_GAME;
+
     // TODO: Also change this to a GUI overlay
     Entity e = Entity("Overlay");
     registry.overlays.emplace(e);
@@ -424,6 +428,10 @@ void LevelSystem::load_next_wave() {
 void LevelSystem::trigger_load_next_level() {
     triggered_load_level = true;
     advance_timer = 2000.f;
+
+    Entity sound_owner = !registry.players.entities.empty() ? registry.players.entities[0] : Entity("CompleteLevelSound");
+    auto &sr = registry.sound_requests.emplace_with_duplicates(sound_owner);
+    sr.type = SOUND_EVENT::COMPLETE_LEVEL;
 
     assert(registry.progresses.size() > 0 && "Progress component not found");
     Progress &progress = registry.progresses.components[0];
