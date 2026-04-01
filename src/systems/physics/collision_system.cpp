@@ -595,6 +595,39 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
     }
 }
 
+// helper version of checking player dash
+void try_dash_damage(Entity attacker, Entity target, Motion &motion_attacker, Motion &motion_target) {
+    // Early exit: only proceed if dash exists and is active
+    if (!registry.dashStates.has(attacker)) {
+        return;
+    }
+    DashState &dash = registry.dashStates.get(attacker);
+    if (!dash.is_dashing || dash.has_dealt_damage) {
+        return;
+    }
+
+    // Check if collision is frontal
+    vec2 forward = vec2(cosf(motion_attacker.angle), sinf(motion_attacker.angle));
+    vec2 to_target = normalize(motion_target.position - motion_attacker.position);
+
+    // If dot product > 0.5, the hit happens with the front of the fish
+    if (dot(forward, to_target) <= 0.5f)
+        return;
+
+    // deal damage equivalent to a player bullet
+    int damage = 10;
+
+    if (registry.fireControls.has(attacker)) {
+        damage += registry.fireControls.get(attacker).damage_bonus;
+    }
+
+    HealDamageSystem::add_damage(target, damage);
+    dash.has_dealt_damage = true; // prevent multiple hits per dash
+
+    // bubbles
+    createEffectBubbles(motion_target.position);
+}
+
 void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
     if (is_actor(entity_a) && (is_actor(entity_b))) {
         Motion &motion_a = registry.motions.get(entity_a);
@@ -606,32 +639,25 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
 
         float overlap = (radius_a + radius_b) - length(separation);
         if (overlap > 0.f) {
-            // Check for dash damage (player dashing into enemy) - optimized with early exits
-            if (registry.players.has(entity_a) && registry.enemies.has(entity_b)) {
-                // Early exit: only proceed if dash exists and is active
-                if (registry.dashStates.has(entity_a)) {
-                    DashState &dash = registry.dashStates.get(entity_a);
-                    if (dash.is_dashing && !dash.has_dealt_damage) {
-                        // Check if collision is frontal (player facing enemy)
-                        vec2 player_forward = vec2(cosf(motion_a.angle), sinf(motion_a.angle));
-                        vec2 to_enemy = normalize(motion_b.position - motion_a.position);
-                        float dot_product = dot(player_forward, to_enemy);
+            bool a_can_dash = registry.dashStates.has(entity_a) && registry.dashStates.get(entity_a).is_dashing;
+            bool b_can_dash = registry.dashStates.has(entity_b) && registry.dashStates.get(entity_b).is_dashing;
 
-                        // If dot product > 0.5, the hit happens with the front of the fish
-                        if (dot_product > 0.5f) {
-                            // deal damage equivalent to a player bullet
-                            int dash_damage = 10;
-                            if (registry.fireControls.has(entity_a)) {
-                                dash_damage += registry.fireControls.get(entity_a).damage_bonus;
-                            }
-
-                            HealDamageSystem::add_damage(entity_b, dash_damage);
-                            dash.has_dealt_damage = true;  // prevent multiple hits per dash
-
-                            // bubbles
-                            createEffectBubbles(motion_b.position);
-                        }
-                    }
+            // Prioritize player
+            if (a_can_dash && b_can_dash) {
+                if (registry.players.has(entity_a)) {
+                    try_dash_damage(entity_a, entity_b, motion_a, motion_b);
+                } else if (registry.players.has(entity_b)) {
+                    try_dash_damage(entity_b, entity_a, motion_b, motion_a);
+                } else {
+                    try_dash_damage(entity_a, entity_b, motion_a, motion_b);
+                    try_dash_damage(entity_b, entity_a, motion_b, motion_a);
+                }
+            } else {
+                if (a_can_dash) {
+                    try_dash_damage(entity_a, entity_b, motion_a, motion_b);
+                }
+                if (b_can_dash) {
+                    try_dash_damage(entity_b, entity_a, motion_b, motion_a);
                 }
             }
 
@@ -644,7 +670,7 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
             motion_b.position -= correction;
         }
     }
-}
+};
 
 void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b, float &elapsed_ms) {
     if (registry.players.has(entity_a) && registry.bubblerBubbles.has(entity_b)) {

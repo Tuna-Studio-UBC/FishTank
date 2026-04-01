@@ -2,7 +2,7 @@
 
 std::unordered_map<std::string, AIAction> action_map = {{"PURSUE", AIAction::PURSUE},
                                                         {"IDLE", AIAction::IDLE},
-                                                        {"DISTRACTED", AIAction::DISTRACTED},
+                                                        {"ATTACK", AIAction::ATTACKING},
                                                         {"PATROL", AIAction::PATROL}};
 
 AIAction str_to_action(const std::string &str) {
