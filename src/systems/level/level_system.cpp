@@ -299,8 +299,8 @@ void LevelSystem::load_tutorial() {
     createLabelText("D - RIGHT", player_motion.position, vec3(1.f), OFFSET::RIGHT);
     createLabelText("S - REVERSE", player_motion.position, vec3(1.f), OFFSET::BOTTOM);
 
-    createEnemy(renderer, {150.f, 150.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {850.f, 150.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {150.f, 150.f}, ENEMY_TYPE::DASHER);
+    createEnemy(renderer, {850.f, 150.f}, ENEMY_TYPE::DASHER);
     createEnemy(renderer, {500.f, 150.f}, ENEMY_TYPE::GUARD);
 
     // Set enemy health to something low for tutorial
@@ -317,9 +317,9 @@ void LevelSystem::load_tutorial() {
     createLabelText("Come back later for more", target, vec3(0.95f, 0.65f, 0.38f), OFFSET::BOTTOM);
     createBubbler(renderer, {425.f, 400.f});
 
-    target = createMine(renderer, {450.f, 1150.f});
+    target = createMine(renderer, {450.f, 1100.f});
     registry.explosives.get(target).damage = 25.f;
-    createLabelText("Mine", target, vec3(1.f, 0.f, 0.f), OFFSET::TOP);
+    createLabelText("Mine", target, vec3(1.f, 0.f, 0.f), OFFSET::BOTTOM);
     target = createAnemone(renderer, {350.f, 1000.f}, true);
     createLabelText("Anemone", target, vec3(1.f, 0.f, 0.f), OFFSET::BOTTOM);
     target = createPowerUp(renderer, {900.f, 1300.f}, POWER_UP_TYPE::HEAL);
@@ -338,6 +338,8 @@ void LevelSystem::load_tutorial() {
     createLabelText("1/2/3 - Switch Weapon", {825.f, 350.f}, vec3(1.f), OFFSET::TOP);
     createLabelText("Left - Attack 1", {825.f, 400.f}, vec3(1.f), OFFSET::TOP);
     createLabelText("Right - Attack 2", {825.f, 450.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("F - Parry", {125.f, 400.f}, vec3(1.f), OFFSET::TOP);
+    createLabelText("SHIFT - Dash", {125.f, 450.f}, vec3(1.f), OFFSET::TOP);
     createLabelText("Point and Click!", {825.f, 550.f}, vec3(1.f), OFFSET::TOP);
 
     camera_system->init(tilemap_system->get_current_map()); // Must be done last, requires player to exist
