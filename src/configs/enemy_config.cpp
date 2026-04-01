@@ -16,27 +16,29 @@ struct EnemyConfig {
     Health health;
     float move_speed;
     float turn_speed;
-    float detection_radius;
     ATTACK_PATTERN attack_pattern;
 };
 
 static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
     // Turret
-    {"Turret", {50, 50}, 0.f, M_PI, 500.f, ATTACK_PATTERN::SINGLE},
+    {"Turret", {50, 50}, 0.f, M_PI, ATTACK_PATTERN::SINGLE},
 
     // Urchin
-    {"Urchin", {100, 100}, 0.f, 0.f, 500.f, ATTACK_PATTERN::URCHIN},
+    {"Urchin", {100, 100}, 0.f, 0.f, ATTACK_PATTERN::URCHIN},
 
     // Guard
-    {"Crab", {50, 50}, 50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE},
+    {"Crab", {50, 50}, 50.f, M_PI / 2.f, ATTACK_PATTERN::SINGLE},
 
     // Homing
-    {"Isopod", {30, 30}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::RAPID},
+    {"Isopod", {30, 30}, 150.f, M_PI, ATTACK_PATTERN::RAPID},
 
     // Swarm
-    {"Mother", {50, 50}, 50.f, M_PI / 2.f, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::SINGLE},
+    {"Mother", {50, 50}, 50.f, M_PI / 2.f, ATTACK_PATTERN::SINGLE},
 
-    {"Child", {30, 30}, 150.f, M_PI, (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX), ATTACK_PATTERN::HAVOC}};
+    {"Child", {30, 30}, 150.f, M_PI, ATTACK_PATTERN::HAVOC},
+
+    // Dasher
+    {"Dasher", {50, 50}, 50.f, M_PI, ATTACK_PATTERN::DASH}};
 
 #pragma endregion Enemies
 

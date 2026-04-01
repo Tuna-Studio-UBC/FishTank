@@ -45,6 +45,9 @@ static const AttackConfig ATTACK_CONFIGS[attack_count] = {
     // Vengence
     {ATTACK_EFFECT::NORMAL, 1, 3000.f, BASE_PROJECTILE_SPEED * 1.5f, 2000.f, Tint({1.f, 0.5f, 0.25f})},
 
+    // DASH
+    {ATTACK_EFFECT::NORMAL, 10, 0.f, 0.f, 3000.f},
+
     /* --------------------------------- BOSSES --------------------------------- */
 
     // Sharky

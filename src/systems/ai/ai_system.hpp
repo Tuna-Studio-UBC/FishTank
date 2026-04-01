@@ -11,6 +11,7 @@ class AISystem {
     PathfindingSystem *ps = nullptr;
     void act(Entity e, float elapsed_ms, vec2 player_pos);
     void run_pursuit(Entity e, float elapsed_ms, vec2 player_pos);
+    void run_attack(Entity e, float elapsed_ms);
     void run_idle(Entity e);
     void run_distracted(Entity e, float elapsed_ms, vec2 player_pos);
     void run_patrol(Entity e, float elapsed_ms);

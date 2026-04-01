@@ -44,6 +44,7 @@ class ECSRegistry {
     ComponentContainer<WeaponState> weaponStates;
     ComponentContainer<BulletRequest> bullet_requests;
     ComponentContainer<Distracted> distracteds;
+    ComponentContainer<Detection> detections;
     ComponentContainer<Sense> senses;
     ComponentContainer<AI> ais;
     ComponentContainer<Bezier> beziers;
@@ -140,6 +141,7 @@ class ECSRegistry {
         registry_list.push_back(&weaponStates);
         registry_list.push_back(&bullet_requests);
         registry_list.push_back(&distracteds);
+        registry_list.push_back(&detections);
         registry_list.push_back(&senses);
         registry_list.push_back(&ais);
         registry_list.push_back(&beziers);
