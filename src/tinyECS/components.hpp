@@ -24,7 +24,7 @@ struct Player {};
 // Uses: Motion, Health, FireControl, SpeedControl, Wallet
 
 struct Enemy {
-    float detection_radius;
+    ENEMY_TYPE type;
 };
 // Uses: Motion, Health, FireControl, SpeedControl, DropsCrackers
 // Optional: Patrolling, Pursuit
@@ -218,6 +218,10 @@ struct Distracted {
     float remaining_ms;
 };
 
+struct Detection {
+    float radius;
+};
+
 struct Bezier {
     int current_segment = 0;
     float t = 0.f;
@@ -239,7 +243,7 @@ struct Boid {
 };
 
 struct Sense {
-    bool detects_player = false;
+    bool sees_player = false;
     bool is_distracted = false;
     bool is_patrolling = true;
     vec2 last_known_player_pos;

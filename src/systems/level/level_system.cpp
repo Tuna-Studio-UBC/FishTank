@@ -294,18 +294,16 @@ void LevelSystem::load_tutorial() {
     FireControl &player_fc = registry.fireControls.get(player);
     player_fc.ammo = 0;
 
-    createEnemy(renderer, {150.f, 150.f}, ENEMY_TYPE::GUARD);
-    createEnemy(renderer, {850.f, 150.f}, ENEMY_TYPE::GUARD);
+    createEnemy(renderer, {150.f, 150.f}, ENEMY_TYPE::DASHER);
+    createEnemy(renderer, {850.f, 150.f}, ENEMY_TYPE::DASHER);
     createEnemy(renderer, {500.f, 150.f}, ENEMY_TYPE::GUARD);
 
     // Set enemy health to something low for tutorial
     for (Entity e : registry.enemies.entities) {
-        Health &h = registry.healths.get(e);
-        h.hp = 50;
-        h.max_hp = 50;
-
-        registry.fireControls.get(e).cooldown_ms = 5000.f;
-        registry.enemies.get(e).detection_radius = 300.f;
+        if (registry.fireControls.has(e)) {
+            registry.fireControls.get(e).cooldown_ms = 5000.f;
+        }
+        registry.detections.insert(e, {400.f});
     }
 
     Entity target = createBubbler(renderer, {625.f, 875.f});

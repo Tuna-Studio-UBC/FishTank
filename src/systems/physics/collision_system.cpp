@@ -591,6 +591,36 @@ void CollisionSystem::handle_actors_vs_walls(Entity entity_a, Entity entity_b) {
     }
 }
 
+bool try_dash_damage(Entity attacker, Entity target, Motion &motion_attacker, Motion &motion_target) {
+    if (!registry.dashStates.has(attacker))
+        return false;
+
+    DashState &dash = registry.dashStates.get(attacker);
+
+    if (!dash.is_dashing || dash.has_dealt_damage)
+        return false;
+
+    // frontal check
+    vec2 forward = vec2(cosf(motion_attacker.angle), sinf(motion_attacker.angle));
+    vec2 to_target = normalize(motion_target.position - motion_attacker.position);
+
+    if (dot(forward, to_target) <= 0.5f)
+        return false;
+
+    int damage = 10;
+
+    if (registry.fireControls.has(attacker)) {
+        damage += registry.fireControls.get(attacker).damage_bonus;
+    }
+
+    HealDamageSystem::add_damage(target, damage);
+    dash.has_dealt_damage = true;
+
+    createEffectBubbles(motion_target.position);
+
+    return true;
+}
+
 void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
     if (is_actor(entity_a) && (is_actor(entity_b))) {
         Motion &motion_a = registry.motions.get(entity_a);
@@ -603,7 +633,7 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
         float overlap = (radius_a + radius_b) - length(separation);
         if (overlap > 0.f) {
             // Check for dash damage (player dashing into enemy) - optimized with early exits
-            if (registry.players.has(entity_a) && registry.enemies.has(entity_b)) {
+            /* if (registry.players.has(entity_a) && registry.enemies.has(entity_b)) {
                 // Early exit: only proceed if dash exists and is active
                 if (registry.dashStates.has(entity_a)) {
                     DashState &dash = registry.dashStates.get(entity_a);
@@ -629,6 +659,28 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
                         }
                     }
                 }
+            }*/
+
+            bool a_can_dash = registry.dashStates.has(entity_a) && registry.dashStates.get(entity_a).is_dashing;
+            bool b_can_dash = registry.dashStates.has(entity_b) && registry.dashStates.get(entity_b).is_dashing;
+
+            // Prioritize player
+            if (a_can_dash && b_can_dash) {
+                if (registry.players.has(entity_a)) {
+                    try_dash_damage(entity_a, entity_b, motion_a, motion_b);
+                } else if (registry.players.has(entity_b)) {
+                    try_dash_damage(entity_b, entity_a, motion_b, motion_a);
+                } else {
+                    try_dash_damage(entity_a, entity_b, motion_a, motion_b);
+                    try_dash_damage(entity_b, entity_a, motion_b, motion_a);
+                }
+            } else {
+                if (a_can_dash) {
+                    try_dash_damage(entity_a, entity_b, motion_a, motion_b);
+                }
+                if (b_can_dash) {
+                    try_dash_damage(entity_b, entity_a, motion_b, motion_a);
+                }
             }
 
             // Standard collision separation
@@ -640,7 +692,7 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
             motion_b.position -= correction;
         }
     }
-}
+};
 
 void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b, float &elapsed_ms) {
     if (registry.players.has(entity_a) && registry.bubblerBubbles.has(entity_b)) {

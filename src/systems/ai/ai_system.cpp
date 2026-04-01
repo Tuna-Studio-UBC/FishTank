@@ -28,7 +28,7 @@ AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
         if (node.type == NodeType::CONDITION) {
             Sense &sense = registry.senses.get(e);
             if (node.condition_name == "sees_player") {
-                result = sense.detects_player;
+                result = sense.sees_player;
             } else if (node.condition_name == "is_distracted") {
                 result = sense.is_distracted;
             } else if (node.condition_name == "is_patrolling") {
@@ -135,6 +135,46 @@ void fire_projectiles(Entity enemy, float elapsed_ms, float angle) {
     }
 }
 
+void ram_dash(Entity e, float elapsed_ms, float angle) {
+    Motion &motion = registry.motions.get(e);
+    DashState &dash = registry.dashStates.get(e);
+    dash.dash_direction = direction_to_unit_vector(angle);
+
+    if (dash.cooldown_timer > 0.0f) {
+        dash.cooldown_timer = std::max(0.0f, dash.cooldown_timer - elapsed_ms);
+        if (dash.cooldown_timer < 500.f && registry.tints.has(e)) {
+            registry.tints.get(e).tint = vec3(1.f, 0.f, 0.f);
+        }
+    }
+
+    // Update dash duration timer
+    if (dash.is_dashing) {
+        dash.duration_timer -= elapsed_ms;
+        if (dash.duration_timer <= 0.0f) {
+            dash.is_dashing = false;
+            if (registry.tints.has(e)) {
+                registry.tints.get(e).tint = vec3(1.f);
+            }
+            dash.duration_timer = 0.0f;
+        }
+    }
+
+    // activate dash 
+    if (dash.cooldown_timer <= 0.0f && !dash.is_dashing) {
+        dash.is_dashing = true;
+        dash.duration_timer = dash.duration_ms;
+        dash.cooldown_timer = dash.cooldown_ms;
+        dash.has_dealt_damage = false; // Reset damage flag for new dash
+    }
+
+    // apply dash velocity while dashing
+    if (dash.is_dashing) {
+        // Set local forward velocity (the physics system will rotate this based on player angle)
+        motion.velocity.x = dash.dash_speed;
+        motion.velocity.y = 0.0f; // No lateral movement during dash
+    }
+}
+
 void AISystem::step(float elapsed_ms) {
     Entity player = registry.players.entities[0];
     vec2 player_pos = registry.motions.get(player).position;
@@ -145,7 +185,9 @@ void AISystem::step(float elapsed_ms) {
 
         Motion &motion = registry.motions.get(e);
 
-        ai.current_state = evaluate_tree(e, ai.tree);
+        if (!ai.tree_file.empty()) {
+            ai.current_state = evaluate_tree(e, ai.tree);
+        }
 
         act(e, elapsed_ms, player_pos);
     }
@@ -217,6 +259,14 @@ void AISystem::run_patrol(Entity e, float elapsed_ms) {
 
 void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
     Motion &motion_i = registry.motions.get(e);
+    if (registry.detections.has(e) && !entity_in_radius(player_pos - motion_i.position, motion_i.scale, registry.detections.get(e).radius)) {
+        return;
+    }
+
+    if (registry.dashStates.has(e) && registry.dashStates.get(e).is_dashing) {
+        return;
+    }
+
     vec2 target_pos = player_pos;
     float angle = 0;
 
@@ -241,14 +291,23 @@ void AISystem::run_pursuit(Entity e, float elapsed_ms, vec2 player_pos) {
 
             target_pos = next_pos;
         }
-
         angle = adjust_angle(motion_i, registry.speedControls.get(e), target_pos, player_pos, elapsed_ms,
                              (TILE_SIZE_PX * 1.5));
     }
+}
+
+void AISystem::run_attack(Entity e, float elapsed_ms) {
+    ENEMY_TYPE type = registry.enemies.get(e).type;
+    float angle = registry.motions.get(e).angle;
 
     // Firing logic
-    if (ps->visible_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos))) {
+    switch (type) { 
+    case ENEMY_TYPE::DASHER:
+        ram_dash(e, elapsed_ms, angle);
+        break;
+    default:
         fire_projectiles(e, elapsed_ms, angle);
+        break;
     }
 }
 
@@ -281,16 +340,16 @@ void AISystem::act(Entity e, float elapsed_ms, vec2 player_pos) {
     AI &ai = registry.ais.get(e);
 
     switch (ai.current_state) {
+    case AIAction::ATTACKING:
+        run_attack(e, elapsed_ms);
+        // no break to continue pursue while attack
+    
     case AIAction::PURSUE:
         run_pursuit(e, elapsed_ms, player_pos);
         break;
 
     case AIAction::IDLE:
         run_idle(e);
-        break;
-
-    case AIAction::DISTRACTED:
-        run_distracted(e, elapsed_ms, player_pos);
         break;
 
     case AIAction::PATROL:
@@ -304,20 +363,18 @@ void AISystem::handle_detection() {
     Entity player = registry.players.entities[0];
     vec2 player_pos = registry.motions.get(player).position;
 
-    for (uint i = 0; i < enemy_container.components.size(); i++) {
-        Entity enemy_i = enemy_container.entities[i];
-        Sense &sense_i = registry.senses.get(enemy_i);
+    for (Entity enemy : registry.enemies.entities) {
+        Sense &sense = registry.senses.get(enemy);
 
-        if (sense_i.last_known_player_pos != player_pos) {
-            float radius_i = enemy_container.components[i].detection_radius;
-            Motion &motion_i = registry.motions.get(enemy_i);
+        if (sense.last_known_player_pos != player_pos) {
+            Motion &motion_i = registry.motions.get(enemy);
 
-            sense_i.detects_player = entity_in_radius(player_pos - motion_i.position, motion_i.scale, radius_i);
+            sense.sees_player = ps->visible_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos));
 
-            if (sense_i.detects_player) {
-                sense_i.last_known_player_pos = player_pos;
-                if (registry.pursuits.has(enemy_i)) {
-                    registry.pursuits.get(enemy_i).goal = player_pos;
+            if (sense.sees_player) {
+                sense.last_known_player_pos = player_pos;
+                if (registry.pursuits.has(enemy)) {
+                    registry.pursuits.get(enemy).goal = player_pos;
                 }
 
                 // spdlog::debug("{} detected {}", enemy_i.name_id(), player.name_id());

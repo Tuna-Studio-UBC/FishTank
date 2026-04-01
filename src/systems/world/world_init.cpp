@@ -122,7 +122,6 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     registry.meshPtrs.emplace(entity, &mesh);
 
     auto &enemy = registry.enemies.emplace(entity);
-    enemy.detection_radius = config.detection_radius;
 
     int attack_pattern_index = 0;
     ATTACK_PATTERN attack_pattern = config.attack_patterns[attack_pattern_index];
@@ -198,7 +197,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     Entity entity = Entity(config.name);
 
     auto &enemy = registry.enemies.emplace(entity);
-    enemy.detection_radius = config.detection_radius;
+    enemy.type = type;
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -224,7 +223,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
     AI &ai = registry.ais.emplace(entity);
     ai.tree_file = "enemy_tree.txt";
     ai.tree = load_tree(ai.tree_file);
-    ai.current_state = AIAction::IDLE;
+    ai.current_state = AIAction::PURSUE;
 
     if (type != ENEMY_TYPE::URCHIN) {
         registry.pursuits.emplace(entity);
@@ -254,8 +253,7 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         motion.scale = vec2(40.0f, 25.0f);
         dc = 1;
     } else if (type == ENEMY_TYPE::MOTHER) {
-        ai.tree_file = "leader_tree.txt";
-        ai.tree = load_tree(ai.tree_file);
+        ai.tree_file = "";
         ai.current_state = AIAction::PATROL;
 
         registry.beziers.emplace(entity);
@@ -269,6 +267,22 @@ Entity createEnemy(RenderSystem *renderer, vec2 position, ENEMY_TYPE type) {
         an.columns = 8;
         an.frame_time = 250;
         dc = 4;
+    } else if (type == ENEMY_TYPE::DASHER) {
+        DashState &ds = registry.dashStates.emplace(entity);
+        ds.cooldown_ms = fire.cooldown_ms;
+        registry.fireControls.remove(entity);
+
+        registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_URCHIN_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 4;
+        an.columns = 4;
+        an.frame_time = 500;
+        dc = 3;
+
+        registry.tints.emplace(entity, vec3(1.f));
     } else {
         registry.colours.emplace(entity, Colour(vec3(1.0f, 0.2f, 0.2f)));
         registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_CRAB_SHEET, EFFECT_ASSET_ID::TEXTURED,
@@ -289,7 +303,6 @@ Entity createFollower(RenderSystem *renderer, vec2 position, Entity leader) {
     auto entity = Entity(config.name);
 
     auto &enemy = registry.enemies.emplace(entity);
-    enemy.detection_radius = config.detection_radius;
 
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEBUG_LINE);
     registry.meshPtrs.emplace(entity, &mesh);
