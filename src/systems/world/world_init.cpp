@@ -52,8 +52,8 @@ Entity createPlayer(RenderSystem *renderer, vec2 position) {
 
     registry.scoring.emplace(entity);
     registry.weaponStates.emplace(entity);
-    registry.parryStates.emplace(entity);  // add parry state for player
-    registry.dashStates.emplace(entity);   // add dash state for player
+    registry.parryStates.emplace(entity); // add parry state for player
+    registry.dashStates.emplace(entity);  // add dash state for player
     // Replace the debug-line mesh pointer with the sprite mesh so original_size matches the texture
     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
     registry.meshPtrs.emplace(entity, &mesh);
@@ -142,10 +142,8 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
     auto &fire = registry.fireControls.emplace(entity);
     fire.cooldown_ms = ATTACK_CONFIGS[(int)attack_pattern].cooldown_ms;
     fire.attack_pattern = attack_pattern;
-    if (type == BOSS_TYPE::SHARKY) {
-        // Add initial 3 second delay to allow the player to run
-        fire.cooldown_timer = -3000;
-    }
+    // Add initial 3 second delay to allow the player to run
+    fire.cooldown_timer = -3000;
 
     auto &speed = registry.speedControls.emplace(entity);
     speed.move_speed = config.move_speed;
@@ -186,7 +184,16 @@ Entity createBoss(RenderSystem *renderer, vec2 position, BOSS_TYPE type) {
         an.columns = 8;
         an.frame_time = 250;
     } else if (type == BOSS_TYPE::EEEEL) {
-        // TODO
+        motion.scale = vec2(150.0f, 50.0f);
+
+        registry.stateTransitionRequests.replace(entity, STATE_TYPE::EEEEL_NORMAL);
+        registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_EEEEL_SHEET, EFFECT_ASSET_ID::TEXTURED,
+                                                GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::ACTORS});
+
+        Animation &an = registry.animations.emplace(entity);
+        an.frame_count = 8;
+        an.columns = 8;
+        an.frame_time = 100;
     }
 
     return entity;
@@ -503,7 +510,7 @@ Entity createBubbler(RenderSystem *renderer, vec2 position) {
     registry.tints.emplace(bubbler_bubble, vec3(0.3f));
     registry.bubblerBubbles.emplace(bubbler_bubble, entity);
     registry.renderRequests.insert(bubbler_bubble, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
-                                            GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES_PRIORITY});
+                                                    GEOMETRY_BUFFER_ID::SPRITE, RENDER_LAYER::INTERACTABLES_PRIORITY});
 
     return entity;
 }
@@ -545,7 +552,8 @@ Entity createBell(RenderSystem *renderer, vec2 position, float interact_radius_p
 // Hazards
 // =================================================================================
 
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner, int damage_bonus) {
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner, int damage_bonus,
+                        bool is_bouncy) {
     auto entity = Entity("Projectile");
 
     AttackConfig attack_config = ATTACK_CONFIGS[(int)attack_pattern];
@@ -571,7 +579,8 @@ Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_patter
     motion.angle = angle;
     motion.scale = vec2(attack_config.projectile_scale);
 
-    Bouncy &bouncy = registry.bouncies.emplace(entity);
+    if (is_bouncy)
+        registry.bouncies.emplace(entity);
 
     registry.tints.emplace(entity, attack_config.projectile_tint);
     registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
@@ -759,23 +768,22 @@ Entity createText(std::string text, vec2 position, float scale, const glm::vec3 
     t.centered = centered;
 
     RENDER_LAYER render_layer = label ? RENDER_LAYER::LABELS : RENDER_LAYER::OVERLAYS;
-    registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::FONT,
-                                                     GEOMETRY_BUFFER_ID::EGG, render_layer});
+    registry.renderRequests.insert(
+        entity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::FONT, GEOMETRY_BUFFER_ID::EGG, render_layer});
 
     return entity;
 }
 
 Entity createCompletionText(std::string message) {
-    Entity e = createText(message, vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f),
-                          glm::mat4(1.f), true);
+    Entity e =
+        createText(message, vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX - 250), 3.f, vec3(1.f), glm::mat4(1.f), true);
     registry.expirations.emplace(e, 2000.f);
     return e;
 }
 
 Entity createTimeBonusText(int bonus_points) {
-    Entity e = createText("BONUS POINTS: " + std::to_string(bonus_points), vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX - 350),
-                          2.f, vec3(1.f),
-                          glm::mat4(1.f), true);
+    Entity e = createText("BONUS POINTS: " + std::to_string(bonus_points),
+                          vec2(WINDOW_WIDTH_PX / 2, WINDOW_HEIGHT_PX - 350), 2.f, vec3(1.f), glm::mat4(1.f), true);
     registry.expirations.emplace(e, 2000.f);
     return e;
 }

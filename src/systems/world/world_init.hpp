@@ -23,7 +23,8 @@ Entity createTurret(RenderSystem *renderer, vec2 position);
 
 Entity createBell(RenderSystem *renderer, vec2 position, float interact_radius_px);
 
-Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner, int damage_bonus = 0);
+Entity createProjectile(vec2 position, float angle, ATTACK_PATTERN attack_pattern, Entity owner, int damage_bonus = 0,
+                        bool is_bouncy = true);
 Entity createMine(RenderSystem *renderer, vec2 position);
 Entity createAnemone(RenderSystem *renderer, vec2 position, bool tutorial);
 
@@ -69,7 +70,6 @@ Entity createOverTimeEffect(Entity target_entity, float interval_ms, float durat
 }
 
 Entity createCompletionText(std::string message);
-
 Entity createTimeBonusText(int bonus_points);
 Entity createLabelText(std::string message, Entity object, vec3 colour, OFFSET offset);
 Entity createLabelText(std::string message, vec2 pos, vec3 colour, OFFSET offset);

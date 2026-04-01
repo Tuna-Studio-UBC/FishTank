@@ -46,8 +46,8 @@ AIAction evaluate_tree(Entity e, const ScriptedTree &tree) {
     }
 }
 
-float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 player_pos, float elapsed_ms,
-                   float stopping_dist) {
+float AISystem::adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 player_pos, float elapsed_ms,
+                             float stopping_dist) {
     vec2 position = motion.position;
     float angle = motion.angle;
 
@@ -72,8 +72,50 @@ float adjust_angle(Motion &motion, SpeedControl &speed, vec2 target_pos, vec2 pl
         diff += 2 * M_PI;
     }
 
-    float step = std::clamp(diff, -max_turn, max_turn);
+    // Adjust angle to avoid walls
+    TileMap &map = registry.tilemaps.get(ps->get_current_map());
+    vec2 force = vec2(0.f);
+    float avoid_radius = TILE_SIZE_PX + length(motion.scale);
+    float avoid_factor = 60.f;
+    ivec2 tile = world_to_tile(motion.position);
 
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            ivec2 check_tile = tile + ivec2(dx, dy);
+            if (check_tile.x < 0 || check_tile.y < 0 || check_tile.x >= map.width || check_tile.y >= map.height) {
+                continue;
+            }
+
+            int idx = check_tile.y * map.width + check_tile.x;
+            if (map.tile_ids[idx] == 0) {
+                continue;
+            }
+
+            vec2 wall_center = tile_center_to_world(check_tile);
+            vec2 wall_diff = motion.position - wall_center;
+            float dist = length(wall_diff);
+
+            if (dist < avoid_radius && dist > 0.f) {
+                vec2 push = normalize(wall_diff);
+                float strength = (avoid_radius - dist) / avoid_radius;
+                force += push * strength * avoid_factor;
+            }
+        }
+    }
+
+    // Readjust
+    if (length(force) > 0.f) {
+        target_angle_radians = atan2(force.y, force.x);
+        diff = target_angle_radians - current_angle;
+        while (diff > M_PI) {
+            diff -= 2 * M_PI;
+        }
+        while (diff < -M_PI) {
+            diff += 2 * M_PI;
+        }
+    }
+
+    float step = std::clamp(diff, -max_turn, max_turn);
     current_angle += step;
 
     if (current_angle >= 2 * M_PI) {
@@ -106,8 +148,7 @@ void try_fire(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 4.f;
             }
-        } else if (fire.attack_pattern == ATTACK_PATTERN::SHOTGUN ||
-                   fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_B) {
+        } else if (fire.attack_pattern == ATTACK_PATTERN::SHOTGUN) {
             float incAngle = -2 * M_PI / 12.f;
             for (int i = 0; i < 5; i++) {
                 auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
@@ -117,6 +158,14 @@ void try_fire(Entity enemy, float elapsed_ms, float angle) {
                 req.owner = enemy;
                 incAngle += M_PI / 12.f;
             }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::SHARKY_WAVES) {
+            float incAngle = fire.last_angle + M_PI / 8.f;
+            fire.last_angle = incAngle;
+            auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+            req.attack_pattern = fire.attack_pattern;
+            req.position = position;
+            req.angle = incAngle;
+            req.owner = enemy;
         } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_NORMAL ||
                    fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_A) {
             float incAngle = -1 * M_PI / 6.f;
@@ -127,6 +176,28 @@ void try_fire(Entity enemy, float elapsed_ms, float angle) {
                 req.angle = angle + incAngle;
                 req.owner = enemy;
                 incAngle += M_PI / 6.f;
+            }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::KING_CRABBY_TOXIC_B) {
+            float incAngle = 0.f;
+            for (int i = 0; i < 6; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = incAngle;
+                req.owner = enemy;
+                incAngle += M_PI / 3.f;
+            }
+        } else if (fire.attack_pattern == ATTACK_PATTERN::EEEEL_DEFENSIVE_SWIRL) {
+            float incAngle = fire.last_angle + M_PI / 16.f;
+            fire.last_angle = incAngle;
+            for (int i = 0; i < 4; i++) {
+                auto &req = registry.bullet_requests.emplace_with_duplicates(enemy);
+                req.attack_pattern = fire.attack_pattern;
+                req.position = position;
+                req.angle = incAngle;
+                req.owner = enemy;
+                req.is_bouncy = false;
+                incAngle += M_PI / 2.f;
             }
         } else {
             registry.bullet_requests.insert(enemy, {fire.attack_pattern, position, angle, enemy});
@@ -160,7 +231,7 @@ void try_dash(Entity e, float elapsed_ms, float angle) {
         }
     }
 
-    // activate dash 
+    // activate dash
     if (dash.cooldown_timer <= 0.0f && !dash.is_dashing) {
         dash.is_dashing = true;
         dash.duration_timer = dash.duration_ms;
@@ -226,13 +297,22 @@ void AISystem::handle_bosses(float elapsed_ms) {
                 fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::SHARKY_ENRAGED));
             }
         } else if (boss.type == BOSS_TYPE::KING_CRABBY) {
-            if (health.hp <= health.max_hp * 0.33f && boss.curr_phase < 3) {
+            if (health.hp <= health.max_hp * 0.5f && boss.curr_phase < 3) {
                 fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::KING_CRABBY_ENRAGED));
-            } else if (health.hp <= health.max_hp * 0.67f && boss.curr_phase < 2) {
+            } else if (health.hp <= health.max_hp * 0.75f && boss.curr_phase < 2) {
                 fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::KING_CRABBY_TOXIC));
             }
         } else if (boss.type == BOSS_TYPE::EEEEL) {
-            // TODO
+            if (health.hp <= health.max_hp * 0.4f && boss.curr_phase < 3) {
+                // Remove all old projectiles
+                for (Entity projectile : registry.bullets.entities) {
+                    if (registry.bullets.get(projectile).owner == e)
+                        registry.remove_all_components_of(projectile);
+                }
+                fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::EEEEL_ENRAGED));
+            } else if (health.hp <= health.max_hp * 0.65f && boss.curr_phase < 2) {
+                fsm.change_state(e, TransitionSystem::create_state(STATE_TYPE::EEEEL_DEFENSIVE_SWIRL));
+            }
         }
     }
 }
@@ -299,7 +379,7 @@ void AISystem::run_attack(Entity e, float elapsed_ms) {
     float angle = registry.motions.get(e).angle;
 
     // Firing logic
-    switch (type) { 
+    switch (type) {
     case ENEMY_TYPE::DASHER:
         try_dash(e, elapsed_ms, angle);
         break;
@@ -346,7 +426,7 @@ void AISystem::act(Entity e, float elapsed_ms, vec2 player_pos) {
     case AIAction::ATTACKING:
         run_attack(e, elapsed_ms);
         // no break to continue pursue while attack
-    
+
     case AIAction::PURSUE:
         run_pursuit(e, elapsed_ms, player_pos);
         break;
@@ -372,7 +452,8 @@ void AISystem::handle_detection() {
         if (sense.last_known_player_pos != player_pos) {
             Motion &motion_i = registry.motions.get(enemy);
 
-            sense.sees_player = ps->visible_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos));
+            sense.sees_player =
+                ps->visible_bresenhams_line(world_to_tile(motion_i.position), world_to_tile(player_pos));
 
             if (sense.sees_player) {
                 sense.last_known_player_pos = player_pos;

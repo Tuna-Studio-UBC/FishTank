@@ -37,7 +37,15 @@ std::unique_ptr<State> TransitionSystem::create_state(STATE_TYPE type) {
     case STATE_TYPE::KING_CRABBY_ENRAGED:
         return std::make_unique<KingCrabbyEnragedState>();
 
-    // TODO: EEEEL
+    // EEEEL
+    case STATE_TYPE::EEEEL_IDLE:
+        return std::make_unique<EeeelIdleState>();
+    case STATE_TYPE::EEEEL_NORMAL:
+        return std::make_unique<EeeelNormalState>();
+    case STATE_TYPE::EEEEL_DEFENSIVE_SWIRL:
+        return std::make_unique<EeeelDefensiveSwirlState>();
+    case STATE_TYPE::EEEEL_ENRAGED:
+        return std::make_unique<EeeelEnragedState>();
 
     // Idle
     case STATE_TYPE::IDLE:

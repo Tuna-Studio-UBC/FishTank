@@ -49,7 +49,10 @@ const std::vector<Wave> WAVE_CONFIGS = {
     {{ENEMY_TYPE::MOTHER, ENEMY_TYPE::HOMING, ENEMY_TYPE::DASHER}, {}},
 
     // Level 5: Boss
-    {{ENEMY_TYPE::MOTHER}, {BOSS_TYPE::KING_CRABBY}}
+    {{ENEMY_TYPE::MOTHER}, {BOSS_TYPE::KING_CRABBY}},
+
+    // Level 6: Boss
+    {{ENEMY_TYPE::HOMING, ENEMY_TYPE::HOMING}, {BOSS_TYPE::EEEEL}},
 };
 
 const std::vector<Level> LEVEL_CONFIGS = {
@@ -63,40 +66,70 @@ const std::vector<Level> LEVEL_CONFIGS = {
      false,
      0.5f,
      15000.f,
-    75000.f},
+     75000.f},
 
     // Level 2
-    {9, MapType::TEST_MAP2,
-    {HAZARD_TYPE::MINE, HAZARD_TYPE::ANEMONE},
-    {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
-    {},
-    {ivec2(2), ivec2(28, 18)},
-    true,
-    0.3f,
-    15000.f,
-    75000.f
-    },
-    
+    {9,
+     MapType::TEST_MAP2,
+     {HAZARD_TYPE::MINE, HAZARD_TYPE::ANEMONE},
+     {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
+     {},
+     {ivec2(2), ivec2(28, 18)},
+     true,
+     0.3f,
+     15000.f,
+     75000.f},
+
     // Level 3
-    {10, MapType::EMPTY_MAP,
+    {10,
+     MapType::EMPTY_MAP,
      {HAZARD_TYPE::MINE, HAZARD_TYPE::MINE},
      {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::SPEED_MULTIPLIER},
      {},
      {ivec2(2, 18), ivec2(28, 2)},
      true,
-    0.5f,
-    15000.f,
-    45000.f},
+     0.5f,
+     15000.f,
+     45000.f},
+
     // Level 4
-    {15, MapType::TEST_MAP3, {HAZARD_TYPE::MINE}, {POWER_UP_TYPE::HEAL}, {}, {ivec2(2, 9), ivec2(14, 9), ivec2(26, 9)}, true, 0.5f, 15000.f, 60000.f},
+    {15,
+     MapType::TEST_MAP3,
+     {HAZARD_TYPE::MINE},
+     {POWER_UP_TYPE::HEAL},
+     {},
+     {ivec2(2, 9), ivec2(14, 9), ivec2(26, 9)},
+     true,
+     0.5f,
+     15000.f,
+     60000.f},
+
     // Level 5
-    {16, MapType::TEST_MAP,
-    {HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
-    {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::DAMAGE_MULTIPLIER},
-    {},
-    {ivec2(3), ivec2(27, 17)},
-    true,
-    0.5f,
-    15000.f,
-    50000.f}
+    {16,
+     MapType::TEST_MAP,
+     {HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
+     {POWER_UP_TYPE::HEAL, POWER_UP_TYPE::HEAL, POWER_UP_TYPE::DAMAGE_MULTIPLIER},
+     {},
+     {ivec2(3), ivec2(27, 17)},
+     true,
+     0.5f,
+     15000.f,
+     50000.f},
+
+    // Level 6
+    {17,
+     MapType::EMPTY_MAP,
+     {HAZARD_TYPE::MINE, HAZARD_TYPE::MINE, HAZARD_TYPE::ANEMONE, HAZARD_TYPE::ANEMONE},
+     {
+         POWER_UP_TYPE::HEAL,
+         POWER_UP_TYPE::HEAL,
+         POWER_UP_TYPE::HEAL,
+         POWER_UP_TYPE::DAMAGE_MULTIPLIER,
+     },
+     {},
+     {ivec2(2, 18), ivec2(28, 2)},
+     true,
+     0.5f,
+     15000.f,
+     70000.f},
 };
