@@ -199,15 +199,30 @@ void CollisionSystem::handle_bullets(Entity bullet_entity, Entity other_entity) 
         if (registry.players.has(other_entity)) {
             // Player mines don't damage the owner!
             if (bullet.owner != other_entity) {
-                handle_apply_damage(bullet, other_entity);
-                if (should_explode && !is_deployed_mine) {
-                    // Explosive bullets explode on player hit
-                    Explosive &exp = registry.explosives.get(bullet_entity);
-                    vec2 pos = registry.motions.get(bullet_entity).position;
-                    handle_explosives(bullet_entity, pos, exp.radius, exp.damage);
+                // Check if player has active parry or dash (iframes)
+                bool is_invincible = false;
+                if (registry.parryStates.has(other_entity)) {
+                    ParryState &parry = registry.parryStates.get(other_entity);
+                    is_invincible = parry.is_active;
                 }
-                registry.remove_all_components_of(bullet_entity);
-                score.been_hit += 1;
+                if (!is_invincible && registry.dashStates.has(other_entity)) {
+                    DashState &dash = registry.dashStates.get(other_entity);
+                    is_invincible = dash.is_dashing;
+                }
+
+                // Only apply damage and remove bullet if player is not invincible
+                if (!is_invincible) {
+                    handle_apply_damage(bullet, other_entity);
+                    if (should_explode && !is_deployed_mine) {
+                        // Explosive bullets explode on player hit
+                        Explosive &exp = registry.explosives.get(bullet_entity);
+                        vec2 pos = registry.motions.get(bullet_entity).position;
+                        handle_explosives(bullet_entity, pos, exp.radius, exp.damage);
+                    }
+                    registry.remove_all_components_of(bullet_entity);
+                    score.been_hit += 1;
+                }
+                // If player is invincible (parrying or dashing), bullet passes through
             }
         }
         // Bullet hit enemy
@@ -304,9 +319,13 @@ void CollisionSystem::handle_hazards(Entity hazard_entity, Entity other_entity) 
         if (registry.players.has(other_entity)) {
             if (config.duration_ms > 0.f && config.interval_ms > 0.f) {
                 createOverTimeEffect<Damage>(other_entity, config.interval_ms, config.duration_ms, true, config.amount);
+                auto &sr = registry.sound_requests.emplace_with_duplicates(other_entity);
+                sr.type = SOUND_EVENT::PLAYER_HIT_HAZARD;
                 registry.remove_all_components_of(hazard_entity);
             } else {
                 HealDamageSystem::add_damage(other_entity, config.amount);
+                auto &sr = registry.sound_requests.emplace_with_duplicates(other_entity);
+                sr.type = SOUND_EVENT::PLAYER_HIT_HAZARD;
 
                 if (registry.explosives.has(hazard_entity)) {
                     Explosive &exp = registry.explosives.get(hazard_entity);
@@ -587,6 +606,36 @@ void CollisionSystem::handle_actor_actor(Entity entity_a, Entity entity_b) {
 
         float overlap = (radius_a + radius_b) - length(separation);
         if (overlap > 0.f) {
+            // Check for dash damage (player dashing into enemy) - optimized with early exits
+            if (registry.players.has(entity_a) && registry.enemies.has(entity_b)) {
+                // Early exit: only proceed if dash exists and is active
+                if (registry.dashStates.has(entity_a)) {
+                    DashState &dash = registry.dashStates.get(entity_a);
+                    if (dash.is_dashing && !dash.has_dealt_damage) {
+                        // Check if collision is frontal (player facing enemy)
+                        vec2 player_forward = vec2(cosf(motion_a.angle), sinf(motion_a.angle));
+                        vec2 to_enemy = normalize(motion_b.position - motion_a.position);
+                        float dot_product = dot(player_forward, to_enemy);
+
+                        // If dot product > 0.5, the hit happens with the front of the fish
+                        if (dot_product > 0.5f) {
+                            // deal damage equivalent to a player bullet
+                            int dash_damage = 10;
+                            if (registry.fireControls.has(entity_a)) {
+                                dash_damage += registry.fireControls.get(entity_a).damage_bonus;
+                            }
+
+                            HealDamageSystem::add_damage(entity_b, dash_damage);
+                            dash.has_dealt_damage = true;  // prevent multiple hits per dash
+
+                            // bubbles
+                            createEffectBubbles(motion_b.position);
+                        }
+                    }
+                }
+            }
+
+            // Standard collision separation
             float tolerance = 0.01f;
             float correction_mag = max(overlap - tolerance, 0.f) / 2.f;
             vec2 correction = normalize(separation) * correction_mag;
@@ -605,6 +654,7 @@ void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b,
             Bubbler &bubbler = registry.bubblers.get(bubbler_bubbler.parent_bubbler);
 
             if (bubbler.charged) {
+                int previous_ammo = fc.ammo;
                 fc.ammo = min(fc.ammo + bubbler.ammo_given, fc.max_ammo);
                 bubbler.charged = false;
                 bubbler.recharge_timer = 0;
@@ -613,6 +663,11 @@ void CollisionSystem::handle_bubbler_collision(Entity entity_a, Entity entity_b,
                 createEffectBubbles(pos);
                 createEffectBubbles(pos);
                 createEffectBubbles(pos);
+
+                if (fc.ammo > previous_ammo) {
+                    auto &sr = registry.sound_requests.emplace_with_duplicates(entity_a);
+                    sr.type = SOUND_EVENT::AMMO_LOAD;
+                }
             }
         }
     }

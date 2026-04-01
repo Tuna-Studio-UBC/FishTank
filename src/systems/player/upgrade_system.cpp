@@ -40,6 +40,9 @@ void UpgradeSystem::try_upgrade_player(const UPGRADE_TYPE type) {
                     upgrade_attack(player, upgrade_instance);
                     break;
                 }
+
+                auto &sr = registry.sound_requests.emplace_with_duplicates(player);
+                sr.type = SOUND_EVENT::UPGRADE_APPLY;
             }
         }
     }

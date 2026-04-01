@@ -6,6 +6,7 @@
 
 // stlib
 #include "configs/wave_config.cpp"
+#include "io/persist_file.hpp"
 #include "systems/physics/physics_system.hpp"
 #include "systems/rendering/particle_system.hpp"
 #include <cassert>
@@ -183,6 +184,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     Progress &progress = registry.progresses.components[0];
 
+    for (auto &sr : registry.sound_requests.components) {
+        if (sr.type == SOUND_EVENT::PLAYER_SHOT) {
+            audio_system.play_player_shot_center(128);
+        } else if (sr.type == SOUND_EVENT::PLAYER_CANNON_SHOT) {
+            audio_system.play_cannon_shot_center();
+        } else if (sr.type == SOUND_EVENT::PLAYER_SHOT_MINE) {
+            audio_system.play_shot_mine_center();
+        } else if (sr.type == SOUND_EVENT::PLAYER_HIT_HAZARD) {
+            audio_system.play_hit_hazard_center();
+        } else if (sr.type == SOUND_EVENT::ENEMY_DEAD) {
+            audio_system.play_enemy_dead_center();
+        } else if (sr.type == SOUND_EVENT::COMPLETE_LEVEL) {
+            audio_system.play_complete_level_center();
+        } else if (sr.type == SOUND_EVENT::UPGRADE_APPLY) {
+            audio_system.play_upgrade_center();
+        } else if (sr.type == SOUND_EVENT::AMMO_LOAD) {
+            audio_system.play_ammo_load_center();
+        } else if (sr.type == SOUND_EVENT::CLEAR_GAME) {
+            audio_system.play_clear_game_center();
+        } else if (sr.type == SOUND_EVENT::GAME_OVER) {
+            audio_system.play_game_over_center();
+        } else if (sr.type == SOUND_EVENT::NO_AMMO) {
+            audio_system.play_no_ammo_center();
+        }
+    }
+    registry.sound_requests.clear();
+
     // Check if game is over
     if (progress.is_game_over == true) {
         ScreenState &screen = registry.screenStates.components[0];
@@ -231,13 +259,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     }
     registry.bullet_requests.clear();
 
-    for (auto &sr : registry.sound_requests.components) {
-        if (sr.type == SOUND_EVENT::PLAYER_SHOT) {
-            audio_system.play_player_shot_center(128);
-        }
-    }
-    registry.sound_requests.clear();
-
     // Remove debug info from the last step
     while (registry.debugComponents.entities.size() > 0)
         registry.remove_all_components_of(registry.debugComponents.entities.back());
@@ -282,6 +303,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
     if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN) {
         ps.current_actions[KeyboardActions::QuickTurn] = key_pressed;
+    }
+    if (key == GLFW_KEY_F) {
+        ps.current_actions[KeyboardActions::Parry] = key_pressed;
+    }
+    if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
+        ps.current_actions[KeyboardActions::Dash] = key_pressed;
     }
 
     if (action == GLFW_PRESS) {
@@ -349,8 +376,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
             // spdlog::debug("[Bell] {} triggered at ({:.2f}, {:.2f})", best_bell.name_id(), bell_pos.x, bell_pos.y);
         }
-
-        if (key == GLFW_KEY_F) {
+        // changed to P for performance display, wanted parry to be on a more accessible key, soz
+        if (key == GLFW_KEY_P) {
             show_fps = !show_fps;
         }
 
@@ -390,14 +417,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                     upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
             }
 
-            if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-                upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_HP);
-
             if (key == GLFW_KEY_X && action == GLFW_PRESS)
                 upgrade_system->try_upgrade_player(UPGRADE_TYPE::MAX_AMMO);
 
             if (key == GLFW_KEY_C && action == GLFW_PRESS)
                 upgrade_system->try_upgrade_player(UPGRADE_TYPE::ATTACK);
+
+            if (key == GLFW_KEY_Z) {
+                for (auto &wallet : registry.wallets.components)
+                    wallet.crackers += 5;
+            }
         }
 #endif
         // #undef DEBUG_UPGRADE_INPUTS
@@ -435,6 +464,23 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
                 }
             }
         }
+        if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+            Entity player = registry.players.entities[0];
+            if (registry.weaponStates.has(player)) {
+                WeaponState &ws = registry.weaponStates.get(player);
+                ws.current_weapon = WeaponType::GUN_3;
+
+                // make turret green
+                if (!registry.turrets.entities.empty()) {
+                    Entity turret = registry.turrets.entities[0];
+                    if (registry.tints.has(turret)) {
+                        registry.tints.get(turret).tint = vec3(0.2f, 1.0f, 0.2f);
+                    } else {
+                        registry.tints.emplace(turret, vec3(0.2f, 1.0f, 0.2f));
+                    }
+                }
+            }
+        }
 
 #ifdef ENABLE_LOAD_TUTORIAL
         if (key == GLFW_KEY_T) {
@@ -462,11 +508,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             FireControl &fc = registry.fireControls.get(player);
             fc.ammo = fc.max_ammo;
         }
-
-        if (key == GLFW_KEY_Z) {
-            for (auto &wallet : registry.wallets.components)
-                wallet.crackers += 5;
-        }
 #endif
 
 #ifdef ENABLE_USER_INPUT_PAUSE_GAME
@@ -482,8 +523,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
 
     // Log debug info
-    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
         registry.list_all_components();
+    }
+
+    if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+        persist_file.save();
+    }
+
+    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+        persist_file.load();
     }
 
     // Log persistence info

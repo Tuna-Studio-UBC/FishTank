@@ -36,17 +36,39 @@ bool key_held(KeyboardActions a, const KeyboardInputState &keyboard_input) { ret
 // TODO: STUB FUNCTION -- REPLACE WHEN WE IMPLEMENT DIFFERENT AMMO TYPES
 int PlayerInputSystem::get_player_ammo_cost() { return 1; }
 
+namespace {
+void queue_no_ammo_sound(Entity player, WeaponState &ws, float game_time_ms) {
+    if (game_time_ms - ws.last_no_ammo_sound_time < ws.no_ammo_sound_cooldown)
+        return;
+
+    auto &sr = registry.sound_requests.emplace_with_duplicates(player);
+    sr.type = SOUND_EVENT::NO_AMMO;
+    ws.last_no_ammo_sound_time = game_time_ms;
+}
+} // namespace
+
 
    // Tries to fire left click projectile (normal bullet for Gun 1, explosive for Gun 2)
 
 void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
-    // Gun 2 explosive bullets cost 10 ammo, Gun 1 costs 1
+    // Gun 2 explosive bullets cost 10 ammo, Gun 3 costs 1, Gun 1 costs 1
     int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 10 : 1;
-    if (fc.ammo < ammo_cost)
+    Entity player = registry.players.entities[0];
+    if (fc.ammo < ammo_cost) {
+        queue_no_ammo_sound(player, ws, game_time_ms);
         return;
+    }
 
     // Check cooldown based on weapon type
-    float cooldown = (ws.current_weapon == WeaponType::GUN_1) ? ws.gun1_left_cooldown : ws.gun2_left_cooldown;
+    float cooldown = 0.0f;
+    if (ws.current_weapon == WeaponType::GUN_1) {
+        cooldown = ws.gun1_left_cooldown;
+    } else if (ws.current_weapon == WeaponType::GUN_2) {
+        cooldown = ws.gun2_left_cooldown;
+    } else if (ws.current_weapon == WeaponType::GUN_3) {
+        cooldown = ws.gun3_left_cooldown;
+    }
+
     if (game_time_ms - ws.last_left_click_time < cooldown)
         return;
 
@@ -58,12 +80,11 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
 
     vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
     vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
-    Entity player = registry.players.entities[0];
 
     if (ws.current_weapon == WeaponType::GUN_1) {
         // Gun 1: Normal bouncing bullet (1 ammo)
         createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
-    } else {
+    } else if (ws.current_weapon == WeaponType::GUN_2) {
         // Gun 2: Explosive bullet (10 ammo, no bouncing)
         Entity bullet = createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
         registry.bouncies.remove(bullet);  // Remove bouncy component
@@ -81,10 +102,33 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
         } else {
             registry.tints.emplace(bullet, vec3(1.0f, 0.1f, 0.1f));
         }
+    } else if (ws.current_weapon == WeaponType::GUN_3) {
+        // Gun 3: Minigun - low damage rapid fire (1 ammo)
+        Entity bullet = createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, 0);  // No damage bonus
+
+        // Override bullet damage: base 2 + small fraction of damage bonus
+        if (registry.bullets.has(bullet)) {
+            Bullet &b = registry.bullets.get(bullet);
+            b.damage = 3 + (fc.damage_bonus / 5);  // Base 3 damage + 20% of damage bonus
+        }
+
+        // Make bullet smaller and faster for minigun feel
+        if (registry.motions.has(bullet)) {
+            Motion &bullet_motion = registry.motions.get(bullet);
+            bullet_motion.scale *= 0.7f;  // Smaller bullets
+            bullet_motion.velocity *= 1.3f;  // Faster bullets
+        }
+
+        // Green tint for minigun bullets
+        if (registry.tints.has(bullet)) {
+            registry.tints.get(bullet).tint = vec3(0.2f, 1.0f, 0.2f);  // Green
+        } else {
+            registry.tints.emplace(bullet, vec3(0.2f, 1.0f, 0.2f));
+        }
     }
 
     auto &sr = registry.sound_requests.emplace_with_duplicates(player);
-    sr.type = SOUND_EVENT::PLAYER_SHOT;
+    sr.type = (ws.current_weapon == WeaponType::GUN_2) ? SOUND_EVENT::PLAYER_CANNON_SHOT : SOUND_EVENT::PLAYER_SHOT;
 
     ws.last_left_click_time = game_time_ms;
     fc.ammo -= ammo_cost;
@@ -96,10 +140,19 @@ void PlayerInputSystem::try_fire_left_click(Motion &player_motion, FireControl &
   // Tries to fire right click projectile (burst for Gun 1, mine for Gun 2)
 
 void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
-    // Gun 2 mine costs 10 ammo, Gun 1 burst costs 1 per shot
-    int ammo_cost = (ws.current_weapon == WeaponType::GUN_2) ? 5 : 1;
-    if (fc.ammo < ammo_cost)
+    // Gun 2 mine costs 5 ammo, Gun 1 burst costs 1 per shot, Gun 3 full-auto uses all remaining
+    int ammo_cost = 1;
+    if (ws.current_weapon == WeaponType::GUN_2) {
+        ammo_cost = 5;
+    } else if (ws.current_weapon == WeaponType::GUN_3) {
+        ammo_cost = 1;
+    }
+
+    Entity player = registry.players.entities[0];
+    if (fc.ammo < ammo_cost) {
+        queue_no_ammo_sound(player, ws, game_time_ms);
         return;
+    }
 
     float barrel_len = DEFAULT_BARREL_LEN;
     if (!registry.turrets.entities.empty()) {
@@ -109,7 +162,6 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
 
     vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
     vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
-    Entity player = registry.players.entities[0];
 
     if (ws.current_weapon == WeaponType::GUN_1) {
         // Gun 1: Burst fire (3 shots)
@@ -119,7 +171,7 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
         ws.burst_shots_remaining = 3;
         ws.next_burst_time = game_time_ms;
         ws.last_right_click_time = game_time_ms;
-    } else {
+    } else if (ws.current_weapon == WeaponType::GUN_2) {
         // Gun 2: Deploy mine
         if (game_time_ms - ws.last_right_click_time < ws.gun2_right_cooldown)
             return;
@@ -157,10 +209,18 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
         registry.expirations.get(mine).lifespan_ms = 40000.0f;  // 40 seconds
 
         auto &sr = registry.sound_requests.emplace_with_duplicates(player);
-        sr.type = SOUND_EVENT::PLAYER_SHOT;
+        sr.type = SOUND_EVENT::PLAYER_SHOT_MINE;
 
         ws.last_right_click_time = game_time_ms;
         fc.ammo -= ammo_cost;
+    } else if (ws.current_weapon == WeaponType::GUN_3) {
+        // Gun 3: mini-gun mode / dump all remaining ammo rapidly
+        if (game_time_ms - ws.last_right_click_time < ws.gun3_right_cooldown)
+            return;
+
+        ws.minigun_shots_remaining = fc.ammo;  // Use all remaining ammo
+        ws.next_minigun_time = game_time_ms;
+        ws.last_right_click_time = game_time_ms;
     }
 }
 
@@ -169,8 +229,36 @@ void PlayerInputSystem::try_fire_right_click(Motion &player_motion, FireControl 
 
 void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &fc, WeaponState &ws, const float &aim_angle) {
     if (ws.burst_shots_remaining > 0 && game_time_ms >= ws.next_burst_time) {
+        Entity player = registry.players.entities[0];
         if (fc.ammo < 1) {
+            queue_no_ammo_sound(player, ws, game_time_ms);
             ws.burst_shots_remaining = 0;
+            return;
+        }
+
+        float barrel_len = DEFAULT_BARREL_LEN;
+        if (!registry.turrets.entities.empty()) {
+            Entity turret_entity = registry.turrets.entities[0];
+            barrel_len = registry.turrets.get(turret_entity).barrel_length_px;
+        }
+
+        vec2 forward = {cosf(aim_angle), sinf(aim_angle)};
+        vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
+
+        createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
+
+        auto &sr = registry.sound_requests.emplace_with_duplicates(player);
+        sr.type = SOUND_EVENT::PLAYER_SHOT;
+
+        fc.ammo -= 1;
+        ws.burst_shots_remaining--;
+        ws.next_burst_time = game_time_ms + 100.0f;  // 100ms between burst shots
+    }
+
+    // minigun full-auto fire (GUN_3)
+    if (ws.minigun_shots_remaining > 0 && game_time_ms >= ws.next_minigun_time) {
+        if (fc.ammo < 1) {
+            ws.minigun_shots_remaining = 0;
             return;
         }
 
@@ -184,14 +272,38 @@ void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &f
         vec2 bullet_spawn_pos = player_motion.position + forward * barrel_len;
         Entity player = registry.players.entities[0];
 
-        createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, fc.damage_bonus);
+        // Create minigun bullet with low damage
+        Entity bullet = createProjectile(bullet_spawn_pos, aim_angle, ATTACK_PATTERN::PLAYER, player, 0);  // No damage bonus
+
+        // Override bullet damage: base 2 + small fraction of damage bonus
+        if (registry.bullets.has(bullet)) {
+            Bullet &b = registry.bullets.get(bullet);
+            b.damage = 2 + (fc.damage_bonus / 5);  // Base 2 damage + 20% of damage bonus
+        }
+
+        // Make bullet smaller and faster
+        if (registry.motions.has(bullet)) {
+            Motion &bullet_motion = registry.motions.get(bullet);
+            bullet_motion.scale *= 0.7f;
+            bullet_motion.velocity *= 1.3f;
+        }
+
+        // Green tint
+        if (registry.tints.has(bullet)) {
+            registry.tints.get(bullet).tint = vec3(0.2f, 1.0f, 0.2f);
+        } else {
+            registry.tints.emplace(bullet, vec3(0.2f, 1.0f, 0.2f));
+        }
 
         auto &sr = registry.sound_requests.emplace_with_duplicates(player);
         sr.type = SOUND_EVENT::PLAYER_SHOT;
 
         fc.ammo -= 1;
-        ws.burst_shots_remaining--;
-        ws.next_burst_time = game_time_ms + 100.0f;  // 100ms between burst shots
+        ws.minigun_shots_remaining--;
+        ws.next_minigun_time = game_time_ms + 50.0f;  // 50ms between minigun shots (twice as fast as burst)
+
+        Scoring &score = registry.scoring.components[0];
+        score.bullets_fired += 1;
     }
 }
 
@@ -299,6 +411,162 @@ void PlayerInputSystem::step(float elapsed_ms) {
     }
     if (mouse_input.current_action == MouseActions::RightClick) {
         try_fire_right_click(motion, fc, ws, aim_angle);
+    }
+
+    // Parry
+    ParryState &parry = registry.parryStates.get(playerEntity);
+
+    // Update cooldown timer
+    if (parry.cooldown_timer > 0.0f) {
+        parry.cooldown_timer = std::max(0.0f, parry.cooldown_timer - elapsed_ms);
+    }
+
+    // Update parry window timer (iframes)
+    if (parry.is_active) {
+        parry.window_timer -= elapsed_ms;
+        if (parry.window_timer <= 0.0f) {
+            parry.is_active = false;
+            parry.window_timer = 0.0f;
+        }
+    }
+
+    // Dash
+    DashState &dash = registry.dashStates.get(playerEntity);
+
+    // Update cooldown timer
+    if (dash.cooldown_timer > 0.0f) {
+        dash.cooldown_timer = std::max(0.0f, dash.cooldown_timer - elapsed_ms);
+    }
+
+    // Update dash duration timer
+    if (dash.is_dashing) {
+        dash.duration_timer -= elapsed_ms;
+        if (dash.duration_timer <= 0.0f) {
+            dash.is_dashing = false;
+            dash.duration_timer = 0.0f;
+        }
+    }
+
+    // activate dash on key press (only if not on cooldown and not already dashing)
+    if (key_pressed(KeyboardActions::Dash, keyboard_input) && dash.cooldown_timer <= 0.0f && !dash.is_dashing) {
+        dash.is_dashing = true;
+        dash.duration_timer = dash.duration_ms;
+        dash.cooldown_timer = dash.cooldown_ms;
+        dash.has_dealt_damage = false;  // Reset damage flag for new dash
+    }
+
+    // apply dash velocity while dashing
+    if (dash.is_dashing) {
+        // Set local forward velocity (the physics system will rotate this based on player angle)
+        motion.velocity.x = dash.dash_speed;
+        motion.velocity.y = 0.0f;  // No lateral movement during dash
+    }
+
+    // Apply tint for parry state (only when parry is active or on cooldown)
+    if (parry.is_active || parry.cooldown_timer > 0.0f) {
+        vec3 target_tint = vec3(1.0f, 1.0f, 1.0f); // Default
+
+        if (parry.is_active) {
+            // Full white during active parry window
+            target_tint = vec3(2.0f, 2.0f, 2.0f); // bright white (values > 1 for intensity)
+        } else if (parry.cooldown_timer > 0.0f) {
+            // Fade from white back to normal as cooldown decreases
+            float cooldown_progress = parry.cooldown_timer / parry.cooldown_ms;
+            float fade = 1.0f + cooldown_progress * 0.5f; // Fade from 1.5 to 1.0
+            target_tint = vec3(fade, fade, fade);
+        }
+
+        // Apply tint to player
+        if (registry.tints.has(playerEntity)) {
+            Tint &player_tint = registry.tints.get(playerEntity);
+            // Only override if not a temporary damage tint (life_ms <= 0 means permanent/controlled tint)
+            if (player_tint.life_ms <= 0.0f) {
+                player_tint.tint = target_tint;
+                player_tint.life_ms = -99.f; // Keep it as controlled tint
+            }
+        } else {
+            Tint &new_tint = registry.tints.emplace(playerEntity, target_tint);
+            new_tint.life_ms = -99.f; // Controlled tint, not temporary
+        }
+
+        // Apply tint to turret (keep weapon specific tint when not in parry)
+        if (!registry.turrets.entities.empty()) {
+            Entity turret_entity = registry.turrets.entities[0];
+
+            // Only override turret tint during active parry window
+            if (parry.is_active) {
+                if (registry.tints.has(turret_entity)) {
+                    registry.tints.get(turret_entity).tint = target_tint;
+                } else {
+                    registry.tints.emplace(turret_entity, target_tint);
+                }
+            } else if (parry.cooldown_timer > 0.0f) {
+                // During cooldown fade, blend with the weapon tint
+                vec3 weapon_base_tint = vec3(1.0f, 1.0f, 1.0f);
+                if (ws.current_weapon == WeaponType::GUN_2) {
+                    weapon_base_tint = vec3(1.0f, 0.1f, 0.1f); // Red for GUN_2
+                } else if (ws.current_weapon == WeaponType::GUN_3) {
+                    weapon_base_tint = vec3(0.2f, 1.0f, 0.2f); // Green for GUN_3
+                }
+
+                // Blend between parry fade and weapon color
+                float cooldown_progress = parry.cooldown_timer / parry.cooldown_ms;
+                float fade_amount = cooldown_progress * 0.5f; // 0 to 0.5
+                vec3 blended_tint = weapon_base_tint + vec3(fade_amount, fade_amount, fade_amount);
+
+                if (registry.tints.has(turret_entity)) {
+                    registry.tints.get(turret_entity).tint = blended_tint;
+                } else {
+                    registry.tints.emplace(turret_entity, blended_tint);
+                }
+            }
+        }
+    }
+
+    // activate parry on key press (only if not on cooldown)
+    if (key_pressed(KeyboardActions::Parry, keyboard_input) && parry.cooldown_timer <= 0.0f && !parry.is_active) {
+        parry.is_active = true;
+        parry.cooldown_timer = parry.cooldown_ms;
+
+        // Deflect nearby enemy bullets
+        vec2 mouse_direction = normalize(mouse_relative_pos);
+        float deflect_angle = atan2(mouse_direction.y, mouse_direction.x);
+
+        for (Entity bullet_entity : registry.bullets.entities) {
+            if (!registry.motions.has(bullet_entity)) continue;
+
+            Bullet &bullet = registry.bullets.get(bullet_entity);
+            Motion &bullet_motion = registry.motions.get(bullet_entity);
+
+            // Only deflect enemy bullets
+            if (bullet.owner == playerEntity) continue;
+
+            // Check if bullet is within deflect radius
+            vec2 bullet_to_player = bullet_motion.position - player_pos;
+            float distance = length(bullet_to_player);
+
+            if (distance <= parry.deflect_radius) {
+                // Change ownership to player
+                bullet.owner = playerEntity;
+                bullet.attack_effect = ATTACK_EFFECT::NORMAL;
+
+                // Apply player damage bonus to the parried bullet
+                bullet.damage += fc.damage_bonus;
+
+                // Redirect bullet toward mouse direction
+                // Bullets use local velocity that gets rotated by angle in physics system
+                float bullet_speed = length(bullet_motion.velocity);
+                bullet_motion.angle = deflect_angle;
+                bullet_motion.velocity = vec2(bullet_speed, 0.f);  // Local velocity (forward direction)
+
+                // Add visual feedback with a tint
+                if (registry.tints.has(bullet_entity)) {
+                    registry.tints.get(bullet_entity).tint = vec3(0.3f, 0.3f, 1.0f);  // Blue tint for parried bullets
+                } else {
+                    registry.tints.emplace(bullet_entity, vec3(0.3f, 0.3f, 1.0f));
+                }
+            }
+        }
     }
 
     // Shift action over

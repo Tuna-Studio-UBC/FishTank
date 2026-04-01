@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+void PickUpSystem::set_audio_system(AudioSystem *audio_system) { this->audio_system = audio_system; }
+
 void PickUpSystem::step(float elapsed_ms) {
     for (Entity e : registry.pickUps.entities) {
         Entity player = registry.players.entities[0];
@@ -17,6 +19,8 @@ void PickUpSystem::step(float elapsed_ms) {
 }
 
 void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
+    bool picked_up = false;
+
     if (registry.powerUps.has(pickUp)) {
         PowerUp powerUp = registry.powerUps.get(pickUp);
         auto &config = POWER_UP_CONFIGS[(int)powerUp.type];
@@ -32,17 +36,24 @@ void PickUpSystem::on_pickup(Entity pickUp, Entity player) {
                 return;
 
             createOverTimeEffect<Heal>(player, config.duration_ms, config.interval_ms, true, config.amount);
+            picked_up = true;
             break;
         case POWER_UP_TYPE::SPEED_MULTIPLIER:
             createExpirationEffect<SpeedMultiplier>(player, config.duration_ms, config.amount);
+            picked_up = true;
             break;
         case POWER_UP_TYPE::DAMAGE_MULTIPLIER:
             createExpirationEffect<DamageMultiplier>(player, config.duration_ms, config.amount);
+            picked_up = true;
             break;
         default:
             spdlog::warn("Unknown power up type");
             break;
         }
+    }
+
+    if (picked_up && audio_system != nullptr) {
+        audio_system->play_power_up_center();
     }
 
     registry.remove_all_components_of(pickUp);

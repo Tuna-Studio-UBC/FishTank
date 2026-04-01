@@ -17,11 +17,46 @@ bool AudioSystem::load() {
     enemy_shot = Mix_LoadWAV(get_path(AUDIO, "enemy_shot.wav").c_str());
     Mix_VolumeChunk(enemy_shot, 96);
     player_shot = Mix_LoadWAV(get_path(AUDIO, "player_shot.wav").c_str());
+    cannon_shot = Mix_LoadWAV(get_path(AUDIO, "canon_shot.wav").c_str());
+    Mix_VolumeChunk(cannon_shot, 104);
+    shot_mine = Mix_LoadWAV(get_path(AUDIO, "shot_mine.wav").c_str());
+    Mix_VolumeChunk(shot_mine, 96);
+    power_up = Mix_LoadWAV(get_path(AUDIO, "power_up.wav").c_str());
+    Mix_VolumeChunk(power_up, 96);
+    hit_hazard = Mix_LoadWAV(get_path(AUDIO, "hit_hazard.wav").c_str());
+    Mix_VolumeChunk(hit_hazard, 104);
+    enemy_dead = Mix_LoadWAV(get_path(AUDIO, "enemy_dead.wav").c_str());
+    Mix_VolumeChunk(enemy_dead, 96);
+    complete_level = Mix_LoadWAV(get_path(AUDIO, "complete_level.wav").c_str());
+    Mix_VolumeChunk(complete_level, 108);
+    upgrade = Mix_LoadWAV(get_path(AUDIO, "upgrade.wav").c_str());
+    Mix_VolumeChunk(upgrade, 96);
+    ammo_load = Mix_LoadWAV(get_path(AUDIO, "ammo_load.wav").c_str());
+    Mix_VolumeChunk(ammo_load, 96);
+    clear_game = Mix_LoadWAV(get_path(AUDIO, "clear_game.wav").c_str());
+    Mix_VolumeChunk(clear_game, 108);
+    game_over = Mix_LoadWAV(get_path(AUDIO, "game_over.wav").c_str());
+    Mix_VolumeChunk(game_over, 108);
+    no_ammo = Mix_LoadWAV(get_path(AUDIO, "no_ammo.wav").c_str());
+    Mix_VolumeChunk(no_ammo, 96);
 
-    if (!hazard_warn_loop || !enemy_shot) {
+    if (!hazard_warn_loop || !enemy_shot || !player_shot || !cannon_shot || !shot_mine || !power_up || !hit_hazard ||
+        !enemy_dead || !complete_level || !upgrade || !ammo_load || !clear_game || !game_over || !no_ammo) {
         spdlog::error("[Audio] Failed to load audio. Ensure files exist in res/audio/");
         spdlog::error("[Audio] hazard_warn_loop.wav path = {}", get_path(AUDIO, "hazard_warn_loop.wav"));
         spdlog::error("[Audio] enemy_shot.wav path = {}", get_path(AUDIO, "enemy_shot.wav"));
+        spdlog::error("[Audio] player_shot.wav path = {}", get_path(AUDIO, "player_shot.wav"));
+        spdlog::error("[Audio] canon_shot.wav path = {}", get_path(AUDIO, "canon_shot.wav"));
+        spdlog::error("[Audio] shot_mine.wav path = {}", get_path(AUDIO, "shot_mine.wav"));
+        spdlog::error("[Audio] power_up.wav path = {}", get_path(AUDIO, "power_up.wav"));
+        spdlog::error("[Audio] hit_hazard.wav path = {}", get_path(AUDIO, "hit_hazard.wav"));
+        spdlog::error("[Audio] enemy_dead.wav path = {}", get_path(AUDIO, "enemy_dead.wav"));
+        spdlog::error("[Audio] complete_level.wav path = {}", get_path(AUDIO, "complete_level.wav"));
+        spdlog::error("[Audio] upgrade.wav path = {}", get_path(AUDIO, "upgrade.wav"));
+        spdlog::error("[Audio] ammo_load.wav path = {}", get_path(AUDIO, "ammo_load.wav"));
+        spdlog::error("[Audio] clear_game.wav path = {}", get_path(AUDIO, "clear_game.wav"));
+        spdlog::error("[Audio] game_over.wav path = {}", get_path(AUDIO, "game_over.wav"));
+        spdlog::error("[Audio] no_ammo.wav path = {}", get_path(AUDIO, "no_ammo.wav"));
         return false;
     }
 
@@ -55,6 +90,50 @@ void AudioSystem::shutdown() {
     if (player_shot) {
         Mix_FreeChunk(player_shot);
         player_shot = nullptr;
+    }
+    if (cannon_shot) {
+        Mix_FreeChunk(cannon_shot);
+        cannon_shot = nullptr;
+    }
+    if (shot_mine) {
+        Mix_FreeChunk(shot_mine);
+        shot_mine = nullptr;
+    }
+    if (power_up) {
+        Mix_FreeChunk(power_up);
+        power_up = nullptr;
+    }
+    if (hit_hazard) {
+        Mix_FreeChunk(hit_hazard);
+        hit_hazard = nullptr;
+    }
+    if (enemy_dead) {
+        Mix_FreeChunk(enemy_dead);
+        enemy_dead = nullptr;
+    }
+    if (complete_level) {
+        Mix_FreeChunk(complete_level);
+        complete_level = nullptr;
+    }
+    if (upgrade) {
+        Mix_FreeChunk(upgrade);
+        upgrade = nullptr;
+    }
+    if (ammo_load) {
+        Mix_FreeChunk(ammo_load);
+        ammo_load = nullptr;
+    }
+    if (clear_game) {
+        Mix_FreeChunk(clear_game);
+        clear_game = nullptr;
+    }
+    if (game_over) {
+        Mix_FreeChunk(game_over);
+        game_over = nullptr;
+    }
+    if (no_ammo) {
+        Mix_FreeChunk(no_ammo);
+        no_ammo = nullptr;
     }
 
     if (bgm) {
@@ -164,6 +243,116 @@ void AudioSystem::play_player_shot_center(int volume) {
     if (!player_shot)
         return;
     int ch = Mix_PlayChannel(-1, player_shot, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_cannon_shot_center(int volume) {
+    if (!cannon_shot)
+        return;
+    int ch = Mix_PlayChannel(-1, cannon_shot, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_shot_mine_center(int volume) {
+    if (!shot_mine)
+        return;
+    int ch = Mix_PlayChannel(-1, shot_mine, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_power_up_center(int volume) {
+    if (!power_up)
+        return;
+    int ch = Mix_PlayChannel(-1, power_up, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_hit_hazard_center(int volume) {
+    if (!hit_hazard)
+        return;
+    int ch = Mix_PlayChannel(-1, hit_hazard, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_enemy_dead_center(int volume) {
+    if (!enemy_dead)
+        return;
+    int ch = Mix_PlayChannel(-1, enemy_dead, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_complete_level_center(int volume) {
+    if (!complete_level)
+        return;
+    int ch = Mix_PlayChannel(-1, complete_level, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_upgrade_center(int volume) {
+    if (!upgrade)
+        return;
+    int ch = Mix_PlayChannel(-1, upgrade, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_ammo_load_center(int volume) {
+    if (!ammo_load)
+        return;
+    int ch = Mix_PlayChannel(-1, ammo_load, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_clear_game_center(int volume) {
+    if (!clear_game)
+        return;
+    int ch = Mix_PlayChannel(-1, clear_game, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_game_over_center(int volume) {
+    if (!game_over)
+        return;
+    int ch = Mix_PlayChannel(-1, game_over, 0);
+    if (ch == -1)
+        return;
+    Mix_Volume(ch, std::clamp(volume, 0, 128));
+    Mix_SetPanning(ch, 255, 255);
+}
+
+void AudioSystem::play_no_ammo_center(int volume) {
+    if (!no_ammo)
+        return;
+    int ch = Mix_PlayChannel(-1, no_ammo, 0);
     if (ch == -1)
         return;
     Mix_Volume(ch, std::clamp(volume, 0, 128));
