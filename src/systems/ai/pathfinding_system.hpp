@@ -31,4 +31,6 @@ class PathfindingSystem {
     std::vector<vec2> path_finding(const vec2 &start_world, const vec2 &goal_world);
     void update_leader(Entity e, Motion &motion, float elapsed_ms);
     void update_follower(Entity follower, Entity leader, float elapsed_ms);
+
+    Entity get_current_map() const { return current_map; }
 };

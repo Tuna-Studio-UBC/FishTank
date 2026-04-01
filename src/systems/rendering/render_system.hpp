@@ -68,10 +68,8 @@ class RenderSystem {
         get_path(FilePath::TEXTURES, "smoke.png"),
 
         // Sprite sheets
-        get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"), 
-        get_path(FilePath::SPRITE_SHEETS, "whirl_sheet.png"), 
-        get_path(FilePath::SPRITE_SHEETS, "fish_sheet.png"),
-        get_path(FilePath::SPRITE_SHEETS, "turret_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "bubble_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "whirl_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "fish_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "turret_sheet.png"),
 
         get_path(FilePath::SPRITE_SHEETS, "crab_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "urchin_sheet.png"), 
@@ -79,15 +77,18 @@ class RenderSystem {
         get_path(FilePath::SPRITE_SHEETS, "mother_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "dasher_sheet.png"),
 
-        get_path(FilePath::SPRITE_SHEETS, "mine_sheet.png"),
-        get_path(FilePath::SPRITE_SHEETS, "anemone_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "mine_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "anemone_sheet.png"),
 
-        get_path(FilePath::SPRITE_SHEETS, "health_sheet.png"), 
-        get_path(FilePath::SPRITE_SHEETS, "whey_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "health_sheet.png"), get_path(FilePath::SPRITE_SHEETS, "whey_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "speed_sheet.png"),
 
         get_path(FilePath::SPRITE_SHEETS, "sharky_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "sharky_enraged_sheet.png"),
         get_path(FilePath::SPRITE_SHEETS, "king_crabby_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "king_crabby_enraged_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "eeeel_sheet.png"),
+        get_path(FilePath::SPRITE_SHEETS, "eeeel_enraged_sheet.png"),
+
         get_path(FilePath::SPRITE_SHEETS, "explosion_sheet.png")};
 
     std::array<GLuint, effect_count> effects;

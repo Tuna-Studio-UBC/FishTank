@@ -47,7 +47,6 @@ static const EnemyConfig ENEMY_CONFIGS[enemy_count] = {
 // Bosses
 // =================================================================================
 
-// TODO: Add rate of attack pattern switching
 struct BossConfig {
     std::string name;
     Health health;
@@ -60,7 +59,7 @@ struct BossConfig {
 static const BossConfig BOSS_CONFIGS[boss_count] = {
     // Sharky
     {"Sharky",
-     {400, 400},
+     {500, 500},
      150.f,
      M_PI * 1.5f,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
@@ -68,7 +67,7 @@ static const BossConfig BOSS_CONFIGS[boss_count] = {
 
     // King Crabby
     {"King Crabby",
-     {1200, 1200},
+     {1500, 1500},
      100.f,
      M_PI,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
@@ -76,11 +75,11 @@ static const BossConfig BOSS_CONFIGS[boss_count] = {
 
     // EEEEL
     {"EEEEL",
-     {500, 500},
-     100.f,
+     {2800, 2800},
+     200.f,
      M_PI,
      (float)std::max(WINDOW_WIDTH_PX, WINDOW_HEIGHT_PX),
-     {ATTACK_PATTERN::EEEEL_NORMAL}},
+     {ATTACK_PATTERN::EEEEL_NORMAL, ATTACK_PATTERN::EEEEL_DEFENSIVE_SWIRL, ATTACK_PATTERN::EEEEL_ENRAGED}},
 };
 
 #pragma endregion Bosses

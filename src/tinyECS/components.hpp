@@ -137,9 +137,10 @@ struct FireControl {
 
     bool can_shoot = true;
     float can_shoot_ms = 5 * 1000.f;    // Time window for shooting mode
-    float cd_can_shoot_ms = 2 * 1000.f; // Time window for cooldown mode
+    float cd_can_shoot_ms = 3 * 1000.f; // Time window for cooldown mode
     float elapsed_can_shoot_ms = 0.f;
     float elapsed_cd_can_shoot_ms = 0.f;
+    float last_angle = 0.f;
 };
 
 struct SpeedControl {
@@ -211,7 +212,7 @@ struct WeaponState {
     float gun3_right_cooldown = 3000.0f; // ms - full auto cooldown 3s
     int minigun_shots_remaining = 0;
     float next_minigun_time = 0.0f;
-    
+
     // Gun no ammo
     float last_no_ammo_sound_time = -1000.0f;
     float no_ammo_sound_cooldown = 250.0f;
@@ -278,6 +279,7 @@ struct BulletRequest {
     vec2 position;
     float angle;
     Entity owner;
+    bool is_bouncy = true;
 };
 
 // used to delay spawn and time SpawnEffect
@@ -418,23 +420,24 @@ struct KeyboardInputState {
 };
 
 struct ParryState {
-    bool is_active = false;              
-    float window_ms = 500.0f;            // Parry window duration (0.5 seconds) this doesn't work the way i wanted it but it works so its fine.
-    float window_timer = 0.0f;           // Current parry window timer
-    float cooldown_ms = 1000.0f;         // Cooldown between parries (1 second tweakable)
-    float cooldown_timer = 0.0f;         // Current cooldown timer
-    float deflect_radius = 75.0f;        // Radius to deflect projectiles
+    bool is_active = false;
+    float window_ms =
+        500.0f; // Parry window duration (0.5 seconds) this doesn't work the way i wanted it but it works so its fine.
+    float window_timer = 0.0f;    // Current parry window timer
+    float cooldown_ms = 1000.0f;  // Cooldown between parries (1 second tweakable)
+    float cooldown_timer = 0.0f;  // Current cooldown timer
+    float deflect_radius = 75.0f; // Radius to deflect projectiles
 };
 
 struct DashState {
-    bool is_dashing = false;             // Currently dashing
-    float duration_ms = 200.0f;          // Dash duration (0.2 seconds)
-    float duration_timer = 0.0f;         // Current dash timer
-    float cooldown_ms = 1000.0f;         // Cooldown between dashes (like 1 second, also tweakable)
-    float cooldown_timer = 0.0f;         // Current cooldown timer
-    float dash_speed = 800.0f;           // Dash speed in px/s
-    vec2 dash_direction = {0.0f, 0.0f};  // Direction of dash
-    bool has_dealt_damage = false;       // Track if damage dealt this dash to prevent multiple hits
+    bool is_dashing = false;            // Currently dashing
+    float duration_ms = 200.0f;         // Dash duration (0.2 seconds)
+    float duration_timer = 0.0f;        // Current dash timer
+    float cooldown_ms = 1000.0f;        // Cooldown between dashes (like 1 second, also tweakable)
+    float cooldown_timer = 0.0f;        // Current cooldown timer
+    float dash_speed = 800.0f;          // Dash speed in px/s
+    vec2 dash_direction = {0.0f, 0.0f}; // Direction of dash
+    bool has_dealt_damage = false;      // Track if damage dealt this dash to prevent multiple hits
 };
 
 enum MouseActions { LeftClick, RightClick, MouseActionsCount };
@@ -456,10 +459,7 @@ struct TutorialStep {
 };
 
 const std::vector<TutorialStep> TUTORIAL_STEPS = {
-    TutorialStep(Tutorial::MOVEMENT, 1), 
-    TutorialStep(Tutorial::INTERACT, 1),
-    TutorialStep(Tutorial::COMBAT, 1)
-};
+    TutorialStep(Tutorial::MOVEMENT, 1), TutorialStep(Tutorial::INTERACT, 1), TutorialStep(Tutorial::COMBAT, 1)};
 
 struct Progress {
     bool trigger_restart = false;
@@ -690,8 +690,13 @@ enum class TEXTURE_ASSET_ID {
     TEXTURE_SPEED_SHEET = TEXTURE_WHEY_SHEET + 1,
 
     TEXTURE_SHARKY_SHEET = TEXTURE_SPEED_SHEET + 1,
-    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_SHEET + 1,
-    TEXTURE_EXPLOSION_SHEET = TEXTURE_KING_CRABBY_SHEET + 1,
+    TEXTURE_SHARKY_ENRAGED_SHEET = TEXTURE_SHARKY_SHEET + 1,
+    TEXTURE_KING_CRABBY_SHEET = TEXTURE_SHARKY_ENRAGED_SHEET + 1,
+    TEXTURE_KING_CRABBY_ENRAGED_SHEET = TEXTURE_KING_CRABBY_SHEET + 1,
+    TEXTURE_EEEEL_SHEET = TEXTURE_KING_CRABBY_ENRAGED_SHEET + 1,
+    TEXTURE_EEEEL_ENRAGED_SHEET = TEXTURE_EEEEL_SHEET + 1,
+
+    TEXTURE_EXPLOSION_SHEET = TEXTURE_EEEEL_ENRAGED_SHEET + 1,
 
     TEXTURE_COUNT = TEXTURE_EXPLOSION_SHEET + 1
 };
