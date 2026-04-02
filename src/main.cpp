@@ -96,6 +96,8 @@ int main() {
     path_system.init(&tilemap_system);
     ai_system.init(&path_system);
 
+    Progress &progress = registry.progresses.components[0];
+
     // variable timestep loop
     auto t = Clock::now();
     while (!world_system.is_over()) {
@@ -191,44 +193,45 @@ int main() {
         }
 
         // Draw GUIs
-        {
-            ZoneScopedN("RENDER: Health");
-            game_ui.draw_enemy_healthbars();
-            game_ui.draw_boss_healthbars();
-            game_ui.draw_healthbar();
-        }
-        {
-            ZoneScopedN("RENDER: Minimap");
-            game_ui.draw_minimap();
-        }
-        {
-            ZoneScopedN("RENDER: Wallet");
-            game_ui.draw_wallet();
-        }
-        {
-            ZoneScopedN("RENDER: Wallet");
-            game_ui.draw_score();
-        }
-        {
-            ZoneScopedN("RENDER: Ammo");
-            game_ui.draw_ammo();
-        }
-        {
-            ZoneScopedN("RENDER: Ammo Types");
-            game_ui.draw_ammo_types();
-        }
-        {
-            ZoneScopedN("RENDER: Upgrade");
-            game_ui.draw_upgrade_menu();
+        if (!progress.is_game_over) {
+            {
+                ZoneScopedN("RENDER: Health");
+                game_ui.draw_enemy_healthbars();
+                game_ui.draw_boss_healthbars();
+                game_ui.draw_healthbar();
+            }
+            {
+                ZoneScopedN("RENDER: Minimap");
+                game_ui.draw_minimap();
+            }
+            {
+                ZoneScopedN("RENDER: Wallet");
+                game_ui.draw_wallet();
+            }
+            {
+                ZoneScopedN("RENDER: Wallet");
+                game_ui.draw_score();
+            }
+            {
+                ZoneScopedN("RENDER: Ammo");
+                game_ui.draw_ammo();
+            }
+            {
+                ZoneScopedN("RENDER: Ammo Types");
+                game_ui.draw_ammo_types();
+            }
+            {
+                ZoneScopedN("RENDER: Upgrade");
+                game_ui.draw_upgrade_menu();
+            }
+            {
+                ZoneScopedN("RENDER: Tutorial");
+                tutorial_ui.draw_tutorial_step();
+            }
         }
         {
             ZoneScopedN("RENDER: Pause");
             game_ui.draw_pause_menu();
-        }
-
-        {
-            ZoneScopedN("RENDER: Tutorial");
-            tutorial_ui.draw_tutorial_step();
         }
 
         // Debugging UI
