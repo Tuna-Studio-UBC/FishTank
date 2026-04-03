@@ -93,6 +93,9 @@ void GameUI::draw_pause_menu() {
     ImGui::SetCursorPos(ImVec2(left_x, section_y + 188.f));
     ImGui::TextColored(ImVec4(.92f, .92f, .92f, 1.f), "%s", state_line.c_str());
 
+    ImGui::SetCursorPos(ImVec2(left_x, section_y + 188.f + row_gap));
+    ImGui::Checkbox("Use Alt Controls (WASD)", input_system->get_input_mode());
+
     text = "MASTER VOLUME";
     ImGui::SetCursorPos(ImVec2(right_x, section_y));
     ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, 1.f), "%s", text);

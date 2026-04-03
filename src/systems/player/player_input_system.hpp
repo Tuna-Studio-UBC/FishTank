@@ -9,6 +9,7 @@
 class PlayerInputSystem {
   public:
     void step(float elapsed_ms);
+    bool* get_input_mode();
 
     PlayerInputSystem() {}
 

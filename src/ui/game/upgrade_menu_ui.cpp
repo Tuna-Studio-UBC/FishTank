@@ -113,6 +113,8 @@ void GameUI::set_audio_system(AudioSystem *audio_system) {
     this->audio_system = audio_system;
 }
 
+void GameUI::set_input_system(PlayerInputSystem *input_system) { this->input_system = input_system; }
+
 void GameUI::draw_upgrade_menu() {
     Progress &progress = registry.progresses.components[0];
     if (!(progress.is_paused && progress.is_upgrade_menu_called))
