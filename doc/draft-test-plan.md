@@ -73,6 +73,35 @@ Behaviours of various entity interactions, including collision, detection, and e
 
 ## Bug List
 
+### [P2: King crabby gets stuck behind walls #152](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/152)
+
+Steps to reproduce:
+
+1. Hide behind a wall, with king crabby directly opposite
+2. He will get stuck
+
+Fixed by updating the crabby AI system
+
+### [P2: Upgrade damage not working when resetting checkpoint #147](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/147)
+
+Steps to reproduce:
+
+1. Reach the end of a level with upgrades enabled so that they are saved.
+2. Die in the next level
+3. Reset, you will see upgrade screen with correct saved stats (upgrade state is maintained)
+4. But the actual damage resets to 0. The upgrades must be applied again.
+
+Fixed by refreshing the buffs when resetting from a checkpoint
+
+### [P2: Upgrade damage not working between levels #143](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/143)
+
+Steps to reproduce:
+
+1. Upgrade your stats on the level after tutorial (+ 10, total 20 damage per shot)
+2. When you get to sharky, the buffs are gone, your bullets only do 10 damage at a time
+
+Fixed by refreshing the buffs when loading a level
+
 ### [P1: Completing tutorial leads to win screen #123](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/123)
 
 Level transitions broke during refactoring, completing the tutorial leads directly into the win screen. Fixed, can be tested by completing the tutorial.
