@@ -505,7 +505,7 @@ void LevelSystem::handle_time_bonus() {
     float relative_time = time_since_level_start - LEVEL_CONFIGS[persist.level].time_bonus_threshold;
     int crackers_earned = 5;
     if (relative_time > 0.f) {
-        crackers_earned = max(0, 4 - ((int)relative_time / 5000));
+        crackers_earned = max(0, 4 - ((int)relative_time / 11000));
     }
     scoring.crackers_earned += crackers_earned;
     wallet.crackers += crackers_earned;
