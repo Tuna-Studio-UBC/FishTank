@@ -11,9 +11,10 @@
 const enum class MapType {
     TUTORIAL_MAP,
     EMPTY_MAP,
-    TEST_MAP,
+    TEST_MAP0,
+    TEST_MAP1,
     TEST_MAP2,
-    TEST_MAP3
+    TEST_MAP3,
 };
 
 class TileMapSystem {
@@ -33,7 +34,8 @@ class TileMapSystem {
     static void generate_loop(TileMap *map);
 
     static Entity load_empty_map();
-    static Entity load_test_map();
+    static Entity load_test_map0();
+    static Entity load_test_map1();
     static Entity load_test_map2();
     static Entity load_test_map3();
     static Entity load_tutorial_map();
@@ -48,7 +50,7 @@ class TileMapSystem {
     Entity get_current_map() const { return current_map; }
 
     void clear_map();
-    Entity load_map(MapType map_type = MapType::TEST_MAP);
+    Entity load_map(MapType map_type = MapType::TEST_MAP0);
 
     std::unordered_map<MapType, std::function<Entity()>> LOAD_MAP_FN = {};
 
@@ -57,7 +59,8 @@ class TileMapSystem {
 
         // Define loadable maps here
         LOAD_MAP_FN.emplace(MapType::EMPTY_MAP, TileMapSystem::load_empty_map);
-        LOAD_MAP_FN.emplace(MapType::TEST_MAP, TileMapSystem::load_test_map);
+        LOAD_MAP_FN.emplace(MapType::TEST_MAP0, TileMapSystem::load_test_map0);
+        LOAD_MAP_FN.emplace(MapType::TEST_MAP1, TileMapSystem::load_test_map1);
         LOAD_MAP_FN.emplace(MapType::TEST_MAP2, TileMapSystem::load_test_map2);
         LOAD_MAP_FN.emplace(MapType::TEST_MAP3, TileMapSystem::load_test_map3);
         LOAD_MAP_FN.emplace(MapType::TUTORIAL_MAP, TileMapSystem::load_tutorial_map);
