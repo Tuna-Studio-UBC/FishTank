@@ -12,6 +12,17 @@ float AUTO_DECELERATION_MULTIPLIER = 2;          // Deceleration = move speed * 
 float ANGULAR_VELOCITY_MULTIPLIER = 0.8;
 float ANGULAR_VELOCITY_LOSS_MULTIPLIER = 4; // How fast we lose rotation velocity
 
+// Alternative WASD controls are tuned differently
+float ALT_AUTO_DECELERATION_MULTIPLIER = 4;
+float ALT_ANGULAR_VELOCITY_MULTIPLIER = 1.0;
+float ALT_ACCELERATION_MULTIPLIER = 5;
+
+bool USE_ALTERNATIVE_INPUT = false;
+
+bool* PlayerInputSystem::get_input_mode() {
+    return &USE_ALTERNATIVE_INPUT;
+}
+
 void debug_print_input_state(KeyboardInputState &keyboard_input) {
     std::cout << "Current:  ";
     for (int i = 0; i < KeyboardActionsCount; ++i) {
@@ -344,22 +355,7 @@ void PlayerInputSystem::process_burst_fire(Motion &player_motion, FireControl &f
     }
 }
 
-void PlayerInputSystem::step(float elapsed_ms) {
-    // We should have 1 and only ever 1 player input component
-    assert(registry.keyboardInputs.components.size() == 1);
-    assert(registry.mouseInputs.components.size() == 1);
-    Entity playerEntity = registry.players.entities[0];
-    KeyboardInputState &keyboard_input = registry.keyboardInputs.get(playerEntity);
-    MouseInputState &mouse_input = registry.mouseInputs.get(playerEntity);
-    Motion &motion = registry.motions.get(playerEntity);
-    SpeedControl &sc = registry.speedControls.get(playerEntity);
-
-    // Update game time
-    game_time_ms += elapsed_ms;
-
-    // Get weapon state
-    WeaponState &ws = registry.weaponStates.get(playerEntity);
-
+void handle_tank_controls(float elapsed_ms, KeyboardInputState &keyboard_input, Motion &motion, SpeedControl &sc) {
     float dt = elapsed_ms / 1000.0f;
 
     float turn_dir = 0.f;
@@ -369,6 +365,7 @@ void PlayerInputSystem::step(float elapsed_ms) {
     if (key_held(KeyboardActions::TurnRight, keyboard_input)) {
         turn_dir += 1.f;
     }
+
     // motion.angle = std::fmod(motion.angle + turn_dir * sc.turn_speed * dt, 2 * M_PI);
     if (turn_dir != 0.f) {
         motion.angular_velocity = turn_dir * sc.turn_speed * ANGULAR_VELOCITY_MULTIPLIER;
@@ -393,6 +390,111 @@ void PlayerInputSystem::step(float elapsed_ms) {
         } else if (motion.velocity.x < 0) {
             motion.velocity.x = std::min(0.f, motion.velocity.x + (AUTO_ACCELERATION_MULTIPLIER * sc.move_speed) * dt);
         }
+    }
+}
+
+float get_desired_heading(KeyboardInputState &keyboard_input, float current_angle) {
+    auto &act = keyboard_input.current_actions;
+    float dir_x = 0;
+    float dir_y = 0;
+
+    if (act[KeyboardActions::MoveForward]) {
+        dir_y -= 1;
+    }
+    if (act[KeyboardActions::MoveBackward]) {
+        dir_y += 1;
+    }
+    if (act[KeyboardActions::TurnLeft]) {
+        dir_x -= 1;
+    }
+    if (act[KeyboardActions::TurnRight]) {
+        dir_x += 1;
+    }
+
+    // Check final result
+    if (dir_x == 0.f && dir_y == 0.f) {
+        return current_angle;
+    }
+
+    return std::atan2(dir_y, dir_x);
+}
+
+bool valid_movement(KeyboardInputState &keyboard_input) {
+    auto &act = keyboard_input.current_actions;
+    float dir_x = 0;
+    float dir_y = 0;
+
+    if (act[KeyboardActions::MoveForward]) {
+        dir_y -= 1;
+    }
+    if (act[KeyboardActions::MoveBackward]) {
+        dir_y += 1;
+    }
+    if (act[KeyboardActions::TurnLeft]) {
+        dir_x -= 1;
+    }
+    if (act[KeyboardActions::TurnRight]) {
+        dir_x += 1;
+    }
+
+    return !(dir_x == 0.f && dir_y == 0.f);
+}
+
+void handle_wasd_controls(float elapsed_ms, KeyboardInputState &keyboard_input, Motion &motion, SpeedControl &sc) {
+    float dt = elapsed_ms / 1000.0f;
+
+    float desired_heading = get_desired_heading(keyboard_input, motion.angle);
+    
+    float delta = desired_heading - motion.angle;
+    while (delta > M_PI) {
+        delta -= 2 * M_PI;
+    }
+    while (delta < -M_PI) {
+        delta += 2 * M_PI;
+    }
+    
+    float max_turn = sc.turn_speed * dt * ALT_ANGULAR_VELOCITY_MULTIPLIER * 1.5;
+    if (delta > max_turn) {
+        delta = max_turn;
+    } else if (delta < -max_turn) {
+        delta = -max_turn;
+    }
+
+    motion.angle += delta;
+    float max_speed = MAX_SPEED_MULTIPLIER * sc.move_speed;
+
+    // Accept any valid movement input for acceleration
+    if (valid_movement(keyboard_input)) {
+        motion.velocity.x = std::min(max_speed, motion.velocity.x + (sc.move_speed * dt * 2 * ALT_ACCELERATION_MULTIPLIER));
+    } else {
+        motion.velocity.x = std::max(0.f, motion.velocity.x - (ALT_AUTO_DECELERATION_MULTIPLIER * 2 * sc.move_speed) * dt);
+    }
+
+    // spdlog::debug("{}", motion.angle);
+    // spdlog::debug("{}", desired_heading);
+    // spdlog::debug("{}", delta);
+}
+
+void PlayerInputSystem::step(float elapsed_ms) {
+    // We should have 1 and only ever 1 player input component
+    assert(registry.keyboardInputs.components.size() == 1);
+    assert(registry.mouseInputs.components.size() == 1);
+    Entity playerEntity = registry.players.entities[0];
+    KeyboardInputState &keyboard_input = registry.keyboardInputs.get(playerEntity);
+    MouseInputState &mouse_input = registry.mouseInputs.get(playerEntity);
+    Motion &motion = registry.motions.get(playerEntity);
+    SpeedControl &sc = registry.speedControls.get(playerEntity);
+
+    // Update game time
+    game_time_ms += elapsed_ms;
+
+    // Get weapon state
+    WeaponState &ws = registry.weaponStates.get(playerEntity);
+
+    if (USE_ALTERNATIVE_INPUT) {
+        handle_wasd_controls(elapsed_ms, keyboard_input, motion, sc);
+    } else {
+        handle_tank_controls(elapsed_ms, keyboard_input, motion, sc);
     }
 
     FireControl &fc = registry.fireControls.get(playerEntity);

@@ -7,6 +7,7 @@
 #include "common.hpp"
 #include "systems/audio/audio_system.hpp"
 #include "systems/player/upgrade_system.hpp"
+#include "systems/player/player_input_system.hpp"
 #include "tinyECS/components.hpp"
 #include "tinyECS/registry.hpp"
 #include "tinyECS/tiny_ecs.hpp"
@@ -18,6 +19,7 @@ struct GameUI {
     void set_upgrade_system(UpgradeSystem *upgrade_system);
     void set_audio_system(AudioSystem *audio_system);
     void set_level_system(LevelSystem *level_system);
+    void set_input_system(PlayerInputSystem *input_system);
     void draw_healthbar();
     void draw_enemy_healthbars();
     void draw_boss_healthbars();
@@ -34,6 +36,7 @@ struct GameUI {
     UpgradeSystem *upgrade_system = nullptr;
     AudioSystem *audio_system = nullptr;
     LevelSystem *level_system = nullptr;
+    PlayerInputSystem *input_system = nullptr;
 };
 
 // prevent linker error
