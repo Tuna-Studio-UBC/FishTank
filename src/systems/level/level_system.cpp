@@ -331,7 +331,7 @@ void LevelSystem::load_tutorial() {
     createLabelText("More Speed", target, vec3(0.f, 1.f, 0.f), OFFSET::TOP);
 
     createTutorialTrigger(player_motion.position, vec2(50.f, 50.f), Tutorial::MOVEMENT);
-    Entity label = createLabelText("INTERACT", {250.f, 1200.f}, vec3(1.f), OFFSET::TOP);
+    Entity label = createLabelText("INTERACT", {750.f, 1200.f}, vec3(1.f), OFFSET::TOP);
     registry.texts.get(label).scale = 1.5f;
     label = createLabelText("COMBAT", {750.f, 775.f}, vec3(1.f), OFFSET::TOP);
     registry.texts.get(label).scale = 1.5f;
