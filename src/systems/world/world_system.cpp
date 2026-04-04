@@ -399,7 +399,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 #pragma region DEBUG KEYS
 
 #define ENABLE_LOAD_TUTORIAL
-#define ENABLE_SKIP_WAVE
+// #define ENABLE_SKIP_WAVE
 #define ENABLE_USER_INPUT_PAUSE_GAME
         // #define DEBUG_UPGRADE_INPUTS
 
