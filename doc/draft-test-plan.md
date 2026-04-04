@@ -12,31 +12,36 @@ Items relating directly to the player's view. (Entity interactions are in a sepa
 - Player can use `D` key to turn left
 - Player can use `A` key to turn right
 - Player can use `S` will toggle quick turn. Players will not be able to `A` or `D` during the quick turn to prevent multiple conflicting actions.
+- Alternative controls work by directly the player naturally to its intended `WASD` direction. The player should always turn using the shortest angle when there is one. E.g. turning from facing up to left will always turn left 90 degrees rather than turning right 270 degrees. Try with all directions.
+- Player can use `Shift` to dash, ramming into enemies does damage, dash has cooldown and cannot be used when the player is not moving.
 
 ### Shooting
 
 - Player can use `Left-Click` on their mouse to shoot a projectile. The projectile should travel in the direction of the cursor on screen. Player can shoot independently of their movement with the keyboard.
-- **M3:** Player can use `Right-Click` on their mouse to shoot the special projectile.
-- **M3:** Player can use the number `1` and `2` to swap between the basic and explosive weapons. Pressing `1` when you are already on the basic weapon does nothing and vice versa.
+- Player can use `Right-Click` on their mouse to shoot the special projectile.
+- Player can use the number `1`, `2`, and `3` to swap between the weapons. Pressing `1` when you are already on the basic weapon does nothing, same goes for the other weapons.
+- `F` deflects bullets towards the mouse direction. (Keep in mind this is a very skill based move, hard to do, try a few times)
 
 ### Menu
-- **M2:** Player can press `T` at any time to restart tutorial.
-- **M2:** Player can press `Enter` to clear tutorial messages.
-- **M2:** Player can press `R` once they've won or lost to reset the game to after the tutorial.
-- **M3:** Player can press `ESC` to pause their game
+- Player can press `T` at any time to restart tutorial.
+- Player can press `P` at any time to toggle the FPS counter.
+- Player can press `R` once they've won or lost to reset the game to after the tutorial.
+- Player can press `ESC` to pause their game
+- Player can press `K` at any point after the tutorial to save their level. (`data/data.txt`)
+- Player can press `L` at any point to load their save if there is one. Otherwise, nothing will happen and an error is printed in the console.
 
 ## Rendering
 
 ### General
 
 - Load game: All entities, including the player and walls are visible and rendered
-- **M2:** Move player: The camera is centered on the player as the player moves, offset slightly by cursor position to help the player aim. 
-- **M2:** All rendered entities should be rendered accordingly, except for elements of the UI which are fixed to the screen.
-- **M2:** All players and enemies have unique sprites.
+- Move player: The camera is centered on the player as the player moves, offset slightly by cursor position to help the player aim. 
+- All rendered entities should be rendered accordingly, except for elements of the UI which are fixed to the screen.
+- All players and enemies have unique sprites.
 
 ### Animation
 
-- **M2:** Player, Enemy, Hazard, Power-Up, and bubble sprites all have animation
+- Player, Enemy, Hazard, Power-Up, and bubble sprites all have animation
 
 ## Entity Behaviour
 
@@ -50,26 +55,26 @@ Behaviours of various entity interactions, including collision, detection, and e
 ### Hazards & Power-ups
 
 - Drive over hazards: Hazards will decrease player health
-- **M2:** Drive over power-up: Drive over a medkit in order to increase player health.
+- Drive over power-up: Drive over a medkit in order to increase player health.
 
 ### Projectiles
 
 - Hit wall: Projectiles will bounce off walls
-- **M2:** Expiry: Projectiles should de-spawn after ten seconds for the player, or five seconds for the enemy, or after hitting a target
-- **M2:** Hitting Self: Projectiles should not be able to hit the creator (E.g. Player bullets cannot hit player, will pass through)
+- Expiry: Projectiles should de-spawn after ten seconds for the player, or five seconds for the enemy, or after hitting a target
+- Hitting Self: Projectiles should not be able to hit the creator (E.g. Player bullets cannot hit player, will pass through)
 - Player can only fire projectiles if they have ammunition (shown in the bottom UI)
-- **M3:** Friendly mines do not damage player and explode on enemy contact, damaging in a small area.
-- **M3:** Explosive shots explode on contact with another object instead of bouncing. When colliding with a mine, it results in a large explosion.
+- Friendly mines do not damage player and explode on enemy contact, damaging in a small area.
+- Explosive shots explode on contact with another object instead of bouncing. When colliding with a mine, it results in a large explosion.
 
 ### Enemies
 
 - Player gets within detection distance: Enemy will begin shooting and chasing the player. Once it gets within a configurable range, it will stop approaching the player but will continue shooting.
-- **M2:** Exit detection distance: Crab enemies will only detect the player when they are nearby, and will lose the player if they exit their detection distance. Fish enemies do not have a maximum detection distance, and always track and follow the player.
-- **M2:** Pathfinding: Enemies should pathfind correctly around walls towards the player.
-- **M3:** When the "Mother" enemy is killed, any remaining children should switch from following the mother (Which is gone) to swarming the player. When the children of a mother are killed, the mother should switch to a basic crab attack pattern.
+- Exit detection distance: Crab enemies will only detect the player when they are nearby, and will lose the player if they exit their detection distance. Fish enemies do not have a maximum detection distance, and always track and follow the player.
+- Pathfinding: Enemies should pathfind correctly around walls towards the player.
+- When the "Mother" enemy is killed, any remaining children should switch from following the mother (Which is gone) to swarming the player. When the children of a mother are killed, the mother should switch to a basic crab attack pattern.
 
 ### Mesh-Based Collision
-- **M2:** Player has mesh-based collider that follows the rough contour of the fish.
+- Player has mesh-based collider that follows the rough contour of the fish.
 
 ## Bug List
 
@@ -102,6 +107,10 @@ Steps to reproduce:
 
 Fixed by refreshing the buffs when loading a level
 
+### [P2: Fire control recharge issue #139](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/139)
+
+Marked as feature. Left and right click have separate cool downs, which allows the player to alternate between left and right click to "shoot faster". This is an intended feature for players that can manage to do so, as the cools downs still apply to each weapon.
+
 ### [P1: Completing tutorial leads to win screen #123](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/123)
 
 Level transitions broke during refactoring, completing the tutorial leads directly into the win screen. Fixed, can be tested by completing the tutorial.
@@ -120,7 +129,9 @@ Steps to reproduce:
 2. Lose to that enemy
 3. See that the health bar is on top
 
-This has to do with how we've structured our rendering pipeline, not fixed as of M3 since this requires some restructuring in the rendering flow.
+~~This has to do with how we've structured our rendering pipeline, not fixed as of M3 since this requires some restructuring in the rendering flow.~~
+
+M4: Fixed by removing health bar render when game is over
 
 ### [P2: Lag Spike for Mesh-Based Collisions #96](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/96)
 
@@ -146,9 +157,7 @@ Steps to reproduce:
 2. Press "R" to reset (spam the key right before game over)
 3. Crash occurs
 
-
-
-### [P3: Bullets self-collide when fired](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/53)
+### [P3: Bullets self-collide when fired #53](https://github.students.cs.ubc.ca/CPSC427-2025W-T2/Team02/issues/53)
 
 When moving with a speed boost, the player's bullets sometimes hit themselves, and despawn.
 
