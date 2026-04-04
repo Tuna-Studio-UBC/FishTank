@@ -231,10 +231,9 @@ class EeeelEnragedState : public EeeelState {
 
         // Random chance of spawning isopod (max 10)
         if (registry.enemies.size() < 11) {
-            if (get_random_float(0.f, 1.f) < 0.0025f) {
-                vec2 pos = registry.motions.get(e).position;
+            if (get_random_float(0.f, 1.f) < 0.005f) {
                 Entity isopod = Entity();
-                registry.spawnRequests.insert(isopod, {pos, 0.f, ENEMY_TYPE::HOMING});
+                registry.spawnRequests.insert(isopod, {UNSET_POS, 0.f, ENEMY_TYPE::HOMING});
             }
         }
 

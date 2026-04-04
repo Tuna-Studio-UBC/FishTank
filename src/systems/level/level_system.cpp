@@ -1,5 +1,7 @@
 #include "level_system.hpp"
 
+#include "common.hpp"
+
 int LevelSystem::get_current_wave() const {
     Persistence &persist = registry.persistences.components[0];
     return persist.wave;
@@ -57,6 +59,12 @@ void LevelSystem::step(const float &elapsed_ms) {
     for (Entity e : registry.spawnRequests.entities) {
         SpawnRequest &req = registry.spawnRequests.get(e);
         req.timer_ms -= elapsed_ms;
+
+        // Assign random position if not set
+        if (req.position == UNSET_POS) {
+            req.position = tilemap_system->get_random_position(SpawnTarget::ENEMY);
+        }
+
         if (req.timer_ms <= 0) {
             Entity entity = createEnemy(renderer, req.position, req.type);
             createEffectSmoke(req.position);
@@ -476,7 +484,8 @@ void LevelSystem::trigger_load_next_level() {
     triggered_load_level = true;
     advance_timer = 2000.f;
 
-    Entity sound_owner = !registry.players.entities.empty() ? registry.players.entities[0] : Entity("CompleteLevelSound");
+    Entity sound_owner =
+        !registry.players.entities.empty() ? registry.players.entities[0] : Entity("CompleteLevelSound");
     auto &sr = registry.sound_requests.emplace_with_duplicates(sound_owner);
     sr.type = SOUND_EVENT::COMPLETE_LEVEL;
 
@@ -498,8 +507,8 @@ void LevelSystem::trigger_load_next_level() {
     }
 }
 
-void LevelSystem::handle_time_bonus() { 
-    Scoring& scoring = registry.scoring.components[0];
+void LevelSystem::handle_time_bonus() {
+    Scoring &scoring = registry.scoring.components[0];
     Persistence &persist = registry.persistences.components[0];
     Wallet &wallet = registry.wallets.components[0];
     float relative_time = time_since_level_start - LEVEL_CONFIGS[persist.level].time_bonus_threshold;

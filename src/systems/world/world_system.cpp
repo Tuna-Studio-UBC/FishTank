@@ -400,6 +400,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 #define ENABLE_LOAD_TUTORIAL
 // #define ENABLE_SKIP_WAVE
+// #define ENABLE_GOD_MODE
 #define ENABLE_USER_INPUT_PAUSE_GAME
         // #define DEBUG_UPGRADE_INPUTS
 
@@ -487,6 +488,22 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
             auto &progress = registry.progresses.components[0];
             progress.is_tutorial = true;
             trigger_restart();
+        }
+#endif
+
+#ifdef ENABLE_GOD_MODE
+        if (key == GLFW_KEY_0) {
+            auto &wallet = registry.wallets.components[0];
+            wallet.crackers = 10000;
+
+            Entity player = registry.players.entities[0];
+            Health &health = registry.healths.get(player);
+            health.max_hp = 10000000;
+            health.hp = health.max_hp;
+            FireControl &fc = registry.fireControls.get(player);
+            fc.damage_bonus = 100;
+            fc.max_ammo = 10000000;
+            fc.ammo = fc.max_ammo;
         }
 #endif
 
