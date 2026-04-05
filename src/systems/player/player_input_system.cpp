@@ -559,7 +559,7 @@ void PlayerInputSystem::step(float elapsed_ms) {
     }
 
     // activate dash on key press (only if not on cooldown, not already dashing, and moving forward)
-    if (key_pressed(KeyboardActions::Dash, keyboard_input) && dash.cooldown_timer <= 0.0f && !dash.is_dashing && key_held(KeyboardActions::MoveForward, keyboard_input)) {
+    if (key_pressed(KeyboardActions::Dash, keyboard_input) && dash.cooldown_timer <= 0.0f && !dash.is_dashing && motion.velocity.x > 250.0f) {
         dash.is_dashing = true;
         dash.duration_timer = dash.duration_ms;
         dash.cooldown_timer = dash.cooldown_ms;
