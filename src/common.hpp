@@ -115,6 +115,8 @@ inline const bool is_empty_tile(int tile_id) { return (tile_id == 0 || tile_id =
 const int STARTING_AMMO = 40;
 const int PROGRESS_PER_AMMO = 1000;
 
+const vec2 UNSET_POS = vec2(-999999.f, -999999.f);
+
 // passive constants
 
 // enemy constants
